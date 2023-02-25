@@ -1,0 +1,20 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/payments
+    DO ../..+LOAD_SOURCES --LOCATION=components/payments
+
+    WORKDIR /src/components/payments
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/payments --COMPONENT=payments) /bin/payments
+    ENTRYPOINT ["/bin/payments"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=payments
+
+tests:
+    FROM +sources
+    DO ../..+GO_STD_TEST_COMMAND

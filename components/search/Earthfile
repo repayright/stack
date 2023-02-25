@@ -1,0 +1,25 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/search
+    DO ../..+LOAD_SOURCES --LOCATION=components/search
+
+    WORKDIR /src/components/search
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/search --COMPONENT=search) /bin/search
+    ENTRYPOINT ["/bin/search"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=search
+
+    WORKDIR /src/components/search
+
+tests:
+    FROM +sources
+    WITH DOCKER --allow-privileged \
+        --load opensearchproject/opensearch:2.2.1=+opensearch
+        DO ../..+GO_STD_TEST_COMMAND
+    END

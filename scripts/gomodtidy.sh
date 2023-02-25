@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-dir=$(dirname "$0")
-source "${dir}"/common.sh
-
-for mod in $(find-updated-modules $@); do
-  echo "Run go mod tidy on ${mod}"
-  pushd ${mod} >/dev/null
-  go mod tidy
-  popd >/dev/null
+scriptFile=$(realpath $0)
+scriptDir=$(dirname $scriptFile)
+randomFile=/tmp/$RANDOM
+components=$(ls $scriptDir/../components)
+for mod in $components; do
+  echo "cd components/${mod} && go mod tidy" >> $randomFile
 done
+
+parallel < $randomFile

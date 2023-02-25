@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-dir=$(dirname "$0")
-source "${dir}"/common.sh
+set -x;
+set -e;
 
-for mod in $(find-updated-modules $@); do
-  echo "Run golangci-lint on ${mod}"
-  pushd ${mod} >/dev/null
-  golangci-lint -v run --fix
-  popd >/dev/null
+scriptFile=$(realpath $0)
+scriptDir=$(dirname $scriptFile)
+randomFile=/tmp/$RANDOM
+components=$(ls $scriptDir/../components)
+for mod in $components; do
+  echo "cd components/${mod} && golangci-lint --allow-parallel-runners -v run --fix" >> $randomFile
 done
+
+parallel < $randomFile

@@ -59,19 +59,27 @@ func createRedpandaServer(t *testing.T) string {
 		stdout = os.Stdout
 		stderr = os.Stderr
 	}
-	exitCode, err := resource.Exec([]string{
-		"rpk",
-		"cluster",
-		"config",
-		"set",
-		"auto_create_topics_enabled",
-		"true",
-	}, dockertest.ExecOptions{
-		StdOut: stdout,
-		StdErr: stderr,
-	})
+
+	deadline, ok := t.Deadline()
+	for !ok || time.Now().Before(deadline) {
+		<-time.After(200 * time.Millisecond)
+		exitCode, err := resource.Exec([]string{
+			"rpk",
+			"cluster",
+			"config",
+			"set",
+			"auto_create_topics_enabled",
+			"true",
+		}, dockertest.ExecOptions{
+			StdOut: stdout,
+			StdErr: stderr,
+		})
+		require.NoError(t, err)
+		if exitCode == 0 {
+			break
+		}
+	}
 	require.NoError(t, err)
-	require.Equal(t, 0, exitCode)
 
 	return "9092"
 }

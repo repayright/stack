@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
-dir=$(dirname "$0")
-source "${dir}"/common.sh
-
-for mod in $(find-updated-modules $@); do
+scriptFile=$(realpath $0)
+scriptDir=$(dirname $scriptFile)
+randomFile=/tmp/$RANDOM
+components=$(ls $scriptDir/../components)
+for mod in $components; do
   echo "Run tests on ${mod}"
-  pushd ${mod} >/dev/null
+  pushd $scriptDir/../components/${mod} >/dev/null
   [[ -e Taskfile.yml ]] && task tests
   popd >/dev/null
 done

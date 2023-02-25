@@ -1,0 +1,21 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+LOAD_SOURCES --LOCATION=sdks/go
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/wallets
+    DO ../..+LOAD_SOURCES --LOCATION=components/wallets
+
+    WORKDIR /src/components/wallets
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/wallets --COMPONENT=wallets) /bin/wallets
+    ENTRYPOINT ["/bin/wallets"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=wallets
+
+tests:
+    FROM +sources
+    DO ../..+GO_STD_TEST_COMMAND

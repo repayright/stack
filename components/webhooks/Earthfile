@@ -1,0 +1,28 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/webhooks
+    DO ../..+LOAD_SOURCES --LOCATION=components/webhooks
+
+    WORKDIR /src/components/webhooks
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/webhooks --COMPONENT=webhooks) /bin/webhooks
+    ENTRYPOINT ["/bin/webhooks"]
+    CMD ["serve"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=webhooks
+
+tests:
+    FROM +sources
+    WITH DOCKER --compose docker-compose.yml \
+        --service postgres \
+        --service redpanda \
+        --load postgres:15-alpine=+postgres \
+        --load docker.redpanda.com/vectorized/redpanda:v22.2.2=+redpanda \
+        --allow-privileged
+        DO ../..+GO_STD_TEST_COMMAND
+    END

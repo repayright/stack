@@ -123,7 +123,7 @@ func TestSearchEngine(t *testing.T) {
 	pool, err := dockertest.NewPool("")
 	require.NoError(t, err)
 
-	resource, err := pool.Run("opensearchproject/opensearch", "1.2.3", []string{
+	resource, err := pool.Run("opensearchproject/opensearch", "2.2.1", []string{
 		"discovery.type=single-node",
 		"DISABLE_SECURITY_PLUGIN=true",
 		"DISABLE_INSTALL_DEMO_CONFIG=true",

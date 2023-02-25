@@ -1,0 +1,24 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/ledger
+    DO ../..+LOAD_SOURCES --LOCATION=components/ledger
+
+    WORKDIR /src/components/ledger
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/ledger --COMPONENT=ledger) /bin/ledger
+    ENTRYPOINT ["/bin/ledger"]
+    CMD ["serve"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=ledger
+
+tests:
+    FROM +sources
+    WITH DOCKER --allow-privileged --compose docker-compose.yml --service postgres \
+        --load postgres:15-alpine=+postgres
+        DO ../..+GO_STD_TEST_COMMAND
+    END

@@ -1,0 +1,18 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../../+DOWNLOAD_DEPENDENCIES --LOCATION=libs/go-libs
+    DO ../../+LOAD_SOURCES --LOCATION=libs/go-libs
+    WORKDIR /src/libs/go-libs
+
+redpanda:
+    FROM docker.redpanda.com/vectorized/redpanda:v22.3.11
+
+tests:
+    FROM +sources
+    WITH DOCKER --allow-privileged \
+        --load docker.redpanda.com/vectorized/redpanda:v22.3.11=+redpanda \
+        --load postgres:15-alpine=../..+postgres
+        RUN go test -v ./...
+    END

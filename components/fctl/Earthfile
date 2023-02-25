@@ -1,0 +1,22 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+LOAD_SOURCES --LOCATION=sdks/go
+    DO ../..+LOAD_SOURCES --LOCATION=components/fctl/membershipclient
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/fctl
+    DO ../..+LOAD_SOURCES --LOCATION=components/fctl
+
+    WORKDIR /src/components/fctl
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/fctl --COMPONENT=fctl) /bin/fctl
+    ENTRYPOINT ["/bin/fctl"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=fctl
+
+tests:
+    FROM +sources
+    DO ../..+GO_STD_TEST_COMMAND

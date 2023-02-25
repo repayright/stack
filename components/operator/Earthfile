@@ -1,0 +1,32 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    WORKDIR /src/components/operator
+    DO ../..+LOAD_SOURCE_FILE --LOCATION=components/operator/Makefile
+    RUN make controller-gen
+    RUN make kustomize
+    RUN make envtest
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+LOAD_SOURCES --LOCATION=components/search
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/operator
+    DO ../..+LOAD_SOURCES --LOCATION=components/operator
+    RUN make manifests
+    RUN make generate
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/operator --COMPONENT=operator) /usr/bin/operator
+
+    USER 65532:65532
+    ENTRYPOINT ["/usr/bin/operator"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=operator
+
+tests:
+    FROM +sources
+    # Disable proxy
+    ENV GOPROXY=
+    WITH DOCKER --allow-privileged --load postgres:15-alpine=../..+postgres
+        RUN --mount=type=cache,target=/root/.cache/go-build make test
+    END

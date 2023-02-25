@@ -1,0 +1,23 @@
+VERSION 0.7
+
+sources:
+    FROM ../..+base-build-image
+    DO ../..+LOAD_SOURCES --LOCATION=libs/go-libs
+    DO ../..+DOWNLOAD_DEPENDENCIES --LOCATION=components/gateway
+    DO ../..+LOAD_SOURCES --LOCATION=components/gateway
+
+    WORKDIR /src/components/gateway
+
+build-image:
+    FROM ../..+base-final-image
+    COPY (../..+build/gateway --COMPONENT=gateway) /usr/bin/caddy
+    COPY Caddyfile /etc/caddy/Caddyfile
+
+    ENTRYPOINT ["/usr/bin/caddy"]
+    CMD ["run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+
+    DO ../..+SAVE_IMAGE --COMPONENT=gateway
+
+tests:
+    FROM +sources
+    DO ../..+GO_STD_TEST_COMMAND

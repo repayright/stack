@@ -2,7 +2,10 @@ package publish
 
 import (
 	"context"
+	"fmt"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
 	wHttp "github.com/ThreeDotsLabs/watermill-http/pkg/http"
@@ -67,12 +70,26 @@ func httpModule(addr string) fx.Option {
 				}
 				lc.Append(fx.Hook{
 					OnStart: func(ctx context.Context) error {
+						_, port, err := net.SplitHostPort(addr)
+						if err != nil {
+							return err
+						}
 						go func() {
 							if err := ret.StartHTTPServer(); err != nil && err != http.ErrServerClosed {
 								panic(err)
 							}
 						}()
-						return nil
+						for {
+							select {
+							case <-ctx.Done():
+								return ctx.Err()
+							case <-time.After(100 * time.Millisecond):
+								_, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s", port))
+								if err == nil {
+									return nil
+								}
+							}
+						}
 					},
 					OnStop: func(ctx context.Context) error {
 						return ret.Close()
