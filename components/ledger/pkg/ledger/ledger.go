@@ -55,7 +55,7 @@ func (l *Ledger) GetLedgerStore() storage.LedgerStore {
 }
 
 func (l *Ledger) writeLog(ctx context.Context, logHolder *core.LogHolder) error {
-	l.queryWorker.QueueLog(ctx, logHolder, l.store)
+	l.queryWorker.QueueLog(logHolder)
 	// Wait for CQRS ingestion
 	// TODO(polo/gfyrag): add possiblity to disable this via request param
 	select {
@@ -153,7 +153,6 @@ func (l *Ledger) GetBalancesAggregated(ctx context.Context, q storage.BalancesQu
 	return l.store.GetBalancesAggregated(ctx, q)
 }
 
-// TODO(gfyrag): maybe we should check transaction exists on the log store before set a metadata ? (accounts always exists even if never used)
 func (l *Ledger) SaveMeta(ctx context.Context, targetType string, targetID interface{}, m core.Metadata) error {
 	if m == nil {
 		return nil
@@ -174,6 +173,11 @@ func (l *Ledger) SaveMeta(ctx context.Context, targetType string, targetID inter
 	)
 	switch targetType {
 	case core.MetaTargetTypeTransaction:
+		_, err = l.GetTransaction(ctx, targetID.(uint64))
+		if err != nil {
+			return err
+		}
+
 		log = core.NewSetMetadataLog(at, core.SetMetadataLogPayload{
 			TargetType: core.MetaTargetTypeTransaction,
 			TargetID:   targetID.(uint64),
@@ -224,6 +228,6 @@ func (l *Ledger) SaveMeta(ctx context.Context, targetType string, targetID inter
 	return err
 }
 
-func (l *Ledger) GetLogs(ctx context.Context, q *storage.LogsQuery) (api.Cursor[core.Log], error) {
-	return l.store.GetLogs(ctx, q)
+func (l *Ledger) GetLogs(ctx context.Context, q storage.LogsQuery) (api.Cursor[core.Log], error) {
+	return l.store.GetLogs(ctx, &q)
 }

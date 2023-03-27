@@ -7,12 +7,8 @@ import (
 	"testing"
 
 	"github.com/formancehq/ledger/pkg/core"
-	"github.com/formancehq/ledger/pkg/ledgertesting"
 	"github.com/formancehq/ledger/pkg/machine/script/compiler"
 	"github.com/formancehq/ledger/pkg/machine/vm"
-	"github.com/formancehq/ledger/pkg/storage"
-	"github.com/formancehq/stack/libs/go-libs/pgtesting"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,7 +18,7 @@ type testCase struct {
 	vars            map[string]json.RawMessage
 	expectErrorCode string
 	expectResult    Result
-	setup           func(t *testing.T, store storage.LedgerStore)
+	store           vm.Store
 	metadata        core.Metadata
 }
 
@@ -151,27 +147,36 @@ var testCases = []testCase{
 	},
 	{
 		name: "using metadata",
-		setup: func(t *testing.T, store storage.LedgerStore) {
-			require.NoError(t, store.UpdateVolumes(context.Background(), core.AccountsAssetsVolumes{
-				"sales:001": {
+		store: vm.StaticStore{
+			"sales:001": &core.AccountWithVolumes{
+				Account: core.Account{
+					Address: "sales:001",
+					Metadata: core.Metadata{
+						"seller": json.RawMessage(`{
+							"type":  "account",
+							"value": "users:001"
+						}`),
+					},
+				},
+				Volumes: map[string]core.Volumes{
 					"COIN": {
 						Input:  big.NewInt(100),
 						Output: big.NewInt(0),
 					},
 				},
-			}))
-			require.NoError(t, store.UpdateAccountMetadata(context.Background(), "sales:001", core.Metadata{
-				"seller": json.RawMessage(`{
-					"type":  "account",
-					"value": "users:001"
-				}`),
-			}))
-			require.NoError(t, store.UpdateAccountMetadata(context.Background(), "users:001", core.Metadata{
-				"commission": json.RawMessage(`{
-					"type":  "portion",
-					"value": "15.5%"
-				}`),
-			}))
+			},
+			"users:001": &core.AccountWithVolumes{
+				Account: core.Account{
+					Address: "sales:001",
+					Metadata: core.Metadata{
+						"commission": json.RawMessage(`{
+							"type":  "portion",
+							"value": "15.5%"
+						}`),
+					},
+				},
+				Volumes: map[string]core.Volumes{},
+			},
 		},
 		script: `
 			vars {
@@ -285,16 +290,19 @@ var testCases = []testCase{
 	},
 	{
 		name: "balance function",
-		setup: func(t *testing.T, store storage.LedgerStore) {
-			require.NoError(t, store.EnsureAccountExists(context.Background(), "users:001"))
-			require.NoError(t, store.UpdateVolumes(context.Background(), core.AccountsAssetsVolumes{
-				"users:001": map[string]core.Volumes{
+		store: vm.StaticStore{
+			"users:001": {
+				Account: core.Account{
+					Address:  "users:001",
+					Metadata: core.Metadata{},
+				},
+				Volumes: map[string]core.Volumes{
 					"COIN": {
 						Input:  big.NewInt(100),
 						Output: big.NewInt(0),
 					},
 				},
-			}))
+			},
 		},
 		script: `
 			vars {
@@ -329,8 +337,14 @@ var testCases = []testCase{
 	},
 	{
 		name: "send amount 0",
-		setup: func(t *testing.T, store storage.LedgerStore) {
-			require.NoError(t, store.EnsureAccountExists(context.Background(), "alice"))
+		store: vm.StaticStore{
+			"alice": {
+				Account: core.Account{
+					Address:  "alice",
+					Metadata: core.Metadata{},
+				},
+				Volumes: map[string]core.Volumes{},
+			},
 		},
 		script: `
 			send [USD 0] (
@@ -347,8 +361,14 @@ var testCases = []testCase{
 	},
 	{
 		name: "send all with balance 0",
-		setup: func(t *testing.T, store storage.LedgerStore) {
-			require.NoError(t, store.EnsureAccountExists(context.Background(), "alice"))
+		store: vm.StaticStore{
+			"alice": {
+				Account: core.Account{
+					Address:  "alice",
+					Metadata: core.Metadata{},
+				},
+				Volumes: map[string]core.Volumes{},
+			},
 		},
 		script: `
 			send [USD *] (
@@ -365,8 +385,14 @@ var testCases = []testCase{
 	},
 	{
 		name: "send account balance of 0",
-		setup: func(t *testing.T, store storage.LedgerStore) {
-			require.NoError(t, store.EnsureAccountExists(context.Background(), "alice"))
+		store: vm.StaticStore{
+			"alice": {
+				Account: core.Account{
+					Address:  "alice",
+					Metadata: core.Metadata{},
+				},
+				Volumes: map[string]core.Volumes{},
+			},
 		},
 		script: `
 			vars {
@@ -389,27 +415,12 @@ var testCases = []testCase{
 func TestMachine(t *testing.T) {
 	t.Parallel()
 
-	require.NoError(t, pgtesting.CreatePostgresServer())
-	defer func() {
-		_ = pgtesting.DestroyPostgresServer()
-	}()
-
-	storageDriver := ledgertesting.StorageDriver(t)
-	require.NoError(t, storageDriver.Initialize(context.Background()))
-
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			ledger := uuid.NewString()
 
-			store, _, err := storageDriver.GetLedgerStore(context.Background(), ledger, true)
-			require.NoError(t, err)
-
-			_, err = store.Initialize(context.Background())
-			require.NoError(t, err)
-
-			if tc.setup != nil {
-				tc.setup(t, store)
+			if tc.store == nil {
+				tc.store = vm.StaticStore{}
 			}
 
 			program, err := compiler.Compile(tc.script)
@@ -418,9 +429,9 @@ func TestMachine(t *testing.T) {
 			m := vm.NewMachine(*program)
 			require.NoError(t, m.SetVarsFromJSON(tc.vars))
 
-			_, _, err = m.ResolveResources(context.Background(), store)
+			_, _, err = m.ResolveResources(context.Background(), tc.store)
 			require.NoError(t, err)
-			require.NoError(t, m.ResolveBalances(context.Background(), store))
+			require.NoError(t, m.ResolveBalances(context.Background(), tc.store))
 
 			result, err := Run(m, core.RunScript{
 				Script: core.Script{

@@ -22,6 +22,10 @@ type BalancesPaginationToken struct {
 	AddressRegexpFilter string `json:"address,omitempty"`
 }
 
+func (t BalancesPaginationToken) Encode() string {
+	return encodePaginationToken(t)
+}
+
 func (s *Store) GetBalancesAggregated(ctx context.Context, q storage.BalancesQuery) (core.AssetsBalances, error) {
 	if !s.isInitialized {
 		return nil, storage.ErrStoreNotInitialized
