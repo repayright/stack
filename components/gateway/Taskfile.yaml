@@ -7,7 +7,8 @@ vars:
 tasks:
   tests:
     cmds:
-      - go test -coverpkg ./... -coverprofile coverage.out -covermode atomic ./...
+      - mkdir -p ./coverdir
+      - go test -cover ./... -coverpkg ./... -covermode atomic ./... -test.gocoverdir=$(pwd)/coverdir;
 
   lint:
     cmds:

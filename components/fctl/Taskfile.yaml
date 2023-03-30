@@ -8,7 +8,8 @@ tasks:
 
   tests:
     cmds:
-      - go test -coverpkg ./... -coverprofile coverage.out -covermode atomic ./...
+    - mkdir -p ./coverdir
+    - go test -coverpkg ./... -covermode atomic ./...  -test.gocoverdir=$(pwd)/coverdir;
 
   lint:
     cmds:

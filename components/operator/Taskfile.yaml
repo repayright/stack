@@ -5,7 +5,8 @@ version: '3'
 tasks:
   tests:
     cmds:
-      - make test
+    - mkdir -p ./coverdir
+    - make test
 
   lint:
     cmds:

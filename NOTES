@@ -1,0 +1,4 @@
+on component : go test -cover ./... -coverpkg=./... -covermode=atomic -args -test.gocoverdir=$(pwd)/coverdir
+on integration : go test -cover ./... -coverpkg=github.com/formancehq/$COMPONENT/... -covermode=atomic -args -test.gocoverdir=$(pwd)/coverdir
+generate final profile :  go tool covdata textfmt -i=../../components/$COMPONENT/coverdir,./coverdir -o ./profile
+see total : go tool cover -func profile

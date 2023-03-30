@@ -26,4 +26,5 @@ tasks:
 
   tests:
     cmds:
-      - go test {{if eq .VERBOSE "true"}}-v{{end}} -race -coverpkg {{.PKG}} -coverprofile coverage.out {{.PKG}}
+      - mkdir -p ./coverdir
+      - go test {{if eq .VERBOSE "true"}}-v{{end}} -race -cover {{.PKG}} -coverpkg {{.PKG}} -test.gocoverdir=$(pwd)/coverdir

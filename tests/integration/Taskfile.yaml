@@ -1,7 +1,6 @@
 version: "3"
 
 vars:
-  PKG: "./suite"
   RUN: ".*"
   VERBOSE: "false"
   PARALLEL: "true"
@@ -22,6 +21,7 @@ tasks:
   tests:
     deps: [run-docker-compose]
     cmds:
+      - defer: docker compose down -v
       - >
         ginkgo --vet ""
         {{if eq .VERBOSE "true"}}-v{{end}}
@@ -31,7 +31,7 @@ tasks:
         --focus-file "{{.RUN}}"
         --repeat {{.REPEAT}}
         {{if eq .DEBUG "true"}}--output-interceptor-mode=none{{end}}
-        {{.PKG}}
+        -cover ./suite -coverpkg=github.com/formancehq/... -covermode=atomic -args -test.gocoverdir=$(pwd)/coverdir
 
   run-docker-compose:
     cmds:
