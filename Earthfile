@@ -80,7 +80,7 @@ base-build-image:
     RUN apk update && apk add jq go nodejs make bash curl
     RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /bin ${GOLANGCI_LINT_VERSION}
     ENV CGO_ENABLED=0
-    ENV GOPROXY http://172.20.0.13:8080
+    #ENV GOPROXY http://172.20.0.13:8080
     ENV GOSUMDB=off
 
     WORKDIR /src

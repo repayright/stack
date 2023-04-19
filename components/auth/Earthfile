@@ -10,7 +10,7 @@ sources:
 
 build-image:
     FROM ../..+base-final-image
-    COPY (../..+build/auth --COMPONENT=auth) /bin/auth
+    COPY (../..+build-component-binary --COMPONENT=auth) /bin/auth
     ENTRYPOINT ["/bin/auth"]
 
     DO ../..+SAVE_IMAGE --COMPONENT=auth
