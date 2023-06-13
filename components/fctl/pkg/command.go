@@ -340,6 +340,11 @@ func WithConfirmFlag() CommandOptionFn {
 	return WithBoolFlag(confirmFlag, false, "Confirm action")
 }
 
+func WithOutputFlag() CommandOptionFn {
+	return WithStringFlag(outputFlag, "", "Output format. One of: json")
+
+}
+
 func NewStackCommand(use string, opts ...CommandOption) *cobra.Command {
 	cmd := NewMembershipCommand(use,
 		append(opts,
