@@ -40,6 +40,7 @@ func NewDeleteCommand() *cobra.Command {
 		fctl.WithShortDescription("Delete a stack"),
 		fctl.WithAliases("del", "d"),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
+		fctl.WithOutputFlag(),
 		fctl.WithStringFlag(stackNameFlag, "", "Stack to remove"),
 		fctl.WithController[*DeletedStackStore](NewStackDeleteController()),
 	)
