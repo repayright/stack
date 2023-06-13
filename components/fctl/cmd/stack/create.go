@@ -175,3 +175,125 @@ func (c *StackCreateController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 func (c *StackCreateController) Render(cmd *cobra.Command, args []string) error {
 	return internal.PrintStackInformation(cmd, c.profile, c.store.Stack, c.store.Versions)
 }
+
+func createStackCommand(cmd *cobra.Command, args []string) error {
+
+	cfg, err := fctl.GetConfig(cmd)
+	if err != nil {
+		return err
+	}
+
+	organization, err := fctl.ResolveOrganizationID(cmd, cfg)
+	if err != nil {
+		return err
+	}
+
+	apiClient, err := fctl.NewMembershipClient(cmd, cfg)
+	if err != nil {
+		return err
+	}
+
+	protected := !fctl.GetBool(cmd, unprotectFlag)
+	metadata := map[string]string{
+		fctl.ProtectedStackMetadata: fctl.BoolPointerToString(&protected),
+	}
+
+	name := ""
+	if len(args) > 0 {
+		name = args[0]
+	} else {
+		name, err = pterm.DefaultInteractiveTextInput.WithMultiLine(false).Show("Enter a name")
+		if err != nil {
+			return err
+		}
+	}
+
+	region := fctl.GetString(cmd, regionFlag)
+	if region == "" {
+		regions, _, err := apiClient.DefaultApi.ListRegions(cmd.Context(), organization).Execute()
+		if err != nil {
+			return errors.Wrap(err, "listing regions")
+		}
+
+		var options []string
+		for _, region := range regions.Data {
+			privacy := "Private"
+			if region.Public {
+				privacy = "Public "
+			}
+			name := "<noname>"
+			if region.Name != "" {
+				name = region.Name
+			}
+			options = append(options, fmt.Sprintf("%s | %s | %s", region.Id, privacy, name))
+		}
+
+		printer := pterm.DefaultInteractiveSelect.WithOptions(options)
+		selectedOption, err := printer.Show("Please select a region")
+		if err != nil {
+			return err
+		}
+		for i := 0; i < len(options); i++ {
+			if selectedOption == options[i] {
+				region = regions.Data[i].Id
+				break
+			}
+		}
+	}
+
+	stackResponse, _, err := apiClient.DefaultApi.CreateStack(cmd.Context(), organization).CreateStackRequest(membershipclient.CreateStackRequest{
+		Name:     name,
+		Metadata: metadata,
+		RegionID: region,
+	}).Execute()
+	if err != nil {
+		return errors.Wrap(err, "creating stack")
+	}
+
+	profile := fctl.GetCurrentProfile(cmd, cfg)
+
+	if !fctl.GetBool(cmd, nowaitFlag) {
+		spinner, err := pterm.DefaultSpinner.Start("Waiting services availability")
+		if err != nil {
+			return err
+		}
+
+		if err := waitStackReady(cmd, profile, stackResponse.Data); err != nil {
+			return err
+		}
+
+		if err := spinner.Stop(); err != nil {
+			return err
+		}
+	}
+
+	fctl.BasicTextCyan.WithWriter(cmd.OutOrStdout()).Printfln("Your dashboard will be reachable on: %s",
+		profile.ServicesBaseUrl(stackResponse.Data).String())
+
+	stackClient, err := fctl.NewStackClient(cmd, cfg, stackResponse.Data)
+	if err != nil {
+		return err
+	}
+
+	versions, err := stackClient.GetVersions(cmd.Context())
+	if err != nil {
+		return err
+	}
+	if versions.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code %d when reading versions", versions.StatusCode)
+	}
+
+	fctl.SetSharedData(&StackCreate{
+		Stack:    stackResponse.Data,
+		Versions: versions.GetVersionsResponse,
+	}, profile, nil)
+
+	return nil
+}
+
+func viewStackCreate(cmd *cobra.Command, args []string) error {
+
+	data := fctl.GetSharedData().(*StackCreate)
+
+	return internal.PrintStackInformation(cmd.OutOrStdout(), fctl.GetSharedProfile(), data.Stack, data.Versions)
+}
