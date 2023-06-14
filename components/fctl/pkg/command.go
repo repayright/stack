@@ -1,16 +1,12 @@
 package fctl
 
 import (
-<<<<<<< HEAD
 	"encoding/json"
 	"fmt"
 
 	"github.com/TylerBrock/colorjson"
-=======
->>>>>>> ef4971ea (wip: use pterm instead of fmt.PrintLn)
 	"github.com/formancehq/fctl/membershipclient"
 	"github.com/pkg/errors"
-	"github.com/pterm/pterm"
 	"github.com/segmentio/analytics-go/v3"
 	"github.com/segmentio/ksuid"
 	"github.com/spf13/cobra"
@@ -342,11 +338,6 @@ func WithSilenceError() CommandOptionFn {
 
 func WithConfirmFlag() CommandOptionFn {
 	return WithBoolFlag(confirmFlag, false, "Confirm action")
-}
-
-func WithOutputFlag() CommandOptionFn {
-	return WithStringFlag(outputFlag, "", "Output format. One of: json")
-
 }
 
 func NewStackCommand(use string, opts ...CommandOption) *cobra.Command {
