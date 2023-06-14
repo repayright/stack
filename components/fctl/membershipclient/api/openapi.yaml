@@ -1054,6 +1054,9 @@ components:
           type: string
         stargateEnabled:
           type: boolean
+        createdAt:
+          format: date-time
+          type: string
         deletedAt:
           format: date-time
           type: string

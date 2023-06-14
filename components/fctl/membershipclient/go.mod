@@ -1,4 +1,4 @@
-module github.com/formancehq/fctl/membershipclient
+module github.com/formancehq/fctl
 
 go 1.18
 

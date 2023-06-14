@@ -29,6 +29,7 @@ type StackAllOf struct {
 	// The region where the stack is installed
 	RegionID string `json:"regionID"`
 	StargateEnabled bool `json:"stargateEnabled"`
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 }
 
@@ -174,6 +175,38 @@ func (o *StackAllOf) SetStargateEnabled(v bool) {
 	o.StargateEnabled = v
 }
 
+// GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
+func (o *StackAllOf) GetCreatedAt() time.Time {
+	if o == nil || IsNil(o.CreatedAt) {
+		var ret time.Time
+		return ret
+	}
+	return *o.CreatedAt
+}
+
+// GetCreatedAtOk returns a tuple with the CreatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StackAllOf) GetCreatedAtOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.CreatedAt) {
+		return nil, false
+	}
+	return o.CreatedAt, true
+}
+
+// HasCreatedAt returns a boolean if a field has been set.
+func (o *StackAllOf) HasCreatedAt() bool {
+	if o != nil && !IsNil(o.CreatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedAt gets a reference to the given time.Time and assigns it to the CreatedAt field.
+func (o *StackAllOf) SetCreatedAt(v time.Time) {
+	o.CreatedAt = &v
+}
+
 // GetDeletedAt returns the DeletedAt field value if set, zero value otherwise.
 func (o *StackAllOf) GetDeletedAt() time.Time {
 	if o == nil || IsNil(o.DeletedAt) {
@@ -221,6 +254,9 @@ func (o StackAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize["uri"] = o.Uri
 	toSerialize["regionID"] = o.RegionID
 	toSerialize["stargateEnabled"] = o.StargateEnabled
+	if !IsNil(o.CreatedAt) {
+		toSerialize["createdAt"] = o.CreatedAt
+	}
 	if !IsNil(o.DeletedAt) {
 		toSerialize["deletedAt"] = o.DeletedAt
 	}

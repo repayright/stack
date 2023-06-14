@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **Uri** | **string** | Base stack uri | 
 **RegionID** | **string** | The region where the stack is installed | 
 **StargateEnabled** | **bool** |  | 
+**CreatedAt** | Pointer to **time.Time** |  | [optional] 
 **DeletedAt** | Pointer to **time.Time** |  | [optional] 
 
 ## Methods
@@ -171,6 +172,31 @@ and a boolean to check if the value has been set.
 
 SetStargateEnabled sets StargateEnabled field to given value.
 
+
+### GetCreatedAt
+
+`func (o *Stack) GetCreatedAt() time.Time`
+
+GetCreatedAt returns the CreatedAt field if non-nil, zero value otherwise.
+
+### GetCreatedAtOk
+
+`func (o *Stack) GetCreatedAtOk() (*time.Time, bool)`
+
+GetCreatedAtOk returns a tuple with the CreatedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedAt
+
+`func (o *Stack) SetCreatedAt(v time.Time)`
+
+SetCreatedAt sets CreatedAt field to given value.
+
+### HasCreatedAt
+
+`func (o *Stack) HasCreatedAt() bool`
+
+HasCreatedAt returns a boolean if a field has been set.
 
 ### GetDeletedAt
 
