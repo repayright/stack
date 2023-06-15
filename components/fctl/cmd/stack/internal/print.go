@@ -44,7 +44,7 @@ func printInformation(out io.Writer, stack *membershipclient.Stack) *ui.ListMode
 	items = append(items, ui.NewItem(pterm.LightCyan("Name"), stack.Name))
 	items = append(items, ui.NewItem(pterm.LightCyan("Region"), stack.RegionID))
 
-	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight)
+	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithTitle("Information").WithMaxPossibleHeight().WithMaxPossibleWidth()
 }
 
 func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) *ui.ListModel {
@@ -59,7 +59,7 @@ func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsRespo
 
 	}
 
-	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithMaxPossibleHeight().WithMaxPossibleWidth()
+	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithTitle("Version").WithMaxPossibleHeight().WithMaxPossibleWidth()
 }
 
 func printMetadata(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
@@ -73,5 +73,5 @@ func printMetadata(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
 		))
 
 	}
-	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithMaxPossibleHeight().WithMaxPossibleWidth()
+	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithTitle("Metadata").WithMaxPossibleHeight().WithMaxPossibleWidth()
 }

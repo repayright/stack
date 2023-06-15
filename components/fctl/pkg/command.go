@@ -3,6 +3,7 @@ package fctl
 import (
 	"github.com/formancehq/fctl/membershipclient"
 	"github.com/pkg/errors"
+	"github.com/pterm/pterm"
 	"github.com/segmentio/analytics-go/v3"
 	"github.com/segmentio/ksuid"
 	"github.com/spf13/cobra"
@@ -12,6 +13,7 @@ const (
 	stackFlag              = "stack"
 	organizationFlag       = "organization"
 	DefaultSegmentWriteKey = ""
+	outputFlag             = "output"
 )
 
 var (
@@ -169,6 +171,37 @@ func WithHidden() CommandOptionFn {
 func WithRunE(fn func(cmd *cobra.Command, args []string) error) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.RunE = fn
+	}
+}
+
+func WithPreRunE(fn func(cmd *cobra.Command, args []string) error) CommandOptionFn {
+	return func(cmd *cobra.Command) {
+		cmd.PreRunE = fn
+	}
+}
+
+func WrapOutputPostRunE(fn func(cmd *cobra.Command, args []string) error) CommandOptionFn {
+	return func(cmd *cobra.Command) {
+		cmd.PostRunE = func(cmd *cobra.Command, args []string) error {
+			flags := GetString(cmd, OutputFlag)
+
+			if flags == "table" {
+				return fn(cmd, args)
+			}
+
+			switch flags {
+			case "json":
+				// Marshal to JSON then print to stdout
+				data, err := ShareStoreToJson()
+				if (err) != nil {
+					return err
+				}
+				pterm.Println(string(data))
+				return nil
+			}
+
+			return cmd.Help()
+		}
 	}
 }
 
