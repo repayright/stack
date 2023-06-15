@@ -48,6 +48,7 @@ func NewCreateCommand() *cobra.Command {
 				fctl.ProtectedStackMetadata: fctl.BoolPointerToString(&protected),
 			}
 
+			// PROMPT FOR STACK NAME
 			name := ""
 			if len(args) > 0 {
 				name = args[0]
@@ -58,6 +59,7 @@ func NewCreateCommand() *cobra.Command {
 				}
 			}
 
+			// PROMPT FOR STACK REGION
 			region := fctl.GetString(cmd, regionFlag)
 			if region == "" {
 				regions, _, err := apiClient.DefaultApi.ListRegions(cmd.Context(), organization).Execute()
@@ -158,4 +160,8 @@ func waitStackReady(cmd *cobra.Command, profile *fctl.Profile, stack *membership
 		}
 	}
 	return nil
+}
+
+func displayCreateResult() {
+
 }

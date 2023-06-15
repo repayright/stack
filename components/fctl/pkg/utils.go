@@ -5,6 +5,24 @@ import (
 	"runtime"
 )
 
+// Reduce is a generic reduce function
+// It takes a slice of T and a function that takes a M and a T and returns a M
+func Reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
+	acc := initValue
+	for _, v := range s {
+		acc = f(acc, v)
+	}
+	return acc
+}
+
+// If is a ternary operator
+func If[T any](cond bool, vtrue, vfalse T) T {
+	if cond {
+		return vtrue
+	}
+	return vfalse
+}
+
 func Map[SRC any, DST any](srcs []SRC, mapper func(SRC) DST) []DST {
 	ret := make([]DST, 0)
 	for _, src := range srcs {

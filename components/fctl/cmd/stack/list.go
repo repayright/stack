@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -17,17 +18,6 @@ const (
 	deletedFlag = "deleted"
 	outputFlag  = "output"
 )
-
-func If[T any](cond bool, vtrue, vfalse T) T {
-	if cond {
-		return vtrue
-	}
-	return vfalse
-}
-
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
 
 type model struct {
 	table table.Model
@@ -49,7 +39,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return baseStyle.Render(m.table.View()) + "\n"
+	return ui.BaseStyle.Render(m.table.View()) + "\n"
 }
 
 func NewListCommand() *cobra.Command {
@@ -141,8 +131,8 @@ func listCommand(cmd *cobra.Command, args []string) error {
 		return data
 	})
 
-	//Table max height of 10
-	maxHeight := If(len(tableData)+1 > 10, 10, len(tableData)+1)
+	//Table max height of 10 rows
+	maxHeight := fctl.If(len(tableData)+1 > 10, 10, len(tableData)+1)
 
 	t := table.New(
 		table.WithColumns(columns),
@@ -155,12 +145,12 @@ func listCommand(cmd *cobra.Command, args []string) error {
 	s := table.DefaultStyles()
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
+		BorderForeground(ui.TabBorderColor).
 		BorderBottom(true).
 		Bold(false)
 	s.Selected = s.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
+		Foreground(ui.SelectedColorForeground).
+		Background(ui.SelectedColorForegroundBackground).
 		Bold(false)
 	t.SetStyles(s)
 
