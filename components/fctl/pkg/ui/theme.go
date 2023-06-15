@@ -7,20 +7,24 @@ import (
 )
 
 var (
+	//Docuement
+	DocStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
+	// Tabs
 	BaseStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
 			BorderForeground(lipgloss.Color("240"))
-	TabBorderColor                    = lipgloss.Color("240")
+	TabBorderColor    = lipgloss.Color("240")
+	InactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
+	ActiveTabBorder   = tabBorderWithBottom("┘", " ", "└")
+	InactiveTabStyle  = lipgloss.NewStyle().Border(InactiveTabBorder, true).BorderForeground(HighlightColor).Padding(0, 1)
+	ActiveTabStyle    = InactiveTabStyle.Copy().Border(ActiveTabBorder, true)
+
 	SelectedColorForeground           = lipgloss.Color("229")
 	SelectedColorForegroundBackground = lipgloss.Color("57")
-	InactiveTabBorder                 = tabBorderWithBottom("┴", "─", "┴")
-	ActiveTabBorder                   = tabBorderWithBottom("┘", " ", "└")
-	DocStyle                          = lipgloss.NewStyle().Padding(1, 2, 1, 2)
-	HighlightColor                    = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	ImportantColor                    = pterm.Yellow
-	InactiveTabStyle                  = lipgloss.NewStyle().Border(InactiveTabBorder, true).BorderForeground(HighlightColor).Padding(0, 1)
-	ActiveTabStyle                    = InactiveTabStyle.Copy().Border(ActiveTabBorder, true)
-	WindowStyle                       = lipgloss.NewStyle().BorderForeground(HighlightColor).Padding(2, 0).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).UnsetBorderTop()
+
+	HighlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	ImportantColor = pterm.Yellow
+	WindowStyle    = lipgloss.NewStyle().BorderForeground(HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).BorderStyle(lipgloss.RoundedBorder())
 
 	TitleStyle        = lipgloss.NewStyle().MarginLeft(2)
 	ItemStyle         = lipgloss.NewStyle().PaddingLeft(4)

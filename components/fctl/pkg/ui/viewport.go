@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -35,10 +34,7 @@ func NewModelManager(content string, out io.Writer, profile *fctl.Profile, stack
 	// It makes the terminal much smoother with a higher framerate
 	// But it breaks bubbletea output
 	// vp.HighPerformanceRendering = true
-	vp.Style = lipgloss.NewStyle().
-		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("220")).
-		PaddingRight(2)
+	vp.Style = WindowStyle
 
 	renderer, err := glamour.NewTermRenderer(
 		glamour.WithAutoStyle(),
