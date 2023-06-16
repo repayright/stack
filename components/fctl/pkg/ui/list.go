@@ -8,9 +8,10 @@ import (
 // TODO: This should extend list.Model from github.com/charmbracelet/bubbles/list
 type ListModel struct {
 	list list.Model
+	help bool
 }
 
-func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, height int) *ListModel {
+func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, height int, help bool) *ListModel {
 	l := list.New(items, delegate, width, height)
 
 	l.SetShowTitle(true)
@@ -20,17 +21,27 @@ func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, heig
 
 	return &ListModel{
 		list: l,
+		help: help,
 	}
 }
 
-func NewDefaultListModel(items []list.Item) *ListModel {
-	return NewListModel(items, ItemDelegate{}, ViewWidth, ViewHeight).WithMaxPossibleHeight().WithMaxPossibleWidth()
+func NewDefaultListModel(items []list.Item, help bool) *ListModel {
+	return NewListModel(items, ItemDelegate{}, ViewWidth, ViewHeight, help).WithMaxPossibleHeight().WithMaxPossibleWidth()
 }
 
 func (m ListModel) Init() tea.Cmd {
 	return nil
 }
+
+func (m ListModel) helpView() string {
+	return HelpStyle.Render("Formance CLI: \n • ↑/↓: Navigate \n • q: Quit")
+}
+
 func (m ListModel) View() string {
+	if m.help {
+		return m.helpView() + "\n" + DocStyle.Render(m.list.View())
+	}
+
 	return DocStyle.Render(m.list.View())
 }
 

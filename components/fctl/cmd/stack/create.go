@@ -182,5 +182,5 @@ func viewStackCreate(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	return internal.PrintStackInformation(cmd.OutOrStdout(), fctl.GetSharedProfile(), data.Stack, data.Versions)
+	return internal.PrintStackInformation(cmd, fctl.GetSharedProfile(), data.Stack, data.Versions)
 }

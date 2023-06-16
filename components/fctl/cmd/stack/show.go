@@ -111,5 +111,5 @@ func viewStackInformation(cmd *cobra.Command, args []string) error {
 		return errors.New("invalid shared data")
 	}
 
-	return internal.PrintStackInformation(cmd.OutOrStdout(), fctl.GetCurrentProfile(cmd, fctl.GetSharedConfig()), data.Stack, data.Versions)
+	return internal.PrintStackInformation(cmd, fctl.GetCurrentProfile(cmd, fctl.GetSharedConfig()), data.Stack, data.Versions)
 }

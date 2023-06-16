@@ -12,28 +12,12 @@ import (
 	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/iancoleman/strcase"
-
 	"github.com/pterm/pterm"
+	"github.com/spf13/cobra"
 )
 
 func getContent(out io.Writer, stack *membershipclient.Stack, url *url.URL, versions *shared.GetVersionsResponse) string {
 	return printInformation(out, stack).View() + printVersion(out, url, versions, stack).View() + printMetadata(out, stack).View()
-}
-
-func PrintStackInformation(out io.Writer, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) error {
-	baseUrlStr := profile.ServicesBaseUrl(stack)
-	content := getContent(out, stack, baseUrlStr, versions)
-
-	model, err := ui.NewModelManager(content, out, profile, stack, versions)
-	if err != nil {
-		return err
-	}
-
-	if _, err := tea.NewProgram(model, tea.WithAltScreen()).Run(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func printInformation(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
@@ -44,7 +28,7 @@ func printInformation(out io.Writer, stack *membershipclient.Stack) *ui.ListMode
 	items = append(items, ui.NewItem(pterm.LightCyan("Name"), stack.Name))
 	items = append(items, ui.NewItem(pterm.LightCyan("Region"), stack.RegionID))
 
-	return ui.NewDefaultListModel(items).WithTitle("Information")
+	return ui.NewDefaultListModel(items, false).WithTitle("Information")
 }
 
 func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) *ui.ListModel {
@@ -59,7 +43,7 @@ func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsRespo
 
 	}
 
-	return ui.NewDefaultListModel(items).WithTitle("Version")
+	return ui.NewDefaultListModel(items, false).WithTitle("Version")
 }
 
 func printMetadata(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
@@ -72,5 +56,29 @@ func printMetadata(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
 		))
 
 	}
-	return ui.NewDefaultListModel(items).WithTitle("Metadata")
+	return ui.NewDefaultListModel(items, false).WithTitle("Metadata")
+}
+
+func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) error {
+	out := cmd.OutOrStdout()
+	baseUrlStr := profile.ServicesBaseUrl(stack)
+	content := getContent(out, stack, baseUrlStr, versions)
+
+	// Static
+	if fctl.GetBool(cmd, fctl.StaticFlag) {
+		fmt.Fprint(out, content)
+		return nil
+	}
+
+	// Interactive
+	model, err := ui.NewModelManager(content, out, profile, stack, versions)
+	if err != nil {
+		return err
+	}
+
+	if _, err := tea.NewProgram(model, tea.WithAltScreen()).Run(); err != nil {
+		return err
+	}
+
+	return nil
 }

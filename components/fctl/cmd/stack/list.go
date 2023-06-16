@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui"
@@ -16,7 +17,6 @@ const (
 	deletedFlag = "deleted"
 	outputFlag  = "output"
 	orgKey      = "organization"
-	staticTable = true
 )
 
 // Every column in the table is a column in the struct
@@ -31,8 +31,8 @@ const (
 	maxLengthOrganizationId = 15
 	maxLengthStackId        = 8
 	maxLengthStackName      = 6
-	maxLengthApiUrl         = 50
-	maxLengthStackRegion    = 25
+	maxLengthApiUrl         = 48
+	maxLengthStackRegion    = 21
 	maxLengthStackCreatedAt = 20
 	maxLengthStackDeletedAt = 20
 )
@@ -44,7 +44,7 @@ func NewListCommand() *cobra.Command {
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithBoolFlag(deletedFlag, false, "Display deleted stacks"),
 		fctl.WithRunE(listCommand),
-		fctl.WrapOutputPostRunE(viewStackTable),
+		fctl.WrapOutputPostRunE(formatViewStackListAsTable),
 	)
 }
 
@@ -88,7 +88,7 @@ func listCommand(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func viewStackTable(cmd *cobra.Command, args []string) error {
+func formatViewStackListAsTable(cmd *cobra.Command, args []string) error {
 	data, ok := fctl.GetSharedData().([]membershipclient.Stack)
 	if !ok {
 		return errors.New("invalid shared data")
@@ -101,8 +101,8 @@ func viewStackTable(cmd *cobra.Command, args []string) error {
 
 	// Default Columns
 	columns := ui.NewArrayColumn(
-		ui.NewColumn("Organization ID", maxLengthOrganizationId),
-		ui.NewColumn("Stack ID", maxLengthStackId),
+		ui.NewColumn("Organization Id", maxLengthOrganizationId),
+		ui.NewColumn("Stack Id", maxLengthStackId),
 		ui.NewColumn("Name", maxLengthStackName),
 		ui.NewColumn("API URL", maxLengthApiUrl),
 		ui.NewColumn("Region", maxLengthStackRegion),
@@ -140,14 +140,30 @@ func viewStackTable(cmd *cobra.Command, args []string) error {
 	opts := ui.NewDefaultOptions(columns, tableData)
 
 	// Add static table option if --static flag is set
-	opt := ui.WithStaticTable(len(tableData), staticTable)
-	if opt != nil {
-		opts = append(opts, opt)
+	var opt table.Option
+	if fctl.GetBool(cmd, fctl.StaticFlag) {
+		opt = ui.WithHeight(len(tableData))
+	} else {
+		opt = ui.WithHeight(ui.MaxTableHeight)
 	}
 
-	t := ui.NewTableModel(opt != nil, opts...)
+	opts = append(opts, opt)
 
-	fmt.Println(t.View())
+	t := ui.NewTableModel(!fctl.GetBool(cmd, fctl.StaticFlag), opts...)
+
+	return displayStackList(cmd, t)
+}
+
+func displayStackList(cmd *cobra.Command, t *ui.TableModel) error {
+
+	if fctl.GetBool(cmd, fctl.StaticFlag) {
+		fmt.Println(t.View())
+		return nil
+	}
+
+	if _, err := tea.NewProgram(t, tea.WithAltScreen()).Run(); err != nil {
+		return err
+	}
 
 	return nil
 }

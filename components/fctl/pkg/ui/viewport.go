@@ -59,12 +59,21 @@ func NewModelManager(content string, out io.Writer, profile *fctl.Profile, stack
 }
 
 func (m modelManager) View() string {
-	return m.vp.View() + m.helpView()
+	return m.helpView() + "\n" + m.vp.View()
 }
 
 func (m modelManager) helpView() string {
-	return HelpStyle.Render("\n  ↑/↓: Navigate • q: Quit\n")
+	return HelpStyle.Render("Formance CLI: \n • ↑/↓: Navigate \n • q: Quit")
 }
+
+func (m modelManager) GetViewKeyHelper() *viewport.Model {
+	return &m.vp
+}
+
+// func headerView() string {
+// 	return HeaderStyle.Render("fctl")
+// }
+
 func (m modelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:

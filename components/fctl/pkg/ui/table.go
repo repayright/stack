@@ -14,8 +14,8 @@ var (
 func (t TableModel) Init() tea.Cmd { return nil }
 
 type TableModel struct {
-	table       table.Model
-	staticTable bool
+	table table.Model
+	help  bool
 }
 
 func (t TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -31,7 +31,14 @@ func (t TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return t, cmd
 }
 
+func (t TableModel) helpView() string {
+	return HelpStyle.Render("Formance CLI: \n • ↑/↓: Navigate \n • q: Quit")
+}
+
 func (t TableModel) View() string {
+	if t.help {
+		return t.helpView() + "\n" + BaseStyle.Render(t.table.View())
+	}
 	return BaseStyle.Render(t.table.View()) + "\n"
 }
 
@@ -61,17 +68,14 @@ func NewDefaultOptions(ac ArrayColumn, row []table.Row) []table.Option {
 	}
 }
 
-func WithStaticTable(height int, static bool) table.Option {
-	if static {
-		return table.WithHeight(height)
-	}
-	return nil
+func WithHeight(height int) table.Option {
+	return table.WithHeight(height)
 }
 
-func NewTableModel(staticTable bool, opts ...table.Option) *TableModel {
+func NewTableModel(help bool, opts ...table.Option) *TableModel {
 	return (&TableModel{
-		table:       table.New(opts...),
-		staticTable: staticTable,
+		table: table.New(opts...),
+		help:  help,
 	}).WithDefaultStyle()
 }
 

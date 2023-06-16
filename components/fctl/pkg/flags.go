@@ -14,6 +14,7 @@ const (
 	FileFlag          = "config"
 	ProfileFlag       = "profile"
 	OutputFlag        = "output"
+	StaticFlag        = "static"
 	DebugFlag         = "debug"
 	InsecureTlsFlag   = "insecure-tls"
 	TelemetryFlag     = "telemetry"
