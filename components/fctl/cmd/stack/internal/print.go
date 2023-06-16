@@ -31,7 +31,7 @@ func getContent(out io.Writer, stack *membershipclient.Stack, versions *shared.G
 		return "", err
 	}
 
-	return uiInfo.View() + uiVersion.View() + uiMetadata.View(), nil
+	return uiInfo.View() + uiVersion.View() + uiMetadata.View() + "\n", nil
 }
 
 func printInformation(out io.Writer, stack *membershipclient.Stack) (*ui.ListModel, error) {
@@ -92,7 +92,7 @@ func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *mem
 
 	// Static
 	if flag := fctl.GetString(cmd, fctl.OutputFlag); flag == "static" {
-		fctl.Println(content)
+		fmt.Printf("%s", content)
 		return nil
 	}
 
@@ -102,7 +102,7 @@ func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *mem
 		return err
 	}
 
-	if _, err := tea.NewProgram(model, tea.WithAltScreen()).Run(); err != nil {
+	if _, err := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run(); err != nil {
 		return err
 	}
 
