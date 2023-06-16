@@ -10,13 +10,8 @@ import (
 
 type Item struct {
 	title, desc string
+	horizontal  bool
 }
-
-func (i Item) GetTitle() string       { return i.title }
-func (i Item) GetDescription() string { return i.desc }
-
-// This is needed to implement list.Item interface
-func (i Item) FilterValue() string { return i.title }
 
 func NewItem(title, desc string) *Item {
 	return &Item{
@@ -24,11 +19,37 @@ func NewItem(title, desc string) *Item {
 		desc:  desc,
 	}
 }
+func (i Item) GetTitle() string       { return i.title }
+func (i Item) GetDescription() string { return i.desc }
 
-type ItemDelegate struct{}
+// This is needed to implement list.Item interface
+func (i Item) FilterValue() string { return i.title }
 
-func (d ItemDelegate) Height() int                             { return 3 }
-func (d ItemDelegate) Spacing() int                            { return 0 }
+func (i *Item) GetHeight() int {
+	if i.desc != "" {
+		return 2
+	}
+	return 1
+}
+
+type ItemDelegate struct {
+	height int
+}
+
+func NewItemDelegate(heigth int) *ItemDelegate {
+	return &ItemDelegate{
+		height: heigth,
+	}
+}
+
+func (d ItemDelegate) Height() int {
+	return d.height
+}
+
+func (d *ItemDelegate) SetHeight(i int) {
+	d.height = i
+}
+func (d ItemDelegate) Spacing() int                            { return 1 }
 func (d ItemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
 func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
 	i, ok := item.(*Item)
@@ -37,9 +58,17 @@ func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 		return
 	}
 
-	str := fmt.Sprintf("%s\n%s\n", i.GetTitle(), i.GetDescription())
+	var str string
+	if i.GetDescription() == "" {
+		str = fmt.Sprint(i.GetTitle())
+	} else {
+		str = fmt.Sprintf("%s\n%s", i.GetTitle(), i.GetDescription())
+	}
 
-	fn := ItemStyle.Render
+	str = ItemStyle.Render(str)
 
-	fmt.Fprint(w, fn(str))
+	_, err := fmt.Fprint(w, str)
+	if err != nil {
+		panic(err)
+	}
 }

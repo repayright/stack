@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"io"
-	"net/url"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,11 +15,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func getContent(out io.Writer, stack *membershipclient.Stack, url *url.URL, versions *shared.GetVersionsResponse) string {
-	return printInformation(out, stack).View() + printVersion(out, url, versions, stack).View() + printMetadata(out, stack).View()
+func getContent(out io.Writer, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (string, error) {
+	uiInfo, err := printInformation(out, stack)
+	if err != nil {
+		return "", err
+	}
+
+	uiVersion, err := printVersion(out, versions, stack)
+	if err != nil {
+		return "", err
+	}
+
+	uiMetadata, err := printMetadata(out, stack)
+	if err != nil {
+		return "", err
+	}
+
+	return uiInfo.View() + uiVersion.View() + uiMetadata.View(), nil
 }
 
-func printInformation(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
+func printInformation(out io.Writer, stack *membershipclient.Stack) (*ui.ListModel, error) {
 
 	items := []list.Item{}
 
@@ -28,25 +42,31 @@ func printInformation(out io.Writer, stack *membershipclient.Stack) *ui.ListMode
 	items = append(items, ui.NewItem(pterm.LightCyan("Name"), stack.Name))
 	items = append(items, ui.NewItem(pterm.LightCyan("Region"), stack.RegionID))
 
-	return ui.NewDefaultListModel(items, false).WithTitle("Information")
+	if ui, err := ui.NewDefaultListModel(items, false); err != nil {
+		return nil, err
+	} else {
+		return ui.WithTitle("Information"), nil
+	}
 }
 
-func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) *ui.ListModel {
+func printVersion(out io.Writer, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) (*ui.ListModel, error) {
 	items := []list.Item{}
 
 	for _, service := range versions.Versions {
-
 		items = append(items, ui.NewItem(
 			pterm.LightCyan(fmt.Sprintf("%s (%s)", strcase.ToCamel(service.Name), pterm.Yellow(service.Version))),
-			fmt.Sprintf("%s/api/%s", url.String(), service.Name),
+			"",
 		))
-
 	}
 
-	return ui.NewDefaultListModel(items, false).WithTitle("Version")
+	if ui, err := ui.NewDefaultListModel(items, false); err != nil {
+		return nil, nil
+	} else {
+		return ui.WithTitle("Version"), nil
+	}
 }
 
-func printMetadata(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
+func printMetadata(out io.Writer, stack *membershipclient.Stack) (*ui.ListModel, error) {
 	items := []list.Item{}
 
 	for k, v := range stack.Metadata {
@@ -56,22 +76,28 @@ func printMetadata(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
 		))
 
 	}
-	return ui.NewDefaultListModel(items, false).WithTitle("Metadata")
+	if ui, err := ui.NewDefaultListModel(items, false); err != nil {
+		return nil, nil
+	} else {
+		return ui.WithTitle("Metadata"), nil
+	}
 }
 
 func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) error {
 	out := cmd.OutOrStdout()
-	baseUrlStr := profile.ServicesBaseUrl(stack)
-	content := getContent(out, stack, baseUrlStr, versions)
+	content, err := getContent(out, stack, versions)
+	if err != nil {
+		return err
+	}
 
 	// Static
-	if fctl.GetBool(cmd, fctl.StaticFlag) {
-		fmt.Fprint(out, content)
+	if flag := fctl.GetString(cmd, fctl.OutputFlag); flag == "static" {
+		fctl.Println(content)
 		return nil
 	}
 
-	// Interactive
-	model, err := ui.NewModelManager(content, out, profile, stack, versions)
+	// Dynamic
+	model, err := ui.NewViewPortManager(content, out, profile, stack, versions)
 	if err != nil {
 		return err
 	}

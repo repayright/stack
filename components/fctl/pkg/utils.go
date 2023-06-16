@@ -7,12 +7,16 @@ import (
 
 // Reduce is a generic reduce function
 // It takes a slice of T and a function that takes a M and a T and returns a M
-func Reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
+func Reduce[T, M any](s []T, f func(M M, T T, err error) (M, error), initValue M) (M, error) {
+	var err error
 	acc := initValue
 	for _, v := range s {
-		acc = f(acc, v)
+		if err != nil {
+			return acc, err
+		}
+		acc, err = f(acc, v, err)
 	}
-	return acc
+	return acc, nil
 }
 
 // If is a ternary operator

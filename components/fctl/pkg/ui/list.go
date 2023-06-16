@@ -1,8 +1,11 @@
 package ui
 
 import (
+	"errors"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	fctl "github.com/formancehq/fctl/pkg"
 )
 
 // TODO: This should extend list.Model from github.com/charmbracelet/bubbles/list
@@ -25,8 +28,27 @@ func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, heig
 	}
 }
 
-func NewDefaultListModel(items []list.Item, help bool) *ListModel {
-	return NewListModel(items, ItemDelegate{}, ViewWidth, ViewHeight, help).WithMaxPossibleHeight().WithMaxPossibleWidth()
+// ViewWidth, ViewHeight
+// Default width and height
+// Should be dynamic and scale with terminale view
+func NewDefaultListModel(items []list.Item, help bool) (*ListModel, error) {
+	if len(items) == 0 {
+		return nil, errors.New("ITEMS_EMPTY")
+	}
+
+	firstItem, ok := items[0].(*Item)
+	if !ok {
+		return nil, errors.New("FIRST_ITEMS_NOT_ITEM")
+	}
+
+	m := NewListModel(items, NewItemDelegate(firstItem.GetHeight()), ViewWidth, ViewHeight, help).WithMaxPossibleWidth()
+
+	m, err := m.WithMaxPossibleHeight()
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
 }
 
 func (m ListModel) Init() tea.Cmd {
@@ -63,21 +85,58 @@ func (m *ListModel) GetMaxPossibleWidth() int {
 	return 90
 }
 
+// header is equivalent to one line + 1 breackline
+func (m *ListModel) GetHeaderHeight() int {
+	if m.list.ShowTitle() {
+		return 2
+	}
+	return 0
+}
+
+func (m *ListModel) GetFooterHeight() int {
+	return 0
+}
+
+// Each item has X lines defined with ItemDelegate.Height()
+// Each item has 1 breackline
+// It should be calculed from ItemDelegate.Height()
+func (m *ListModel) GetBodyHeight() (int, error) {
+	itemListLength, err := fctl.Reduce[list.Item, int](m.list.Items(), func(acc int, i list.Item, err error) (int, error) {
+		item, ok := i.(*Item)
+		if !ok {
+			return acc, errors.New("ITEM_NOT_ITEM")
+		}
+
+		return acc + item.GetHeight(), nil
+	}, 0)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return itemListLength + len(m.list.Items()), nil
+}
+
 // The height counter depends on row count
 // of the terminal
-// Sooo where is the limit ?
-func (m *ListModel) GetMaxPossibleHeight() int {
+// res = header + body + footer
+func (m *ListModel) GetMaxPossibleHeight() (int, error) {
+	bodyHeight, err := m.GetBodyHeight()
+	if err != nil {
+		return 0, err
+	}
 
-	// TODO: This should be dynamic
-	// It should be calculed from ItemDelegate.Height()
-	// 3*len(m.list.Items())
-	// 3 = title + desc + breackline
-	// + 2 line for the header
-	return 3*len(m.list.Items()) + 2
+	return m.GetHeaderHeight() + bodyHeight + m.GetFooterHeight(), nil
 }
-func (m *ListModel) WithMaxPossibleHeight() *ListModel {
-	m.list.SetHeight(m.GetMaxPossibleHeight())
-	return m
+
+func (m *ListModel) WithMaxPossibleHeight() (*ListModel, error) {
+	height, err := m.GetMaxPossibleHeight()
+	if err != nil {
+		return nil, err
+	}
+
+	m.list.SetHeight(height)
+	return m, nil
 
 }
 func (m *ListModel) WithMaxPossibleWidth() *ListModel {

@@ -53,7 +53,11 @@ func view(cmd *cobra.Command, args []string) error {
 		ui.NewItem(pterm.LightCyan("Commit"), data.Commit),
 	}
 
-	model := ui.NewDefaultListModel(items, false).WithTitle("FCTL Information")
+	model, err := ui.NewDefaultListModel(items, false)
+	if err != nil {
+		return err
+	}
+	model = model.WithTitle("FCTL Information")
 
 	//Print the list
 	fmt.Println(model.View())

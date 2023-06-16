@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	ViewWidth  = 40
+	ViewWidth  = 200
 	ViewHeight = 20
 )
 
@@ -26,9 +26,9 @@ func (m modelManager) Init() tea.Cmd {
 	return nil
 }
 
-func NewModelManager(content string, out io.Writer, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (*modelManager, error) {
-	width := 78
-	vp := viewport.New(width, 20)
+func NewViewPortManager(content string, out io.Writer, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (*modelManager, error) {
+	width := ViewWidth
+	vp := viewport.New(width, ViewHeight)
 
 	// This paramaeter is working well
 	// It makes the terminal much smoother with a higher framerate

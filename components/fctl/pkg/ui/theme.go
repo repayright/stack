@@ -8,7 +8,7 @@ import (
 
 var (
 	//Docuement
-	DocStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
+	DocStyle = lipgloss.NewStyle().Padding(1, 2, 0, 2)
 	// Tabs
 	BaseStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
@@ -26,14 +26,13 @@ var (
 	ImportantColor = pterm.Yellow
 	WindowStyle    = lipgloss.NewStyle().BorderForeground(HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).BorderStyle(lipgloss.RoundedBorder())
 
-	TitleStyle        = lipgloss.NewStyle().MarginLeft(2)
+	// List
+	TitleStyle        = lipgloss.NewStyle().PaddingLeft(2)
 	ItemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	SelectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	QuitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
-
-	//List Styles
-	PaginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
-	HelpStyle       = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
+	PaginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
+	HelpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 )
 
 // / COLOR PALETTE IMPORTANCY ///
