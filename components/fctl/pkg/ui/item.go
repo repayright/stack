@@ -14,10 +14,12 @@ type Item struct {
 
 func (i Item) GetTitle() string       { return i.title }
 func (i Item) GetDescription() string { return i.desc }
-func (i Item) FilterValue() string    { return i.title }
 
-func NewItem(title, desc string) Item {
-	return Item{
+// This is needed to implement list.Item interface
+func (i Item) FilterValue() string { return i.title }
+
+func NewItem(title, desc string) *Item {
+	return &Item{
 		title: title,
 		desc:  desc,
 	}

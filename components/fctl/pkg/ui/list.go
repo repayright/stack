@@ -23,6 +23,19 @@ func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, heig
 	}
 }
 
+func (m ListModel) Init() tea.Cmd {
+	return nil
+}
+func (m ListModel) View() string {
+	return DocStyle.Render(m.list.View())
+}
+
+func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
+}
+
 func (m *ListModel) WithTitle(title string) *ListModel {
 	m.list.Title = title
 	return m
@@ -40,7 +53,9 @@ func (m *ListModel) GetMaxPossibleWidth() int {
 // Sooo where is the limit ?
 func (m *ListModel) GetMaxPossibleHeight() int {
 
-	// 3*len(m.list.Items()) for breacklines
+	// TODO: This should be dynamic
+	// It should be calculed from ItemDelegate.Height()
+	// 3*len(m.list.Items())
 	// 3 = title + desc + breackline
 	// + 2 line for the header
 	return 3*len(m.list.Items()) + 2
@@ -60,16 +75,4 @@ func (m ListModel) GetHeigth() int {
 }
 func (m ListModel) GetWidth() int {
 	return m.list.Width()
-}
-func (m ListModel) Init() tea.Cmd {
-	return nil
-}
-func (m ListModel) View() string {
-	return DocStyle.Render(m.list.View())
-}
-
-func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
-	return m, cmd
 }

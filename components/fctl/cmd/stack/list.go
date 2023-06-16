@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui"
@@ -17,30 +15,18 @@ import (
 const (
 	deletedFlag = "deleted"
 	outputFlag  = "output"
+	orgKey      = "organization"
+	staticTable = true
 )
 
-type model struct {
-	table table.Model
-}
-
-func (m model) Init() tea.Cmd { return nil }
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
-		}
-	}
-	m.table, cmd = m.table.Update(msg)
-	return m, cmd
-}
-
-func (m model) View() string {
-	return ui.BaseStyle.Render(m.table.View()) + "\n"
-}
+const (
+	maxLengthOrganizationId = 20
+	maxLengthStackId        = 20
+	maxLengthStackName      = 20
+	maxLengthStackStatus    = 20
+	maxLengthStackCreatedAt = 20
+	maxLengthStackDeletedAt = 20
+)
 
 func NewListCommand() *cobra.Command {
 	return fctl.NewMembershipCommand("list",
@@ -48,8 +34,8 @@ func NewListCommand() *cobra.Command {
 		fctl.WithShortDescription("List stacks"),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithBoolFlag(deletedFlag, false, "Display deleted stacks"),
-		fctl.WithStringFlag(outputFlag, "", "Output to the resquested format (json)"),
 		fctl.WithRunE(listCommand),
+		fctl.WrapOutputPostRunE(viewStackTable),
 	)
 }
 
@@ -83,44 +69,47 @@ func listCommand(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	//Output to requested format
-	if flags := fctl.GetString(cmd, outputFlag); flags != "" {
-		switch flags {
-		case "json":
-			// Marshal to JSON then print to stdout
-			m, err := rsp.MarshalJSON()
-			if (err) != nil {
-				return errors.Wrap(err, "marshalling to json")
-			}
-
-			_, err = fmt.Fprintln(cmd.OutOrStdout(), string(m))
-
-			return err
-		}
+	//Create map for addtionnal data containing the organization
+	additionalData := map[string]interface{}{
+		orgKey: organization,
 	}
+
+	fctl.SetSharedData(rsp.Data, profile, cfg, additionalData)
+
+	return nil
+}
+
+func viewStackTable(cmd *cobra.Command, args []string) error {
+	data := fctl.GetSharedData().([]membershipclient.Stack)
+	organization := fctl.GetSharedAdditionnalData(orgKey).(string)
 
 	// Default Columns
-	columns := []table.Column{
-		{Title: "Organization ID", Width: 15},
-		{Title: "Stack ID", Width: 10},
-		{Title: "Name", Width: 10},
-		{Title: "API URL", Width: 50},
-		{Title: "Region", Width: 40},
-		{Title: "Created At", Width: 25},
+	columns := ui.NewArrayColumn(
+		ui.NewColumn("Organization ID", maxLengthOrganizationId),
+		ui.NewColumn("Stack ID", maxLengthStackId),
+		ui.NewColumn("Name", maxLengthStackName),
+		ui.NewColumn("API URL", maxLengthStackStatus),
+		ui.NewColumn("Region", maxLengthStackCreatedAt),
+		ui.NewColumn("Created At", maxLengthStackCreatedAt),
+	)
+
+	// Add Deleted At column if --deleted flag is set
+	if fctl.GetBool(cmd, deletedFlag) {
+		columns = columns.AddColumn("Deleted At", maxLengthStackDeletedAt)
 	}
 
-	tableData := fctl.Map(rsp.Data, func(stack membershipclient.Stack) table.Row {
+	// Create table data
+	tableData := fctl.Map(data, func(stack membershipclient.Stack) table.Row {
 		data := []string{
 			organization,
 			stack.Id,
 			stack.Name,
-			profile.ServicesBaseUrl(&stack).String(),
+			fctl.GetSharedProfile().ServicesBaseUrl(&stack).String(),
 			stack.RegionID,
 			stack.CreatedAt.Format(time.RFC3339),
 		}
 
 		if fctl.GetBool(cmd, deletedFlag) {
-			columns = append(columns, table.Column{Title: "Deleted At", Width: 25})
 			if stack.DeletedAt != nil {
 				data = append(data, stack.DeletedAt.Format(time.RFC3339))
 			} else {
@@ -131,34 +120,21 @@ func listCommand(cmd *cobra.Command, args []string) error {
 		return data
 	})
 
-	//Table max height of 10 rows
-	maxHeight := fctl.If(len(tableData)+1 > 10, 10, len(tableData)+1)
-
-	t := table.New(
+	opts := []table.Option{
 		table.WithColumns(columns),
 		table.WithRows(tableData),
 		table.WithFocused(true),
-		table.WithHeight(maxHeight),
-	)
-
-	//Default styles
-	s := table.DefaultStyles()
-	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(ui.TabBorderColor).
-		BorderBottom(true).
-		Bold(false)
-	s.Selected = s.Selected.
-		Foreground(ui.SelectedColorForeground).
-		Background(ui.SelectedColorForegroundBackground).
-		Bold(false)
-	t.SetStyles(s)
-
-	// Print model
-	m := model{t}
-	if _, err := tea.NewProgram(m).Run(); err != nil {
-		fmt.Println("Error running program:", err)
 	}
 
-	return err
+	// Add static table option if --static flag is set
+	opt := ui.WithStaticTable(len(tableData), staticTable)
+	if opt != nil {
+		opts = append(opts, opt)
+	}
+
+	t := ui.NewTableModel(opt != nil, opts...)
+
+	fmt.Println(t.View())
+
+	return nil
 }
