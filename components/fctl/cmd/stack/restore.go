@@ -81,7 +81,11 @@ type RestoreStackInformation struct {
 }
 
 func viewRestore(cmd *cobra.Command, args []string) error {
-	data := fctl.GetSharedData().(*RestoreStackInformation)
+	data, ok := fctl.GetSharedData().(*RestoreStackInformation)
+
+	if !ok {
+		return errors.New("invalid shared data")
+	}
 
 	return internal.PrintStackInformation(cmd.OutOrStdout(), fctl.GetCurrentProfile(cmd, fctl.GetSharedConfig()), data.Stack, data.Versions)
 }

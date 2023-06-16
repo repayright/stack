@@ -177,7 +177,10 @@ func createStackCommand(cmd *cobra.Command, args []string) error {
 
 func viewStackCreate(cmd *cobra.Command, args []string) error {
 
-	data := fctl.GetSharedData().(*StackCreate)
+	data, ok := fctl.GetSharedData().(*StackCreate)
+	if !ok {
+		return nil
+	}
 
 	return internal.PrintStackInformation(cmd.OutOrStdout(), fctl.GetSharedProfile(), data.Stack, data.Versions)
 }

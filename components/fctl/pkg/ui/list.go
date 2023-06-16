@@ -23,6 +23,10 @@ func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, heig
 	}
 }
 
+func NewDefaultListModel(items []list.Item) *ListModel {
+	return NewListModel(items, ItemDelegate{}, ViewWidth, ViewHeight).WithMaxPossibleHeight().WithMaxPossibleWidth()
+}
+
 func (m ListModel) Init() tea.Cmd {
 	return nil
 }

@@ -19,11 +19,20 @@ const (
 	staticTable = true
 )
 
+// Every column in the table is a column in the struct
+// The column name is suffixed with the max length of the column
+// This is used to align the columns in the table
+// e.g. maxLengthOrganizationId = 20
+//
+//	maxLengthStackId = 4
+//
+// Where the max length is the number of characters in the column name and values
 const (
-	maxLengthOrganizationId = 20
-	maxLengthStackId        = 20
-	maxLengthStackName      = 20
-	maxLengthStackStatus    = 20
+	maxLengthOrganizationId = 15
+	maxLengthStackId        = 8
+	maxLengthStackName      = 6
+	maxLengthApiUrl         = 50
+	maxLengthStackRegion    = 25
 	maxLengthStackCreatedAt = 20
 	maxLengthStackDeletedAt = 20
 )
@@ -80,16 +89,23 @@ func listCommand(cmd *cobra.Command, args []string) error {
 }
 
 func viewStackTable(cmd *cobra.Command, args []string) error {
-	data := fctl.GetSharedData().([]membershipclient.Stack)
-	organization := fctl.GetSharedAdditionnalData(orgKey).(string)
+	data, ok := fctl.GetSharedData().([]membershipclient.Stack)
+	if !ok {
+		return errors.New("invalid shared data")
+	}
+
+	organization, ok := fctl.GetSharedAdditionnalData(orgKey).(string)
+	if !ok {
+		return errors.New("invalid shared additional data")
+	}
 
 	// Default Columns
 	columns := ui.NewArrayColumn(
 		ui.NewColumn("Organization ID", maxLengthOrganizationId),
 		ui.NewColumn("Stack ID", maxLengthStackId),
 		ui.NewColumn("Name", maxLengthStackName),
-		ui.NewColumn("API URL", maxLengthStackStatus),
-		ui.NewColumn("Region", maxLengthStackCreatedAt),
+		ui.NewColumn("API URL", maxLengthApiUrl),
+		ui.NewColumn("Region", maxLengthStackRegion),
 		ui.NewColumn("Created At", maxLengthStackCreatedAt),
 	)
 
@@ -120,11 +136,8 @@ func viewStackTable(cmd *cobra.Command, args []string) error {
 		return data
 	})
 
-	opts := []table.Option{
-		table.WithColumns(columns),
-		table.WithRows(tableData),
-		table.WithFocused(true),
-	}
+	// Default table options
+	opts := ui.NewDefaultOptions(columns, tableData)
 
 	// Add static table option if --static flag is set
 	opt := ui.WithStaticTable(len(tableData), staticTable)

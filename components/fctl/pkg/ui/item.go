@@ -30,8 +30,9 @@ type ItemDelegate struct{}
 func (d ItemDelegate) Height() int                             { return 3 }
 func (d ItemDelegate) Spacing() int                            { return 0 }
 func (d ItemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
-func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
-	i, ok := listItem.(Item)
+func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
+	i, ok := item.(*Item)
+
 	if !ok {
 		return
 	}

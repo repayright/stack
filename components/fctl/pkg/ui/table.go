@@ -53,6 +53,14 @@ func (t *TableModel) WithDefaultStyle() *TableModel {
 	return t
 }
 
+func NewDefaultOptions(ac ArrayColumn, row []table.Row) []table.Option {
+	return []table.Option{
+		table.WithColumns(ac),
+		table.WithRows(row),
+		table.WithFocused(true),
+	}
+}
+
 func WithStaticTable(height int, static bool) table.Option {
 	if static {
 		return table.WithHeight(height)

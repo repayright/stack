@@ -44,7 +44,7 @@ func printInformation(out io.Writer, stack *membershipclient.Stack) *ui.ListMode
 	items = append(items, ui.NewItem(pterm.LightCyan("Name"), stack.Name))
 	items = append(items, ui.NewItem(pterm.LightCyan("Region"), stack.RegionID))
 
-	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithTitle("Information").WithMaxPossibleHeight().WithMaxPossibleWidth()
+	return ui.NewDefaultListModel(items).WithTitle("Information")
 }
 
 func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) *ui.ListModel {
@@ -59,19 +59,18 @@ func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsRespo
 
 	}
 
-	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithTitle("Version").WithMaxPossibleHeight().WithMaxPossibleWidth()
+	return ui.NewDefaultListModel(items).WithTitle("Version")
 }
 
 func printMetadata(out io.Writer, stack *membershipclient.Stack) *ui.ListModel {
 	items := []list.Item{}
 
 	for k, v := range stack.Metadata {
-
 		items = append(items, ui.NewItem(
 			pterm.LightCyan(k),
 			v,
 		))
 
 	}
-	return ui.NewListModel(items, ui.ItemDelegate{}, ui.ViewWidth, ui.ViewHeight).WithTitle("Metadata").WithMaxPossibleHeight().WithMaxPossibleWidth()
+	return ui.NewDefaultListModel(items).WithTitle("Metadata")
 }

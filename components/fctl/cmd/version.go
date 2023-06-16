@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+
+	"github.com/charmbracelet/bubbles/list"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -42,12 +46,17 @@ func versionCommand(cmd *cobra.Command, args []string) error {
 func view(cmd *cobra.Command, args []string) error {
 	data := fctl.GetSharedData().(*VersionStruct)
 
-	tableData := pterm.TableData{}
-	tableData = append(tableData, []string{pterm.LightCyan("Version"), data.Version})
-	tableData = append(tableData, []string{pterm.LightCyan("Date"), data.BuildDate})
-	tableData = append(tableData, []string{pterm.LightCyan("Commit"), data.Commit})
-	return pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
-		WithData(tableData).
-		Render()
+	// Default List
+	items := []list.Item{
+		ui.NewItem(pterm.LightCyan("Version"), data.Version),
+		ui.NewItem(pterm.LightCyan("Date"), data.BuildDate),
+		ui.NewItem(pterm.LightCyan("Commit"), data.Commit),
+	}
+
+	model := ui.NewDefaultListModel(items).WithTitle("FCTL Information")
+
+	//Print the list
+	fmt.Println(model.View())
+	return nil
+
 }
