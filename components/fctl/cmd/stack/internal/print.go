@@ -90,8 +90,8 @@ func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *mem
 		return err
 	}
 
-	// Static
-	if flag := fctl.GetString(cmd, fctl.OutputFlag); flag == "static" {
+	// Plain
+	if flag := fctl.GetString(cmd, fctl.OutputFlag); flag == "plain" {
 		fctl.Println(content)
 		return nil
 	}

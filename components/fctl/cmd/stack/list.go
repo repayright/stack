@@ -139,12 +139,12 @@ func formatViewStackListAsTable(cmd *cobra.Command, args []string) error {
 	// Default table options
 	opts := ui.NewDefaultOptions(columns, tableData)
 
-	// Add static table option if --static flag is set
+	// Add plain table option if --plain flag is set
 
-	isStatic := fctl.GetString(cmd, fctl.OutputFlag) == "static"
+	isPlain := fctl.GetString(cmd, fctl.OutputFlag) == "plain"
 
 	var opt table.Option
-	if isStatic {
+	if isPlain {
 		opt = ui.WithHeight(len(tableData))
 	} else {
 		opt = ui.WithHeight(ui.MaxTableHeight)
@@ -152,15 +152,15 @@ func formatViewStackListAsTable(cmd *cobra.Command, args []string) error {
 
 	opts = append(opts, opt)
 
-	t := ui.NewTableModel(!isStatic, opts...)
+	t := ui.NewTableModel(!isPlain, opts...)
 
 	return displayStackList(cmd, t)
 }
 
 func displayStackList(cmd *cobra.Command, t *ui.TableModel) error {
-	isStatic := fctl.GetString(cmd, fctl.OutputFlag)
+	isPlain := fctl.GetString(cmd, fctl.OutputFlag)
 
-	if isStatic == "static" {
+	if isPlain == "plain" {
 		fmt.Println(t.View())
 		return nil
 	}
