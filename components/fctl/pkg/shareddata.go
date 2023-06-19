@@ -49,6 +49,10 @@ func GetSharedAdditionnalData(key string) interface{} {
 	return sharedStore.additionnalData[key]
 }
 
+type ExportedData struct {
+	Data interface{} `json:"data"`
+}
+
 func ShareStoreToJson() ([]byte, error) {
 	if (sharedStore.data) == nil {
 		errors.New("no data to marshal")
