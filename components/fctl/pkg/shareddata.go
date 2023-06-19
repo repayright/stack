@@ -3,6 +3,7 @@ package fctl
 import (
 	"encoding/json"
 
+	"github.com/TylerBrock/colorjson"
 	"github.com/pkg/errors"
 )
 
@@ -13,9 +14,13 @@ type SharedStore struct {
 
 	// Those data are not printed in the json output
 	additionnalData map[string]interface{}
+	//additionnalKeyType 	map[string]
+
 }
 
-var sharedStore = &SharedStore{}
+var sharedStore = &SharedStore{
+	additionnalData: make(map[string]interface{}),
+}
 
 // GetSharedData returns the shared data store
 func GetSharedData() interface{} {
@@ -37,16 +42,45 @@ func SetSharedData(data interface{}, profile *Profile, config *Config, additionn
 	sharedStore.additionnalData = additionnalData
 }
 
-func GetSharedAdditionnalData(key string) interface{} {
+func SetSharedAdditionnalData(key string, value interface{}) {
+	sharedStore.additionnalData[key] = value
+}
 
+func GetSharedAdditionnalData(key string) interface{} {
 	return sharedStore.additionnalData[key]
+}
+
+type ExportedData struct {
+	Data interface{} `json:"data"`
 }
 
 func ShareStoreToJson() ([]byte, error) {
 	if (sharedStore.data) == nil {
-		errors.New("no data to marshal")
+		return nil, errors.New("no data to marshal")
+	}
+
+	// Inject into export struct
+	export := ExportedData{
+		Data: sharedStore.data,
 	}
 
 	// Marshal to JSON then print to stdout
-	return json.Marshal(sharedStore.data)
+	s, err := json.Marshal(export)
+	if err != nil {
+		return nil, err
+	}
+
+	raw := make(map[string]any)
+	if err := json.Unmarshal(s, &raw); err == nil {
+		f := colorjson.NewFormatter()
+		f.Indent = 2
+		colorized, err := f.Marshal(raw)
+		if err != nil {
+			panic(err)
+		}
+		return colorized, nil
+	} else {
+		return s, nil
+	}
+
 }

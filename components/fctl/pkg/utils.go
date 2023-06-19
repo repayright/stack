@@ -1,6 +1,7 @@
 package fctl
 
 import (
+	"errors"
 	"os/exec"
 	"runtime"
 )
@@ -67,6 +68,7 @@ func Open(url string) error {
 		args = append(args, url)
 		return exec.Command(cmd, args...).Start()
 	}
-	Printfln("Unable to find a browser, please open the following link: %s", url)
-	return nil
+
+	SetSharedAdditionnalData("browser_url", url)
+	return errors.New("error_opening_browser")
 }
