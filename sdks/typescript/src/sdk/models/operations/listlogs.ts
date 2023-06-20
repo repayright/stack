@@ -8,6 +8,12 @@ import { AxiosResponse } from "axios";
 
 export class ListLogsRequest extends SpeakeasyBase {
   /**
+   * Pagination cursor, will return the logs after a given ID. (in descending order).
+   */
+  @SpeakeasyMetadata({ data: "queryParam, style=form;explode=true;name=after" })
+  after?: string;
+
+  /**
    * Parameter used in pagination requests. Maximum page size is set to 15.
    *
    * @remarks
@@ -51,6 +57,23 @@ export class ListLogsRequest extends SpeakeasyBase {
     data: "queryParam, style=form;explode=true;name=pageSize",
   })
   pageSize?: number;
+
+  /**
+   * Parameter used in pagination requests. Maximum page size is set to 15.
+   *
+   * @remarks
+   * Set to the value of next for the next page of results.
+   * Set to the value of previous for the previous page of results.
+   * No other parameters can be set when this parameter is set.
+   * Deprecated, please use `cursor` instead.
+   *
+   *
+   * @deprecated this field will be removed in a future release, please migrate away from it as soon as possible
+   */
+  @SpeakeasyMetadata({
+    data: "queryParam, style=form;explode=true;name=pagination_token",
+  })
+  paginationToken?: string;
 
   /**
    * Filter transactions that occurred after this timestamp.

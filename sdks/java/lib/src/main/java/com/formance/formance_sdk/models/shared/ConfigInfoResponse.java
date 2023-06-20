@@ -10,33 +10,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * ConfigInfoResponse - OK
  */
 public class ConfigInfoResponse {
-    @JsonProperty("config")
-    public Config config;
+    @JsonProperty("data")
+    public ConfigInfo data;
 
-    public ConfigInfoResponse withConfig(Config config) {
-        this.config = config;
+    public ConfigInfoResponse withData(ConfigInfo data) {
+        this.data = data;
         return this;
     }
     
-    @JsonProperty("server")
-    public String server;
-
-    public ConfigInfoResponse withServer(String server) {
-        this.server = server;
-        return this;
-    }
-    
-    @JsonProperty("version")
-    public String version;
-
-    public ConfigInfoResponse withVersion(String version) {
-        this.version = version;
-        return this;
-    }
-    
-    public ConfigInfoResponse(@JsonProperty("config") Config config, @JsonProperty("server") String server, @JsonProperty("version") String version) {
-        this.config = config;
-        this.server = server;
-        this.version = version;
+    public ConfigInfoResponse(@JsonProperty("data") ConfigInfo data) {
+        this.data = data;
   }
 }

@@ -49,7 +49,7 @@ export class CountTransactionsRequest extends SpeakeasyBase {
   @SpeakeasyMetadata({
     data: "queryParam, style=deepObject;explode=true;name=metadata",
   })
-  metadata?: Record<string, string>;
+  metadata?: Record<string, any>;
 
   /**
    * Filter transactions by reference field.

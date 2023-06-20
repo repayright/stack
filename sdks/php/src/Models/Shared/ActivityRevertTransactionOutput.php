@@ -11,12 +11,47 @@ namespace formance\stack\Models\Shared;
 
 class ActivityRevertTransactionOutput
 {
-	#[\JMS\Serializer\Annotation\SerializedName('data')]
-    #[\JMS\Serializer\Annotation\Type('formance\stack\Models\Shared\Transaction')]
-    public Transaction $data;
+    /**
+     * $metadata
+     * 
+     * @var ?array<string, mixed> $metadata
+     */
+	#[\JMS\Serializer\Annotation\SerializedName('metadata')]
+    #[\JMS\Serializer\Annotation\Type('array<string, mixed>')]
+    #[\JMS\Serializer\Annotation\SkipWhenEmpty]
+    public ?array $metadata = null;
+    
+    /**
+     * $postings
+     * 
+     * @var ?array<\formance\stack\Models\Shared\Posting> $postings
+     */
+	#[\JMS\Serializer\Annotation\SerializedName('postings')]
+    #[\JMS\Serializer\Annotation\Type('array<formance\stack\Models\Shared\Posting>')]
+    #[\JMS\Serializer\Annotation\SkipWhenEmpty]
+    public ?array $postings = null;
+    
+	#[\JMS\Serializer\Annotation\SerializedName('reference')]
+    #[\JMS\Serializer\Annotation\Type('string')]
+    #[\JMS\Serializer\Annotation\SkipWhenEmpty]
+    public ?string $reference = null;
+    
+	#[\JMS\Serializer\Annotation\SerializedName('script')]
+    #[\JMS\Serializer\Annotation\Type('formance\stack\Models\Shared\ActivityRevertTransactionOutputScript')]
+    #[\JMS\Serializer\Annotation\SkipWhenEmpty]
+    public ?ActivityRevertTransactionOutputScript $script = null;
+    
+	#[\JMS\Serializer\Annotation\SerializedName('timestamp')]
+    #[\JMS\Serializer\Annotation\Type("DateTime<'Y-m-d\TH:i:s.up'>")]
+    #[\JMS\Serializer\Annotation\SkipWhenEmpty]
+    public ?\DateTime $timestamp = null;
     
 	public function __construct()
 	{
-		$this->data = new \formance\stack\Models\Shared\Transaction();
+		$this->metadata = null;
+		$this->postings = null;
+		$this->reference = null;
+		$this->script = null;
+		$this->timestamp = null;
 	}
 }

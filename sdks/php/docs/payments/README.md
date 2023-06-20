@@ -44,8 +44,9 @@ try {
     $request->asset = 'USD';
     $request->destination = 'acct_1Gqj58KZcSIg2N2q';
     $request->metadata = [
-        'non' => 'eligendi',
-        'sint' => 'aliquid',
+        'officia' => 'dolor',
+        'debitis' => 'a',
+        'dolorum' => 'in',
     ];
 
     $response = $sdk->payments->connectorsStripeTransfer($request);
@@ -86,7 +87,7 @@ try {
     $request->transferRequest->asset = 'USD';
     $request->transferRequest->destination = 'acct_1Gqj58KZcSIg2N2q';
     $request->transferRequest->source = 'acct_1Gqj58KZcSIg2N2q';
-    $request->connector = Connector::MODULR;
+    $request->connector = Connector::WISE;
 
     $response = $sdk->payments->connectorsTransfer($request);
 
@@ -121,7 +122,7 @@ $sdk = SDK::builder()
 try {
     $request = new GetConnectorTaskRequest();
     $request->connector = Connector::BANKING_CIRCLE;
-    $request->taskId = 'sint';
+    $request->taskId = 'maiores';
 
     $response = $sdk->payments->getConnectorTask($request);
 
@@ -154,7 +155,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetPaymentRequest();
-    $request->paymentId = 'officia';
+    $request->paymentId = 'rerum';
 
     $response = $sdk->payments->getPayment($request);
 
@@ -188,11 +189,11 @@ $sdk = SDK::builder()
 
 try {
     $request = new InstallConnectorRequest();
-    $request->requestBody = new DummyPayConfig();
-    $request->requestBody->directory = '/tmp/dummypay';
-    $request->requestBody->fileGenerationPeriod = '60s';
-    $request->requestBody->filePollingPeriod = '60s';
-    $request->connector = Connector::BANKING_CIRCLE;
+    $request->requestBody = new StripeConfig();
+    $request->requestBody->apiKey = 'XXX';
+    $request->requestBody->pageSize = 50;
+    $request->requestBody->pollingPeriod = '60s';
+    $request->connector = Connector::DUMMY_PAY;
 
     $response = $sdk->payments->installConnector($request);
 
@@ -284,9 +285,9 @@ $sdk = SDK::builder()
 
 try {
     $request = new ListConnectorTasksRequest();
-    $request->connector = Connector::BANKING_CIRCLE;
+    $request->connector = Connector::CURRENCY_CLOUD;
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->pageSize = 680056;
+    $request->pageSize = 813798;
 
     $response = $sdk->payments->listConnectorTasks($request);
 
@@ -354,12 +355,11 @@ $sdk = SDK::builder()
 try {
     $request = new ListPaymentsRequest();
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->pageSize = 449198;
+    $request->pageSize = 396506;
     $request->sort = [
-        'maiores',
-        'rerum',
-        'dicta',
-        'magnam',
+        'accusamus',
+        'non',
+        'occaecati',
     ];
 
     $response = $sdk->payments->listPayments($request);
@@ -423,12 +423,12 @@ $sdk = SDK::builder()
 try {
     $request = new PaymentslistAccountsRequest();
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->pageSize = 767024;
+    $request->pageSize = 313218;
     $request->sort = [
-        'ea',
-        'aliquid',
-        'laborum',
-        'accusamus',
+        'delectus',
+        'quidem',
+        'provident',
+        'nam',
     ];
 
     $response = $sdk->payments->paymentslistAccounts($request);
@@ -463,7 +463,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new ReadConnectorConfigRequest();
-    $request->connector = Connector::DUMMY_PAY;
+    $request->connector = Connector::MODULR;
 
     $response = $sdk->payments->readConnectorConfig($request);
 
@@ -533,7 +533,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new UninstallConnectorRequest();
-    $request->connector = Connector::DUMMY_PAY;
+    $request->connector = Connector::MODULR;
 
     $response = $sdk->payments->uninstallConnector($request);
 
@@ -568,8 +568,8 @@ $sdk = SDK::builder()
 try {
     $request = new UpdateMetadataRequest();
     $request->paymentMetadata = new PaymentMetadata();
-    $request->paymentMetadata->key = 'accusamus';
-    $request->paymentId = 'delectus';
+    $request->paymentMetadata->key = 'sapiente';
+    $request->paymentId = 'amet';
 
     $response = $sdk->payments->updateMetadata($request);
 

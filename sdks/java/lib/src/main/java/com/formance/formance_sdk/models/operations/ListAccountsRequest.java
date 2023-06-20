@@ -20,6 +20,17 @@ public class ListAccountsRequest {
     }
     
     /**
+     * Pagination cursor, will return accounts after given address, in descending order.
+     */
+    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=after")
+    public String after;
+
+    public ListAccountsRequest withAfter(String after) {
+        this.after = after;
+        return this;
+    }
+    
+    /**
      * Filter accounts by their balance (default operator is gte)
      */
     @SpeakeasyMetadata("queryParam:style=form,explode=true,name=balance")
@@ -72,9 +83,9 @@ public class ListAccountsRequest {
      * Filter accounts by metadata key value pairs. Nested objects can be used as seen in the example below.
      */
     @SpeakeasyMetadata("queryParam:style=deepObject,explode=true,name=metadata")
-    public java.util.Map<String, String> metadata;
+    public java.util.Map<String, Object> metadata;
 
-    public ListAccountsRequest withMetadata(java.util.Map<String, String> metadata) {
+    public ListAccountsRequest withMetadata(java.util.Map<String, Object> metadata) {
         this.metadata = metadata;
         return this;
     }
@@ -88,6 +99,25 @@ public class ListAccountsRequest {
 
     public ListAccountsRequest withPageSize(Long pageSize) {
         this.pageSize = pageSize;
+        return this;
+    }
+    
+    /**
+     * Parameter used in pagination requests. Maximum page size is set to 15.
+     * Set to the value of next for the next page of results.
+     * Set to the value of previous for the previous page of results.
+     * No other parameters can be set when this parameter is set.
+     * Deprecated, please use `cursor` instead.
+     * 
+     * @deprecated this field will be removed in a future release, please migrate away from it as soon as possible
+     */
+    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=pagination_token")
+    @Deprecated
+    public String paginationToken;
+
+    @Deprecated
+    public ListAccountsRequest withPaginationToken(String paginationToken) {
+        this.paginationToken = paginationToken;
         return this;
     }
     

@@ -12,14 +12,6 @@ use \formance\stack\Utils\SpeakeasyMetadata;
 class CreateTransactionRequest
 {
     /**
-     * Use an idempotency key
-     * 
-     * @var ?string $idempotencyKey
-     */
-	#[SpeakeasyMetadata('header:style=simple,explode=false,name=Idempotency-Key')]
-    public ?string $idempotencyKey = null;
-    
-    /**
      * The request body must contain at least one of the following objects:
      * 
      *   - `postings`: suitable for simple transactions
@@ -32,22 +24,6 @@ class CreateTransactionRequest
     public \formance\stack\Models\Shared\PostTransaction $postTransaction;
     
     /**
-     * Set async mode.
-     * 
-     * @var ?bool $async
-     */
-	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=async')]
-    public ?bool $async = null;
-    
-    /**
-     * Set the dryRun mode. dry run mode doesn't add the logs to the database or publish a message to the message broker.
-     * 
-     * @var ?bool $dryRun
-     */
-	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=dryRun')]
-    public ?bool $dryRun = null;
-    
-    /**
      * Name of the ledger.
      * 
      * @var string $ledger
@@ -55,12 +31,18 @@ class CreateTransactionRequest
 	#[SpeakeasyMetadata('pathParam:style=simple,explode=false,name=ledger')]
     public string $ledger;
     
+    /**
+     * Set the preview mode. Preview mode doesn't add the logs to the database or publish a message to the message broker.
+     * 
+     * @var ?bool $preview
+     */
+	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=preview')]
+    public ?bool $preview = null;
+    
 	public function __construct()
 	{
-		$this->idempotencyKey = null;
 		$this->postTransaction = new \formance\stack\Models\Shared\PostTransaction();
-		$this->async = null;
-		$this->dryRun = null;
 		$this->ledger = "";
+		$this->preview = null;
 	}
 }

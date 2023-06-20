@@ -18,7 +18,4 @@ enum ErrorsEnum: string
     case NO_SCRIPT = 'NO_SCRIPT';
     case COMPILATION_FAILED = 'COMPILATION_FAILED';
     case METADATA_OVERRIDE = 'METADATA_OVERRIDE';
-    case NOT_FOUND = 'NOT_FOUND';
-    case CONTEXT_CANCELLED = 'CONTEXT_CANCELLED';
-    case STORE = 'STORE';
 }

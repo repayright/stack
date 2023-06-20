@@ -38,6 +38,53 @@ class Ledger
 	}
 	
     /**
+     * Create a new batch of transactions to a ledger
+     * 
+     * @param \formance\stack\Models\Operations\CreateTransactionsRequest $request
+     * @return \formance\stack\Models\Operations\CreateTransactionsResponse
+     */
+	public function createTransactions(
+        \formance\stack\Models\Operations\CreateTransactionsRequest $request,
+    ): \formance\stack\Models\Operations\CreateTransactionsResponse
+    {
+        $baseUrl = $this->_serverUrl;
+        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/transactions/batch', \formance\stack\Models\Operations\CreateTransactionsRequest::class, $request);
+        
+        $options = ['http_errors' => false];
+        $body = Utils\Utils::serializeRequestBody($request, "transactions", "json");
+        if ($body === null) {
+            throw new \Exception('Request body is required');
+        }
+        $options = array_merge_recursive($options, $body);
+        $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';
+        $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
+        
+        $httpResponse = $this->_securityClient->request('POST', $url, $options);
+        
+        $contentType = $httpResponse->getHeader('Content-Type')[0] ?? '';
+
+        $response = new \formance\stack\Models\Operations\CreateTransactionsResponse();
+        $response->statusCode = $httpResponse->getStatusCode();
+        $response->contentType = $contentType;
+        $response->rawResponse = $httpResponse;
+        
+        if ($httpResponse->getStatusCode() === 200) {
+            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
+                $serializer = Utils\JSON::createSerializer();
+                $response->transactionsResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\TransactionsResponse', 'json');
+            }
+        }
+        else {
+            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
+                $serializer = Utils\JSON::createSerializer();
+                $response->errorResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\ErrorResponse', 'json');
+            }
+        }
+
+        return $response;
+    }
+	
+    /**
      * Set the metadata of a transaction by its ID
      * 
      * @param \formance\stack\Models\Operations\AddMetadataOnTransactionRequest $request
@@ -53,11 +100,6 @@ class Ledger
         $options = ['http_errors' => false];
         $body = Utils\Utils::serializeRequestBody($request, "requestBody", "json");
         $options = array_merge_recursive($options, $body);
-        $options = array_merge_recursive($options, Utils\Utils::getQueryParams(\formance\stack\Models\Operations\AddMetadataOnTransactionRequest::class, $request, null));
-        $options = array_merge_recursive($options, Utils\Utils::getHeaders($request));
-        if (!array_key_exists('headers', $options)) {
-            $options['headers'] = [];
-        }
         $options['headers']['Accept'] = 'application/json';
         $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
         
@@ -101,11 +143,6 @@ class Ledger
             throw new \Exception('Request body is required');
         }
         $options = array_merge_recursive($options, $body);
-        $options = array_merge_recursive($options, Utils\Utils::getQueryParams(\formance\stack\Models\Operations\AddMetadataToAccountRequest::class, $request, null));
-        $options = array_merge_recursive($options, Utils\Utils::getHeaders($request));
-        if (!array_key_exists('headers', $options)) {
-            $options['headers'] = [];
-        }
         $options['headers']['Accept'] = 'application/json';
         $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
         
@@ -157,7 +194,7 @@ class Ledger
         $response->contentType = $contentType;
         $response->rawResponse = $httpResponse;
         
-        if ($httpResponse->getStatusCode() === 204) {
+        if ($httpResponse->getStatusCode() === 200) {
             $response->headers = $httpResponse->getHeaders();
             
         }
@@ -198,7 +235,7 @@ class Ledger
         $response->contentType = $contentType;
         $response->rawResponse = $httpResponse;
         
-        if ($httpResponse->getStatusCode() === 204) {
+        if ($httpResponse->getStatusCode() === 200) {
             $response->headers = $httpResponse->getHeaders();
             
         }
@@ -232,10 +269,6 @@ class Ledger
         }
         $options = array_merge_recursive($options, $body);
         $options = array_merge_recursive($options, Utils\Utils::getQueryParams(\formance\stack\Models\Operations\CreateTransactionRequest::class, $request, null));
-        $options = array_merge_recursive($options, Utils\Utils::getHeaders($request));
-        if (!array_key_exists('headers', $options)) {
-            $options['headers'] = [];
-        }
         $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';
         $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
         
@@ -251,7 +284,7 @@ class Ledger
         if ($httpResponse->getStatusCode() === 200) {
             if (Utils\Utils::matchContentType($contentType, 'application/json')) {
                 $serializer = Utils\JSON::createSerializer();
-                $response->createTransactionResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\CreateTransactionResponse', 'json');
+                $response->transactionsResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\TransactionsResponse', 'json');
             }
         }
         else {
@@ -475,6 +508,48 @@ class Ledger
     }
 	
     /**
+     * Get the mapping of a ledger
+     * 
+     * @param \formance\stack\Models\Operations\GetMappingRequest $request
+     * @return \formance\stack\Models\Operations\GetMappingResponse
+     */
+	public function getMapping(
+        \formance\stack\Models\Operations\GetMappingRequest $request,
+    ): \formance\stack\Models\Operations\GetMappingResponse
+    {
+        $baseUrl = $this->_serverUrl;
+        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/mapping', \formance\stack\Models\Operations\GetMappingRequest::class, $request);
+        
+        $options = ['http_errors' => false];
+        $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';
+        $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
+        
+        $httpResponse = $this->_securityClient->request('GET', $url, $options);
+        
+        $contentType = $httpResponse->getHeader('Content-Type')[0] ?? '';
+
+        $response = new \formance\stack\Models\Operations\GetMappingResponse();
+        $response->statusCode = $httpResponse->getStatusCode();
+        $response->contentType = $contentType;
+        $response->rawResponse = $httpResponse;
+        
+        if ($httpResponse->getStatusCode() === 200) {
+            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
+                $serializer = Utils\JSON::createSerializer();
+                $response->mappingResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\MappingResponse', 'json');
+            }
+        }
+        else {
+            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
+                $serializer = Utils\JSON::createSerializer();
+                $response->errorResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\ErrorResponse', 'json');
+            }
+        }
+
+        return $response;
+    }
+	
+    /**
      * Get transaction from a ledger by its ID
      * 
      * @param \formance\stack\Models\Operations\GetTransactionRequest $request
@@ -503,7 +578,7 @@ class Ledger
         if ($httpResponse->getStatusCode() === 200) {
             if (Utils\Utils::matchContentType($contentType, 'application/json')) {
                 $serializer = Utils\JSON::createSerializer();
-                $response->getTransactionResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\GetTransactionResponse', 'json');
+                $response->transactionResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\TransactionResponse', 'json');
             }
         }
         else {
@@ -722,10 +797,105 @@ class Ledger
         $response->contentType = $contentType;
         $response->rawResponse = $httpResponse;
         
-        if ($httpResponse->getStatusCode() === 201) {
+        if ($httpResponse->getStatusCode() === 200) {
             if (Utils\Utils::matchContentType($contentType, 'application/json')) {
                 $serializer = Utils\JSON::createSerializer();
-                $response->revertTransactionResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\RevertTransactionResponse', 'json');
+                $response->transactionResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\TransactionResponse', 'json');
+            }
+        }
+        else {
+            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
+                $serializer = Utils\JSON::createSerializer();
+                $response->errorResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\ErrorResponse', 'json');
+            }
+        }
+
+        return $response;
+    }
+	
+    /**
+     * Execute a Numscript
+     * 
+     * This route is deprecated, and has been merged into `POST /{ledger}/transactions`.
+     * 
+     * 
+     * @param \formance\stack\Models\Operations\RunScriptRequest $request
+     * @return \formance\stack\Models\Operations\RunScriptResponse
+     * @deprecated this method will be removed in a future release, please migrate away from it as soon as possible
+     */
+	public function runScript(
+        \formance\stack\Models\Operations\RunScriptRequest $request,
+    ): \formance\stack\Models\Operations\RunScriptResponse
+    {
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        
+        $baseUrl = $this->_serverUrl;
+        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/script', \formance\stack\Models\Operations\RunScriptRequest::class, $request);
+        
+        $options = ['http_errors' => false];
+        $body = Utils\Utils::serializeRequestBody($request, "script", "json");
+        if ($body === null) {
+            throw new \Exception('Request body is required');
+        }
+        $options = array_merge_recursive($options, $body);
+        $options = array_merge_recursive($options, Utils\Utils::getQueryParams(\formance\stack\Models\Operations\RunScriptRequest::class, $request, null));
+        $options['headers']['Accept'] = 'application/json';
+        $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
+        
+        $httpResponse = $this->_securityClient->request('POST', $url, $options);
+        
+        $contentType = $httpResponse->getHeader('Content-Type')[0] ?? '';
+
+        $response = new \formance\stack\Models\Operations\RunScriptResponse();
+        $response->statusCode = $httpResponse->getStatusCode();
+        $response->contentType = $contentType;
+        $response->rawResponse = $httpResponse;
+        
+        if ($httpResponse->getStatusCode() === 200) {
+            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
+                $serializer = Utils\JSON::createSerializer();
+                $response->scriptResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\ScriptResponse', 'json');
+            }
+        }
+
+        return $response;
+    }
+	
+    /**
+     * Update the mapping of a ledger
+     * 
+     * @param \formance\stack\Models\Operations\UpdateMappingRequest $request
+     * @return \formance\stack\Models\Operations\UpdateMappingResponse
+     */
+	public function updateMapping(
+        \formance\stack\Models\Operations\UpdateMappingRequest $request,
+    ): \formance\stack\Models\Operations\UpdateMappingResponse
+    {
+        $baseUrl = $this->_serverUrl;
+        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/mapping', \formance\stack\Models\Operations\UpdateMappingRequest::class, $request);
+        
+        $options = ['http_errors' => false];
+        $body = Utils\Utils::serializeRequestBody($request, "mapping", "json");
+        if ($body === null) {
+            throw new \Exception('Request body is required');
+        }
+        $options = array_merge_recursive($options, $body);
+        $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';
+        $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
+        
+        $httpResponse = $this->_securityClient->request('PUT', $url, $options);
+        
+        $contentType = $httpResponse->getHeader('Content-Type')[0] ?? '';
+
+        $response = new \formance\stack\Models\Operations\UpdateMappingResponse();
+        $response->statusCode = $httpResponse->getStatusCode();
+        $response->contentType = $contentType;
+        $response->rawResponse = $httpResponse;
+        
+        if ($httpResponse->getStatusCode() === 200) {
+            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
+                $serializer = Utils\JSON::createSerializer();
+                $response->mappingResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\MappingResponse', 'json');
             }
         }
         else {

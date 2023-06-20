@@ -40,7 +40,7 @@ req = operations.ConfirmHoldRequest(
         amount=100,
         final=True,
     ),
-    hold_id='omnis',
+    hold_id='maxime',
 )
 
 res = s.wallets.confirm_hold(req)
@@ -68,11 +68,11 @@ s = sdk.SDK(
 
 req = operations.CreateBalanceRequest(
     create_balance_request=shared.CreateBalanceRequest(
-        expires_at=dateutil.parser.isoparse('2022-12-24T23:52:02.245Z'),
-        name='Megan Rau',
-        priority=290077,
+        expires_at=dateutil.parser.isoparse('2021-08-05T03:52:18.835Z'),
+        name='Alice Bradtke',
+        priority=714242,
     ),
-    id='69b6e214-1959-4890-afa5-63e2516fe4c8',
+    id='7fd2ed02-8921-4cdd-8692-601fb576b0d5',
 )
 
 res = s.wallets.create_balance(req)
@@ -99,11 +99,12 @@ s = sdk.SDK(
 
 req = shared.CreateWalletRequest(
     metadata={
-        "in": 'architecto',
-        "architecto": 'repudiandae',
-        "ullam": 'expedita',
+        "perferendis": 'fugiat',
+        "amet": 'aut',
+        "cumque": 'corporis',
+        "hic": 'libero',
     },
-    name='Kristie Spencer',
+    name='Ernest Hayes',
 )
 
 res = s.wallets.create_wallet(req)
@@ -131,29 +132,27 @@ s = sdk.SDK(
 req = operations.CreditWalletRequest(
     credit_wallet_request=shared.CreditWalletRequest(
         amount=shared.Monetary(
-            amount=868126,
-            asset='accusantium',
+            amount=54338,
+            asset='quis',
         ),
-        balance='consequuntur',
+        balance='nesciunt',
         metadata={
-            "natus": 'magni',
-            "sunt": 'quo',
-            "illum": 'pariatur',
+            "perferendis": 'dolores',
         },
-        reference='maxime',
+        reference='minus',
         sources=[
-            shared.WalletSubject(
-                balance='odit',
-                identifier='ea',
-                type='accusantium',
-            ),
             shared.LedgerAccountSubject(
-                identifier='maiores',
-                type='quidem',
+                identifier='vero',
+                type='nostrum',
+            ),
+            shared.WalletSubject(
+                balance='recusandae',
+                identifier='omnis',
+                type='facilis',
             ),
         ],
     ),
-    id='576b0d5f-0d30-4c5f-bb25-87053202c73d',
+    id='90c28909-b3fe-449a-8d9c-bf48633323f9',
 )
 
 res = s.wallets.credit_wallet(req)
@@ -181,26 +180,24 @@ s = sdk.SDK(
 req = operations.DebitWalletRequest(
     debit_wallet_request=shared.DebitWalletRequest(
         amount=shared.Monetary(
-            amount=345352,
-            asset='hic',
+            amount=739551,
+            asset='voluptate',
         ),
         balances=[
-            'omnis',
-            'facilis',
-            'perspiciatis',
-            'voluptatem',
+            'reiciendis',
+            'amet',
         ],
-        description='porro',
+        description='dolorum',
         destination=shared.LedgerAccountSubject(
-            identifier='blanditiis',
-            type='error',
+            identifier='veritatis',
+            type='ipsa',
         ),
         metadata={
-            "occaecati": 'rerum',
+            "iure": 'odio',
         },
         pending=False,
     ),
-    id='3fe49a8d-9cbf-4486-b332-3f9b77f3a410',
+    id='4ebf6928-0d1b-4a77-a89e-bf737ae4203c',
 )
 
 res = s.wallets.debit_wallet(req)
@@ -226,8 +223,8 @@ s = sdk.SDK(
 )
 
 req = operations.GetBalanceRequest(
-    balance_name='ipsa',
-    id='674ebf69-280d-41ba-b7a8-9ebf737ae420',
+    balance_name='accusamus',
+    id='5e6a95d8-a0d4-446c-a2af-7a73cf3be453',
 )
 
 res = s.wallets.get_balance(req)
@@ -253,7 +250,7 @@ s = sdk.SDK(
 )
 
 req = operations.GetHoldRequest(
-    hold_id='amet',
+    hold_id='sapiente',
 )
 
 res = s.wallets.get_hold(req)
@@ -281,13 +278,12 @@ s = sdk.SDK(
 req = operations.GetHoldsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
     metadata={
-        "accusamus": 'ad',
-        "saepe": 'suscipit',
-        "deserunt": 'provident',
-        "minima": 'repellendus',
+        "nihil": 'sit',
+        "expedita": 'neque',
+        "sed": 'vel',
     },
-    page_size=519711,
-    wallet_id='similique',
+    page_size=730442,
+    wallet_id='voluptas',
 )
 
 res = s.wallets.get_holds(req)
@@ -312,8 +308,8 @@ s = sdk.SDK(
 
 req = operations.GetTransactionsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    page_size=55,
-    wallet_id='at',
+    page_size=646265,
+    wallet_id='quam',
 )
 
 res = s.wallets.get_transactions(req)
@@ -339,7 +335,7 @@ s = sdk.SDK(
 )
 
 req = operations.GetWalletRequest(
-    id='446ce2af-7a73-4cf3-be45-3f870b326b5a',
+    id='3429cdb1-a842-42bb-a79d-2322715bf0cb',
 )
 
 res = s.wallets.get_wallet(req)
@@ -365,7 +361,7 @@ s = sdk.SDK(
 )
 
 req = operations.GetWalletSummaryRequest(
-    id='73429cdb-1a84-422b-b679-d2322715bf0c',
+    id='b1e31b8b-90f3-4443-a110-8e0adcf4b921',
 )
 
 res = s.wallets.get_wallet_summary(req)
@@ -391,7 +387,7 @@ s = sdk.SDK(
 )
 
 req = operations.ListBalancesRequest(
-    id='bb1e31b8-b90f-4344-ba11-08e0adcf4b92',
+    id='879fce95-3f73-4ef7-bbc7-abd74dd39c0f',
 )
 
 res = s.wallets.list_balances(req)
@@ -419,10 +415,11 @@ s = sdk.SDK(
 req = operations.ListWalletsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
     metadata={
-        "laudantium": 'odio',
+        "nulla": 'fugit',
+        "porro": 'maiores',
     },
-    name='Jan Schaefer',
-    page_size=338159,
+    name='Ted Romaguera MD',
+    page_size=269479,
 )
 
 res = s.wallets.list_wallets(req)
@@ -450,10 +447,11 @@ s = sdk.SDK(
 req = operations.UpdateWalletRequest(
     request_body=operations.UpdateWalletRequestBody(
         metadata={
-            "delectus": 'voluptate',
+            "ea": 'aspernatur',
+            "vel": 'possimus',
         },
     ),
-    id='3ef7fbc7-abd7-44dd-b9c0-f5d2cff7c70a',
+    id='436813f1-6d9f-45fc-a6c5-56146c3e250f',
 )
 
 res = s.wallets.update_wallet(req)
@@ -479,7 +477,7 @@ s = sdk.SDK(
 )
 
 req = operations.VoidHoldRequest(
-    hold_id='tempora',
+    hold_id='libero',
 )
 
 res = s.wallets.void_hold(req)

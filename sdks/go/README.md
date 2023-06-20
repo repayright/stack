@@ -70,6 +70,7 @@ func main() {
 
 ### [Ledger](docs/ledger/README.md)
 
+* [CreateTransactions](docs/ledger/README.md#createtransactions) - Create a new batch of transactions to a ledger
 * [AddMetadataOnTransaction](docs/ledger/README.md#addmetadataontransaction) - Set the metadata of a transaction by its ID
 * [AddMetadataToAccount](docs/ledger/README.md#addmetadatatoaccount) - Add metadata to an account
 * [CountAccounts](docs/ledger/README.md#countaccounts) - Count the accounts from a ledger
@@ -80,12 +81,15 @@ func main() {
 * [GetBalancesAggregated](docs/ledger/README.md#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [GetInfo](docs/ledger/README.md#getinfo) - Show server information
 * [GetLedgerInfo](docs/ledger/README.md#getledgerinfo) - Get information about a ledger
+* [GetMapping](docs/ledger/README.md#getmapping) - Get the mapping of a ledger
 * [GetTransaction](docs/ledger/README.md#gettransaction) - Get transaction from a ledger by its ID
 * [ListAccounts](docs/ledger/README.md#listaccounts) - List accounts from a ledger
 * [ListLogs](docs/ledger/README.md#listlogs) - List the logs from a ledger
 * [ListTransactions](docs/ledger/README.md#listtransactions) - List transactions from a ledger
 * [ReadStats](docs/ledger/README.md#readstats) - Get statistics from a ledger
 * [RevertTransaction](docs/ledger/README.md#reverttransaction) - Revert a ledger transaction by its ID
+* [~~RunScript~~](docs/ledger/README.md#runscript) - Execute a Numscript :warning: **Deprecated**
+* [UpdateMapping](docs/ledger/README.md#updatemapping) - Update the mapping of a ledger
 
 ### [Orchestration](docs/orchestration/README.md)
 

@@ -57,6 +57,8 @@ src/Models/Operations/UpdateClientRequest.php
 src/Models/Operations/UpdateClientResponse.php
 src/Models/Operations/UpdateScopeRequest.php
 src/Models/Operations/UpdateScopeResponse.php
+src/Models/Operations/CreateTransactionsRequest.php
+src/Models/Operations/CreateTransactionsResponse.php
 src/Models/Operations/AddMetadataOnTransactionRequest.php
 src/Models/Operations/AddMetadataOnTransactionResponse.php
 src/Models/Operations/AddMetadataToAccountRequest.php
@@ -76,6 +78,8 @@ src/Models/Operations/GetBalancesAggregatedResponse.php
 src/Models/Operations/GetInfoResponse.php
 src/Models/Operations/GetLedgerInfoRequest.php
 src/Models/Operations/GetLedgerInfoResponse.php
+src/Models/Operations/GetMappingRequest.php
+src/Models/Operations/GetMappingResponse.php
 src/Models/Operations/GetTransactionRequest.php
 src/Models/Operations/GetTransactionResponse.php
 src/Models/Operations/ListAccountsBalanceOperator.php
@@ -89,6 +93,10 @@ src/Models/Operations/ReadStatsRequest.php
 src/Models/Operations/ReadStatsResponse.php
 src/Models/Operations/RevertTransactionRequest.php
 src/Models/Operations/RevertTransactionResponse.php
+src/Models/Operations/RunScriptRequest.php
+src/Models/Operations/RunScriptResponse.php
+src/Models/Operations/UpdateMappingRequest.php
+src/Models/Operations/UpdateMappingResponse.php
 src/Models/Operations/CancelEventRequest.php
 src/Models/Operations/CancelEventResponse.php
 src/Models/Operations/CreateWorkflowResponse.php
@@ -206,11 +214,14 @@ src/Models/Shared/UpdateClientResponse.php
 src/Models/Shared/UpdateClientRequest.php
 src/Models/Shared/UpdateScopeResponse.php
 src/Models/Shared/UpdateScopeRequest.php
+src/Models/Shared/TransactionsResponse.php
+src/Models/Shared/Transaction.php
+src/Models/Shared/Volume.php
+src/Models/Shared/Posting.php
 src/Models/Shared/ErrorResponse.php
 src/Models/Shared/ErrorsEnum.php
-src/Models/Shared/CreateTransactionResponse.php
-src/Models/Shared/Transaction.php
-src/Models/Shared/Posting.php
+src/Models/Shared/Transactions.php
+src/Models/Shared/TransactionData.php
 src/Models/Shared/PostTransactionScript.php
 src/Models/Shared/PostTransaction.php
 src/Models/Shared/AccountResponse.php
@@ -219,6 +230,7 @@ src/Models/Shared/BalancesCursorResponseCursor.php
 src/Models/Shared/BalancesCursorResponse.php
 src/Models/Shared/AggregateBalancesResponse.php
 src/Models/Shared/ConfigInfoResponse.php
+src/Models/Shared/ConfigInfo.php
 src/Models/Shared/Config.php
 src/Models/Shared/LedgerStorage.php
 src/Models/Shared/LedgerInfoResponse.php
@@ -226,9 +238,10 @@ src/Models/Shared/LedgerInfoStorage.php
 src/Models/Shared/LedgerInfo.php
 src/Models/Shared/MigrationInfoState.php
 src/Models/Shared/MigrationInfo.php
-src/Models/Shared/GetTransactionResponse.php
-src/Models/Shared/ExpandedTransaction.php
-src/Models/Shared/Volume.php
+src/Models/Shared/MappingResponse.php
+src/Models/Shared/Mapping.php
+src/Models/Shared/Contract.php
+src/Models/Shared/TransactionResponse.php
 src/Models/Shared/AccountsCursorResponseCursor.php
 src/Models/Shared/AccountsCursorResponse.php
 src/Models/Shared/Account.php
@@ -240,7 +253,8 @@ src/Models/Shared/TransactionsCursorResponseCursor.php
 src/Models/Shared/TransactionsCursorResponse.php
 src/Models/Shared/StatsResponse.php
 src/Models/Shared/Stats.php
-src/Models/Shared/RevertTransactionResponse.php
+src/Models/Shared/ScriptResponse.php
+src/Models/Shared/Script.php
 src/Models/Shared/ErrorErrorCode.php
 src/Models/Shared/Error.php
 src/Models/Shared/CreateWorkflowResponse.php
@@ -267,6 +281,7 @@ src/Models/Shared/StageWaitEvent.php
 src/Models/Shared/GetWorkflowInstanceHistoryStageResponse.php
 src/Models/Shared/WorkflowInstanceHistoryStage.php
 src/Models/Shared/WorkflowInstanceHistoryStageOutput.php
+src/Models/Shared/ActivityRevertTransactionOutputScript.php
 src/Models/Shared/ActivityRevertTransactionOutput.php
 src/Models/Shared/ActivityGetWalletOutput.php
 src/Models/Shared/WalletWithBalancesBalances.php
@@ -285,6 +300,7 @@ src/Models/Shared/ActivityDebitWalletOutput.php
 src/Models/Shared/Hold.php
 src/Models/Shared/LedgerAccountSubject.php
 src/Models/Shared/WalletSubject.php
+src/Models/Shared/ActivityCreateTransactionOutputScript.php
 src/Models/Shared/ActivityCreateTransactionOutput.php
 src/Models/Shared/WorkflowInstanceHistoryStageInput.php
 src/Models/Shared/ActivityVoidHold.php
@@ -373,6 +389,8 @@ src/Models/Shared/ListBalancesResponseCursor.php
 src/Models/Shared/ListBalancesResponse.php
 src/Models/Shared/ListWalletsResponseCursor.php
 src/Models/Shared/ListWalletsResponse.php
+src/Models/Shared/WebhooksErrorResponse.php
+src/Models/Shared/WebhooksErrorsEnum.php
 src/Models/Shared/ConfigResponse.php
 src/Models/Shared/WebhooksConfig.php
 src/Models/Shared/ConfigChangeSecret.php

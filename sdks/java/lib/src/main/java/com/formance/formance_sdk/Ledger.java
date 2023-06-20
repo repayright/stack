@@ -34,6 +34,58 @@ public class Ledger {
 	}
 
     /**
+     * Create a new batch of transactions to a ledger
+     * @param request the request object containing all of the parameters for the API call
+     * @return the response from the API call
+     * @throws Exception if the API call fails
+     */
+    public com.formance.formance_sdk.models.operations.CreateTransactionsResponse createTransactions(com.formance.formance_sdk.models.operations.CreateTransactionsRequest request) throws Exception {
+        String baseUrl = this._serverUrl;
+        String url = com.formance.formance_sdk.utils.Utils.generateURL(com.formance.formance_sdk.models.operations.CreateTransactionsRequest.class, baseUrl, "/api/ledger/{ledger}/transactions/batch", request, null);
+        
+        HTTPRequest req = new HTTPRequest();
+        req.setMethod("POST");
+        req.setURL(url);
+        SerializedBody serializedRequestBody = com.formance.formance_sdk.utils.Utils.serializeRequestBody(request, "transactions", "json");
+        if (serializedRequestBody == null) {
+            throw new Exception("Request body is required");
+        }
+        req.setBody(serializedRequestBody);
+
+        req.addHeader("Accept", "application/json;q=1, application/json;q=0");
+        req.addHeader("user-agent", String.format("speakeasy-sdk/%s %s %s", this._language, this._sdkVersion, this._genVersion));
+        
+        HTTPClient client = this._securityClient;
+        
+        HttpResponse<byte[]> httpRes = client.send(req);
+
+        String contentType = httpRes.headers().firstValue("Content-Type").orElse("application/octet-stream");
+
+        com.formance.formance_sdk.models.operations.CreateTransactionsResponse res = new com.formance.formance_sdk.models.operations.CreateTransactionsResponse(contentType, httpRes.statusCode()) {{
+            transactionsResponse = null;
+            errorResponse = null;
+        }};
+        res.rawResponse = httpRes;
+        
+        if (httpRes.statusCode() == 200) {
+            if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
+                ObjectMapper mapper = JSON.getMapper();
+                com.formance.formance_sdk.models.shared.TransactionsResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.TransactionsResponse.class);
+                res.transactionsResponse = out;
+            }
+        }
+        else {
+            if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
+                ObjectMapper mapper = JSON.getMapper();
+                com.formance.formance_sdk.models.shared.ErrorResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.ErrorResponse.class);
+                res.errorResponse = out;
+            }
+        }
+
+        return res;
+    }
+
+    /**
      * Set the metadata of a transaction by its ID
      * @param request the request object containing all of the parameters for the API call
      * @return the response from the API call
@@ -51,20 +103,6 @@ public class Ledger {
 
         req.addHeader("Accept", "application/json");
         req.addHeader("user-agent", String.format("speakeasy-sdk/%s %s %s", this._language, this._sdkVersion, this._genVersion));
-        java.util.List<NameValuePair> queryParams = com.formance.formance_sdk.utils.Utils.getQueryParams(com.formance.formance_sdk.models.operations.AddMetadataOnTransactionRequest.class, request, null);
-        if (queryParams != null) {
-            for (NameValuePair queryParam : queryParams) {
-                req.addQueryParam(queryParam);
-            }
-        }
-        java.util.Map<String, java.util.List<String>> headers = com.formance.formance_sdk.utils.Utils.getHeaders(request);
-        if (headers != null) {
-            for (java.util.Map.Entry<String, java.util.List<String>> header : headers.entrySet()) {
-                for (String value : header.getValue()) {
-                    req.addHeader(header.getKey(), value);
-                }
-            }
-        }
         
         HTTPClient client = this._securityClient;
         
@@ -111,20 +149,6 @@ public class Ledger {
 
         req.addHeader("Accept", "application/json");
         req.addHeader("user-agent", String.format("speakeasy-sdk/%s %s %s", this._language, this._sdkVersion, this._genVersion));
-        java.util.List<NameValuePair> queryParams = com.formance.formance_sdk.utils.Utils.getQueryParams(com.formance.formance_sdk.models.operations.AddMetadataToAccountRequest.class, request, null);
-        if (queryParams != null) {
-            for (NameValuePair queryParam : queryParams) {
-                req.addQueryParam(queryParam);
-            }
-        }
-        java.util.Map<String, java.util.List<String>> headers = com.formance.formance_sdk.utils.Utils.getHeaders(request);
-        if (headers != null) {
-            for (java.util.Map.Entry<String, java.util.List<String>> header : headers.entrySet()) {
-                for (String value : header.getValue()) {
-                    req.addHeader(header.getKey(), value);
-                }
-            }
-        }
         
         HTTPClient client = this._securityClient;
         
@@ -184,7 +208,7 @@ public class Ledger {
         }};
         res.rawResponse = httpRes;
         
-        if (httpRes.statusCode() == 204) {
+        if (httpRes.statusCode() == 200) {
             res.headers = httpRes.headers().map().keySet().stream().collect(Collectors.toMap(Function.identity(), k -> httpRes.headers().allValues(k).toArray(new String[0])));
             
         }
@@ -233,7 +257,7 @@ public class Ledger {
         }};
         res.rawResponse = httpRes;
         
-        if (httpRes.statusCode() == 204) {
+        if (httpRes.statusCode() == 200) {
             res.headers = httpRes.headers().map().keySet().stream().collect(Collectors.toMap(Function.identity(), k -> httpRes.headers().allValues(k).toArray(new String[0])));
             
         }
@@ -275,14 +299,6 @@ public class Ledger {
                 req.addQueryParam(queryParam);
             }
         }
-        java.util.Map<String, java.util.List<String>> headers = com.formance.formance_sdk.utils.Utils.getHeaders(request);
-        if (headers != null) {
-            for (java.util.Map.Entry<String, java.util.List<String>> header : headers.entrySet()) {
-                for (String value : header.getValue()) {
-                    req.addHeader(header.getKey(), value);
-                }
-            }
-        }
         
         HTTPClient client = this._securityClient;
         
@@ -291,7 +307,7 @@ public class Ledger {
         String contentType = httpRes.headers().firstValue("Content-Type").orElse("application/octet-stream");
 
         com.formance.formance_sdk.models.operations.CreateTransactionResponse res = new com.formance.formance_sdk.models.operations.CreateTransactionResponse(contentType, httpRes.statusCode()) {{
-            createTransactionResponse = null;
+            transactionsResponse = null;
             errorResponse = null;
         }};
         res.rawResponse = httpRes;
@@ -299,8 +315,8 @@ public class Ledger {
         if (httpRes.statusCode() == 200) {
             if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
                 ObjectMapper mapper = JSON.getMapper();
-                com.formance.formance_sdk.models.shared.CreateTransactionResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.CreateTransactionResponse.class);
-                res.createTransactionResponse = out;
+                com.formance.formance_sdk.models.shared.TransactionsResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.TransactionsResponse.class);
+                res.transactionsResponse = out;
             }
         }
         else {
@@ -561,6 +577,53 @@ public class Ledger {
     }
 
     /**
+     * Get the mapping of a ledger
+     * @param request the request object containing all of the parameters for the API call
+     * @return the response from the API call
+     * @throws Exception if the API call fails
+     */
+    public com.formance.formance_sdk.models.operations.GetMappingResponse getMapping(com.formance.formance_sdk.models.operations.GetMappingRequest request) throws Exception {
+        String baseUrl = this._serverUrl;
+        String url = com.formance.formance_sdk.utils.Utils.generateURL(com.formance.formance_sdk.models.operations.GetMappingRequest.class, baseUrl, "/api/ledger/{ledger}/mapping", request, null);
+        
+        HTTPRequest req = new HTTPRequest();
+        req.setMethod("GET");
+        req.setURL(url);
+
+        req.addHeader("Accept", "application/json;q=1, application/json;q=0");
+        req.addHeader("user-agent", String.format("speakeasy-sdk/%s %s %s", this._language, this._sdkVersion, this._genVersion));
+        
+        HTTPClient client = this._securityClient;
+        
+        HttpResponse<byte[]> httpRes = client.send(req);
+
+        String contentType = httpRes.headers().firstValue("Content-Type").orElse("application/octet-stream");
+
+        com.formance.formance_sdk.models.operations.GetMappingResponse res = new com.formance.formance_sdk.models.operations.GetMappingResponse(contentType, httpRes.statusCode()) {{
+            mappingResponse = null;
+            errorResponse = null;
+        }};
+        res.rawResponse = httpRes;
+        
+        if (httpRes.statusCode() == 200) {
+            if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
+                ObjectMapper mapper = JSON.getMapper();
+                com.formance.formance_sdk.models.shared.MappingResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.MappingResponse.class);
+                res.mappingResponse = out;
+            }
+        }
+        else {
+            if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
+                ObjectMapper mapper = JSON.getMapper();
+                com.formance.formance_sdk.models.shared.ErrorResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.ErrorResponse.class);
+                res.errorResponse = out;
+            }
+        }
+
+        return res;
+    }
+
+    /**
      * Get transaction from a ledger by its ID
      * @param request the request object containing all of the parameters for the API call
      * @return the response from the API call
@@ -584,7 +647,7 @@ public class Ledger {
         String contentType = httpRes.headers().firstValue("Content-Type").orElse("application/octet-stream");
 
         com.formance.formance_sdk.models.operations.GetTransactionResponse res = new com.formance.formance_sdk.models.operations.GetTransactionResponse(contentType, httpRes.statusCode()) {{
-            getTransactionResponse = null;
+            transactionResponse = null;
             errorResponse = null;
         }};
         res.rawResponse = httpRes;
@@ -592,8 +655,8 @@ public class Ledger {
         if (httpRes.statusCode() == 200) {
             if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
                 ObjectMapper mapper = JSON.getMapper();
-                com.formance.formance_sdk.models.shared.GetTransactionResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.GetTransactionResponse.class);
-                res.getTransactionResponse = out;
+                com.formance.formance_sdk.models.shared.TransactionResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.TransactionResponse.class);
+                res.transactionResponse = out;
             }
         }
         else {
@@ -842,16 +905,122 @@ public class Ledger {
         String contentType = httpRes.headers().firstValue("Content-Type").orElse("application/octet-stream");
 
         com.formance.formance_sdk.models.operations.RevertTransactionResponse res = new com.formance.formance_sdk.models.operations.RevertTransactionResponse(contentType, httpRes.statusCode()) {{
-            revertTransactionResponse = null;
+            transactionResponse = null;
             errorResponse = null;
         }};
         res.rawResponse = httpRes;
         
-        if (httpRes.statusCode() == 201) {
+        if (httpRes.statusCode() == 200) {
             if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
                 ObjectMapper mapper = JSON.getMapper();
-                com.formance.formance_sdk.models.shared.RevertTransactionResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.RevertTransactionResponse.class);
-                res.revertTransactionResponse = out;
+                com.formance.formance_sdk.models.shared.TransactionResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.TransactionResponse.class);
+                res.transactionResponse = out;
+            }
+        }
+        else {
+            if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
+                ObjectMapper mapper = JSON.getMapper();
+                com.formance.formance_sdk.models.shared.ErrorResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.ErrorResponse.class);
+                res.errorResponse = out;
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * Execute a Numscript
+     * This route is deprecated, and has been merged into `POST /{ledger}/transactions`.
+     * 
+     * @param request the request object containing all of the parameters for the API call
+     * @return the response from the API call
+     * @throws Exception if the API call fails
+     * @deprecated this method will be removed in a future release, please migrate away from it as soon as possible
+     */
+    @Deprecated
+    public com.formance.formance_sdk.models.operations.RunScriptResponse runScript(com.formance.formance_sdk.models.operations.RunScriptRequest request) throws Exception {
+        String baseUrl = this._serverUrl;
+        String url = com.formance.formance_sdk.utils.Utils.generateURL(com.formance.formance_sdk.models.operations.RunScriptRequest.class, baseUrl, "/api/ledger/{ledger}/script", request, null);
+        
+        HTTPRequest req = new HTTPRequest();
+        req.setMethod("POST");
+        req.setURL(url);
+        SerializedBody serializedRequestBody = com.formance.formance_sdk.utils.Utils.serializeRequestBody(request, "script", "json");
+        if (serializedRequestBody == null) {
+            throw new Exception("Request body is required");
+        }
+        req.setBody(serializedRequestBody);
+
+        req.addHeader("Accept", "application/json");
+        req.addHeader("user-agent", String.format("speakeasy-sdk/%s %s %s", this._language, this._sdkVersion, this._genVersion));
+        java.util.List<NameValuePair> queryParams = com.formance.formance_sdk.utils.Utils.getQueryParams(com.formance.formance_sdk.models.operations.RunScriptRequest.class, request, null);
+        if (queryParams != null) {
+            for (NameValuePair queryParam : queryParams) {
+                req.addQueryParam(queryParam);
+            }
+        }
+        
+        HTTPClient client = this._securityClient;
+        
+        HttpResponse<byte[]> httpRes = client.send(req);
+
+        String contentType = httpRes.headers().firstValue("Content-Type").orElse("application/octet-stream");
+
+        com.formance.formance_sdk.models.operations.RunScriptResponse res = new com.formance.formance_sdk.models.operations.RunScriptResponse(contentType, httpRes.statusCode()) {{
+            scriptResponse = null;
+        }};
+        res.rawResponse = httpRes;
+        
+        if (httpRes.statusCode() == 200) {
+            if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
+                ObjectMapper mapper = JSON.getMapper();
+                com.formance.formance_sdk.models.shared.ScriptResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.ScriptResponse.class);
+                res.scriptResponse = out;
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * Update the mapping of a ledger
+     * @param request the request object containing all of the parameters for the API call
+     * @return the response from the API call
+     * @throws Exception if the API call fails
+     */
+    public com.formance.formance_sdk.models.operations.UpdateMappingResponse updateMapping(com.formance.formance_sdk.models.operations.UpdateMappingRequest request) throws Exception {
+        String baseUrl = this._serverUrl;
+        String url = com.formance.formance_sdk.utils.Utils.generateURL(com.formance.formance_sdk.models.operations.UpdateMappingRequest.class, baseUrl, "/api/ledger/{ledger}/mapping", request, null);
+        
+        HTTPRequest req = new HTTPRequest();
+        req.setMethod("PUT");
+        req.setURL(url);
+        SerializedBody serializedRequestBody = com.formance.formance_sdk.utils.Utils.serializeRequestBody(request, "mapping", "json");
+        if (serializedRequestBody == null) {
+            throw new Exception("Request body is required");
+        }
+        req.setBody(serializedRequestBody);
+
+        req.addHeader("Accept", "application/json;q=1, application/json;q=0");
+        req.addHeader("user-agent", String.format("speakeasy-sdk/%s %s %s", this._language, this._sdkVersion, this._genVersion));
+        
+        HTTPClient client = this._securityClient;
+        
+        HttpResponse<byte[]> httpRes = client.send(req);
+
+        String contentType = httpRes.headers().firstValue("Content-Type").orElse("application/octet-stream");
+
+        com.formance.formance_sdk.models.operations.UpdateMappingResponse res = new com.formance.formance_sdk.models.operations.UpdateMappingResponse(contentType, httpRes.statusCode()) {{
+            mappingResponse = null;
+            errorResponse = null;
+        }};
+        res.rawResponse = httpRes;
+        
+        if (httpRes.statusCode() == 200) {
+            if (com.formance.formance_sdk.utils.Utils.matchContentType(contentType, "application/json")) {
+                ObjectMapper mapper = JSON.getMapper();
+                com.formance.formance_sdk.models.shared.MappingResponse out = mapper.readValue(new String(httpRes.body(), StandardCharsets.UTF_8), com.formance.formance_sdk.models.shared.MappingResponse.class);
+                res.mappingResponse = out;
             }
         }
         else {

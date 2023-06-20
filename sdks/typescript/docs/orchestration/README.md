@@ -32,7 +32,7 @@ const sdk = new SDK({
 });
 
 sdk.orchestration.cancelEvent({
-  instanceID: "quae",
+  instanceID: "dolorum",
 }).then((res: CancelEventResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -58,18 +58,25 @@ const sdk = new SDK({
 });
 
 sdk.orchestration.createWorkflow({
-  name: "Alison Mann",
+  name: "Eddie Prosacco",
   stages: [
     {
-      "rem": "voluptates",
-      "quasi": "repudiandae",
-      "sint": "veritatis",
+      "non": "eligendi",
+      "sint": "aliquid",
     },
     {
-      "incidunt": "enim",
-      "consequatur": "est",
-      "quibusdam": "explicabo",
-      "deserunt": "distinctio",
+      "necessitatibus": "sint",
+      "officia": "dolor",
+      "debitis": "a",
+    },
+    {
+      "in": "in",
+      "illum": "maiores",
+      "rerum": "dicta",
+    },
+    {
+      "cumque": "facere",
+      "ea": "aliquid",
     },
   ],
 }).then((res: CreateWorkflowResponse) => {
@@ -97,7 +104,7 @@ const sdk = new SDK({
 });
 
 sdk.orchestration.getInstance({
-  instanceID: "quibusdam",
+  instanceID: "laborum",
 }).then((res: GetInstanceResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -123,7 +130,7 @@ const sdk = new SDK({
 });
 
 sdk.orchestration.getInstanceHistory({
-  instanceID: "labore",
+  instanceID: "accusamus",
 }).then((res: GetInstanceHistoryResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -149,8 +156,8 @@ const sdk = new SDK({
 });
 
 sdk.orchestration.getInstanceStageHistory({
-  instanceID: "modi",
-  number: 183191,
+  instanceID: "non",
+  number: 581273,
 }).then((res: GetInstanceStageHistoryResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -176,7 +183,7 @@ const sdk = new SDK({
 });
 
 sdk.orchestration.getWorkflow({
-  flowId: "aliquid",
+  flowId: "enim",
 }).then((res: GetWorkflowResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -203,7 +210,7 @@ const sdk = new SDK({
 
 sdk.orchestration.listInstances({
   running: false,
-  workflowID: "cupiditate",
+  workflowID: "accusamus",
 }).then((res: ListInstancesResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -278,12 +285,13 @@ const sdk = new SDK({
 
 sdk.orchestration.runWorkflow({
   requestBody: {
-    "perferendis": "magni",
-    "assumenda": "ipsam",
-    "alias": "fugit",
+    "quidem": "provident",
+    "nam": "id",
+    "blanditiis": "deleniti",
+    "sapiente": "amet",
   },
   wait: false,
-  workflowID: "dolorum",
+  workflowID: "deserunt",
 }).then((res: RunWorkflowResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -310,9 +318,9 @@ const sdk = new SDK({
 
 sdk.orchestration.sendEvent({
   requestBody: {
-    name: "Eddie Prosacco",
+    name: "Wilma Mosciski",
   },
-  instanceID: "delectus",
+  instanceID: "perferendis",
 }).then((res: SendEventResponse) => {
   if (res.statusCode == 200) {
     // handle response

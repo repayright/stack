@@ -40,8 +40,8 @@ req = shared.StripeTransferRequest(
     asset='USD',
     destination='acct_1Gqj58KZcSIg2N2q',
     metadata={
-        "non": 'eligendi',
-        "sint": 'aliquid',
+        "magnam": 'distinctio',
+        "id": 'labore',
     },
 )
 
@@ -74,7 +74,7 @@ req = operations.ConnectorsTransferRequest(
         destination='acct_1Gqj58KZcSIg2N2q',
         source='acct_1Gqj58KZcSIg2N2q',
     ),
-    connector=shared.Connector.MODULR,
+    connector=shared.Connector.DUMMY_PAY,
 )
 
 res = s.payments.connectors_transfer(req)
@@ -100,8 +100,8 @@ s = sdk.SDK(
 )
 
 req = operations.GetConnectorTaskRequest(
-    connector=shared.Connector.BANKING_CIRCLE,
-    task_id='sint',
+    connector=shared.Connector.WISE,
+    task_id='natus',
 )
 
 res = s.payments.get_connector_task(req)
@@ -127,7 +127,7 @@ s = sdk.SDK(
 )
 
 req = operations.GetPaymentRequest(
-    payment_id='officia',
+    payment_id='nobis',
 )
 
 res = s.payments.get_payment(req)
@@ -153,10 +153,8 @@ s = sdk.SDK(
 )
 
 req = operations.InstallConnectorRequest(
-    request_body=shared.DummyPayConfig(
-        directory='/tmp/dummypay',
-        file_generation_period='60s',
-        file_polling_period='60s',
+    request_body=shared.WiseConfig(
+        api_key='XXX',
     ),
     connector=shared.Connector.BANKING_CIRCLE,
 )
@@ -230,9 +228,9 @@ s = sdk.SDK(
 )
 
 req = operations.ListConnectorTasksRequest(
-    connector=shared.Connector.BANKING_CIRCLE,
+    connector=shared.Connector.STRIPE,
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    page_size=680056,
+    page_size=102863,
 )
 
 res = s.payments.list_connector_tasks(req)
@@ -258,7 +256,7 @@ s = sdk.SDK(
 )
 
 req = operations.ListConnectorsTransfersRequest(
-    connector=shared.Connector.WISE,
+    connector=shared.Connector.DUMMY_PAY,
 )
 
 res = s.payments.list_connectors_transfers(req)
@@ -285,12 +283,11 @@ s = sdk.SDK(
 
 req = operations.ListPaymentsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    page_size=449198,
+    page_size=92373,
     sort=[
-        'maiores',
-        'rerum',
-        'dicta',
-        'magnam',
+        'ullam',
+        'provident',
+        'quos',
     ],
 )
 
@@ -341,12 +338,9 @@ s = sdk.SDK(
 
 req = operations.PaymentslistAccountsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    page_size=767024,
+    page_size=574325,
     sort=[
-        'ea',
-        'aliquid',
-        'laborum',
-        'accusamus',
+        'mollitia',
     ],
 )
 
@@ -373,7 +367,7 @@ s = sdk.SDK(
 )
 
 req = operations.ReadConnectorConfigRequest(
-    connector=shared.Connector.DUMMY_PAY,
+    connector=shared.Connector.BANKING_CIRCLE,
 )
 
 res = s.payments.read_connector_config(req)
@@ -454,9 +448,9 @@ s = sdk.SDK(
 
 req = operations.UpdateMetadataRequest(
     payment_metadata=shared.PaymentMetadata(
-        key='accusamus',
+        key='eum',
     ),
-    payment_id='delectus',
+    payment_id='dolor',
 )
 
 res = s.payments.update_metadata(req)

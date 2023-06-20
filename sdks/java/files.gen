@@ -68,6 +68,8 @@ lib/src/main/java/com/formance/formance_sdk/models/operations/UpdateClientReques
 lib/src/main/java/com/formance/formance_sdk/models/operations/UpdateClientResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/UpdateScopeRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/UpdateScopeResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/CreateTransactionsRequest.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/CreateTransactionsResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/AddMetadataOnTransactionRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/AddMetadataOnTransactionResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/AddMetadataToAccountRequest.java
@@ -87,6 +89,8 @@ lib/src/main/java/com/formance/formance_sdk/models/operations/GetBalancesAggrega
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetInfoResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetLedgerInfoRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetLedgerInfoResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/GetMappingRequest.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/GetMappingResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetTransactionRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetTransactionResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/ListAccountsBalanceOperator.java
@@ -100,6 +104,10 @@ lib/src/main/java/com/formance/formance_sdk/models/operations/ReadStatsRequest.j
 lib/src/main/java/com/formance/formance_sdk/models/operations/ReadStatsResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/RevertTransactionRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/RevertTransactionResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/RunScriptRequest.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/RunScriptResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/UpdateMappingRequest.java
+lib/src/main/java/com/formance/formance_sdk/models/operations/UpdateMappingResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/CancelEventRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/CancelEventResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/CreateWorkflowResponse.java
@@ -217,11 +225,14 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/UpdateClientResponse.j
 lib/src/main/java/com/formance/formance_sdk/models/shared/UpdateClientRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/UpdateScopeResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/UpdateScopeRequest.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/TransactionsResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/Transaction.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/Volume.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/Posting.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ErrorResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ErrorsEnum.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/CreateTransactionResponse.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/Transaction.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/Posting.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/Transactions.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/TransactionData.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/PostTransactionScript.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/PostTransaction.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/AccountResponse.java
@@ -230,6 +241,7 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/BalancesCursorResponse
 lib/src/main/java/com/formance/formance_sdk/models/shared/BalancesCursorResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/AggregateBalancesResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ConfigInfoResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/ConfigInfo.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/Config.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/LedgerStorage.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/LedgerInfoResponse.java
@@ -237,9 +249,10 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/LedgerInfoStorage.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/LedgerInfo.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/MigrationInfoState.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/MigrationInfo.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/GetTransactionResponse.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/ExpandedTransaction.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/Volume.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/MappingResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/Mapping.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/Contract.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/TransactionResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/AccountsCursorResponseCursor.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/AccountsCursorResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/Account.java
@@ -251,7 +264,8 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/TransactionsCursorResp
 lib/src/main/java/com/formance/formance_sdk/models/shared/TransactionsCursorResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/StatsResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/Stats.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/RevertTransactionResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/ScriptResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/Script.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ErrorErrorCode.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/Error.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/CreateWorkflowResponse.java
@@ -278,6 +292,7 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/StageWaitEvent.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/GetWorkflowInstanceHistoryStageResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/WorkflowInstanceHistoryStage.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/WorkflowInstanceHistoryStageOutput.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/ActivityRevertTransactionOutputScript.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ActivityRevertTransactionOutput.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ActivityGetWalletOutput.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/WalletWithBalancesBalances.java
@@ -296,6 +311,7 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/ActivityDebitWalletOut
 lib/src/main/java/com/formance/formance_sdk/models/shared/Hold.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/LedgerAccountSubject.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/WalletSubject.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/ActivityCreateTransactionOutputScript.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ActivityCreateTransactionOutput.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/WorkflowInstanceHistoryStageInput.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ActivityVoidHold.java
@@ -384,6 +400,8 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/ListBalancesResponseCu
 lib/src/main/java/com/formance/formance_sdk/models/shared/ListBalancesResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ListWalletsResponseCursor.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ListWalletsResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/WebhooksErrorResponse.java
+lib/src/main/java/com/formance/formance_sdk/models/shared/WebhooksErrorsEnum.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ConfigResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/WebhooksConfig.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ConfigChangeSecret.java

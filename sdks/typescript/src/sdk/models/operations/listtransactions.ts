@@ -16,6 +16,12 @@ export class ListTransactionsRequest extends SpeakeasyBase {
   account?: string;
 
   /**
+   * Pagination cursor, will return transactions after given txid (in descending order).
+   */
+  @SpeakeasyMetadata({ data: "queryParam, style=form;explode=true;name=after" })
+  after?: string;
+
+  /**
    * Parameter used in pagination requests. Maximum page size is set to 15.
    *
    * @remarks
@@ -58,12 +64,12 @@ export class ListTransactionsRequest extends SpeakeasyBase {
   ledger: string;
 
   /**
-   * Filter transactions by metadata key value pairs.
+   * Filter transactions by metadata key value pairs. Nested objects can be used as seen in the example below.
    */
   @SpeakeasyMetadata({
     data: "queryParam, style=deepObject;explode=true;name=metadata",
   })
-  metadata?: Record<string, string>;
+  metadata?: Record<string, any>;
 
   /**
    * The maximum number of results to return per page.
@@ -75,6 +81,23 @@ export class ListTransactionsRequest extends SpeakeasyBase {
     data: "queryParam, style=form;explode=true;name=pageSize",
   })
   pageSize?: number;
+
+  /**
+   * Parameter used in pagination requests. Maximum page size is set to 15.
+   *
+   * @remarks
+   * Set to the value of next for the next page of results.
+   * Set to the value of previous for the previous page of results.
+   * No other parameters can be set when this parameter is set.
+   * Deprecated, please use `cursor` instead.
+   *
+   *
+   * @deprecated this field will be removed in a future release, please migrate away from it as soon as possible
+   */
+  @SpeakeasyMetadata({
+    data: "queryParam, style=form;explode=true;name=pagination_token",
+  })
+  paginationToken?: string;
 
   /**
    * Find transactions by reference field.

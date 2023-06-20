@@ -20,6 +20,14 @@ class ListAccountsRequest
     public ?string $address = null;
     
     /**
+     * Pagination cursor, will return accounts after given address, in descending order.
+     * 
+     * @var ?string $after
+     */
+	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=after')]
+    public ?string $after = null;
+    
+    /**
      * Filter accounts by their balance (default operator is gte)
      * 
      * @var ?int $balance
@@ -61,7 +69,7 @@ class ListAccountsRequest
     /**
      * Filter accounts by metadata key value pairs. Nested objects can be used as seen in the example below.
      * 
-     * @var ?array<string, string> $metadata
+     * @var ?array<string, mixed> $metadata
      */
 	#[SpeakeasyMetadata('queryParam:style=deepObject,explode=true,name=metadata')]
     public ?array $metadata = null;
@@ -76,14 +84,31 @@ class ListAccountsRequest
 	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=pageSize')]
     public ?int $pageSize = null;
     
+    /**
+     * Parameter used in pagination requests. Maximum page size is set to 15.
+     * 
+     * Set to the value of next for the next page of results.
+     * Set to the value of previous for the previous page of results.
+     * No other parameters can be set when this parameter is set.
+     * Deprecated, please use `cursor` instead.
+     * 
+     * 
+     * @var ?string $paginationToken
+     * @deprecated this field will be removed in a future release, please migrate away from it as soon as possible
+     */
+	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=pagination_token')]
+    public ?string $paginationToken = null;
+    
 	public function __construct()
 	{
 		$this->address = null;
+		$this->after = null;
 		$this->balance = null;
 		$this->balanceOperator = null;
 		$this->cursor = null;
 		$this->ledger = "";
 		$this->metadata = null;
 		$this->pageSize = null;
+		$this->paginationToken = null;
 	}
 }

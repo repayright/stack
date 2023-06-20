@@ -20,6 +20,14 @@ class ListTransactionsRequest
     public ?string $account = null;
     
     /**
+     * Pagination cursor, will return transactions after given txid (in descending order).
+     * 
+     * @var ?string $after
+     */
+	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=after')]
+    public ?string $after = null;
+    
+    /**
      * Parameter used in pagination requests. Maximum page size is set to 15.
      * 
      * Set to the value of next for the next page of results.
@@ -60,9 +68,9 @@ class ListTransactionsRequest
     public string $ledger;
     
     /**
-     * Filter transactions by metadata key value pairs.
+     * Filter transactions by metadata key value pairs. Nested objects can be used as seen in the example below.
      * 
-     * @var ?array<string, string> $metadata
+     * @var ?array<string, mixed> $metadata
      */
 	#[SpeakeasyMetadata('queryParam:style=deepObject,explode=true,name=metadata')]
     public ?array $metadata = null;
@@ -76,6 +84,21 @@ class ListTransactionsRequest
      */
 	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=pageSize')]
     public ?int $pageSize = null;
+    
+    /**
+     * Parameter used in pagination requests. Maximum page size is set to 15.
+     * 
+     * Set to the value of next for the next page of results.
+     * Set to the value of previous for the previous page of results.
+     * No other parameters can be set when this parameter is set.
+     * Deprecated, please use `cursor` instead.
+     * 
+     * 
+     * @var ?string $paginationToken
+     * @deprecated this field will be removed in a future release, please migrate away from it as soon as possible
+     */
+	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=pagination_token')]
+    public ?string $paginationToken = null;
     
     /**
      * Find transactions by reference field.
@@ -107,12 +130,14 @@ class ListTransactionsRequest
 	public function __construct()
 	{
 		$this->account = null;
+		$this->after = null;
 		$this->cursor = null;
 		$this->destination = null;
 		$this->endTime = null;
 		$this->ledger = "";
 		$this->metadata = null;
 		$this->pageSize = null;
+		$this->paginationToken = null;
 		$this->reference = null;
 		$this->source = null;
 		$this->startTime = null;

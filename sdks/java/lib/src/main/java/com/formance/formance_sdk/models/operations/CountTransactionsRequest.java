@@ -59,9 +59,9 @@ public class CountTransactionsRequest {
      * Filter transactions by metadata key value pairs. Nested objects can be used as seen in the example below.
      */
     @SpeakeasyMetadata("queryParam:style=deepObject,explode=true,name=metadata")
-    public java.util.Map<String, String> metadata;
+    public java.util.Map<String, Object> metadata;
 
-    public CountTransactionsRequest withMetadata(java.util.Map<String, String> metadata) {
+    public CountTransactionsRequest withMetadata(java.util.Map<String, Object> metadata) {
         this.metadata = metadata;
         return this;
     }

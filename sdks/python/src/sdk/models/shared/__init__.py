@@ -33,6 +33,7 @@ from .client import *
 from .clientsecret import *
 from .config import *
 from .configchangesecret import *
+from .configinfo import *
 from .configinforesponse import *
 from .configresponse import *
 from .configsresponse import *
@@ -42,6 +43,7 @@ from .connector import *
 from .connectorconfigresponse import *
 from .connectorsconfigsresponse import *
 from .connectorsresponse import *
+from .contract import *
 from .createbalancerequest import *
 from .createbalanceresponse import *
 from .createclientrequest import *
@@ -50,7 +52,6 @@ from .createscoperequest import *
 from .createscoperesponse import *
 from .createsecretrequest import *
 from .createsecretresponse import *
-from .createtransactionresponse import *
 from .createwalletrequest import *
 from .createwalletresponse import *
 from .createworkflowrequest import *
@@ -64,11 +65,9 @@ from .error import *
 from .errorresponse import *
 from .errorsenum import *
 from .expandeddebithold import *
-from .expandedtransaction import *
 from .getbalanceresponse import *
 from .getholdresponse import *
 from .getholdsresponse import *
-from .gettransactionresponse import *
 from .gettransactionsresponse import *
 from .getversionsresponse import *
 from .getwalletresponse import *
@@ -91,6 +90,8 @@ from .listwalletsresponse import *
 from .listworkflowsresponse import *
 from .log import *
 from .logscursorresponse import *
+from .mapping import *
+from .mappingresponse import *
 from .migrationinfo import *
 from .modulrconfig import *
 from .monetary import *
@@ -108,9 +109,10 @@ from .readclientresponse import *
 from .readscoperesponse import *
 from .readuserresponse import *
 from .response import *
-from .reverttransactionresponse import *
 from .runworkflowresponse import *
 from .scope import *
+from .script import *
+from .scriptresponse import *
 from .secret import *
 from .security import *
 from .serverinfo import *
@@ -139,7 +141,11 @@ from .taskscursor import *
 from .taskstripe import *
 from .taskwise import *
 from .transaction import *
+from .transactiondata import *
+from .transactionresponse import *
+from .transactions import *
 from .transactionscursorresponse import *
+from .transactionsresponse import *
 from .transferrequest import *
 from .transferresponse import *
 from .transfersresponse import *
@@ -157,6 +163,8 @@ from .walletsubject import *
 from .walletsvolume import *
 from .walletwithbalances import *
 from .webhooksconfig import *
+from .webhookserrorresponse import *
+from .webhookserrorsenum import *
 from .wiseconfig import *
 from .workflow import *
 from .workflowconfig import *
@@ -166,4 +174,4 @@ from .workflowinstancehistorystage import *
 from .workflowinstancehistorystageinput import *
 from .workflowinstancehistorystageoutput import *
 
-__all__ = ["Account","AccountResponse","AccountWithVolumesAndBalances","AccountsCursor","AccountsCursorCursor","AccountsCursorResponse","AccountsCursorResponseCursor","ActivityConfirmHold","ActivityCreateTransaction","ActivityCreateTransactionOutput","ActivityCreditWallet","ActivityDebitWallet","ActivityDebitWalletOutput","ActivityGetAccount","ActivityGetAccountOutput","ActivityGetPayment","ActivityGetPaymentOutput","ActivityGetWallet","ActivityGetWalletOutput","ActivityRevertTransaction","ActivityRevertTransactionOutput","ActivityStripeTransfer","ActivityVoidHold","AggregateBalancesResponse","AssetHolder","Attempt","AttemptResponse","Balance","BalanceWithAssets","BalancesCursorResponse","BalancesCursorResponseCursor","BankingCircleConfig","Client","ClientSecret","Config","ConfigChangeSecret","ConfigInfoResponse","ConfigResponse","ConfigUser","ConfigsResponse","ConfigsResponseCursor","ConfirmHoldRequest","Connector","ConnectorConfigResponse","ConnectorsConfigsResponse","ConnectorsConfigsResponseData","ConnectorsConfigsResponseDataConnector","ConnectorsConfigsResponseDataConnectorKey","ConnectorsResponse","ConnectorsResponseData","CreateBalanceRequest","CreateBalanceResponse","CreateClientRequest","CreateClientResponse","CreateScopeRequest","CreateScopeResponse","CreateSecretRequest","CreateSecretResponse","CreateTransactionResponse","CreateWalletRequest","CreateWalletResponse","CreateWorkflowRequest","CreateWorkflowResponse","CreditWalletRequest","CurrencyCloudConfig","DebitWalletRequest","DebitWalletResponse","DummyPayConfig","Error","ErrorErrorCode","ErrorResponse","ErrorsEnum","ExpandedDebitHold","ExpandedTransaction","GetBalanceResponse","GetHoldResponse","GetHoldsResponse","GetHoldsResponseCursor","GetTransactionResponse","GetTransactionsResponse","GetTransactionsResponseCursor","GetVersionsResponse","GetWalletResponse","GetWalletSummaryResponse","GetWorkflowInstanceHistoryResponse","GetWorkflowInstanceHistoryStageResponse","GetWorkflowInstanceResponse","GetWorkflowResponse","Hold","LedgerAccountSubject","LedgerInfo","LedgerInfoResponse","LedgerInfoStorage","LedgerStorage","ListBalancesResponse","ListBalancesResponseCursor","ListClientsResponse","ListRunsResponse","ListScopesResponse","ListUsersResponse","ListWalletsResponse","ListWalletsResponseCursor","ListWorkflowsResponse","Log","LogType","LogsCursorResponse","LogsCursorResponseCursor","MigrationInfo","MigrationInfoState","ModulrConfig","Monetary","Payment","PaymentAdjustment","PaymentMetadata","PaymentResponse","PaymentScheme","PaymentStatus","PaymentType","PaymentsAccount","PaymentsAccountType","PaymentsCursor","PaymentsCursorCursor","PostTransaction","PostTransactionScript","Posting","Query","ReadClientResponse","ReadScopeResponse","ReadUserResponse","Response","ResponseCursor","ResponseCursorTotal","RevertTransactionResponse","RunWorkflowResponse","Scope","Secret","Security","ServerInfo","StageDelay","StageSend","StageSendDestination","StageSendDestinationAccount","StageSendDestinationPayment","StageSendDestinationWallet","StageSendSource","StageSendSourceAccount","StageSendSourcePayment","StageSendSourceWallet","StageStatus","StageWaitEvent","Stats","StatsResponse","StripeConfig","StripeTransferRequest","TaskBankingCircle","TaskBankingCircleDescriptor","TaskCurrencyCloud","TaskCurrencyCloudDescriptor","TaskDummyPay","TaskDummyPayDescriptor","TaskModulr","TaskModulrDescriptor","TaskResponse","TaskStripe","TaskStripeDescriptor","TaskWise","TaskWiseDescriptor","TasksCursor","TasksCursorCursor","Transaction","TransactionsCursorResponse","TransactionsCursorResponseCursor","TransferRequest","TransferResponse","TransfersResponse","TransfersResponseData","UpdateClientRequest","UpdateClientResponse","UpdateScopeRequest","UpdateScopeResponse","User","Version","Volume","Wallet","WalletSubject","WalletWithBalances","WalletWithBalancesBalances","WalletsErrorResponse","WalletsErrorResponseErrorCode","WalletsTransaction","WalletsVolume","WebhooksConfig","WiseConfig","Workflow","WorkflowConfig","WorkflowInstance","WorkflowInstanceHistory","WorkflowInstanceHistoryStage","WorkflowInstanceHistoryStageInput","WorkflowInstanceHistoryStageOutput"]
+__all__ = ["Account","AccountResponse","AccountWithVolumesAndBalances","AccountsCursor","AccountsCursorCursor","AccountsCursorResponse","AccountsCursorResponseCursor","ActivityConfirmHold","ActivityCreateTransaction","ActivityCreateTransactionOutput","ActivityCreateTransactionOutputScript","ActivityCreditWallet","ActivityDebitWallet","ActivityDebitWalletOutput","ActivityGetAccount","ActivityGetAccountOutput","ActivityGetPayment","ActivityGetPaymentOutput","ActivityGetWallet","ActivityGetWalletOutput","ActivityRevertTransaction","ActivityRevertTransactionOutput","ActivityRevertTransactionOutputScript","ActivityStripeTransfer","ActivityVoidHold","AggregateBalancesResponse","AssetHolder","Attempt","AttemptResponse","Balance","BalanceWithAssets","BalancesCursorResponse","BalancesCursorResponseCursor","BankingCircleConfig","Client","ClientSecret","Config","ConfigChangeSecret","ConfigInfo","ConfigInfoResponse","ConfigResponse","ConfigUser","ConfigsResponse","ConfigsResponseCursor","ConfirmHoldRequest","Connector","ConnectorConfigResponse","ConnectorsConfigsResponse","ConnectorsConfigsResponseData","ConnectorsConfigsResponseDataConnector","ConnectorsConfigsResponseDataConnectorKey","ConnectorsResponse","ConnectorsResponseData","Contract","CreateBalanceRequest","CreateBalanceResponse","CreateClientRequest","CreateClientResponse","CreateScopeRequest","CreateScopeResponse","CreateSecretRequest","CreateSecretResponse","CreateWalletRequest","CreateWalletResponse","CreateWorkflowRequest","CreateWorkflowResponse","CreditWalletRequest","CurrencyCloudConfig","DebitWalletRequest","DebitWalletResponse","DummyPayConfig","Error","ErrorErrorCode","ErrorResponse","ErrorsEnum","ExpandedDebitHold","GetBalanceResponse","GetHoldResponse","GetHoldsResponse","GetHoldsResponseCursor","GetTransactionsResponse","GetTransactionsResponseCursor","GetVersionsResponse","GetWalletResponse","GetWalletSummaryResponse","GetWorkflowInstanceHistoryResponse","GetWorkflowInstanceHistoryStageResponse","GetWorkflowInstanceResponse","GetWorkflowResponse","Hold","LedgerAccountSubject","LedgerInfo","LedgerInfoResponse","LedgerInfoStorage","LedgerStorage","ListBalancesResponse","ListBalancesResponseCursor","ListClientsResponse","ListRunsResponse","ListScopesResponse","ListUsersResponse","ListWalletsResponse","ListWalletsResponseCursor","ListWorkflowsResponse","Log","LogType","LogsCursorResponse","LogsCursorResponseCursor","Mapping","MappingResponse","MigrationInfo","MigrationInfoState","ModulrConfig","Monetary","Payment","PaymentAdjustment","PaymentMetadata","PaymentResponse","PaymentScheme","PaymentStatus","PaymentType","PaymentsAccount","PaymentsAccountType","PaymentsCursor","PaymentsCursorCursor","PostTransaction","PostTransactionScript","Posting","Query","ReadClientResponse","ReadScopeResponse","ReadUserResponse","Response","ResponseCursor","ResponseCursorTotal","RunWorkflowResponse","Scope","Script","ScriptResponse","Secret","Security","ServerInfo","StageDelay","StageSend","StageSendDestination","StageSendDestinationAccount","StageSendDestinationPayment","StageSendDestinationWallet","StageSendSource","StageSendSourceAccount","StageSendSourcePayment","StageSendSourceWallet","StageStatus","StageWaitEvent","Stats","StatsResponse","StripeConfig","StripeTransferRequest","TaskBankingCircle","TaskBankingCircleDescriptor","TaskCurrencyCloud","TaskCurrencyCloudDescriptor","TaskDummyPay","TaskDummyPayDescriptor","TaskModulr","TaskModulrDescriptor","TaskResponse","TaskStripe","TaskStripeDescriptor","TaskWise","TaskWiseDescriptor","TasksCursor","TasksCursorCursor","Transaction","TransactionData","TransactionResponse","Transactions","TransactionsCursorResponse","TransactionsCursorResponseCursor","TransactionsResponse","TransferRequest","TransferResponse","TransfersResponse","TransfersResponseData","UpdateClientRequest","UpdateClientResponse","UpdateScopeRequest","UpdateScopeResponse","User","Version","Volume","Wallet","WalletSubject","WalletWithBalances","WalletWithBalancesBalances","WalletsErrorResponse","WalletsErrorResponseErrorCode","WalletsTransaction","WalletsVolume","WebhooksConfig","WebhooksErrorResponse","WebhooksErrorsEnum","WiseConfig","Workflow","WorkflowConfig","WorkflowInstance","WorkflowInstanceHistory","WorkflowInstanceHistoryStage","WorkflowInstanceHistoryStageInput","WorkflowInstanceHistoryStageOutput"]

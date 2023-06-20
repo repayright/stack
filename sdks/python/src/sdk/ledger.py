@@ -22,22 +22,54 @@ class Ledger:
         self._gen_version = gen_version
         
     
+    def create_transactions(self, request: operations.CreateTransactionsRequest) -> operations.CreateTransactionsResponse:
+        r"""Create a new batch of transactions to a ledger"""
+        base_url = self._server_url
+        
+        url = utils.generate_url(operations.CreateTransactionsRequest, base_url, '/api/ledger/{ledger}/transactions/batch', request)
+        headers = {}
+        req_content_type, data, form = utils.serialize_request_body(request, "transactions", 'json')
+        if req_content_type not in ('multipart/form-data', 'multipart/mixed'):
+            headers['content-type'] = req_content_type
+        if data is None and form is None:
+            raise Exception('request body is required')
+        headers['Accept'] = 'application/json;q=1, application/json;q=0'
+        headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
+        
+        client = self._security_client
+        
+        http_res = client.request('POST', url, data=data, files=form, headers=headers)
+        content_type = http_res.headers.get('Content-Type')
+
+        res = operations.CreateTransactionsResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
+        
+        if http_res.status_code == 200:
+            if utils.match_content_type(content_type, 'application/json'):
+                out = utils.unmarshal_json(http_res.text, Optional[shared.TransactionsResponse])
+                res.transactions_response = out
+        else:
+            if utils.match_content_type(content_type, 'application/json'):
+                out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])
+                res.error_response = out
+
+        return res
+
+    
     def add_metadata_on_transaction(self, request: operations.AddMetadataOnTransactionRequest) -> operations.AddMetadataOnTransactionResponse:
         r"""Set the metadata of a transaction by its ID"""
         base_url = self._server_url
         
         url = utils.generate_url(operations.AddMetadataOnTransactionRequest, base_url, '/api/ledger/{ledger}/transactions/{txid}/metadata', request)
-        headers = utils.get_headers(request)
+        headers = {}
         req_content_type, data, form = utils.serialize_request_body(request, "request_body", 'json')
         if req_content_type not in ('multipart/form-data', 'multipart/mixed'):
             headers['content-type'] = req_content_type
-        query_params = utils.get_query_params(operations.AddMetadataOnTransactionRequest, request)
         headers['Accept'] = 'application/json'
         headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
         
         client = self._security_client
         
-        http_res = client.request('POST', url, params=query_params, data=data, files=form, headers=headers)
+        http_res = client.request('POST', url, data=data, files=form, headers=headers)
         content_type = http_res.headers.get('Content-Type')
 
         res = operations.AddMetadataOnTransactionResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
@@ -57,19 +89,18 @@ class Ledger:
         base_url = self._server_url
         
         url = utils.generate_url(operations.AddMetadataToAccountRequest, base_url, '/api/ledger/{ledger}/accounts/{address}/metadata', request)
-        headers = utils.get_headers(request)
+        headers = {}
         req_content_type, data, form = utils.serialize_request_body(request, "request_body", 'json')
         if req_content_type not in ('multipart/form-data', 'multipart/mixed'):
             headers['content-type'] = req_content_type
         if data is None and form is None:
             raise Exception('request body is required')
-        query_params = utils.get_query_params(operations.AddMetadataToAccountRequest, request)
         headers['Accept'] = 'application/json'
         headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
         
         client = self._security_client
         
-        http_res = client.request('POST', url, params=query_params, data=data, files=form, headers=headers)
+        http_res = client.request('POST', url, data=data, files=form, headers=headers)
         content_type = http_res.headers.get('Content-Type')
 
         res = operations.AddMetadataToAccountResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
@@ -101,7 +132,7 @@ class Ledger:
 
         res = operations.CountAccountsResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
         
-        if http_res.status_code == 204:
+        if http_res.status_code == 200:
             res.headers = http_res.headers
             
         else:
@@ -129,7 +160,7 @@ class Ledger:
 
         res = operations.CountTransactionsResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
         
-        if http_res.status_code == 204:
+        if http_res.status_code == 200:
             res.headers = http_res.headers
             
         else:
@@ -145,7 +176,7 @@ class Ledger:
         base_url = self._server_url
         
         url = utils.generate_url(operations.CreateTransactionRequest, base_url, '/api/ledger/{ledger}/transactions', request)
-        headers = utils.get_headers(request)
+        headers = {}
         req_content_type, data, form = utils.serialize_request_body(request, "post_transaction", 'json')
         if req_content_type not in ('multipart/form-data', 'multipart/mixed'):
             headers['content-type'] = req_content_type
@@ -164,8 +195,8 @@ class Ledger:
         
         if http_res.status_code == 200:
             if utils.match_content_type(content_type, 'application/json'):
-                out = utils.unmarshal_json(http_res.text, Optional[shared.CreateTransactionResponse])
-                res.create_transaction_response = out
+                out = utils.unmarshal_json(http_res.text, Optional[shared.TransactionsResponse])
+                res.transactions_response = out
         else:
             if utils.match_content_type(content_type, 'application/json'):
                 out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])
@@ -316,6 +347,34 @@ class Ledger:
         return res
 
     
+    def get_mapping(self, request: operations.GetMappingRequest) -> operations.GetMappingResponse:
+        r"""Get the mapping of a ledger"""
+        base_url = self._server_url
+        
+        url = utils.generate_url(operations.GetMappingRequest, base_url, '/api/ledger/{ledger}/mapping', request)
+        headers = {}
+        headers['Accept'] = 'application/json;q=1, application/json;q=0'
+        headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
+        
+        client = self._security_client
+        
+        http_res = client.request('GET', url, headers=headers)
+        content_type = http_res.headers.get('Content-Type')
+
+        res = operations.GetMappingResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
+        
+        if http_res.status_code == 200:
+            if utils.match_content_type(content_type, 'application/json'):
+                out = utils.unmarshal_json(http_res.text, Optional[shared.MappingResponse])
+                res.mapping_response = out
+        else:
+            if utils.match_content_type(content_type, 'application/json'):
+                out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])
+                res.error_response = out
+
+        return res
+
+    
     def get_transaction(self, request: operations.GetTransactionRequest) -> operations.GetTransactionResponse:
         r"""Get transaction from a ledger by its ID"""
         base_url = self._server_url
@@ -334,8 +393,8 @@ class Ledger:
         
         if http_res.status_code == 200:
             if utils.match_content_type(content_type, 'application/json'):
-                out = utils.unmarshal_json(http_res.text, Optional[shared.GetTransactionResponse])
-                res.get_transaction_response = out
+                out = utils.unmarshal_json(http_res.text, Optional[shared.TransactionResponse])
+                res.transaction_response = out
         else:
             if utils.match_content_type(content_type, 'application/json'):
                 out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])
@@ -483,10 +542,77 @@ class Ledger:
 
         res = operations.RevertTransactionResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
         
-        if http_res.status_code == 201:
+        if http_res.status_code == 200:
             if utils.match_content_type(content_type, 'application/json'):
-                out = utils.unmarshal_json(http_res.text, Optional[shared.RevertTransactionResponse])
-                res.revert_transaction_response = out
+                out = utils.unmarshal_json(http_res.text, Optional[shared.TransactionResponse])
+                res.transaction_response = out
+        else:
+            if utils.match_content_type(content_type, 'application/json'):
+                out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])
+                res.error_response = out
+
+        return res
+
+    
+    def run_script(self, request: operations.RunScriptRequest) -> operations.RunScriptResponse:
+        r"""Execute a Numscript
+        This route is deprecated, and has been merged into `POST /{ledger}/transactions`.
+        
+        Deprecated: this method will be removed in a future release, please migrate away from it as soon as possible
+        """
+        base_url = self._server_url
+        
+        url = utils.generate_url(operations.RunScriptRequest, base_url, '/api/ledger/{ledger}/script', request)
+        headers = {}
+        req_content_type, data, form = utils.serialize_request_body(request, "script", 'json')
+        if req_content_type not in ('multipart/form-data', 'multipart/mixed'):
+            headers['content-type'] = req_content_type
+        if data is None and form is None:
+            raise Exception('request body is required')
+        query_params = utils.get_query_params(operations.RunScriptRequest, request)
+        headers['Accept'] = 'application/json'
+        headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
+        
+        client = self._security_client
+        
+        http_res = client.request('POST', url, params=query_params, data=data, files=form, headers=headers)
+        content_type = http_res.headers.get('Content-Type')
+
+        res = operations.RunScriptResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
+        
+        if http_res.status_code == 200:
+            if utils.match_content_type(content_type, 'application/json'):
+                out = utils.unmarshal_json(http_res.text, Optional[shared.ScriptResponse])
+                res.script_response = out
+
+        return res
+
+    
+    def update_mapping(self, request: operations.UpdateMappingRequest) -> operations.UpdateMappingResponse:
+        r"""Update the mapping of a ledger"""
+        base_url = self._server_url
+        
+        url = utils.generate_url(operations.UpdateMappingRequest, base_url, '/api/ledger/{ledger}/mapping', request)
+        headers = {}
+        req_content_type, data, form = utils.serialize_request_body(request, "mapping", 'json')
+        if req_content_type not in ('multipart/form-data', 'multipart/mixed'):
+            headers['content-type'] = req_content_type
+        if data is None and form is None:
+            raise Exception('request body is required')
+        headers['Accept'] = 'application/json;q=1, application/json;q=0'
+        headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
+        
+        client = self._security_client
+        
+        http_res = client.request('PUT', url, data=data, files=form, headers=headers)
+        content_type = http_res.headers.get('Content-Type')
+
+        res = operations.UpdateMappingResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
+        
+        if http_res.status_code == 200:
+            if utils.match_content_type(content_type, 'application/json'):
+                out = utils.unmarshal_json(http_res.text, Optional[shared.MappingResponse])
+                res.mapping_response = out
         else:
             if utils.match_content_type(content_type, 'application/json'):
                 out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])

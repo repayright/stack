@@ -3,12 +3,40 @@
  */
 
 import { SpeakeasyBase, SpeakeasyMetadata } from "../../../internal/utils";
-import { Transaction } from "./transaction";
-import { Expose, Type } from "class-transformer";
+import { Posting } from "./posting";
+import { Expose, Transform, Type } from "class-transformer";
+
+export class ActivityCreateTransactionOutputScript extends SpeakeasyBase {
+  @SpeakeasyMetadata()
+  @Expose({ name: "plain" })
+  plain: string;
+
+  @SpeakeasyMetadata()
+  @Expose({ name: "vars" })
+  vars?: Record<string, any>;
+}
 
 export class ActivityCreateTransactionOutput extends SpeakeasyBase {
   @SpeakeasyMetadata()
-  @Expose({ name: "data" })
-  @Type(() => Transaction)
-  data: Transaction;
+  @Expose({ name: "metadata" })
+  metadata?: Record<string, any>;
+
+  @SpeakeasyMetadata({ elemType: Posting })
+  @Expose({ name: "postings" })
+  @Type(() => Posting)
+  postings?: Posting[];
+
+  @SpeakeasyMetadata()
+  @Expose({ name: "reference" })
+  reference?: string;
+
+  @SpeakeasyMetadata()
+  @Expose({ name: "script" })
+  @Type(() => ActivityCreateTransactionOutputScript)
+  script?: ActivityCreateTransactionOutputScript;
+
+  @SpeakeasyMetadata()
+  @Expose({ name: "timestamp" })
+  @Transform(({ value }) => new Date(value), { toClassOnly: true })
+  timestamp?: Date;
 }

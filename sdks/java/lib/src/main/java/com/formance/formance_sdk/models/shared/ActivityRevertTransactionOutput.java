@@ -4,18 +4,62 @@
 
 package com.formance.formance_sdk.models.shared;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.formance.formance_sdk.utils.DateTimeDeserializer;
+import com.formance.formance_sdk.utils.DateTimeSerializer;
+import java.time.OffsetDateTime;
 
 public class ActivityRevertTransactionOutput {
-    @JsonProperty("data")
-    public Transaction data;
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonProperty("metadata")
+    public java.util.Map<String, Object> metadata;
 
-    public ActivityRevertTransactionOutput withData(Transaction data) {
-        this.data = data;
+    public ActivityRevertTransactionOutput withMetadata(java.util.Map<String, Object> metadata) {
+        this.metadata = metadata;
         return this;
     }
     
-    public ActivityRevertTransactionOutput(@JsonProperty("data") Transaction data) {
-        this.data = data;
-  }
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonProperty("postings")
+    public Posting[] postings;
+
+    public ActivityRevertTransactionOutput withPostings(Posting[] postings) {
+        this.postings = postings;
+        return this;
+    }
+    
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonProperty("reference")
+    public String reference;
+
+    public ActivityRevertTransactionOutput withReference(String reference) {
+        this.reference = reference;
+        return this;
+    }
+    
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonProperty("script")
+    public ActivityRevertTransactionOutputScript script;
+
+    public ActivityRevertTransactionOutput withScript(ActivityRevertTransactionOutputScript script) {
+        this.script = script;
+        return this;
+    }
+    
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonSerialize(using = DateTimeSerializer.class)
+    @JsonDeserialize(using = DateTimeDeserializer.class)
+    @JsonProperty("timestamp")
+    public OffsetDateTime timestamp;
+
+    public ActivityRevertTransactionOutput withTimestamp(OffsetDateTime timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
+    
+    public ActivityRevertTransactionOutput(){}
 }

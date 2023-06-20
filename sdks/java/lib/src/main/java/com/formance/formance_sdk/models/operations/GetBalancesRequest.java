@@ -20,6 +20,17 @@ public class GetBalancesRequest {
     }
     
     /**
+     * Pagination cursor, will return accounts after given address, in descending order.
+     */
+    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=after")
+    public String after;
+
+    public GetBalancesRequest withAfter(String after) {
+        this.after = after;
+        return this;
+    }
+    
+    /**
      * Parameter used in pagination requests. Maximum page size is set to 15.
      * Set to the value of next for the next page of results.
      * Set to the value of previous for the previous page of results.
@@ -46,14 +57,19 @@ public class GetBalancesRequest {
     }
     
     /**
-     * The maximum number of results to return per page.
-     * 
+     * Parameter used in pagination requests.
+     * Set to the value of next for the next page of results.
+     * Set to the value of previous for the previous page of results.
+     * Deprecated, please use `cursor` instead.
+     * @deprecated this field will be removed in a future release, please migrate away from it as soon as possible
      */
-    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=pageSize")
-    public Long pageSize;
+    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=pagination_token")
+    @Deprecated
+    public String paginationToken;
 
-    public GetBalancesRequest withPageSize(Long pageSize) {
-        this.pageSize = pageSize;
+    @Deprecated
+    public GetBalancesRequest withPaginationToken(String paginationToken) {
+        this.paginationToken = paginationToken;
         return this;
     }
     

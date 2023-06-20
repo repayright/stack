@@ -2,6 +2,7 @@
 
 ### Available Operations
 
+* [createTransactions](#createtransactions) - Create a new batch of transactions to a ledger
 * [addMetadataOnTransaction](#addmetadataontransaction) - Set the metadata of a transaction by its ID
 * [addMetadataToAccount](#addmetadatatoaccount) - Add metadata to an account
 * [countAccounts](#countaccounts) - Count the accounts from a ledger
@@ -12,12 +13,55 @@
 * [getBalancesAggregated](#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [getInfo](#getinfo) - Show server information
 * [getLedgerInfo](#getledgerinfo) - Get information about a ledger
+* [getMapping](#getmapping) - Get the mapping of a ledger
 * [getTransaction](#gettransaction) - Get transaction from a ledger by its ID
 * [listAccounts](#listaccounts) - List accounts from a ledger
 * [listLogs](#listlogs) - List the logs from a ledger
 * [listTransactions](#listtransactions) - List transactions from a ledger
 * [readStats](#readstats) - Get statistics from a ledger
 * [revertTransaction](#reverttransaction) - Revert a ledger transaction by its ID
+* [~~runScript~~](#runscript) - Execute a Numscript :warning: **Deprecated**
+* [updateMapping](#updatemapping) - Update the mapping of a ledger
+
+## createTransactions
+
+Create a new batch of transactions to a ledger
+
+### Example Usage
+
+```php
+<?php
+
+declare(strict_types=1);
+require_once 'vendor/autoload.php';
+
+use \formance\stack\SDK;
+use \formance\stack\Models\Shared\Security;
+use \formance\stack\Models\Operations\CreateTransactionsRequest;
+use \formance\stack\Models\Shared\Transactions;
+use \formance\stack\Models\Shared\TransactionData;
+use \formance\stack\Models\Shared\Posting;
+
+$sdk = SDK::builder()
+    ->build();
+
+try {
+    $request = new CreateTransactionsRequest();
+    $request->transactions = new Transactions();
+    $request->transactions->transactions = [
+        new TransactionData(),
+    ];
+    $request->ledger = 'ledger001';
+
+    $response = $sdk->ledger->createTransactions($request);
+
+    if ($response->transactionsResponse !== null) {
+        // handle response
+    }
+} catch (Exception $e) {
+    // handle exception
+}
+```
 
 ## addMetadataOnTransaction
 
@@ -40,13 +84,10 @@ $sdk = SDK::builder()
 
 try {
     $request = new AddMetadataOnTransactionRequest();
-    $request->idempotencyKey = 'dolorem';
     $request->requestBody = [
         'explicabo' => 'nobis',
         'enim' => 'omnis',
     ];
-    $request->async = true;
-    $request->dryRun = true;
     $request->ledger = 'ledger001';
     $request->txid = 1234;
 
@@ -81,14 +122,11 @@ $sdk = SDK::builder()
 
 try {
     $request = new AddMetadataToAccountRequest();
-    $request->idempotencyKey = 'nemo';
     $request->requestBody = [
-        'excepturi' => 'accusantium',
-        'iure' => 'culpa',
+        'minima' => 'excepturi',
+        'accusantium' => 'iure',
     ];
     $request->address = 'users:001';
-    $request->async = true;
-    $request->dryRun = true;
     $request->ledger = 'ledger001';
 
     $response = $sdk->ledger->addMetadataToAccount($request);
@@ -125,10 +163,9 @@ try {
     $request->address = 'users:.+';
     $request->ledger = 'ledger001';
     $request->metadata = [
-        'sapiente' => 'architecto',
-        'mollitia' => 'dolorem',
-        'culpa' => 'consequuntur',
-        'repellat' => 'mollitia',
+        'doloribus' => 'sapiente',
+        'architecto' => 'mollitia',
+        'dolorem' => 'culpa',
     ];
 
     $response = $sdk->ledger->countAccounts($request);
@@ -164,15 +201,16 @@ try {
     $request = new CountTransactionsRequest();
     $request->account = 'users:001';
     $request->destination = 'users:001';
-    $request->endTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-06-30T02:19:51.375Z');
+    $request->endTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-01-02T17:10:32.894Z');
     $request->ledger = 'ledger001';
     $request->metadata = [
-        'quam' => 'molestiae',
-        'velit' => 'error',
+        'occaecati' => 'numquam',
+        'commodi' => 'quam',
+        'molestiae' => 'velit',
     ];
     $request->reference = 'ref:001';
     $request->source = 'users:001';
-    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-08-30T15:03:11.112Z');
+    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-09-06T22:51:09.401Z');
 
     $response = $sdk->ledger->countTransactions($request);
 
@@ -208,15 +246,12 @@ $sdk = SDK::builder()
 
 try {
     $request = new CreateTransactionRequest();
-    $request->idempotencyKey = 'vitae';
     $request->postTransaction = new PostTransaction();
     $request->postTransaction->metadata = [
+        'vitae' => 'laborum',
         'animi' => 'enim',
-        'odit' => 'quo',
-        'sequi' => 'tenetur',
     ];
     $request->postTransaction->postings = [
-        new Posting(),
         new Posting(),
     ];
     $request->postTransaction->reference = 'ref:001';
@@ -230,18 +265,18 @@ try {
     )
     ';
     $request->postTransaction->script->vars = [
+        'sequi' => 'tenetur',
+        'ipsam' => 'id',
         'possimus' => 'aut',
         'quasi' => 'error',
-        'temporibus' => 'laborum',
     ];
-    $request->postTransaction->timestamp = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-01-11T05:45:42.485Z');
-    $request->async = true;
-    $request->dryRun = true;
+    $request->postTransaction->timestamp = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2020-12-24T08:13:29.299Z');
     $request->ledger = 'ledger001';
+    $request->preview = true;
 
     $response = $sdk->ledger->createTransaction($request);
 
-    if ($response->createTransactionResponse !== null) {
+    if ($response->transactionsResponse !== null) {
         // handle response
     }
 } catch (Exception $e) {
@@ -305,9 +340,10 @@ $sdk = SDK::builder()
 try {
     $request = new GetBalancesRequest();
     $request->address = 'users:001';
+    $request->after = 'users:003';
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
     $request->ledger = 'ledger001';
-    $request->pageSize = 976460;
+    $request->paginationToken = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
 
     $response = $sdk->ledger->getBalances($request);
 
@@ -415,6 +451,39 @@ try {
 }
 ```
 
+## getMapping
+
+Get the mapping of a ledger
+
+### Example Usage
+
+```php
+<?php
+
+declare(strict_types=1);
+require_once 'vendor/autoload.php';
+
+use \formance\stack\SDK;
+use \formance\stack\Models\Shared\Security;
+use \formance\stack\Models\Operations\GetMappingRequest;
+
+$sdk = SDK::builder()
+    ->build();
+
+try {
+    $request = new GetMappingRequest();
+    $request->ledger = 'ledger001';
+
+    $response = $sdk->ledger->getMapping($request);
+
+    if ($response->mappingResponse !== null) {
+        // handle response
+    }
+} catch (Exception $e) {
+    // handle exception
+}
+```
+
 ## getTransaction
 
 Get transaction from a ledger by its ID
@@ -441,7 +510,7 @@ try {
 
     $response = $sdk->ledger->getTransaction($request);
 
-    if ($response->getTransactionResponse !== null) {
+    if ($response->transactionResponse !== null) {
         // handle response
     }
 } catch (Exception $e) {
@@ -472,17 +541,16 @@ $sdk = SDK::builder()
 try {
     $request = new ListAccountsRequest();
     $request->address = 'users:.+';
+    $request->after = 'users:003';
     $request->balance = 2400;
     $request->balanceOperator = ListAccountsBalanceOperator::GTE;
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
     $request->ledger = 'ledger001';
     $request->metadata = [
-        'nihil' => 'praesentium',
-        'voluptatibus' => 'ipsa',
-        'omnis' => 'voluptate',
-        'cum' => 'perferendis',
+        'reiciendis' => 'voluptatibus',
     ];
-    $request->pageSize = 39187;
+    $request->pageSize = 878194;
+    $request->paginationToken = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
 
     $response = $sdk->ledger->listAccounts($request);
 
@@ -515,11 +583,13 @@ $sdk = SDK::builder()
 
 try {
     $request = new ListLogsRequest();
+    $request->after = '1234';
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->endTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-09-19T18:36:39.009Z');
+    $request->endTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-06-28T23:41:25.321Z');
     $request->ledger = 'ledger001';
-    $request->pageSize = 979587;
-    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-08-22T19:15:58.586Z');
+    $request->pageSize = 976762;
+    $request->paginationToken = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
+    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-05-25T05:33:11.349Z');
 
     $response = $sdk->ledger->listLogs($request);
 
@@ -553,17 +623,19 @@ $sdk = SDK::builder()
 try {
     $request = new ListTransactionsRequest();
     $request->account = 'users:001';
+    $request->after = '1234';
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
     $request->destination = 'users:001';
-    $request->endTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-07-09T11:22:20.922Z');
+    $request->endTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-04-06T04:03:03.438Z');
     $request->ledger = 'ledger001';
     $request->metadata = [
-        'harum' => 'enim',
+        'doloremque' => 'reprehenderit',
     ];
-    $request->pageSize = 880476;
+    $request->pageSize = 282807;
+    $request->paginationToken = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
     $request->reference = 'ref:001';
     $request->source = 'users:001';
-    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-01-30T20:15:26.045Z');
+    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-08-22T09:14:02.538Z');
 
     $response = $sdk->ledger->listTransactions($request);
 
@@ -635,7 +707,102 @@ try {
 
     $response = $sdk->ledger->revertTransaction($request);
 
-    if ($response->revertTransactionResponse !== null) {
+    if ($response->transactionResponse !== null) {
+        // handle response
+    }
+} catch (Exception $e) {
+    // handle exception
+}
+```
+
+## ~~runScript~~
+
+This route is deprecated, and has been merged into `POST /{ledger}/transactions`.
+
+
+> :warning: **DEPRECATED**: this method will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+```php
+<?php
+
+declare(strict_types=1);
+require_once 'vendor/autoload.php';
+
+use \formance\stack\SDK;
+use \formance\stack\Models\Shared\Security;
+use \formance\stack\Models\Operations\RunScriptRequest;
+use \formance\stack\Models\Shared\Script;
+
+$sdk = SDK::builder()
+    ->build();
+
+try {
+    $request = new RunScriptRequest();
+    $request->script = new Script();
+    $request->script->metadata = [
+        'dolore' => 'iusto',
+        'dicta' => 'harum',
+    ];
+    $request->script->plain = 'vars {
+    account $user
+    }
+    send [COIN 10] (
+    	source = @world
+    	destination = $user
+    )
+    ';
+    $request->script->reference = 'order_1234';
+    $request->script->vars = [
+        'accusamus' => 'commodi',
+        'repudiandae' => 'quae',
+    ];
+    $request->ledger = 'ledger001';
+    $request->preview = true;
+
+    $response = $sdk->ledger->runScript($request);
+
+    if ($response->scriptResponse !== null) {
+        // handle response
+    }
+} catch (Exception $e) {
+    // handle exception
+}
+```
+
+## updateMapping
+
+Update the mapping of a ledger
+
+### Example Usage
+
+```php
+<?php
+
+declare(strict_types=1);
+require_once 'vendor/autoload.php';
+
+use \formance\stack\SDK;
+use \formance\stack\Models\Shared\Security;
+use \formance\stack\Models\Operations\UpdateMappingRequest;
+use \formance\stack\Models\Shared\Mapping;
+use \formance\stack\Models\Shared\Contract;
+
+$sdk = SDK::builder()
+    ->build();
+
+try {
+    $request = new UpdateMappingRequest();
+    $request->mapping = new Mapping();
+    $request->mapping->contracts = [
+        new Contract(),
+    ];
+    $request->ledger = 'ledger001';
+
+    $response = $sdk->ledger->updateMapping($request);
+
+    if ($response->mappingResponse !== null) {
         // handle response
     }
 } catch (Exception $e) {

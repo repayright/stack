@@ -2,6 +2,19 @@
 
 package shared
 
+import (
+	"time"
+)
+
+type ActivityCreateTransactionOutputScript struct {
+	Plain string                 `json:"plain"`
+	Vars  map[string]interface{} `json:"vars,omitempty"`
+}
+
 type ActivityCreateTransactionOutput struct {
-	Data Transaction `json:"data"`
+	Metadata  map[string]interface{}                 `json:"metadata,omitempty"`
+	Postings  []Posting                              `json:"postings,omitempty"`
+	Reference *string                                `json:"reference,omitempty"`
+	Script    *ActivityCreateTransactionOutputScript `json:"script,omitempty"`
+	Timestamp *time.Time                             `json:"timestamp,omitempty"`
 }

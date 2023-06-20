@@ -40,8 +40,8 @@ sdk.payments.connectorsStripeTransfer({
   asset: "USD",
   destination: "acct_1Gqj58KZcSIg2N2q",
   metadata: {
-    "non": "eligendi",
-    "sint": "aliquid",
+    "magnam": "distinctio",
+    "id": "labore",
   },
 }).then((res: ConnectorsStripeTransferResponse) => {
   if (res.statusCode == 200) {
@@ -74,7 +74,7 @@ sdk.payments.connectorsTransfer({
     destination: "acct_1Gqj58KZcSIg2N2q",
     source: "acct_1Gqj58KZcSIg2N2q",
   },
-  connector: Connector.Modulr,
+  connector: Connector.DummyPay,
 }).then((res: ConnectorsTransferResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -100,8 +100,8 @@ const sdk = new SDK({
 });
 
 sdk.payments.getConnectorTask({
-  connector: Connector.BankingCircle,
-  taskId: "sint",
+  connector: Connector.Wise,
+  taskId: "natus",
 }).then((res: GetConnectorTaskResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -127,7 +127,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.getPayment({
-  paymentId: "officia",
+  paymentId: "nobis",
 }).then((res: GetPaymentResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -154,9 +154,7 @@ const sdk = new SDK({
 
 sdk.payments.installConnector({
   requestBody: {
-    directory: "/tmp/dummypay",
-    fileGenerationPeriod: "60s",
-    filePollingPeriod: "60s",
+    apiKey: "XXX",
   },
   connector: Connector.BankingCircle,
 }).then((res: InstallConnectorResponse) => {
@@ -231,9 +229,9 @@ const sdk = new SDK({
 });
 
 sdk.payments.listConnectorTasks({
-  connector: Connector.BankingCircle,
+  connector: Connector.Stripe,
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 680056,
+  pageSize: 102863,
 }).then((res: ListConnectorTasksResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -259,7 +257,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.listConnectorsTransfers({
-  connector: Connector.Wise,
+  connector: Connector.DummyPay,
 }).then((res: ListConnectorsTransfersResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -286,12 +284,11 @@ const sdk = new SDK({
 
 sdk.payments.listPayments({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 449198,
+  pageSize: 92373,
   sort: [
-    "maiores",
-    "rerum",
-    "dicta",
-    "magnam",
+    "ullam",
+    "provident",
+    "quos",
   ],
 }).then((res: ListPaymentsResponse) => {
   if (res.statusCode == 200) {
@@ -342,12 +339,9 @@ const sdk = new SDK({
 
 sdk.payments.paymentslistAccounts({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 767024,
+  pageSize: 574325,
   sort: [
-    "ea",
-    "aliquid",
-    "laborum",
-    "accusamus",
+    "mollitia",
   ],
 }).then((res: PaymentslistAccountsResponse) => {
   if (res.statusCode == 200) {
@@ -374,7 +368,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.readConnectorConfig({
-  connector: Connector.DummyPay,
+  connector: Connector.BankingCircle,
 }).then((res: ReadConnectorConfigResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -454,9 +448,9 @@ const sdk = new SDK({
 
 sdk.payments.updateMetadata({
   paymentMetadata: {
-    key: "accusamus",
+    key: "eum",
   },
-  paymentId: "delectus",
+  paymentId: "dolor",
 }).then((res: UpdateMetadataResponse) => {
   if (res.statusCode == 200) {
     // handle response

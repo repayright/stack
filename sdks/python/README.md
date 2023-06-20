@@ -70,6 +70,7 @@ if res.get_versions_response is not None:
 
 ### [ledger](docs/ledger/README.md)
 
+* [create_transactions](docs/ledger/README.md#create_transactions) - Create a new batch of transactions to a ledger
 * [add_metadata_on_transaction](docs/ledger/README.md#add_metadata_on_transaction) - Set the metadata of a transaction by its ID
 * [add_metadata_to_account](docs/ledger/README.md#add_metadata_to_account) - Add metadata to an account
 * [count_accounts](docs/ledger/README.md#count_accounts) - Count the accounts from a ledger
@@ -80,12 +81,15 @@ if res.get_versions_response is not None:
 * [get_balances_aggregated](docs/ledger/README.md#get_balances_aggregated) - Get the aggregated balances from selected accounts
 * [get_info](docs/ledger/README.md#get_info) - Show server information
 * [get_ledger_info](docs/ledger/README.md#get_ledger_info) - Get information about a ledger
+* [get_mapping](docs/ledger/README.md#get_mapping) - Get the mapping of a ledger
 * [get_transaction](docs/ledger/README.md#get_transaction) - Get transaction from a ledger by its ID
 * [list_accounts](docs/ledger/README.md#list_accounts) - List accounts from a ledger
 * [list_logs](docs/ledger/README.md#list_logs) - List the logs from a ledger
 * [list_transactions](docs/ledger/README.md#list_transactions) - List transactions from a ledger
 * [read_stats](docs/ledger/README.md#read_stats) - Get statistics from a ledger
 * [revert_transaction](docs/ledger/README.md#revert_transaction) - Revert a ledger transaction by its ID
+* [~~run_script~~](docs/ledger/README.md#run_script) - Execute a Numscript :warning: **Deprecated**
+* [update_mapping](docs/ledger/README.md#update_mapping) - Update the mapping of a ledger
 
 ### [orchestration](docs/orchestration/README.md)
 

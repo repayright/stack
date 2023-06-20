@@ -35,19 +35,17 @@ try {
     $request->ledgers = [
         'quickstart',
         'quickstart',
-        'quickstart',
     ];
-    $request->pageSize = 725255;
+    $request->pageSize = 423855;
     $request->policy = 'OR';
     $request->raw = [
-        'blanditiis' => 'deleniti',
-        'sapiente' => 'amet',
-        'deserunt' => 'nisi',
+        'omnis' => 'molestiae',
+        'perferendis' => 'nihil',
+        'magnam' => 'distinctio',
     ];
     $request->sort = 'txid:asc';
-    $request->target = 'vel';
+    $request->target = 'id';
     $request->terms = [
-        'destination=central_bank1',
         'destination=central_bank1',
         'destination=central_bank1',
     ];

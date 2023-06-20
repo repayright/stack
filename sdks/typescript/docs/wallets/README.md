@@ -41,7 +41,7 @@ sdk.wallets.confirmHold({
     amount: 100,
     final: true,
   },
-  holdId: "omnis",
+  holdId: "maxime",
 }).then((res: ConfirmHoldResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -68,11 +68,11 @@ const sdk = new SDK({
 
 sdk.wallets.createBalance({
   createBalanceRequest: {
-    expiresAt: new Date("2022-12-24T23:52:02.245Z"),
-    name: "Megan Rau",
-    priority: 290077,
+    expiresAt: new Date("2021-08-05T03:52:18.835Z"),
+    name: "Alice Bradtke",
+    priority: 714242,
   },
-  id: "69b6e214-1959-4890-afa5-63e2516fe4c8",
+  id: "7fd2ed02-8921-4cdd-8692-601fb576b0d5",
 }).then((res: CreateBalanceResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -99,11 +99,12 @@ const sdk = new SDK({
 
 sdk.wallets.createWallet({
   metadata: {
-    "in": "architecto",
-    "architecto": "repudiandae",
-    "ullam": "expedita",
+    "perferendis": "fugiat",
+    "amet": "aut",
+    "cumque": "corporis",
+    "hic": "libero",
   },
-  name: "Kristie Spencer",
+  name: "Ernest Hayes",
 }).then((res: CreateWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -131,29 +132,27 @@ const sdk = new SDK({
 sdk.wallets.creditWallet({
   creditWalletRequest: {
     amount: {
-      amount: 868126,
-      asset: "accusantium",
+      amount: 54338,
+      asset: "quis",
     },
-    balance: "consequuntur",
+    balance: "nesciunt",
     metadata: {
-      "natus": "magni",
-      "sunt": "quo",
-      "illum": "pariatur",
+      "perferendis": "dolores",
     },
-    reference: "maxime",
+    reference: "minus",
     sources: [
       {
-        balance: "odit",
-        identifier: "ea",
-        type: "accusantium",
+        identifier: "vero",
+        type: "nostrum",
       },
       {
-        identifier: "maiores",
-        type: "quidem",
+        balance: "recusandae",
+        identifier: "omnis",
+        type: "facilis",
       },
     ],
   },
-  id: "576b0d5f-0d30-4c5f-bb25-87053202c73d",
+  id: "90c28909-b3fe-449a-8d9c-bf48633323f9",
 }).then((res: CreditWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -181,26 +180,24 @@ const sdk = new SDK({
 sdk.wallets.debitWallet({
   debitWalletRequest: {
     amount: {
-      amount: 345352,
-      asset: "hic",
+      amount: 739551,
+      asset: "voluptate",
     },
     balances: [
-      "omnis",
-      "facilis",
-      "perspiciatis",
-      "voluptatem",
+      "reiciendis",
+      "amet",
     ],
-    description: "porro",
+    description: "dolorum",
     destination: {
-      identifier: "blanditiis",
-      type: "error",
+      identifier: "veritatis",
+      type: "ipsa",
     },
     metadata: {
-      "occaecati": "rerum",
+      "iure": "odio",
     },
     pending: false,
   },
-  id: "3fe49a8d-9cbf-4486-b332-3f9b77f3a410",
+  id: "4ebf6928-0d1b-4a77-a89e-bf737ae4203c",
 }).then((res: DebitWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -226,8 +223,8 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getBalance({
-  balanceName: "ipsa",
-  id: "674ebf69-280d-41ba-b7a8-9ebf737ae420",
+  balanceName: "accusamus",
+  id: "5e6a95d8-a0d4-446c-a2af-7a73cf3be453",
 }).then((res: GetBalanceResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -253,7 +250,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getHold({
-  holdID: "amet",
+  holdID: "sapiente",
 }).then((res: GetHoldResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -281,13 +278,12 @@ const sdk = new SDK({
 sdk.wallets.getHolds({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   metadata: {
-    "accusamus": "ad",
-    "saepe": "suscipit",
-    "deserunt": "provident",
-    "minima": "repellendus",
+    "nihil": "sit",
+    "expedita": "neque",
+    "sed": "vel",
   },
-  pageSize: 519711,
-  walletID: "similique",
+  pageSize: 730442,
+  walletID: "voluptas",
 }).then((res: GetHoldsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -312,8 +308,8 @@ const sdk = new SDK({
 
 sdk.wallets.getTransactions({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 55,
-  walletID: "at",
+  pageSize: 646265,
+  walletID: "quam",
 }).then((res: GetTransactionsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -339,7 +335,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getWallet({
-  id: "446ce2af-7a73-4cf3-be45-3f870b326b5a",
+  id: "3429cdb1-a842-42bb-a79d-2322715bf0cb",
 }).then((res: GetWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -365,7 +361,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getWalletSummary({
-  id: "73429cdb-1a84-422b-b679-d2322715bf0c",
+  id: "b1e31b8b-90f3-4443-a110-8e0adcf4b921",
 }).then((res: GetWalletSummaryResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -390,7 +386,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.listBalances({
-  id: "bb1e31b8-b90f-4344-ba11-08e0adcf4b92",
+  id: "879fce95-3f73-4ef7-bbc7-abd74dd39c0f",
 }).then((res: ListBalancesResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -417,10 +413,11 @@ const sdk = new SDK({
 sdk.wallets.listWallets({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   metadata: {
-    "laudantium": "odio",
+    "nulla": "fugit",
+    "porro": "maiores",
   },
-  name: "Jan Schaefer",
-  pageSize: 338159,
+  name: "Ted Romaguera MD",
+  pageSize: 269479,
 }).then((res: ListWalletsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -448,10 +445,11 @@ const sdk = new SDK({
 sdk.wallets.updateWallet({
   requestBody: {
     metadata: {
-      "delectus": "voluptate",
+      "ea": "aspernatur",
+      "vel": "possimus",
     },
   },
-  id: "3ef7fbc7-abd7-44dd-b9c0-f5d2cff7c70a",
+  id: "436813f1-6d9f-45fc-a6c5-56146c3e250f",
 }).then((res: UpdateWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -477,7 +475,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.voidHold({
-  holdId: "tempora",
+  holdId: "libero",
 }).then((res: VoidHoldResponse) => {
   if (res.statusCode == 200) {
     // handle response

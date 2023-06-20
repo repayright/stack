@@ -2,6 +2,7 @@
 
 ### Available Operations
 
+* [createTransactions](#createtransactions) - Create a new batch of transactions to a ledger
 * [addMetadataOnTransaction](#addmetadataontransaction) - Set the metadata of a transaction by its ID
 * [addMetadataToAccount](#addmetadatatoaccount) - Add metadata to an account
 * [countAccounts](#countaccounts) - Count the accounts from a ledger
@@ -12,12 +13,157 @@
 * [getBalancesAggregated](#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [getInfo](#getinfo) - Show server information
 * [getLedgerInfo](#getledgerinfo) - Get information about a ledger
+* [getMapping](#getmapping) - Get the mapping of a ledger
 * [getTransaction](#gettransaction) - Get transaction from a ledger by its ID
 * [listAccounts](#listaccounts) - List accounts from a ledger
 * [listLogs](#listlogs) - List the logs from a ledger
 * [listTransactions](#listtransactions) - List transactions from a ledger
 * [readStats](#readstats) - Get statistics from a ledger
 * [revertTransaction](#reverttransaction) - Revert a ledger transaction by its ID
+* [~~runScript~~](#runscript) - Execute a Numscript :warning: **Deprecated**
+* [updateMapping](#updatemapping) - Update the mapping of a ledger
+
+## createTransactions
+
+Create a new batch of transactions to a ledger
+
+### Example Usage
+
+```java
+package hello.world;
+
+import com.formance.formance_sdk.SDK;
+import com.formance.formance_sdk.models.operations.CreateTransactionsRequest;
+import com.formance.formance_sdk.models.operations.CreateTransactionsResponse;
+import com.formance.formance_sdk.models.shared.Posting;
+import com.formance.formance_sdk.models.shared.Security;
+import com.formance.formance_sdk.models.shared.TransactionData;
+import com.formance.formance_sdk.models.shared.Transactions;
+import java.time.OffsetDateTime;
+
+public class Application {
+    public static void main(String[] args) {
+        try {
+            SDK sdk = SDK.builder()
+                .setSecurity(new Security("nobis") {{
+                    authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
+                }})
+                .build();
+
+            CreateTransactionsRequest req = new CreateTransactionsRequest(                new Transactions(                new com.formance.formance_sdk.models.shared.TransactionData[]{{
+                                                add(new TransactionData(                new com.formance.formance_sdk.models.shared.Posting[]{{
+                                                                    add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                                        amount = 100L;
+                                                                        asset = "COIN";
+                                                                        destination = "users:002";
+                                                                        source = "users:001";
+                                                                    }}),
+                                                                    add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                                        amount = 100L;
+                                                                        asset = "COIN";
+                                                                        destination = "users:002";
+                                                                        source = "users:001";
+                                                                    }}),
+                                                                    add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                                        amount = 100L;
+                                                                        asset = "COIN";
+                                                                        destination = "users:002";
+                                                                        source = "users:001";
+                                                                    }}),
+                                                                }}) {{
+                                                    metadata = new java.util.HashMap<String, Object>() {{
+                                                        put("nemo", "minima");
+                                                        put("excepturi", "accusantium");
+                                                        put("iure", "culpa");
+                                                    }};
+                                                    postings = new com.formance.formance_sdk.models.shared.Posting[]{{
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                    }};
+                                                    reference = "ref:001";
+                                                    timestamp = OffsetDateTime.parse("2022-09-11T06:15:44.019Z");
+                                                }}),
+                                                add(new TransactionData(                new com.formance.formance_sdk.models.shared.Posting[]{{
+                                                                    add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                                        amount = 100L;
+                                                                        asset = "COIN";
+                                                                        destination = "users:002";
+                                                                        source = "users:001";
+                                                                    }}),
+                                                                    add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                                        amount = 100L;
+                                                                        asset = "COIN";
+                                                                        destination = "users:002";
+                                                                        source = "users:001";
+                                                                    }}),
+                                                                }}) {{
+                                                    metadata = new java.util.HashMap<String, Object>() {{
+                                                        put("culpa", "consequuntur");
+                                                    }};
+                                                    postings = new com.formance.formance_sdk.models.shared.Posting[]{{
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                        add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                                            amount = 100L;
+                                                            asset = "COIN";
+                                                            destination = "users:002";
+                                                            source = "users:001";
+                                                        }}),
+                                                    }};
+                                                    reference = "ref:001";
+                                                    timestamp = OffsetDateTime.parse("2021-11-02T05:58:55.429Z");
+                                                }}),
+                                            }});, "ledger001");            
+
+            CreateTransactionsResponse res = sdk.ledger.createTransactions(req);
+
+            if (res.transactionsResponse != null) {
+                // handle response
+            }
+        } catch (Exception e) {
+            // handle exception
+        }
+    }
+}
+```
 
 ## addMetadataOnTransaction
 
@@ -37,20 +183,16 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("nobis") {{
+                .setSecurity(new Security("commodi") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             AddMetadataOnTransactionRequest req = new AddMetadataOnTransactionRequest("ledger001", 1234L) {{
-                idempotencyKey = "enim";
-                requestBody = new java.util.HashMap<String, String>() {{
-                    put("nemo", "minima");
-                    put("excepturi", "accusantium");
-                    put("iure", "culpa");
+                requestBody = new java.util.HashMap<String, Object>() {{
+                    put("molestiae", "velit");
+                    put("error", "quia");
                 }};
-                async = true;
-                dryRun = true;
             }};            
 
             AddMetadataOnTransactionResponse res = sdk.ledger.addMetadataOnTransaction(req);
@@ -83,21 +225,14 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("doloribus") {{
+                .setSecurity(new Security("quis") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
-            AddMetadataToAccountRequest req = new AddMetadataToAccountRequest(                new java.util.HashMap<String, String>() {{
-                                put("architecto", "mollitia");
-                                put("dolorem", "culpa");
-                                put("consequuntur", "repellat");
-                                put("mollitia", "occaecati");
-                            }}, "users:001", "ledger001") {{
-                idempotencyKey = "numquam";
-                async = true;
-                dryRun = true;
-            }};            
+            AddMetadataToAccountRequest req = new AddMetadataToAccountRequest(                new java.util.HashMap<String, Object>() {{
+                                put("laborum", "animi");
+                            }}, "users:001", "ledger001");            
 
             AddMetadataToAccountResponse res = sdk.ledger.addMetadataToAccount(req);
 
@@ -129,7 +264,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("commodi") {{
+                .setSecurity(new Security("enim") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -137,8 +272,7 @@ public class Application {
             CountAccountsRequest req = new CountAccountsRequest("ledger001") {{
                 address = "users:.+";
                 metadata = new java.util.HashMap<String, Object>() {{
-                    put("molestiae", "velit");
-                    put("error", "quia");
+                    put("quo", "sequi");
                 }};
             }};            
 
@@ -173,7 +307,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("quis") {{
+                .setSecurity(new Security("tenetur") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -181,15 +315,16 @@ public class Application {
             CountTransactionsRequest req = new CountTransactionsRequest("ledger001") {{
                 account = "users:001";
                 destination = "users:001";
-                endTime = OffsetDateTime.parse("2022-04-29T17:10:10.440Z");
-                metadata = new java.util.HashMap<String, String>() {{
-                    put("enim", "odit");
-                    put("quo", "sequi");
-                    put("tenetur", "ipsam");
+                endTime = OffsetDateTime.parse("2022-05-04T04:15:52.352Z");
+                metadata = new java.util.HashMap<String, Object>() {{
+                    put("aut", "quasi");
+                    put("error", "temporibus");
+                    put("laborum", "quasi");
+                    put("reiciendis", "voluptatibus");
                 }};
                 reference = "ref:001";
                 source = "users:001";
-                startTime = OffsetDateTime.parse("2021-05-11T16:11:54.761Z");
+                startTime = OffsetDateTime.parse("2021-08-05T19:50:46.898Z");
             }};            
 
             CountTransactionsResponse res = sdk.ledger.countTransactions(req);
@@ -226,15 +361,25 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("aut") {{
+                .setSecurity(new Security("praesentium") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
-            CreateTransactionRequest req = new CreateTransactionRequest(                new PostTransaction(                new java.util.HashMap<String, String>() {{
-                                                put("error", "temporibus");
-                                            }}) {{
+            CreateTransactionRequest req = new CreateTransactionRequest(                new PostTransaction() {{
+                                metadata = new java.util.HashMap<String, Object>() {{
+                                    put("ipsa", "omnis");
+                                    put("voluptate", "cum");
+                                    put("perferendis", "doloremque");
+                                    put("reprehenderit", "ut");
+                                }};
                                 postings = new com.formance.formance_sdk.models.shared.Posting[]{{
+                                    add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                        amount = 100L;
+                                        asset = "COIN";
+                                        destination = "users:002";
+                                        source = "users:001";
+                                    }}),
                                     add(new Posting(100L, "COIN", "users:002", "users:001") {{
                                         amount = 100L;
                                         asset = "COIN";
@@ -264,19 +409,17 @@ public class Application {
                                 )
                                 ") {{
                                     vars = new java.util.HashMap<String, Object>() {{
-                                        put("reiciendis", "voluptatibus");
+                                        put("corporis", "dolore");
                                     }};
                                 }};;
-                                timestamp = OffsetDateTime.parse("2021-08-05T19:50:46.898Z");
+                                timestamp = OffsetDateTime.parse("2022-11-18T15:56:41.921Z");
                             }};, "ledger001") {{
-                idempotencyKey = "praesentium";
-                async = true;
-                dryRun = true;
+                preview = true;
             }};            
 
             CreateTransactionResponse res = sdk.ledger.createTransaction(req);
 
-            if (res.createTransactionResponse != null) {
+            if (res.transactionsResponse != null) {
                 // handle response
             }
         } catch (Exception e) {
@@ -304,7 +447,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("voluptatibus") {{
+                .setSecurity(new Security("harum") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -341,15 +484,16 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("ipsa") {{
+                .setSecurity(new Security("enim") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             GetBalancesRequest req = new GetBalancesRequest("ledger001") {{
                 address = "users:001";
+                after = "users:003";
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
-                pageSize = 604846L;
+                paginationToken = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
             }};            
 
             GetBalancesResponse res = sdk.ledger.getBalances(req);
@@ -382,7 +526,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("voluptate") {{
+                .setSecurity(new Security("accusamus") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -420,7 +564,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("cum") {{
+                .setSecurity(new Security("commodi") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -455,7 +599,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("perferendis") {{
+                .setSecurity(new Security("repudiandae") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -465,6 +609,43 @@ public class Application {
             GetLedgerInfoResponse res = sdk.ledger.getLedgerInfo(req);
 
             if (res.ledgerInfoResponse != null) {
+                // handle response
+            }
+        } catch (Exception e) {
+            // handle exception
+        }
+    }
+}
+```
+
+## getMapping
+
+Get the mapping of a ledger
+
+### Example Usage
+
+```java
+package hello.world;
+
+import com.formance.formance_sdk.SDK;
+import com.formance.formance_sdk.models.operations.GetMappingRequest;
+import com.formance.formance_sdk.models.operations.GetMappingResponse;
+import com.formance.formance_sdk.models.shared.Security;
+
+public class Application {
+    public static void main(String[] args) {
+        try {
+            SDK sdk = SDK.builder()
+                .setSecurity(new Security("quae") {{
+                    authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
+                }})
+                .build();
+
+            GetMappingRequest req = new GetMappingRequest("ledger001");            
+
+            GetMappingResponse res = sdk.ledger.getMapping(req);
+
+            if (res.mappingResponse != null) {
                 // handle response
             }
         } catch (Exception e) {
@@ -492,7 +673,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("doloremque") {{
+                .setSecurity(new Security("ipsum") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -501,7 +682,7 @@ public class Application {
 
             GetTransactionResponse res = sdk.ledger.getTransaction(req);
 
-            if (res.getTransactionResponse != null) {
+            if (res.transactionResponse != null) {
                 // handle response
             }
         } catch (Exception e) {
@@ -530,21 +711,24 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("reprehenderit") {{
+                .setSecurity(new Security("quidem") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             ListAccountsRequest req = new ListAccountsRequest("ledger001") {{
                 address = "users:.+";
+                after = "users:003";
                 balance = 2400L;
                 balanceOperator = ListAccountsBalanceOperator.GTE;
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
-                metadata = new java.util.HashMap<String, String>() {{
-                    put("maiores", "dicta");
-                    put("corporis", "dolore");
+                metadata = new java.util.HashMap<String, Object>() {{
+                    put("excepturi", "pariatur");
+                    put("modi", "praesentium");
+                    put("rem", "voluptates");
                 }};
-                pageSize = 480894L;
+                pageSize = 93940L;
+                paginationToken = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
             }};            
 
             ListAccountsResponse res = sdk.ledger.listAccounts(req);
@@ -578,16 +762,18 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("dicta") {{
+                .setSecurity(new Security("repudiandae") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             ListLogsRequest req = new ListLogsRequest("ledger001") {{
+                after = "1234";
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
-                endTime = OffsetDateTime.parse("2022-05-13T20:56:04.612Z");
-                pageSize = 880476L;
-                startTime = OffsetDateTime.parse("2022-01-30T20:15:26.045Z");
+                endTime = OffsetDateTime.parse("2022-11-01T07:52:08.326Z");
+                pageSize = 929297L;
+                paginationToken = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
+                startTime = OffsetDateTime.parse("2022-09-06T17:20:08.756Z");
             }};            
 
             ListLogsResponse res = sdk.ledger.listLogs(req);
@@ -621,25 +807,25 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("quae") {{
+                .setSecurity(new Security("consequatur") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             ListTransactionsRequest req = new ListTransactionsRequest("ledger001") {{
                 account = "users:001";
+                after = "1234";
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
                 destination = "users:001";
-                endTime = OffsetDateTime.parse("2022-04-23T05:56:38.936Z");
-                metadata = new java.util.HashMap<String, String>() {{
-                    put("excepturi", "pariatur");
-                    put("modi", "praesentium");
-                    put("rem", "voluptates");
+                endTime = OffsetDateTime.parse("2021-04-26T02:10:00.226Z");
+                metadata = new java.util.HashMap<String, Object>() {{
+                    put("deserunt", "distinctio");
                 }};
-                pageSize = 93940L;
+                pageSize = 841386L;
+                paginationToken = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
                 reference = "ref:001";
                 source = "users:001";
-                startTime = OffsetDateTime.parse("2021-04-10T08:07:33.561Z");
+                startTime = OffsetDateTime.parse("2022-09-26T08:57:48.803Z");
             }};            
 
             ListTransactionsResponse res = sdk.ledger.listTransactions(req);
@@ -673,7 +859,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("veritatis") {{
+                .setSecurity(new Security("qui") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -710,7 +896,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("itaque") {{
+                .setSecurity(new Security("aliquid") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -719,7 +905,123 @@ public class Application {
 
             RevertTransactionResponse res = sdk.ledger.revertTransaction(req);
 
-            if (res.revertTransactionResponse != null) {
+            if (res.transactionResponse != null) {
+                // handle response
+            }
+        } catch (Exception e) {
+            // handle exception
+        }
+    }
+}
+```
+
+## ~~runScript~~
+
+This route is deprecated, and has been merged into `POST /{ledger}/transactions`.
+
+
+> :warning: **DEPRECATED**: this method will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+```java
+package hello.world;
+
+import com.formance.formance_sdk.SDK;
+import com.formance.formance_sdk.models.operations.RunScriptRequest;
+import com.formance.formance_sdk.models.operations.RunScriptResponse;
+import com.formance.formance_sdk.models.shared.Script;
+import com.formance.formance_sdk.models.shared.Security;
+
+public class Application {
+    public static void main(String[] args) {
+        try {
+            SDK sdk = SDK.builder()
+                .setSecurity(new Security("cupiditate") {{
+                    authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
+                }})
+                .build();
+
+            RunScriptRequest req = new RunScriptRequest(                new Script("vars {
+                            account $user
+                            }
+                            send [COIN 10] (
+                            	source = @world
+                            	destination = $user
+                            )
+                            ") {{
+                                metadata = new java.util.HashMap<String, Object>() {{
+                                    put("perferendis", "magni");
+                                    put("assumenda", "ipsam");
+                                    put("alias", "fugit");
+                                }};
+                                reference = "order_1234";
+                                vars = new java.util.HashMap<String, Object>() {{
+                                    put("excepturi", "tempora");
+                                    put("facilis", "tempore");
+                                    put("labore", "delectus");
+                                }};
+                            }};, "ledger001") {{
+                preview = true;
+            }};            
+
+            RunScriptResponse res = sdk.ledger.runScript(req);
+
+            if (res.scriptResponse != null) {
+                // handle response
+            }
+        } catch (Exception e) {
+            // handle exception
+        }
+    }
+}
+```
+
+## updateMapping
+
+Update the mapping of a ledger
+
+### Example Usage
+
+```java
+package hello.world;
+
+import com.formance.formance_sdk.SDK;
+import com.formance.formance_sdk.models.operations.UpdateMappingRequest;
+import com.formance.formance_sdk.models.operations.UpdateMappingResponse;
+import com.formance.formance_sdk.models.shared.Contract;
+import com.formance.formance_sdk.models.shared.Mapping;
+import com.formance.formance_sdk.models.shared.Security;
+
+public class Application {
+    public static void main(String[] args) {
+        try {
+            SDK sdk = SDK.builder()
+                .setSecurity(new Security("eum") {{
+                    authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
+                }})
+                .build();
+
+            UpdateMappingRequest req = new UpdateMappingRequest(                new Mapping(                new com.formance.formance_sdk.models.shared.Contract[]{{
+                                                add(new Contract(                new java.util.HashMap<String, Object>() {{
+                                                                    put("dolorum", "in");
+                                                                    put("in", "illum");
+                                                                    put("maiores", "rerum");
+                                                                    put("dicta", "magnam");
+                                                                }}) {{
+                                                    account = "users:001";
+                                                    expr = new java.util.HashMap<String, Object>() {{
+                                                        put("sint", "aliquid");
+                                                        put("provident", "necessitatibus");
+                                                        put("sint", "officia");
+                                                        put("dolor", "debitis");
+                                                    }};
+                                                }}),
+                                            }});, "ledger001");            
+
+            UpdateMappingResponse res = sdk.ledger.updateMapping(req);
+
+            if (res.mappingResponse != null) {
                 // handle response
             }
         } catch (Exception e) {

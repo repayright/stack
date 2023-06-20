@@ -11,6 +11,8 @@ import (
 type ListTransactionsRequest struct {
 	// Filter transactions with postings involving given account, either as source or destination (regular expression placed between ^ and $).
 	Account *string `queryParam:"style=form,explode=true,name=account"`
+	// Pagination cursor, will return transactions after given txid (in descending order).
+	After *string `queryParam:"style=form,explode=true,name=after"`
 	// Parameter used in pagination requests. Maximum page size is set to 15.
 	// Set to the value of next for the next page of results.
 	// Set to the value of previous for the previous page of results.
@@ -25,11 +27,20 @@ type ListTransactionsRequest struct {
 	EndTime *time.Time `queryParam:"style=form,explode=true,name=endTime"`
 	// Name of the ledger.
 	Ledger string `pathParam:"style=simple,explode=false,name=ledger"`
-	// Filter transactions by metadata key value pairs.
-	Metadata map[string]string `queryParam:"style=deepObject,explode=true,name=metadata"`
+	// Filter transactions by metadata key value pairs. Nested objects can be used as seen in the example below.
+	Metadata map[string]interface{} `queryParam:"style=deepObject,explode=true,name=metadata"`
 	// The maximum number of results to return per page.
 	//
 	PageSize *int64 `queryParam:"style=form,explode=true,name=pageSize"`
+	// Parameter used in pagination requests. Maximum page size is set to 15.
+	// Set to the value of next for the next page of results.
+	// Set to the value of previous for the previous page of results.
+	// No other parameters can be set when this parameter is set.
+	// Deprecated, please use `cursor` instead.
+	//
+	//
+	// Deprecated: this field will be removed in a future release, please migrate away from it as soon as possible.
+	PaginationToken *string `queryParam:"style=form,explode=true,name=pagination_token"`
 	// Find transactions by reference field.
 	Reference *string `queryParam:"style=form,explode=true,name=reference"`
 	// Filter transactions with postings involving given account at source (regular expression placed between ^ and $).

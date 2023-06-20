@@ -78,6 +78,7 @@ sdk.getVersions().then((res: GetVersionsResponse) => {
 
 ### [ledger](docs/ledger/README.md)
 
+* [createTransactions](docs/ledger/README.md#createtransactions) - Create a new batch of transactions to a ledger
 * [addMetadataOnTransaction](docs/ledger/README.md#addmetadataontransaction) - Set the metadata of a transaction by its ID
 * [addMetadataToAccount](docs/ledger/README.md#addmetadatatoaccount) - Add metadata to an account
 * [countAccounts](docs/ledger/README.md#countaccounts) - Count the accounts from a ledger
@@ -88,12 +89,15 @@ sdk.getVersions().then((res: GetVersionsResponse) => {
 * [getBalancesAggregated](docs/ledger/README.md#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [getInfo](docs/ledger/README.md#getinfo) - Show server information
 * [getLedgerInfo](docs/ledger/README.md#getledgerinfo) - Get information about a ledger
+* [getMapping](docs/ledger/README.md#getmapping) - Get the mapping of a ledger
 * [getTransaction](docs/ledger/README.md#gettransaction) - Get transaction from a ledger by its ID
 * [listAccounts](docs/ledger/README.md#listaccounts) - List accounts from a ledger
 * [listLogs](docs/ledger/README.md#listlogs) - List the logs from a ledger
 * [listTransactions](docs/ledger/README.md#listtransactions) - List transactions from a ledger
 * [readStats](docs/ledger/README.md#readstats) - Get statistics from a ledger
 * [revertTransaction](docs/ledger/README.md#reverttransaction) - Revert a ledger transaction by its ID
+* [~~runScript~~](docs/ledger/README.md#runscript) - Execute a Numscript :warning: **Deprecated**
+* [updateMapping](docs/ledger/README.md#updatemapping) - Update the mapping of a ledger
 
 ### [orchestration](docs/orchestration/README.md)
 

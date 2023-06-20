@@ -2,6 +2,7 @@
 
 ### Available Operations
 
+* [createTransactions](#createtransactions) - Create a new batch of transactions to a ledger
 * [addMetadataOnTransaction](#addmetadataontransaction) - Set the metadata of a transaction by its ID
 * [addMetadataToAccount](#addmetadatatoaccount) - Add metadata to an account
 * [countAccounts](#countaccounts) - Count the accounts from a ledger
@@ -12,12 +13,67 @@
 * [getBalancesAggregated](#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [getInfo](#getinfo) - Show server information
 * [getLedgerInfo](#getledgerinfo) - Get information about a ledger
+* [getMapping](#getmapping) - Get the mapping of a ledger
 * [getTransaction](#gettransaction) - Get transaction from a ledger by its ID
 * [listAccounts](#listaccounts) - List accounts from a ledger
 * [listLogs](#listlogs) - List the logs from a ledger
 * [listTransactions](#listtransactions) - List transactions from a ledger
 * [readStats](#readstats) - Get statistics from a ledger
 * [revertTransaction](#reverttransaction) - Revert a ledger transaction by its ID
+* [~~runScript~~](#runscript) - Execute a Numscript :warning: **Deprecated**
+* [updateMapping](#updatemapping) - Update the mapping of a ledger
+
+## createTransactions
+
+Create a new batch of transactions to a ledger
+
+### Example Usage
+
+```typescript
+import { SDK } from "@formance/formance-sdk";
+import { CreateTransactionsResponse } from "@formance/formance-sdk/dist/sdk/models/operations";
+import { ErrorsEnum } from "@formance/formance-sdk/dist/sdk/models/shared";
+
+const sdk = new SDK({
+  security: {
+    authorization: "Bearer YOUR_ACCESS_TOKEN_HERE",
+  },
+});
+
+sdk.ledger.createTransactions({
+  transactions: {
+    transactions: [
+      {
+        metadata: {
+          "explicabo": "nobis",
+          "enim": "omnis",
+        },
+        postings: [
+          {
+            amount: 100,
+            asset: "COIN",
+            destination: "users:002",
+            source: "users:001",
+          },
+          {
+            amount: 100,
+            asset: "COIN",
+            destination: "users:002",
+            source: "users:001",
+          },
+        ],
+        reference: "ref:001",
+        timestamp: new Date("2022-06-06T21:04:34.044Z"),
+      },
+    ],
+  },
+  ledger: "ledger001",
+}).then((res: CreateTransactionsResponse) => {
+  if (res.statusCode == 200) {
+    // handle response
+  }
+});
+```
 
 ## addMetadataOnTransaction
 
@@ -37,13 +93,9 @@ const sdk = new SDK({
 });
 
 sdk.ledger.addMetadataOnTransaction({
-  idempotencyKey: "dolorem",
   requestBody: {
-    "explicabo": "nobis",
-    "enim": "omnis",
+    "iure": "culpa",
   },
-  async: true,
-  dryRun: true,
   ledger: "ledger001",
   txid: 1234,
 }).then((res: AddMetadataOnTransactionResponse) => {
@@ -71,14 +123,13 @@ const sdk = new SDK({
 });
 
 sdk.ledger.addMetadataToAccount({
-  idempotencyKey: "nemo",
   requestBody: {
-    "excepturi": "accusantium",
-    "iure": "culpa",
+    "sapiente": "architecto",
+    "mollitia": "dolorem",
+    "culpa": "consequuntur",
+    "repellat": "mollitia",
   },
   address: "users:001",
-  async: true,
-  dryRun: true,
   ledger: "ledger001",
 }).then((res: AddMetadataToAccountResponse) => {
   if (res.statusCode == 200) {
@@ -108,10 +159,9 @@ sdk.ledger.countAccounts({
   address: "users:.+",
   ledger: "ledger001",
   metadata: {
-    "sapiente": "architecto",
-    "mollitia": "dolorem",
-    "culpa": "consequuntur",
-    "repellat": "mollitia",
+    "numquam": "commodi",
+    "quam": "molestiae",
+    "velit": "error",
   },
 }).then((res: CountAccountsResponse) => {
   if (res.statusCode == 200) {
@@ -140,15 +190,14 @@ const sdk = new SDK({
 sdk.ledger.countTransactions({
   account: "users:001",
   destination: "users:001",
-  endTime: new Date("2022-06-30T02:19:51.375Z"),
+  endTime: new Date("2022-08-30T15:03:11.112Z"),
   ledger: "ledger001",
   metadata: {
-    "quam": "molestiae",
-    "velit": "error",
+    "laborum": "animi",
   },
   reference: "ref:001",
   source: "users:001",
-  startTime: new Date("2022-08-30T15:03:11.112Z"),
+  startTime: new Date("2022-11-11T13:31:01.643Z"),
 }).then((res: CountTransactionsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -174,14 +223,26 @@ const sdk = new SDK({
 });
 
 sdk.ledger.createTransaction({
-  idempotencyKey: "vitae",
   postTransaction: {
     metadata: {
-      "animi": "enim",
-      "odit": "quo",
       "sequi": "tenetur",
+      "ipsam": "id",
+      "possimus": "aut",
+      "quasi": "error",
     },
     postings: [
+      {
+        amount: 100,
+        asset: "COIN",
+        destination: "users:002",
+        source: "users:001",
+      },
+      {
+        amount: 100,
+        asset: "COIN",
+        destination: "users:002",
+        source: "users:001",
+      },
       {
         amount: 100,
         asset: "COIN",
@@ -206,16 +267,15 @@ sdk.ledger.createTransaction({
     )
     ",
       vars: {
-        "possimus": "aut",
-        "quasi": "error",
-        "temporibus": "laborum",
+        "quasi": "reiciendis",
+        "voluptatibus": "vero",
+        "nihil": "praesentium",
       },
     },
-    timestamp: new Date("2022-01-11T05:45:42.485Z"),
+    timestamp: new Date("2022-10-31T23:49:03.388Z"),
   },
-  async: true,
-  dryRun: true,
   ledger: "ledger001",
+  preview: true,
 }).then((res: CreateTransactionResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -269,9 +329,10 @@ const sdk = new SDK({
 
 sdk.ledger.getBalances({
   address: "users:001",
+  after: "users:003",
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   ledger: "ledger001",
-  pageSize: 976460,
+  paginationToken: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
 }).then((res: GetBalancesResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -356,6 +417,32 @@ sdk.ledger.getLedgerInfo({
 });
 ```
 
+## getMapping
+
+Get the mapping of a ledger
+
+### Example Usage
+
+```typescript
+import { SDK } from "@formance/formance-sdk";
+import { GetMappingResponse } from "@formance/formance-sdk/dist/sdk/models/operations";
+import { ErrorsEnum } from "@formance/formance-sdk/dist/sdk/models/shared";
+
+const sdk = new SDK({
+  security: {
+    authorization: "Bearer YOUR_ACCESS_TOKEN_HERE",
+  },
+});
+
+sdk.ledger.getMapping({
+  ledger: "ledger001",
+}).then((res: GetMappingResponse) => {
+  if (res.statusCode == 200) {
+    // handle response
+  }
+});
+```
+
 ## getTransaction
 
 Get transaction from a ledger by its ID
@@ -402,17 +489,18 @@ const sdk = new SDK({
 
 sdk.ledger.listAccounts({
   address: "users:.+",
+  after: "users:003",
   balance: 2400,
   balanceOperator: ListAccountsBalanceOperator.Gte,
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   ledger: "ledger001",
   metadata: {
-    "nihil": "praesentium",
-    "voluptatibus": "ipsa",
-    "omnis": "voluptate",
-    "cum": "perferendis",
+    "voluptate": "cum",
+    "perferendis": "doloremque",
+    "reprehenderit": "ut",
   },
-  pageSize: 39187,
+  pageSize: 979587,
+  paginationToken: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
 }).then((res: ListAccountsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -438,11 +526,13 @@ const sdk = new SDK({
 });
 
 sdk.ledger.listLogs({
+  after: "1234",
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  endTime: new Date("2022-09-19T18:36:39.009Z"),
+  endTime: new Date("2022-08-22T19:15:58.586Z"),
   ledger: "ledger001",
-  pageSize: 979587,
-  startTime: new Date("2022-08-22T19:15:58.586Z"),
+  pageSize: 296140,
+  paginationToken: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
+  startTime: new Date("2022-11-18T15:56:41.921Z"),
 }).then((res: ListLogsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -469,17 +559,22 @@ const sdk = new SDK({
 
 sdk.ledger.listTransactions({
   account: "users:001",
+  after: "1234",
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   destination: "users:001",
-  endTime: new Date("2022-07-09T11:22:20.922Z"),
+  endTime: new Date("2022-05-13T20:56:04.612Z"),
   ledger: "ledger001",
   metadata: {
-    "harum": "enim",
+    "commodi": "repudiandae",
+    "quae": "ipsum",
+    "quidem": "molestias",
+    "excepturi": "pariatur",
   },
-  pageSize: 880476,
+  pageSize: 265389,
+  paginationToken: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   reference: "ref:001",
   source: "users:001",
-  startTime: new Date("2022-01-30T20:15:26.045Z"),
+  startTime: new Date("2021-12-15T00:41:38.329Z"),
 }).then((res: ListTransactionsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -535,6 +630,102 @@ sdk.ledger.revertTransaction({
   ledger: "ledger001",
   txid: 1234,
 }).then((res: RevertTransactionResponse) => {
+  if (res.statusCode == 200) {
+    // handle response
+  }
+});
+```
+
+## ~~runScript~~
+
+This route is deprecated, and has been merged into `POST /{ledger}/transactions`.
+
+
+> :warning: **DEPRECATED**: this method will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+```typescript
+import { SDK } from "@formance/formance-sdk";
+import { RunScriptResponse } from "@formance/formance-sdk/dist/sdk/models/operations";
+import { ErrorsEnum } from "@formance/formance-sdk/dist/sdk/models/shared";
+
+const sdk = new SDK({
+  security: {
+    authorization: "Bearer YOUR_ACCESS_TOKEN_HERE",
+  },
+});
+
+sdk.ledger.runScript({
+  script: {
+    metadata: {
+      "quasi": "repudiandae",
+      "sint": "veritatis",
+      "itaque": "incidunt",
+      "enim": "consequatur",
+    },
+    plain: "vars {
+  account $user
+  }
+  send [COIN 10] (
+  	source = @world
+  	destination = $user
+  )
+  ",
+    reference: "order_1234",
+    vars: {
+      "quibusdam": "explicabo",
+      "deserunt": "distinctio",
+      "quibusdam": "labore",
+    },
+  },
+  ledger: "ledger001",
+  preview: true,
+}).then((res: RunScriptResponse) => {
+  if (res.statusCode == 200) {
+    // handle response
+  }
+});
+```
+
+## updateMapping
+
+Update the mapping of a ledger
+
+### Example Usage
+
+```typescript
+import { SDK } from "@formance/formance-sdk";
+import { UpdateMappingResponse } from "@formance/formance-sdk/dist/sdk/models/operations";
+import { ErrorsEnum } from "@formance/formance-sdk/dist/sdk/models/shared";
+
+const sdk = new SDK({
+  security: {
+    authorization: "Bearer YOUR_ACCESS_TOKEN_HERE",
+  },
+});
+
+sdk.ledger.updateMapping({
+  mapping: {
+    contracts: [
+      {
+        account: "users:001",
+        expr: {
+          "aliquid": "cupiditate",
+        },
+      },
+      {
+        account: "users:001",
+        expr: {
+          "perferendis": "magni",
+          "assumenda": "ipsam",
+          "alias": "fugit",
+        },
+      },
+    ],
+  },
+  ledger: "ledger001",
+}).then((res: UpdateMappingResponse) => {
   if (res.statusCode == 200) {
     // handle response
   }

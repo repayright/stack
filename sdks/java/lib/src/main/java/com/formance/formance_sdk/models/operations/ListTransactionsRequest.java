@@ -21,6 +21,17 @@ public class ListTransactionsRequest {
     }
     
     /**
+     * Pagination cursor, will return transactions after given txid (in descending order).
+     */
+    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=after")
+    public String after;
+
+    public ListTransactionsRequest withAfter(String after) {
+        this.after = after;
+        return this;
+    }
+    
+    /**
      * Parameter used in pagination requests. Maximum page size is set to 15.
      * Set to the value of next for the next page of results.
      * Set to the value of previous for the previous page of results.
@@ -71,12 +82,12 @@ public class ListTransactionsRequest {
     }
     
     /**
-     * Filter transactions by metadata key value pairs.
+     * Filter transactions by metadata key value pairs. Nested objects can be used as seen in the example below.
      */
     @SpeakeasyMetadata("queryParam:style=deepObject,explode=true,name=metadata")
-    public java.util.Map<String, String> metadata;
+    public java.util.Map<String, Object> metadata;
 
-    public ListTransactionsRequest withMetadata(java.util.Map<String, String> metadata) {
+    public ListTransactionsRequest withMetadata(java.util.Map<String, Object> metadata) {
         this.metadata = metadata;
         return this;
     }
@@ -90,6 +101,25 @@ public class ListTransactionsRequest {
 
     public ListTransactionsRequest withPageSize(Long pageSize) {
         this.pageSize = pageSize;
+        return this;
+    }
+    
+    /**
+     * Parameter used in pagination requests. Maximum page size is set to 15.
+     * Set to the value of next for the next page of results.
+     * Set to the value of previous for the previous page of results.
+     * No other parameters can be set when this parameter is set.
+     * Deprecated, please use `cursor` instead.
+     * 
+     * @deprecated this field will be removed in a future release, please migrate away from it as soon as possible
+     */
+    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=pagination_token")
+    @Deprecated
+    public String paginationToken;
+
+    @Deprecated
+    public ListTransactionsRequest withPaginationToken(String paginationToken) {
+        this.paginationToken = paginationToken;
         return this;
     }
     
