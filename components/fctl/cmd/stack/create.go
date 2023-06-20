@@ -292,8 +292,5 @@ func (c *StackCreateController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 }
 
 func (c *StackCreateController) Render(cmd *cobra.Command, args []string) error {
-
-	data := c.store.GetData().(*StackCreate)
-
-	return internal.PrintStackInformation(cmd.OutOrStdout(), c.store.GetProfile(), data.Stack, data.Versions)
+	return internal.PrintStackInformation(cmd.OutOrStdout(), c.profile, c.store.Stack, c.store.Versions)
 }
