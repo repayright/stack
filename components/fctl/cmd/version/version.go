@@ -1,4 +1,4 @@
-package cmd
+package version
 
 import (
 	"fmt"
@@ -14,55 +14,55 @@ var (
 	Version = "develop"
 )
 
-type VersionStruct struct {
+type VersionStore struct {
 	Version   string `json:"version" yaml:"version"`
 	BuildDate string `json:"buildDate" yaml:"buildDate"`
 	Commit    string `json:"commit" yaml:"commit"`
 }
 type VersionController struct {
-	store *fctl.SharedStore
+	store *VersionStore
 }
 
-func NewVersion() *VersionController {
-	return &VersionController{
-		store: fctl.NewSharedStore(),
-	}
-}
+var _ fctl.Controller[*VersionStore] = (*VersionController)(nil)
 
-func NewVersionCommand() *cobra.Command {
-	return fctl.NewCommand("version",
-		fctl.WithShortDescription("Get version"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController(NewVersion()),
-	)
-}
-
-func (c *VersionController) GetStore() *fctl.SharedStore {
-	return c.store
-}
-
-func (c *VersionController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-
-	version := &VersionStruct{
+func NewDefaultVersionStore() *VersionStore {
+	return &VersionStore{
 		Version:   "develop",
 		BuildDate: "-",
 		Commit:    "-",
 	}
+}
 
-	c.GetStore().SetData(version)
+func NewVersionController() *VersionController {
+	return &VersionController{
+		store: NewDefaultVersionStore(),
+	}
+}
 
+func NewCommand() *cobra.Command {
+	return fctl.NewCommand("version",
+		fctl.WithShortDescription("Get version"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*VersionStore](NewVersionController()),
+	)
+}
+
+func (c *VersionController) GetStore() *VersionStore {
+	return c.store
+}
+
+func (c *VersionController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
 	return c, nil
 }
 
 // TODO: This need to use the ui.NewListModel
 func (c *VersionController) Render(cmd *cobra.Command, args []string) error {
-	data := c.GetStore().GetData().(*VersionStruct)
 
 	// Default List
 	items := []list.Item{
-		ui.NewItem(pterm.LightCyan("Version"), data.Version),
-		ui.NewItem(pterm.LightCyan("Date"), data.BuildDate),
-		ui.NewItem(pterm.LightCyan("Commit"), data.Commit),
+		ui.NewItem(pterm.LightCyan("Version"), c.store.Version),
+		ui.NewItem(pterm.LightCyan("Date"), c.store.BuildDate),
+		ui.NewItem(pterm.LightCyan("Commit"), c.store.Commit),
 	}
 
 	model, err := ui.NewDefaultListModel(items, false)

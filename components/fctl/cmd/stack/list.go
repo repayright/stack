@@ -37,14 +37,27 @@ const (
 	maxLengthStackDeletedAt = 20
 )
 
+type StackListStore struct {
+	Stacks []membershipclient.Stack `json:"stacks"`
+}
+
 type StackListController struct {
-	store        *fctl.SharedStore
+	store        *StackListStore
+	profile      *fctl.Profile
 	organization string
+}
+
+var _ fctl.Controller[*StackListStore] = (*StackListController)(nil)
+
+func NewDefaultStackListStore() *StackListStore {
+	return &StackListStore{
+		Stacks: []membershipclient.Stack{},
+	}
 }
 
 func NewStackListController() *StackListController {
 	return &StackListController{
-		store: fctl.NewSharedStore(),
+		store: NewDefaultStackListStore(),
 	}
 }
 
@@ -54,10 +67,10 @@ func NewListCommand() *cobra.Command {
 		fctl.WithShortDescription("List stacks"),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithBoolFlag(deletedFlag, false, "Display deleted stacks"),
-		fctl.WithController(NewStackListController()),
+		fctl.WithController[*StackListStore](NewStackListController()),
 	)
 }
-func (c *StackListController) GetStore() *fctl.SharedStore {
+func (c *StackListController) GetStore() *StackListStore {
 	return c.store
 }
 
@@ -92,19 +105,14 @@ func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 		return nil, nil
 	}
 
-	c.store.SetData(rsp.Data)
-	c.store.SetProfile(profile)
+	c.store.Stacks = rsp.Data
+	c.profile = profile
 	c.organization = organization
 
 	return c, nil
 }
 
 func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
-	data, ok := c.store.GetData().([]membershipclient.Stack)
-	if !ok {
-		return errors.New("invalid shared data")
-	}
-
 	// Default Columns
 	columns := ui.NewArrayColumn(
 		ui.NewColumn("Organization Id", maxLengthOrganizationId),
@@ -121,12 +129,12 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create table data
-	tableData := fctl.Map(data, func(stack membershipclient.Stack) table.Row {
+	tableData := fctl.Map(c.store.Stacks, func(stack membershipclient.Stack) table.Row {
 		data := []string{
 			c.organization,
 			stack.Id,
 			stack.Name,
-			c.store.GetProfile().ServicesBaseUrl(&stack).String(),
+			c.profile.ServicesBaseUrl(&stack).String(),
 			stack.RegionID,
 			stack.CreatedAt.Format(time.RFC3339),
 		}
