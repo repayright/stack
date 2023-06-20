@@ -37,66 +37,72 @@ const (
 	maxLengthStackDeletedAt = 20
 )
 
+type StackListController struct {
+	store        *fctl.SharedStore
+	organization string
+}
+
+func NewStackListController() *StackListController {
+	return &StackListController{
+		store: fctl.NewSharedStore(),
+	}
+}
+
 func NewListCommand() *cobra.Command {
 	return fctl.NewMembershipCommand("list",
 		fctl.WithAliases("ls", "l"),
 		fctl.WithShortDescription("List stacks"),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithBoolFlag(deletedFlag, false, "Display deleted stacks"),
-		fctl.WithRunE(listCommand),
-		fctl.WrapOutputPostRunE(formatViewStackListAsTable),
+		fctl.WithController(NewStackListController()),
 	)
 }
+func (c *StackListController) GetStore() *fctl.SharedStore {
+	return c.store
+}
 
-func listCommand(cmd *cobra.Command, args []string) error {
+func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+
 	cfg, err := fctl.GetConfig(cmd)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	profile := fctl.GetCurrentProfile(cmd, cfg)
 
 	organization, err := fctl.ResolveOrganizationID(cmd, cfg)
 	if err != nil {
-		return errors.Wrap(err, "searching default organization")
+		return nil, errors.Wrap(err, "searching default organization")
 	}
 
 	apiClient, err := fctl.NewMembershipClient(cmd, cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	rsp, _, err := apiClient.DefaultApi.ListStacks(cmd.Context(), organization).
 		Deleted(fctl.GetBool(cmd, deletedFlag)).
 		Execute()
 	if err != nil {
-		return errors.Wrap(err, "listing stacks")
+		return nil, errors.Wrap(err, "listing stacks")
 	}
 
 	if len(rsp.Data) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "No stacks found.")
-		return nil
+		return nil, nil
 	}
 
-	//Create map for addtionnal data containing the organization
-	additionalData := map[string]interface{}{
-		orgKey: organization,
-	}
+	c.store.SetData(rsp.Data)
+	c.store.SetProfile(profile)
+	c.organization = organization
 
-	fctl.SetSharedData(rsp.Data, profile, cfg, additionalData)
-
-	return nil
+	return c, nil
 }
 
-func formatViewStackListAsTable(cmd *cobra.Command, args []string) error {
-	data, ok := fctl.GetSharedData().([]membershipclient.Stack)
+func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
+	data, ok := c.store.GetData().([]membershipclient.Stack)
 	if !ok {
 		return errors.New("invalid shared data")
-	}
-
-	organization, ok := fctl.GetSharedAdditionnalData(orgKey).(string)
-	if !ok {
-		return errors.New("invalid shared additional data")
 	}
 
 	// Default Columns
@@ -117,10 +123,10 @@ func formatViewStackListAsTable(cmd *cobra.Command, args []string) error {
 	// Create table data
 	tableData := fctl.Map(data, func(stack membershipclient.Stack) table.Row {
 		data := []string{
-			organization,
+			c.organization,
 			stack.Id,
 			stack.Name,
-			fctl.GetSharedProfile().ServicesBaseUrl(&stack).String(),
+			c.store.GetProfile().ServicesBaseUrl(&stack).String(),
 			stack.RegionID,
 			stack.CreatedAt.Format(time.RFC3339),
 		}
