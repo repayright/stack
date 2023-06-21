@@ -1,7 +1,6 @@
 package connectors
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
@@ -95,7 +94,7 @@ func (c *PaymentsGetConfigController) Run(cmd *cobra.Command, args []string) (fc
 func (c *PaymentsGetConfigController) Render(cmd *cobra.Command, args []string) error {
 	var err error
 
-	switch c.args[0] {
+	switch args[0] {
 	case internal.StripeConnector:
 		err = views.DisplayStripeConfig(cmd, c.store.ConnectorConfig)
 	case internal.ModulrConnector:
@@ -106,50 +105,13 @@ func (c *PaymentsGetConfigController) Render(cmd *cobra.Command, args []string) 
 		err = views.DisplayCurrencyCloudConfig(cmd, c.store.ConnectorConfig)
 	case internal.WiseConnector:
 		err = views.DisplayWiseConfig(cmd, c.store.ConnectorConfig)
+	case internal.MangoPayConnector:
+		err = views.DisplayMangoPayConfig(cmd, c.store.ConnectorConfig)
+	case internal.MoneycorpConnector:
+		err = views.DisplayMoneycorpConfig(cmd, c.store.ConnectorConfig)
 	default:
 		pterm.Error.WithWriter(cmd.OutOrStderr()).Printfln("Connection unknown.")
 	}
-
 	return err
 
-}
-
-func displayMangoPayConfig(cmd *cobra.Command, connectorConfig *shared.ConnectorConfigResponse) error {
-	config, ok := connectorConfig.Data.(*shared.MangoPayConfig)
-	if !ok {
-		return errors.New("invalid currency cloud connector config")
-	}
-
-	tableData := pterm.TableData{}
-	tableData = append(tableData, []string{pterm.LightCyan("API key:"), config.APIKey})
-	tableData = append(tableData, []string{pterm.LightCyan("Client ID:"), config.ClientID})
-	tableData = append(tableData, []string{pterm.LightCyan("Endpoint:"), config.Endpoint})
-
-	if err := pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
-		WithData(tableData).
-		Render(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func displayMoneycorpConfig(cmd *cobra.Command, connectorConfig *shared.ConnectorConfigResponse) error {
-	config, ok := connectorConfig.Data.(*shared.MoneycorpConfig)
-	if !ok {
-		return errors.New("invalid currency cloud connector config")
-	}
-
-	tableData := pterm.TableData{}
-	tableData = append(tableData, []string{pterm.LightCyan("API key:"), config.APIKey})
-	tableData = append(tableData, []string{pterm.LightCyan("Client ID:"), config.ClientID})
-	tableData = append(tableData, []string{pterm.LightCyan("Endpoint:"), config.Endpoint})
-
-	if err := pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
-		WithData(tableData).
-		Render(); err != nil {
-		return err
-	}
-	return nil
 }
