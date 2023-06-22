@@ -78,6 +78,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/talal/go-bits v0.0.0-20200204154716-071e9f3e66e1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	github.com/zitadel/oidc v1.13.4
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db // indirect
 	golang.org/x/net v0.11.0 // indirect
