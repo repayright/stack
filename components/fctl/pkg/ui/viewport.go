@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	ViewWidth  = 200
-	ViewHeight = 35
+	ViewWidth  = 300 //Number of characters
+	ViewHeight = 120 // Number of lines
 )
 
 // https://github.com/charmbracelet/bubbletea/blob/master/examples/pager/main.go#L92
