@@ -1,11 +1,12 @@
-package ui
+package list
 
 import (
 	"fmt"
 	"io"
 
-	"github.com/charmbracelet/bubbles/list"
+	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	fctl "github.com/formancehq/fctl/pkg"
 )
 
 type Item struct {
@@ -49,9 +50,9 @@ func (d ItemDelegate) Height() int {
 func (d *ItemDelegate) SetHeight(i int) {
 	d.height = i
 }
-func (d ItemDelegate) Spacing() int                            { return 1 }
-func (d ItemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
-func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
+func (d ItemDelegate) Spacing() int                             { return 1 }
+func (d ItemDelegate) Update(_ tea.Msg, _ *blist.Model) tea.Cmd { return nil }
+func (d ItemDelegate) Render(w io.Writer, m blist.Model, index int, item blist.Item) {
 	i, ok := item.(*Item)
 
 	if !ok {
@@ -65,7 +66,7 @@ func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 		str = fmt.Sprintf("%s\n%s", i.GetTitle(), i.GetDescription())
 	}
 
-	str = ItemStyle.Render(str)
+	str = fctl.ItemStyle.Render(str)
 
 	_, err := fmt.Fprint(w, str)
 	if err != nil {

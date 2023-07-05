@@ -1,4 +1,4 @@
-package ui
+package list
 
 import (
 	"errors"
@@ -41,7 +41,7 @@ func NewDefaultListModel(items []list.Item, help bool) (*ListModel, error) {
 		return nil, errors.New("FIRST_ITEMS_NOT_ITEM")
 	}
 
-	m := NewListModel(items, NewItemDelegate(firstItem.GetHeight()), ViewWidth, ViewHeight, help).WithMaxPossibleWidth()
+	m := NewListModel(items, NewItemDelegate(firstItem.GetHeight()), fctl.ViewWidth, fctl.ViewHeight, help).WithMaxPossibleWidth()
 
 	m, err := m.WithMaxPossibleHeight()
 	if err != nil {
@@ -55,16 +55,8 @@ func (m ListModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m ListModel) helpView() string {
-	return HelpStyle.Render("Formance CLI: \n • ↑/↓: Navigate \n • q: Quit")
-}
-
 func (m ListModel) View() string {
-	if m.help {
-		return m.helpView() + "\n" + DocStyle.Render(m.list.View())
-	}
-
-	return DocStyle.Render(m.list.View())
+	return fctl.DocStyle.Render(m.list.View())
 }
 
 func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

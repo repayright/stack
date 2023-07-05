@@ -7,6 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	Version = "develop"
+)
+
 type persistedConfig struct {
 	CurrentProfile string              `json:"currentProfile"`
 	Profiles       map[string]*Profile `json:"profiles"`

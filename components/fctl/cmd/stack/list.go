@@ -171,10 +171,9 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
 	})
 
 	// Default table options
-	opts := ui.NewDefaultOptions(columns, tableData)
+	opts := ui.NewTableOptions(columns, tableData)
 
 	// Add plain table option if --plain flag is set
-
 	isPlain := fctl.GetString(cmd, fctl.OutputFlag) == "plain"
 
 	var opt table.Option
@@ -186,7 +185,7 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
 
 	opts = append(opts, opt)
 
-	t := ui.NewTableModel(!isPlain, opts...)
+	t := ui.NewTableModel(opts...)
 
 	return displayStackList(cmd, t)
 }
@@ -199,7 +198,11 @@ func displayStackList(cmd *cobra.Command, t *ui.TableModel) error {
 		return nil
 	}
 
-	if _, err := tea.NewProgram(t, tea.WithAltScreen()).Run(); err != nil {
+	header := ui.NewHeader()
+
+	d := ui.NewDisplay().AppendModels(t).SetHeader(header)
+
+	if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
 		return err
 	}
 

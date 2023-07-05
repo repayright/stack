@@ -3,15 +3,11 @@ package version
 import (
 	"fmt"
 
-	"github.com/charmbracelet/bubbles/list"
+	blist "github.com/charmbracelet/bubbles/list"
 	fctl "github.com/formancehq/fctl/pkg"
-	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-)
-
-var (
-	Version = "develop"
 )
 
 type VersionStore struct {
@@ -27,7 +23,7 @@ var _ fctl.Controller[*VersionStore] = (*VersionController)(nil)
 
 func NewDefaultVersionStore() *VersionStore {
 	return &VersionStore{
-		Version:   "develop",
+		Version:   fctl.Version,
 		BuildDate: "-",
 		Commit:    "-",
 	}
@@ -59,13 +55,13 @@ func (c *VersionController) Run(cmd *cobra.Command, args []string) (fctl.Rendera
 func (c *VersionController) Render(cmd *cobra.Command, args []string) error {
 
 	// Default List
-	items := []list.Item{
-		ui.NewItem(pterm.LightCyan("Version"), c.store.Version),
-		ui.NewItem(pterm.LightCyan("Date"), c.store.BuildDate),
-		ui.NewItem(pterm.LightCyan("Commit"), c.store.Commit),
+	items := []blist.Item{
+		list.NewItem(pterm.LightCyan("Version"), c.store.Version),
+		list.NewItem(pterm.LightCyan("Date"), c.store.BuildDate),
+		list.NewItem(pterm.LightCyan("Commit"), c.store.Commit),
 	}
 
-	model, err := ui.NewDefaultListModel(items, false)
+	model, err := list.NewDefaultListModel(items, false)
 	if err != nil {
 		return err
 	}
