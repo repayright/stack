@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	//Docuement
+	// Document <=> Wrap Content
 	DocStyle = lipgloss.NewStyle().Padding(1, 2, 0, 2)
+
 	// Tabs
 	BaseStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
@@ -22,9 +23,10 @@ var (
 	SelectedColorForeground           = lipgloss.Color("229")
 	SelectedColorForegroundBackground = lipgloss.Color("57")
 
+	// Viewport
 	HighlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	ImportantColor = pterm.Yellow
-	WindowStyle    = lipgloss.NewStyle().BorderForeground(HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).BorderStyle(lipgloss.RoundedBorder())
+	WindowStyle    = lipgloss.NewStyle().BorderForeground(lipgloss.NewStyle().GetBackground()).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240"))
 
 	// List
 	TitleStyle        = lipgloss.NewStyle().PaddingLeft(2)

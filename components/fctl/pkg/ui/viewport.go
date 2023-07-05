@@ -12,13 +12,15 @@ import (
 )
 
 var (
-	ViewWidth  = 200
-	ViewHeight = 20
+	ViewWidth  = 300 //Number of characters
+	ViewHeight = 120 // Number of lines
 )
 
+// https://github.com/charmbracelet/bubbletea/blob/master/examples/pager/main.go#L92
 type modelManager struct {
-	vp   viewport.Model
-	keys *ListKeyMap
+	vp    viewport.Model
+	keys  *ListKeyMap
+	ready bool
 	// delegateKeys *ui.DelegateKeyMap
 }
 
@@ -49,7 +51,6 @@ func NewViewPortManager(content string, out io.Writer, profile *fctl.Profile, st
 	if err != nil {
 		return nil, err
 	}
-
 	vp.SetContent(str)
 
 	return &modelManager{
@@ -59,6 +60,11 @@ func NewViewPortManager(content string, out io.Writer, profile *fctl.Profile, st
 }
 
 func (m modelManager) View() string {
+
+	if !m.ready {
+		return m.helpView() + "\n" + "Initializing..."
+	}
+
 	return m.helpView() + "\n" + m.vp.View()
 }
 
@@ -66,8 +72,9 @@ func (m modelManager) helpView() string {
 	return HelpStyle.Render("Formance CLI: \n • ↑/↓: Navigate \n • q: Quit")
 }
 
-func (m modelManager) GetViewKeyHelper() *viewport.Model {
-	return &m.vp
+// TODO: Need to be calculated depending of the Header content or BE Fixed
+func (m modelManager) GetHelpViewHeight() int {
+	return 5
 }
 
 // func headerView() string {
@@ -75,6 +82,12 @@ func (m modelManager) GetViewKeyHelper() *viewport.Model {
 // }
 
 func (m modelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -86,15 +99,23 @@ func (m modelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 	case tea.WindowSizeMsg:
-		w, h := DocStyle.GetFrameSize()
-		m.vp.Style.Width(msg.Width - w)
-		m.vp.Style.Height(msg.Width - h)
-		return m, nil
-	default:
-		return m, nil
+
+		if !m.ready {
+			w, h := DocStyle.GetFrameSize()
+			m.vp.Width = msg.Width - w
+			m.vp.Height = msg.Height - h - m.GetHelpViewHeight()
+
+			// m.vp.Style.Width().Height(msg.Height - h - m.GetHelpViewHeight())
+			m.vp.YPosition = m.GetHelpViewHeight() + 1
+			m.ready = true
+		} else {
+			m.vp.Style = m.vp.Style.Width(msg.Width).Height(msg.Height - m.GetHelpViewHeight())
+		}
 	}
 
-	// var cmd tea.Cmd
-	// m.GetCurrentModel().list, cmd = m.GetCurrentModel().list.Update(msg)
-	// return m, cmd
+	m.vp, cmd = m.vp.Update(msg)
+
+	cmds = append(cmds, cmd)
+
+	return m, tea.Batch(cmds...)
 }
