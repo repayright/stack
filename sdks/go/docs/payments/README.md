@@ -94,7 +94,7 @@ func main() {
             Destination: "acct_1Gqj58KZcSIg2N2q",
             Source: formance.String("acct_1Gqj58KZcSIg2N2q"),
         },
-        Connector: shared.ConnectorCurrencyCloud,
+        Connector: shared.ConnectorModulr,
     })
     if err != nil {
         log.Fatal(err)
@@ -132,7 +132,7 @@ func main() {
 
     ctx := context.Background()
     res, err := s.Payments.GetConnectorTask(ctx, operations.GetConnectorTaskRequest{
-        Connector: shared.ConnectorMoneycorp,
+        Connector: shared.ConnectorBankingCircle,
         TaskID: "sint",
     })
     if err != nil {
@@ -319,7 +319,7 @@ func main() {
 
     ctx := context.Background()
     res, err := s.Payments.ListConnectorTasks(ctx, operations.ListConnectorTasksRequest{
-        Connector: shared.ConnectorMoneycorp,
+        Connector: shared.ConnectorBankingCircle,
         Cursor: formance.String("aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ=="),
         PageSize: formance.Int64(680056),
     })
@@ -359,7 +359,7 @@ func main() {
 
     ctx := context.Background()
     res, err := s.Payments.ListConnectorsTransfers(ctx, operations.ListConnectorsTransfersRequest{
-        Connector: shared.ConnectorModulr,
+        Connector: shared.ConnectorWise,
     })
     if err != nil {
         log.Fatal(err)
@@ -597,7 +597,7 @@ func main() {
 
     ctx := context.Background()
     res, err := s.Payments.UninstallConnector(ctx, operations.UninstallConnectorRequest{
-        Connector: shared.ConnectorWise,
+        Connector: shared.ConnectorDummyPay,
     })
     if err != nil {
         log.Fatal(err)

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -15,11 +17,30 @@ const (
 	deletedFlag = "deleted"
 )
 
+// Every column in the table is a column in the struct
+// The column name is suffixed with the max length of the column
+// This is used to align the columns in the table
+// e.g. maxLengthOrganizationId = 20
+//
+//	maxLengthStackId = 4
+//
+// Where the max length is the number of characters in the column name and values
+const (
+	maxLengthOrganizationId = 15
+	maxLengthStackId        = 8
+	maxLengthStackName      = 6
+	maxLengthApiUrl         = 48
+	maxLengthStackRegion    = 21
+	maxLengthStackCreatedAt = 20
+	maxLengthStackDeletedAt = 20
+)
+
 type Stack struct {
 	Id        string  `json:"id"`
 	Name      string  `json:"name"`
 	Dashboard string  `json:"dashboard"`
 	RegionID  string  `json:"region"`
+	CreatedAt string  `json:"created_at"`
 	DeletedAt *string `json:"deleted_at"`
 }
 type StackListStore struct {
@@ -27,8 +48,9 @@ type StackListStore struct {
 }
 
 type StackListController struct {
-	store   *StackListStore
-	profile *fctl.Profile
+	store        *StackListStore
+	profile      *fctl.Profile
+	organization string
 }
 
 var _ fctl.Controller[*StackListStore] = (*StackListController)(nil)
@@ -89,12 +111,14 @@ func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 		return c, nil
 	}
 
+	c.organization = organization
 	c.store.Stacks = fctl.Map(rsp.Data, func(stack membershipclient.Stack) Stack {
 		return Stack{
 			Id:        stack.Id,
 			Name:      stack.Name,
 			Dashboard: c.profile.ServicesBaseUrl(&stack).String(),
 			RegionID:  stack.RegionID,
+			CreatedAt: stack.CreatedAt.Format(time.RFC3339),
 			DeletedAt: func() *string {
 				if stack.DeletedAt != nil {
 					t := stack.DeletedAt.Format(time.RFC3339)
@@ -109,18 +133,32 @@ func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 }
 
 func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
-	if len(c.store.Stacks) == 0 {
-		fmt.Fprintln(cmd.OutOrStdout(), "No stacks found.")
-		return nil
+	// Default Columns
+	columns := ui.NewArrayColumn(
+		ui.NewColumn("Organization Id", maxLengthOrganizationId),
+		ui.NewColumn("Stack Id", maxLengthStackId),
+		ui.NewColumn("Name", maxLengthStackName),
+		ui.NewColumn("API URL", maxLengthApiUrl),
+		ui.NewColumn("Region", maxLengthStackRegion),
+		ui.NewColumn("Created At", maxLengthStackCreatedAt),
+	)
+
+	// Add Deleted At column if --deleted flag is set
+	if fctl.GetBool(cmd, deletedFlag) {
+		columns = columns.AddColumn("Deleted At", maxLengthStackDeletedAt)
 	}
 
-	tableData := fctl.Map(c.store.Stacks, func(stack Stack) []string {
+	// Create table data
+	tableData := fctl.Map(c.store.Stacks, func(stack Stack) table.Row {
 		data := []string{
+			c.organization,
 			stack.Id,
 			stack.Name,
 			stack.Dashboard,
 			stack.RegionID,
+			stack.CreatedAt,
 		}
+
 		if fctl.GetBool(cmd, deletedFlag) {
 			if stack.DeletedAt != nil {
 				data = append(data, *stack.DeletedAt)
@@ -128,19 +166,42 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
 				data = append(data, "")
 			}
 		}
+
 		return data
 	})
 
-	headers := []string{"ID", "Name", "Dashboard", "Region"}
-	if fctl.GetBool(cmd, deletedFlag) {
-		headers = append(headers, "Deleted at")
+	// Default table options
+	opts := ui.NewDefaultOptions(columns, tableData)
+
+	// Add plain table option if --plain flag is set
+
+	isPlain := fctl.GetString(cmd, fctl.OutputFlag) == "plain"
+
+	var opt table.Option
+	if isPlain {
+		opt = ui.WithHeight(len(tableData))
+	} else {
+		opt = ui.WithHeight(ui.MaxTableHeight)
 	}
 
-	tableData = fctl.Prepend(tableData, headers)
+	opts = append(opts, opt)
 
-	return pterm.DefaultTable.
-		WithHasHeader().
-		WithWriter(cmd.OutOrStdout()).
-		WithData(tableData).
-		Render()
+	t := ui.NewTableModel(!isPlain, opts...)
+
+	return displayStackList(cmd, t)
+}
+
+func displayStackList(cmd *cobra.Command, t *ui.TableModel) error {
+	isPlain := fctl.GetString(cmd, fctl.OutputFlag)
+
+	if isPlain == "plain" {
+		fmt.Println(t.View())
+		return nil
+	}
+
+	if _, err := tea.NewProgram(t, tea.WithAltScreen()).Run(); err != nil {
+		return err
+	}
+
+	return nil
 }

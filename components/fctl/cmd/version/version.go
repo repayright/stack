@@ -1,7 +1,11 @@
 package version
 
 import (
+	"fmt"
+
+	"github.com/charmbracelet/bubbles/list"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -53,12 +57,22 @@ func (c *VersionController) Run(cmd *cobra.Command, args []string) (fctl.Rendera
 
 // TODO: This need to use the ui.NewListModel
 func (c *VersionController) Render(cmd *cobra.Command, args []string) error {
-	tableData := pterm.TableData{}
-	tableData = append(tableData, []string{pterm.LightCyan("Version"), c.store.Version})
-	tableData = append(tableData, []string{pterm.LightCyan("Date"), c.store.BuildDate})
-	tableData = append(tableData, []string{pterm.LightCyan("Commit"), c.store.Commit})
-	return pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
-		WithData(tableData).
-		Render()
+
+	// Default List
+	items := []list.Item{
+		ui.NewItem(pterm.LightCyan("Version"), c.store.Version),
+		ui.NewItem(pterm.LightCyan("Date"), c.store.BuildDate),
+		ui.NewItem(pterm.LightCyan("Commit"), c.store.Commit),
+	}
+
+	model, err := ui.NewDefaultListModel(items, false)
+	if err != nil {
+		return err
+	}
+	model = model.WithTitle("FCTL Information")
+
+	//Print the list
+	fmt.Println(model.View())
+	return nil
+
 }

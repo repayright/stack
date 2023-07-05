@@ -91,7 +91,7 @@ public class Application {
 
             ConnectorsTransferRequest req = new ConnectorsTransferRequest(                new TransferRequest(100L, "USD", "acct_1Gqj58KZcSIg2N2q") {{
                                 source = "acct_1Gqj58KZcSIg2N2q";
-                            }};, Connector.BANKING_CIRCLE);            
+                            }};, Connector.MODULR);            
 
             ConnectorsTransferResponse res = sdk.payments.connectorsTransfer(req);
 
@@ -129,7 +129,7 @@ public class Application {
                 }})
                 .build();
 
-            GetConnectorTaskRequest req = new GetConnectorTaskRequest(Connector.CURRENCY_CLOUD, "sapiente");            
+            GetConnectorTaskRequest req = new GetConnectorTaskRequest(Connector.MODULR, "sapiente");            
 
             GetConnectorTaskResponse res = sdk.payments.getConnectorTask(req);
 
@@ -322,7 +322,7 @@ public class Application {
                 }})
                 .build();
 
-            ListConnectorTasksRequest req = new ListConnectorTasksRequest(Connector.MODULR) {{
+            ListConnectorTasksRequest req = new ListConnectorTasksRequest(Connector.WISE) {{
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
                 pageSize = 301575L;
             }};            
@@ -363,7 +363,7 @@ public class Application {
                 }})
                 .build();
 
-            ListConnectorsTransfersRequest req = new ListConnectorsTransfersRequest(Connector.BANKING_CIRCLE);            
+            ListConnectorsTransfersRequest req = new ListConnectorsTransfersRequest(Connector.MODULR);            
 
             ListConnectorsTransfersResponse res = sdk.payments.listConnectorsTransfers(req);
 
@@ -522,7 +522,7 @@ public class Application {
                 }})
                 .build();
 
-            ReadConnectorConfigRequest req = new ReadConnectorConfigRequest(Connector.CURRENCY_CLOUD);            
+            ReadConnectorConfigRequest req = new ReadConnectorConfigRequest(Connector.MODULR);            
 
             ReadConnectorConfigResponse res = sdk.payments.readConnectorConfig(req);
 
@@ -562,7 +562,7 @@ public class Application {
                 }})
                 .build();
 
-            ResetConnectorRequest req = new ResetConnectorRequest(Connector.CURRENCY_CLOUD);            
+            ResetConnectorRequest req = new ResetConnectorRequest(Connector.MODULR);            
 
             ResetConnectorResponse res = sdk.payments.resetConnector(req);
 

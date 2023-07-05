@@ -173,5 +173,5 @@ func (c *StackCreateController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 }
 
 func (c *StackCreateController) Render(cmd *cobra.Command, args []string) error {
-	return internal.PrintStackInformation(cmd.OutOrStdout(), c.profile, c.store.Stack, c.store.Versions)
+	return internal.PrintStackInformation(cmd, c.profile, c.store.Stack, c.store.Versions)
 }

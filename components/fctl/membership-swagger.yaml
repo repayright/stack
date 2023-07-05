@@ -692,6 +692,9 @@ components:
             description: The region where the stack is installed
           stargateEnabled:
             type: boolean
+          createdAt:
+            type: string
+            format: date-time
           deletedAt:
             type: string
             format: date-time

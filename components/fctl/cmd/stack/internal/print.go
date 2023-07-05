@@ -3,80 +3,108 @@ package internal
 import (
 	"fmt"
 	"io"
-	"net/url"
 
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/iancoleman/strcase"
 	"github.com/pterm/pterm"
+	"github.com/spf13/cobra"
 )
 
-func PrintStackInformation(out io.Writer, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) error {
-	baseUrlStr := profile.ServicesBaseUrl(stack)
+func getContent(out io.Writer, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (string, error) {
+	uiInfo, err := printInformation(out, stack)
+	if err != nil {
+		return "", err
+	}
 
-	err := printInformation(out, stack)
+	uiVersion, err := printVersion(out, versions, stack)
+	if err != nil {
+		return "", err
+	}
 
+	uiMetadata, err := printMetadata(out, stack)
+	if err != nil {
+		return "", err
+	}
+
+	return uiInfo.View() + uiVersion.View() + uiMetadata.View() + "\n", nil
+}
+
+func printInformation(out io.Writer, stack *membershipclient.Stack) (*ui.ListModel, error) {
+
+	items := []list.Item{}
+
+	items = append(items, ui.NewItem(pterm.LightCyan("ID"), stack.Id))
+	items = append(items, ui.NewItem(pterm.LightCyan("Name"), stack.Name))
+	items = append(items, ui.NewItem(pterm.LightCyan("Region"), stack.RegionID))
+
+	if ui, err := ui.NewDefaultListModel(items, false); err != nil {
+		return nil, err
+	} else {
+		return ui.WithTitle("Information"), nil
+	}
+}
+
+func printVersion(out io.Writer, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) (*ui.ListModel, error) {
+	items := []list.Item{}
+
+	for _, service := range versions.Versions {
+		items = append(items, ui.NewItem(
+			pterm.LightCyan(fmt.Sprintf("%s (%s)", strcase.ToCamel(service.Name), pterm.Yellow(service.Version))),
+			"",
+		))
+	}
+
+	if ui, err := ui.NewDefaultListModel(items, false); err != nil {
+		return nil, nil
+	} else {
+		return ui.WithTitle("Version"), nil
+	}
+}
+
+func printMetadata(out io.Writer, stack *membershipclient.Stack) (*ui.ListModel, error) {
+	items := []list.Item{}
+
+	for k, v := range stack.Metadata {
+		items = append(items, ui.NewItem(
+			pterm.LightCyan(k),
+			v,
+		))
+
+	}
+	if ui, err := ui.NewDefaultListModel(items, false); err != nil {
+		return nil, nil
+	} else {
+		return ui.WithTitle("Metadata"), nil
+	}
+}
+
+func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) error {
+	out := cmd.OutOrStdout()
+	content, err := getContent(out, stack, versions)
 	if err != nil {
 		return err
 	}
 
-	err = printVersion(out, baseUrlStr, versions, stack)
+	// Plain
+	if flag := fctl.GetString(cmd, fctl.OutputFlag); flag == "plain" {
+		fctl.Println(content)
+		return nil
+	}
 
+	// Dynamic
+	model, err := ui.NewViewPortManager(content, out, profile, stack, versions)
 	if err != nil {
 		return err
 	}
 
-	err = printMetadata(out, stack)
-	if err != nil {
+	if _, err := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run(); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func printInformation(out io.Writer, stack *membershipclient.Stack) error {
-
-	fctl.Section.WithWriter(out).Println("Information")
-	tableData := pterm.TableData{}
-	tableData = append(tableData, []string{pterm.LightCyan("ID"), stack.Id, ""})
-	tableData = append(tableData, []string{pterm.LightCyan("Name"), stack.Name, ""})
-	tableData = append(tableData, []string{pterm.LightCyan("Region"), stack.RegionID, ""})
-	return pterm.DefaultTable.
-		WithWriter(out).
-		WithData(tableData).
-		Render()
-}
-
-func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) error {
-	fctl.Println()
-	fctl.Section.WithWriter(out).Println("Versions")
-
-	tableData := pterm.TableData{}
-
-	for _, service := range versions.Versions {
-		tableData = append(tableData, []string{pterm.LightCyan(strcase.ToCamel(service.Name)), service.Version,
-			fmt.Sprintf("%s/api/%s", url.String(), service.Name)})
-	}
-
-	return pterm.DefaultTable.
-		WithWriter(out).
-		WithData(tableData).
-		Render()
-}
-
-func printMetadata(out io.Writer, stack *membershipclient.Stack) error {
-	fctl.Println()
-	fctl.Section.WithWriter(out).Println("Metadata")
-
-	tableData := pterm.TableData{}
-
-	for k, v := range stack.Metadata {
-		tableData = append(tableData, []string{pterm.LightCyan(k), v})
-	}
-
-	return pterm.DefaultTable.
-		WithWriter(out).
-		WithData(tableData).
-		Render()
 }

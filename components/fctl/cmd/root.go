@@ -59,7 +59,7 @@ func NewRootCommand() *cobra.Command {
 		fctl.WithPersistentStringPFlag(fctl.ProfileFlag, "p", "", "config profile to use"),
 		fctl.WithPersistentStringPFlag(fctl.FileFlag, "c", fmt.Sprintf("%s/.formance/fctl.config", homedir), "Debug mode"),
 		fctl.WithPersistentBoolPFlag(fctl.DebugFlag, "d", false, "Debug mode"),
-		fctl.WithPersistentStringPFlag(fctl.OutputFlag, "o", "plain", "Output format (plain, json)"),
+		fctl.WithPersistentStringPFlag(fctl.OutputFlag, "o", "plain", "Output format (plain, json, dynamic)"),
 		fctl.WithPersistentBoolFlag(fctl.InsecureTlsFlag, false, "Insecure TLS"),
 		fctl.WithPersistentBoolFlag(fctl.TelemetryFlag, false, "Telemetry enabled"),
 	)

@@ -74,7 +74,7 @@ sdk.payments.connectorsTransfer({
     destination: "acct_1Gqj58KZcSIg2N2q",
     source: "acct_1Gqj58KZcSIg2N2q",
   },
-  connector: Connector.CurrencyCloud,
+  connector: Connector.Modulr,
 }).then((res: ConnectorsTransferResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -100,7 +100,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.getConnectorTask({
-  connector: Connector.Moneycorp,
+  connector: Connector.BankingCircle,
   taskId: "sint",
 }).then((res: GetConnectorTaskResponse) => {
   if (res.statusCode == 200) {
@@ -231,7 +231,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.listConnectorTasks({
-  connector: Connector.Moneycorp,
+  connector: Connector.BankingCircle,
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   pageSize: 680056,
 }).then((res: ListConnectorTasksResponse) => {
@@ -259,7 +259,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.listConnectorsTransfers({
-  connector: Connector.Modulr,
+  connector: Connector.Wise,
 }).then((res: ListConnectorsTransfersResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -428,7 +428,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.uninstallConnector({
-  connector: Connector.Wise,
+  connector: Connector.DummyPay,
 }).then((res: UninstallConnectorResponse) => {
   if (res.statusCode == 200) {
     // handle response

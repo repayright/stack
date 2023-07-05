@@ -128,5 +128,5 @@ func (c *StackShowController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 }
 
 func (c *StackShowController) Render(cmd *cobra.Command, args []string) error {
-	return internal.PrintStackInformation(cmd.OutOrStdout(), fctl.GetCurrentProfile(cmd, c.config), c.store.Stack, c.store.Versions)
+	return internal.PrintStackInformation(cmd, fctl.GetCurrentProfile(cmd, c.config), c.store.Stack, c.store.Versions)
 }
