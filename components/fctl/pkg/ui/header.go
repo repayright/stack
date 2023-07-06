@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"math"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,28 +27,7 @@ func (h *Header) AddModel(model *list.PointList) *Header {
 	return h
 }
 
-// func GetDefaultHeaderArray() []string {
-
-// 	var maxLength int = 0
-// 	tab := strings.Split(GetDefaultFCTLASCII(fctl.Version), "\n")
-
-// 	//Get the max length
-// 	for i := 0; i < len(tab); i++ {
-// 		if len(tab[i]) > maxLength {
-// 			maxLength = len(tab[i])
-// 		}
-// 	}
-
-// 	// Add spaces to the right
-// 	for i := 0; i < len(tab); i++ {
-// 		if len(tab[i]) != maxLength {
-// 			tab[i] += strings.Repeat(" ", maxLength-len(tab[i]))
-// 		}
-// 	}
-// 	return tab
-// }
-
-// For each in all children models
+// Depends on the FCTL version components
 func (h *Header) GetMaxPossibleHeight() int {
 	return h.version.GetMaxPossibleHeight()
 }
@@ -62,7 +42,6 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 	return h, nil
 }
 
-// Add a breakline to the header
 func (h *Header) View() string {
 
 	var m []string = []string{
@@ -78,34 +57,38 @@ func (h *Header) View() string {
 func (h *Header) AddKeyBinding(keys ...*modelutils.KeyMapHandler) *Header {
 	var maxHeigth int = h.GetMaxPossibleHeight()
 	var buffer []string = []string{}
-	for _, key := range keys {
 
+	for _, key := range keys {
 		v := key.View()
 		s := strings.Split(v, "\n")
 		buffer = append(buffer, s...)
+	}
 
-		var out []string = []string{}
-		if len(buffer) >= maxHeigth {
+	// Get the number of list to create
+	n := math.Ceil(float64(len((buffer))) / float64(maxHeigth))
+	i := int(n)
 
-			out = append(out, buffer[:maxHeigth-1]...)
-			// fmt.Println("out", maxHeigth)
-			// fmt.Println("out", buffer[:maxHeigth])
-			buffer = append(buffer, buffer[maxHeigth-1:]...)
-			// fmt.Println("out", out)
-		} else {
-			out = buffer
-			// fmt.Println("out", out)
-			buffer = []string{}
+	var out [][]string = make([][]string, i)
+
+	// Prepare each list with strings items
+	for c := 0; c < i; c++ {
+
+		min := c * maxHeigth
+		max := (c + 1) * maxHeigth
+
+		if max >= len(buffer) {
+			max = len(buffer) - 1
 		}
 
-		if len(buffer) == 0 && len(out) == 0 {
-			break
-		}
-
-		pointList := list.NewPointList(out...)
-
-		h.AddModel(pointList)
+		out = append(out, buffer[min:max])
 
 	}
+
+	// Create and add models
+	for _, o := range out {
+		pointList := list.NewPointList(o...)
+		h.AddModel(pointList)
+	}
+
 	return h
 }

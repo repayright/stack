@@ -13,6 +13,26 @@ type FctlModel struct {
 	content string
 }
 
+// Generated with: https://patorjk.com/software/taag/#p=display&f=Doom&t=FCTL
+func GetDefaultFCTLASCII(version string) string {
+	t := "______ _____ _____ _  \n|  ___/  __ \\_   _| |\n| |_  | /  \\/ | | | |\n|  _| | |     | | | | \n| |   | \\__/\\ | | | |____\n\\_|    \\____/ \\_/ \\_____/\n"
+	t = ApplyStyleToString(t)
+
+	return t + "\n" + "Version : " + pterm.Red(version)
+	// Get the version from the config file then compare it to the latest version, if semver is a major change display red, if minor display orange, if tiny display yellow
+}
+
+// Export Style as a function argument, then export the function in utils
+func ApplyStyleToString(header string) string {
+	lines := strings.Split(header, "\n")
+
+	for i := 0; i < len(lines); i++ {
+		lines[i] = fctl.HeaderStyle.Sprint(lines[i])
+	}
+
+	return strings.Join(lines, "\n")
+}
+
 func NewFctlModel() *FctlModel {
 	return &FctlModel{
 		content: GetDefaultFCTLASCII("0.0.1"),
@@ -21,25 +41,6 @@ func NewFctlModel() *FctlModel {
 
 func GetListKeyMapHandler() *modelutils.KeyMapHandler {
 	return nil
-}
-
-// Generated with: https://patorjk.com/software/taag/#p=display&f=Doom&t=FCTL
-func GetDefaultFCTLASCII(version string) string {
-	t := "______ _____ _____ _  \n|  ___/  __ \\_   _| |\n| |_  | /  \\/ | | | |\n|  _| | |     | | | | \n| |   | \\__/\\ | | | |____\n\\_|    \\____/ \\_/ \\_____/\n"
-	t = ApplyStyleToHeader(t)
-
-	return t + "\nVersion : " + pterm.Red(version)
-	// Get the version from the config file then compare it to the latest version, if semver is a major change display red, if minor display orange, if tiny display yellow
-}
-func ApplyStyleToHeader(header string) string {
-
-	lines := strings.Split(header, "\n")
-
-	for i := 0; i < len(lines); i++ {
-		lines[i] = fctl.HeaderStyle.Sprint(lines[i])
-	}
-
-	return strings.Join(lines, "\n")
 }
 
 func (f FctlModel) GetMaxPossibleHeight() int {
