@@ -11,8 +11,8 @@ var (
 	ViewHeight = 120 // Number of lines
 )
 var (
-	//Header
-	HeaderStyle pterm.RGB = pterm.NewRGB(255, 0, 0)
+	//RED Logo
+	LogoColor lipgloss.Color = lipgloss.Color("#FF0000")
 
 	// Document <=> Wrap Content
 	DocStyle = lipgloss.NewStyle().Padding(1, 2, 0, 2)

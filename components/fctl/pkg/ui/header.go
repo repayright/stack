@@ -73,7 +73,8 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 
 		t := lipgloss.NewStyle().Render(lipgloss.JoinHorizontal(lipgloss.Top, m...))
 
-		terminalW := msg.Width - h.logo.GetMaxPossibleWidth() - h.fctlContext.GetMaxPossibleWidth() - 10
+		terminalW := msg.Width - h.logo.GetMaxPossibleWidth() - h.fctlContext.GetMaxPossibleWidth()
+
 		leftDiv := h.fctlContext.View()
 
 		style := lipgloss.NewStyle().PaddingTop(1)

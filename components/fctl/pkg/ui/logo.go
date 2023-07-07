@@ -16,20 +16,7 @@ type Logo struct {
 // Generated with: https://patorjk.com/software/taag/#p=display&f=Doom&t=FCTL
 func GetDefaultFCTLASCII() string {
 	t := "______ _____ _____ _  \n|  ___/  __ \\_   _| |\n| |_  | /  \\/ | | | |\n|  _| | |     | | | | \n| |   | \\__/\\ | | | |____\n\\_|    \\____/ \\_/ \\_____/"
-	t = ApplyStyleToString(t)
-
 	return t
-}
-
-// Export Style as a function argument, then export the function in utils
-func ApplyStyleToString(header string) string {
-	lines := strings.Split(header, "\n")
-
-	for i := 0; i < len(lines); i++ {
-		lines[i] = theme.HeaderStyle.Sprint(lines[i])
-	}
-
-	return strings.Join(lines, "\n")
 }
 
 func NewLogo() *Logo {
@@ -53,7 +40,6 @@ func (f Logo) GetMaxPossibleWidth() int {
 			max = len(line)
 		}
 	}
-
 	return max
 }
 
@@ -63,6 +49,19 @@ func (f Logo) Init() tea.Cmd {
 func (f Logo) Update(msg tea.Msg) (Logo, tea.Cmd) {
 	return f, nil
 }
+
+// Export Style as a function argument, then export the function in utils
+func LogoToStyle(header string) string {
+	lines := strings.Split(header, "\n")
+	style := lipgloss.NewStyle().Foreground(theme.LogoColor)
+
+	for i := 0; i < len(lines); i++ {
+		lines[i] = style.Render(lines[i])
+	}
+
+	return strings.Join(lines, "\n")
+}
+
 func (f Logo) View() string {
-	return lipgloss.Place(f.GetMaxPossibleWidth(), f.GetMaxPossibleHeight(), lipgloss.Left, lipgloss.Top, f.content)
+	return lipgloss.Place(f.GetMaxPossibleWidth(), f.GetMaxPossibleHeight(), lipgloss.Left, lipgloss.Top, LogoToStyle(f.content))
 }
