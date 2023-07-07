@@ -10,14 +10,14 @@ import (
 
 type Display struct {
 	header Header
-	list   []Model
+	body   *Model
 
 	time time.Time
 }
 
 func NewDisplay() *Display {
 	return &Display{
-		list: []Model{},
+		body: nil,
 	}
 }
 
@@ -26,24 +26,23 @@ func (d *Display) SetHeader(model *Header) *Display {
 	return d
 }
 
-func (d *Display) AppendModels(models ...Model) *Display {
-	d.list = append(d.list, models...)
+func (d *Display) SetCurrentModel(model *Model) *Display {
+	d.body = model
 	return d
 }
 
 func (d *Display) ResetModels() *Display {
-	d.list = []Model{}
+	d.body = nil
 	return d
 }
 
-func (d *Display) GetListKeyMapHandler() []*modelutils.KeyMapHandler {
-	var keys []*modelutils.KeyMapHandler
-	for _, model := range d.list {
-		if c := model.GetListKeyMapHandler(); c != nil {
-			keys = append(keys, c)
-		}
+func (d *Display) GetListKeyMapHandler() *modelutils.KeyMapHandler {
+	var keys *modelutils.KeyMapHandler
+	if d.body != nil {
+		keys = (*d.body).GetListKeyMapHandler()
+		return keys
 	}
-	return keys
+	return nil
 
 }
 
@@ -51,18 +50,14 @@ func (d *Display) Init() tea.Cmd {
 	var cmd tea.Cmd = nil
 	d.time = time.Now()
 
-	d.header.Init()
-
 	// Init modelKeys
-	var keys []*modelutils.KeyMapHandler = d.GetListKeyMapHandler()
-	d.header = *d.header.AddKeyBinding(keys...)
+	var keys *modelutils.KeyMapHandler = d.GetListKeyMapHandler()
+	d.header = *d.header.AddKeyBinding(keys)
 
-	// Init models
-	for _, model := range d.list {
-		if c := model.Init(); c != nil {
-			cmd = tea.Batch(cmd, c)
-		}
+	if d.body != nil {
+		cmd = tea.Batch(cmd, (*d.body).Init())
 	}
+
 	return cmd
 }
 
@@ -78,12 +73,23 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	d.header = *m
 
-	for k, model := range d.list {
-		nm, cmd := model.Update(msg)
-		if cmd != nil {
-			cmds = append(cmds, cmd)
+	if d.body != nil {
+		switch msg := msg.(type) {
+		case tea.WindowSizeMsg:
+			msg.Height -= 15
+			m, cmd := (*d.body).Update(msg)
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+			*d.body = m
+		case tea.KeyMsg:
+			m, cmd := (*d.body).Update(msg)
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+			*d.body = m
 		}
-		d.list[k] = nm
+
 	}
 
 	return d, tea.Batch(cmds...)
@@ -93,9 +99,10 @@ func (d *Display) View() string {
 	var s []string = []string{
 		d.header.View(),
 	}
-	for _, model := range d.list {
-		s = append(s, model.View())
+
+	if d.body != nil {
+		s = append(s, (*d.body).View())
 	}
+
 	return lipgloss.JoinVertical(lipgloss.Top, s...)
-	// return ""
 }

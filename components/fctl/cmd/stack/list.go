@@ -15,22 +15,15 @@ const (
 	deletedFlag = "deleted"
 )
 
-// Every column in the table is a column in the struct
-// The column name is suffixed with the max length of the column
-// This is used to align the columns in the table
-// e.g. maxLengthOrganizationId = 20
-//
-//	maxLengthStackId = 4
-//
-// Where the max length is the number of characters in the column name and values
+// This defines the minimum length of the columns in the table
 const (
-	maxLengthOrganizationId = 15
-	maxLengthStackId        = 8
-	maxLengthStackName      = 6
-	maxLengthApiUrl         = 48
-	maxLengthStackRegion    = 21
-	maxLengthStackCreatedAt = 20
-	maxLengthStackDeletedAt = 20
+	minLengthOrganizationId = 15
+	minLengthStackId        = 8
+	minLengthStackName      = 10
+	minLengthApiUrl         = 48
+	minLengthStackRegion    = 30
+	minLengthStackCreatedAt = 20
+	minLengthStackDeletedAt = 20
 )
 
 type Stack struct {
@@ -160,31 +153,31 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) (ui.Mode
 		return data
 	})
 
-	// Default Columns
-	columns := ui.NewArrayColumn(
-		ui.NewColumn("Organization Id", maxLengthOrganizationId),
-		ui.NewColumn("Stack Id", maxLengthStackId),
-		ui.NewColumn("Name", maxLengthStackName),
-		ui.NewColumn("API URL", maxLengthApiUrl),
-		ui.NewColumn("Region", maxLengthStackRegion),
-		ui.NewColumn("Created At", maxLengthStackCreatedAt),
-	)
-
-	// Add Deleted At column if --deleted flag is set
-	if fctl.GetBool(cmd, deletedFlag) {
-		columns = columns.AddColumn("Deleted At", maxLengthStackDeletedAt)
-	}
-
-	// Default table options
-	opts := ui.NewTableOptions(columns, tableData)
+	var columns ui.ArrayColumn
 
 	// Add plain table option if --plain flag is set
 	isPlain := fctl.GetString(cmd, fctl.OutputFlag) == "plain"
+	// Default Columns
+	columns = ui.NewArrayColumn(
+		ui.NewColumn("Organization Id", minLengthOrganizationId),
+		ui.NewColumn("Stack Id", minLengthStackId),
+		ui.NewColumn("Name", minLengthStackName),
+		ui.NewColumn("API URL", minLengthApiUrl),
+		ui.NewColumn("Region", minLengthStackRegion),
+		ui.NewColumn("Created At", minLengthStackCreatedAt),
+	)
+	if fctl.GetBool(cmd, deletedFlag) {
+		columns = columns.AddColumn("Deleted At", minLengthStackDeletedAt)
+	}
+	// Default table options
+	opts := ui.NewTableOptions(columns, tableData)
 	if isPlain {
 		opt := ui.WithHeight(len(tableData))
-
-		return ui.NewTableModel(append(opts, opt)...), nil
+		// Add Deleted At column if --deleted flag is set
+		return ui.NewTableModel(columns, append(opts, opt)...), nil
 	}
 
-	return ui.NewTableModel(opts...), nil
+	opts = ui.NewTableOptions(ui.WithFullScreenTable(columns), tableData)
+
+	return ui.NewTableModel(columns, opts...), nil
 }

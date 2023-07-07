@@ -297,7 +297,8 @@ func WithRender[T any](cmd *cobra.Command, args []string, c Controller[T], r Ren
 			return nil
 		}
 
-		d.AppendModels(m).SetHeader(header)
+		d.SetCurrentModel(&m).SetHeader(header)
+		d.Init()
 
 		if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
 			return err
