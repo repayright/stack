@@ -28,7 +28,7 @@ func (i HorizontalItem) GetDescription() string { return i.desc }
 func (i HorizontalItem) FilterValue() string { return i.title }
 
 func (i HorizontalItem) GetWidth() int {
-	return len(i.title) + len(i.desc)
+	return len(i.title) + len(i.desc) + 2 // +2 for the " " + ?????????????
 
 }
 
@@ -50,15 +50,16 @@ func (d HorizontalItemDelegate) Spacing() int                             { retu
 func (d HorizontalItemDelegate) Update(_ tea.Msg, _ *blist.Model) tea.Cmd { return nil }
 func (d HorizontalItemDelegate) Render(w io.Writer, m blist.Model, index int, item blist.Item) {
 	i, ok := item.(*HorizontalItem)
+	if !ok {
+		return
+	}
+
 	//Styles
 	style := lipgloss.Color("#fff788")
 	title := lipgloss.NewStyle().Foreground(style).Bold(true)
 
 	valueStyle := lipgloss.Color("#b3cedc")
 	desc := lipgloss.NewStyle().Foreground(valueStyle).Bold(false)
-	if !ok {
-		return
-	}
 
 	var str string
 	if i.GetDescription() == "" {

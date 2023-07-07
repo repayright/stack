@@ -37,7 +37,7 @@ func (pl *PointList) GetMaxPossibleWidth() int {
 	max := 0
 	for _, i := range pl.list.Items() {
 
-		item, ok := i.(HorizontalItem)
+		item, ok := i.(*HorizontalItem)
 		if !ok {
 			return 0
 		}
