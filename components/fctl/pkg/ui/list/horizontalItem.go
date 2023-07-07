@@ -28,7 +28,7 @@ func (i HorizontalItem) GetDescription() string { return i.desc }
 func (i HorizontalItem) FilterValue() string { return i.title }
 
 func (i HorizontalItem) GetWidth() int {
-	return len(i.title) + len(i.desc) + 2 // +2 for the " " +
+	return len(i.title) + len(i.desc) + 2 // +2 for the " " + ?????????????
 
 }
 
@@ -60,9 +60,6 @@ func (d HorizontalItemDelegate) Render(w io.Writer, m blist.Model, index int, it
 
 	valueStyle := lipgloss.Color("#b3cedc")
 	desc := lipgloss.NewStyle().Foreground(valueStyle).Bold(false)
-	if !ok {
-		return
-	}
 
 	var str string
 	if i.GetDescription() == "" {
