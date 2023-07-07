@@ -42,7 +42,7 @@ func printInformation(out io.Writer, stack *membershipclient.Stack) (*list.ListM
 	items = append(items, list.NewItem(pterm.LightCyan("Name"), stack.Name))
 	items = append(items, list.NewItem(pterm.LightCyan("Region"), stack.RegionID))
 
-	if ui, err := list.NewDefaultListModel(items, false); err != nil {
+	if ui, err := list.NewDefaultListModel(items); err != nil {
 		return nil, err
 	} else {
 		return ui.WithTitle("Information"), nil
@@ -59,7 +59,7 @@ func printVersion(out io.Writer, versions *shared.GetVersionsResponse, stack *me
 		))
 	}
 
-	if ui, err := list.NewDefaultListModel(items, false); err != nil {
+	if ui, err := list.NewDefaultListModel(items); err != nil {
 		return nil, nil
 	} else {
 		return ui.WithTitle("Version"), nil
@@ -76,7 +76,7 @@ func printMetadata(out io.Writer, stack *membershipclient.Stack) (*list.ListMode
 		))
 
 	}
-	if ui, err := list.NewDefaultListModel(items, false); err != nil {
+	if ui, err := list.NewDefaultListModel(items); err != nil {
 		return nil, nil
 	} else {
 		return ui.WithTitle("Metadata"), nil

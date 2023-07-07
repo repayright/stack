@@ -3,30 +3,36 @@ package list
 import (
 	"fmt"
 	"io"
+	"math"
 
 	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
-type Item struct {
+type VerticalItem struct {
 	title, desc string
-	horizontal  bool
 }
 
-func NewItem(title, desc string) *Item {
-	return &Item{
+func NewItem(title, desc string) *VerticalItem {
+	return &VerticalItem{
 		title: title,
 		desc:  desc,
 	}
 }
-func (i Item) GetTitle() string       { return i.title }
-func (i Item) GetDescription() string { return i.desc }
+func (i VerticalItem) GetTitle() string       { return i.title }
+func (i VerticalItem) GetDescription() string { return i.desc }
 
 // This is needed to implement list.Item interface
-func (i Item) FilterValue() string { return i.title }
+func (i VerticalItem) FilterValue() string { return i.title }
 
-func (i *Item) GetHeight() int {
+func (i VerticalItem) GetWidth() int {
+
+	return int(math.Max(float64(len(i.title)), float64(len(i.desc))))
+
+}
+
+func (i *VerticalItem) GetHeight() int {
 	if i.desc != "" {
 		return 2
 	}
@@ -53,7 +59,7 @@ func (d *ItemDelegate) SetHeight(i int) {
 func (d ItemDelegate) Spacing() int                             { return 1 }
 func (d ItemDelegate) Update(_ tea.Msg, _ *blist.Model) tea.Cmd { return nil }
 func (d ItemDelegate) Render(w io.Writer, m blist.Model, index int, item blist.Item) {
-	i, ok := item.(*Item)
+	i, ok := item.(*VerticalItem)
 
 	if !ok {
 		return

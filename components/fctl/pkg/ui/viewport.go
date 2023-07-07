@@ -26,7 +26,7 @@ func (m modelManager) GetListKeyMapHandler() *modelutils.KeyMapHandler {
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("q", "esc", "ctrl+c"),
-			key.WithHelp("q  ", "Quit the application"),
+			key.WithHelp("q", "Quit the application"),
 		),
 	)
 	k.AddNewBinding(
@@ -44,57 +44,57 @@ func (m modelManager) GetListKeyMapHandler() *modelutils.KeyMapHandler {
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("?"),
-			key.WithHelp("? ", "Toggle help"),
+			key.WithHelp("?", "Toggle help"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
+		),
+	)
+
+	k.AddNewBinding(
+		key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 

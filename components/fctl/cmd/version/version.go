@@ -62,7 +62,7 @@ func (c *VersionController) Render(cmd *cobra.Command, args []string) (ui.Model,
 		list.NewItem(pterm.LightCyan("Commit"), c.store.Commit),
 	}
 
-	model, err := list.NewDefaultListModel(items, false)
+	model, err := list.NewDefaultListModel(items)
 	if err != nil {
 		return nil, err
 	}

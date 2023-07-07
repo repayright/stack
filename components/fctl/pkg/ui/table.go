@@ -9,10 +9,6 @@ import (
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
-var (
-	MaxTableHeight = 10
-)
-
 // This model implement the table.Model interface from Bubble Tea Framework
 func (t TableModel) Init() tea.Cmd { return nil }
 
@@ -25,19 +21,19 @@ func (t TableModel) GetListKeyMapHandler() *modelutils.KeyMapHandler {
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("q", "esc", "ctrl+c"),
-			key.WithHelp("q  ", "Quit the application"),
+			key.WithHelp("q", "Quit the application"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("up", "k"),
-			key.WithHelp("↑/k", "move up"),
+			key.WithHelp("up/k", "move up"),
 		),
 	)
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("down", "j"),
-			key.WithHelp("↓/j", "move down"),
+			key.WithHelp("down/j", "move down"),
 		),
 	)
 	k.AddNewBinding(
@@ -49,51 +45,7 @@ func (t TableModel) GetListKeyMapHandler() *modelutils.KeyMapHandler {
 	k.AddNewBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
-		),
-	)
-
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter ", "show selected item"),
+			key.WithHelp("enter", "show selected item"),
 		),
 	)
 
