@@ -10,13 +10,14 @@ import (
 
 // TODO: This should extend list.Model from github.com/charmbracelet/bubbles/list
 type ListModel struct {
-	list list.Model
-	help bool
+	list     list.Model
+	itemType string // Should be enum (vertical, horizontal)
 }
 
-func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, height int, help bool) *ListModel {
+func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, height int) *ListModel {
 	l := list.New(items, delegate, width, height)
 
+	// Can be done in Controller for each setup
 	l.SetShowTitle(true)
 	l.SetShowPagination(false)
 	l.SetShowHelp(false)
@@ -24,24 +25,23 @@ func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, heig
 
 	return &ListModel{
 		list: l,
-		help: help,
 	}
 }
 
 // ViewWidth, ViewHeight
 // Default width and height
 // Should be dynamic and scale with terminale view
-func NewDefaultListModel(items []list.Item, help bool) (*ListModel, error) {
+func NewDefaultListModel(items []list.Item) (*ListModel, error) {
 	if len(items) == 0 {
 		return nil, errors.New("ITEMS_EMPTY")
 	}
 
-	firstItem, ok := items[0].(*Item)
+	firstItem, ok := items[0].(*VerticalItem)
 	if !ok {
 		return nil, errors.New("FIRST_ITEMS_NOT_ITEM")
 	}
 
-	m := NewListModel(items, NewItemDelegate(firstItem.GetHeight()), theme.ViewWidth, theme.ViewHeight, help).WithMaxPossibleWidth()
+	m := NewListModel(items, NewItemDelegate(firstItem.GetHeight()), theme.ViewWidth, theme.ViewHeight).WithMaxPossibleWidth()
 
 	m, err := m.WithMaxPossibleHeight()
 	if err != nil {
@@ -74,7 +74,20 @@ func (m *ListModel) WithTitle(title string) *ListModel {
 // of the longest line of the terminal
 // The terminal width is limitant
 func (m *ListModel) GetMaxPossibleWidth() int {
-	return 90
+
+	max := 0
+	for _, item := range m.list.Items() {
+		i, ok := item.(*VerticalItem)
+		if !ok {
+			return 0
+		}
+
+		if w := i.GetWidth(); w >= max {
+			max = w
+		}
+	}
+
+	return max
 }
 
 // header is equivalent to one line + 1 breackline
@@ -97,7 +110,7 @@ func (m *ListModel) GetBodyHeight() (int, error) {
 	sum := 0
 
 	for _, item := range m.list.Items() {
-		i, ok := item.(*Item)
+		i, ok := item.(*VerticalItem)
 		if !ok {
 			return 0, errors.New("ITEM_NOT_ITEM")
 		}

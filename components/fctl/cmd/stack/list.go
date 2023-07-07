@@ -137,22 +137,8 @@ func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 }
 
 func (c *StackListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
-	// Default Columns
-	columns := ui.NewArrayColumn(
-		ui.NewColumn("Organization Id", maxLengthOrganizationId),
-		ui.NewColumn("Stack Id", maxLengthStackId),
-		ui.NewColumn("Name", maxLengthStackName),
-		ui.NewColumn("API URL", maxLengthApiUrl),
-		ui.NewColumn("Region", maxLengthStackRegion),
-		ui.NewColumn("Created At", maxLengthStackCreatedAt),
-	)
 
-	// Add Deleted At column if --deleted flag is set
-	if fctl.GetBool(cmd, deletedFlag) {
-		columns = columns.AddColumn("Deleted At", maxLengthStackDeletedAt)
-	}
-
-	// Create table data
+	// Create table rows
 	tableData := fctl.Map(c.store.Stacks, func(stack Stack) table.Row {
 		data := []string{
 			c.organization,
@@ -174,21 +160,31 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) (ui.Mode
 		return data
 	})
 
+	// Default Columns
+	columns := ui.NewArrayColumn(
+		ui.NewColumn("Organization Id", maxLengthOrganizationId),
+		ui.NewColumn("Stack Id", maxLengthStackId),
+		ui.NewColumn("Name", maxLengthStackName),
+		ui.NewColumn("API URL", maxLengthApiUrl),
+		ui.NewColumn("Region", maxLengthStackRegion),
+		ui.NewColumn("Created At", maxLengthStackCreatedAt),
+	)
+
+	// Add Deleted At column if --deleted flag is set
+	if fctl.GetBool(cmd, deletedFlag) {
+		columns = columns.AddColumn("Deleted At", maxLengthStackDeletedAt)
+	}
+
 	// Default table options
 	opts := ui.NewTableOptions(columns, tableData)
 
 	// Add plain table option if --plain flag is set
 	isPlain := fctl.GetString(cmd, fctl.OutputFlag) == "plain"
-	var opt table.Option
 	if isPlain {
-		opt = ui.WithHeight(len(tableData))
-	} else {
-		opt = ui.WithHeight(ui.MaxTableHeight)
+		opt := ui.WithHeight(len(tableData))
+
+		return ui.NewTableModel(append(opts, opt)...), nil
 	}
 
-	opts = append(opts, opt)
-
-	t := ui.NewTableModel(opts...)
-
-	return t, nil
+	return ui.NewTableModel(opts...), nil
 }
