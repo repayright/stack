@@ -21,7 +21,7 @@ type Header struct {
 
 func NewHeader() *Header {
 	return &Header{
-		modelAction: []list.PointList{},
+		modelAction: make([]list.PointList, 0),
 		logo:        NewLogo(),
 		fctlContext: NewContext(),
 	}
@@ -48,7 +48,6 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		logoView := h.logo.View()
 		var m []string = []string{}
-
 		for i, model := range h.modelAction {
 			tmp := model.View()
 			split := strings.Split(tmp, "\n")
@@ -61,7 +60,7 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 
 			}
 			// Last add padding left
-			if i == len(h.modelAction)-1 {
+			if i == len(h.modelAction)-1 && i != 0 {
 				for k, line := range split {
 					split[k] = lipgloss.NewStyle().PaddingLeft(1).Render(line)
 				}
@@ -128,17 +127,17 @@ func (h *Header) AddKeyBinding(keys ...*modelutils.KeyMapHandler) *Header {
 			l := list.NewHorizontalItem(part0, strings.TrimPrefix(split[1], " "))
 			items = append(items, l)
 		}
-
 		if len(items) > 0 {
 			out = append(out, items)
-
 		}
 
 	}
+
+	h.modelAction = make([]list.PointList, 0)
 	for _, o := range out {
 		pl := list.NewPointList(o,
 			list.NewHorizontalItemDelegate(),
-			100,
+			50,
 			maxHeigth+1,
 		)
 
