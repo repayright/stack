@@ -28,7 +28,7 @@ func (i HorizontalItem) GetDescription() string { return i.desc }
 func (i HorizontalItem) FilterValue() string { return i.title }
 
 func (i HorizontalItem) GetWidth() int {
-	return len(i.title) + len(i.desc) + 2 // +2 for the " " + ?????????????
+	return len(i.title) + len(i.desc) + 2 // +2 for the " " +
 
 }
 
