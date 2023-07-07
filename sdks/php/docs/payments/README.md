@@ -86,7 +86,7 @@ try {
     $request->transferRequest->asset = 'USD';
     $request->transferRequest->destination = 'acct_1Gqj58KZcSIg2N2q';
     $request->transferRequest->source = 'acct_1Gqj58KZcSIg2N2q';
-    $request->connector = Connector::MODULR;
+    $request->connector = Connector::CURRENCY_CLOUD;
 
     $response = $sdk->payments->connectorsTransfer($request);
 
@@ -120,7 +120,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetConnectorTaskRequest();
-    $request->connector = Connector::BANKING_CIRCLE;
+    $request->connector = Connector::MONEYCORP;
     $request->taskId = 'sint';
 
     $response = $sdk->payments->getConnectorTask($request);
@@ -284,7 +284,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new ListConnectorTasksRequest();
-    $request->connector = Connector::BANKING_CIRCLE;
+    $request->connector = Connector::MONEYCORP;
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
     $request->pageSize = 680056;
 
@@ -320,7 +320,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new ListConnectorsTransfersRequest();
-    $request->connector = Connector::WISE;
+    $request->connector = Connector::MODULR;
 
     $response = $sdk->payments->listConnectorsTransfers($request);
 
@@ -533,7 +533,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new UninstallConnectorRequest();
-    $request->connector = Connector::DUMMY_PAY;
+    $request->connector = Connector::WISE;
 
     $response = $sdk->payments->uninstallConnector($request);
 

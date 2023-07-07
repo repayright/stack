@@ -74,7 +74,7 @@ req = operations.ConnectorsTransferRequest(
         destination='acct_1Gqj58KZcSIg2N2q',
         source='acct_1Gqj58KZcSIg2N2q',
     ),
-    connector=shared.Connector.MODULR,
+    connector=shared.Connector.CURRENCY_CLOUD,
 )
 
 res = s.payments.connectors_transfer(req)
@@ -100,7 +100,7 @@ s = sdk.SDK(
 )
 
 req = operations.GetConnectorTaskRequest(
-    connector=shared.Connector.BANKING_CIRCLE,
+    connector=shared.Connector.MONEYCORP,
     task_id='sint',
 )
 
@@ -230,7 +230,7 @@ s = sdk.SDK(
 )
 
 req = operations.ListConnectorTasksRequest(
-    connector=shared.Connector.BANKING_CIRCLE,
+    connector=shared.Connector.MONEYCORP,
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
     page_size=680056,
 )
@@ -258,7 +258,7 @@ s = sdk.SDK(
 )
 
 req = operations.ListConnectorsTransfersRequest(
-    connector=shared.Connector.WISE,
+    connector=shared.Connector.MODULR,
 )
 
 res = s.payments.list_connectors_transfers(req)
@@ -427,7 +427,7 @@ s = sdk.SDK(
 )
 
 req = operations.UninstallConnectorRequest(
-    connector=shared.Connector.DUMMY_PAY,
+    connector=shared.Connector.WISE,
 )
 
 res = s.payments.uninstall_connector(req)
