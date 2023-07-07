@@ -38,8 +38,8 @@ type Stack struct {
 	Name      string  `json:"name"`
 	Dashboard string  `json:"dashboard"`
 	RegionID  string  `json:"region"`
-	CreatedAt string  `json:"created_at"`
-	DeletedAt *string `json:"deleted_at"`
+	CreatedAt *string `json:"createdAt"`
+	DeletedAt *string `json:"deletedAt"`
 }
 type StackListStore struct {
 	Stacks []Stack `json:"stacks"`
@@ -116,7 +116,13 @@ func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 			Name:      stack.Name,
 			Dashboard: c.profile.ServicesBaseUrl(&stack).String(),
 			RegionID:  stack.RegionID,
-			CreatedAt: stack.CreatedAt.Format(time.RFC3339),
+			CreatedAt: func() *string {
+				if stack.CreatedAt != nil {
+					t := stack.CreatedAt.Format(time.RFC3339)
+					return &t
+				}
+				return nil
+			}(),
 			DeletedAt: func() *string {
 				if stack.DeletedAt != nil {
 					t := stack.DeletedAt.Format(time.RFC3339)
@@ -154,7 +160,7 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) (ui.Mode
 			stack.Name,
 			stack.Dashboard,
 			stack.RegionID,
-			stack.CreatedAt,
+			*stack.CreatedAt,
 		}
 
 		if fctl.GetBool(cmd, deletedFlag) {

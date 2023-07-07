@@ -6,7 +6,7 @@ require (
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2
 	github.com/athul/shelby v1.0.6
 	github.com/c-bata/go-prompt v0.2.6
-	github.com/formancehq/fctl/membershipclient v0.0.0-00010101000000-000000000000
+	github.com/formancehq/fctl/membershipclient v0.0.0-20230109152136-5d4c9193a44c
 	github.com/formancehq/formance-sdk-go v0.0.0-00010101000000-000000000000
 	github.com/formancehq/stack/libs/go-libs v0.0.0-00010101000000-000000000000
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -26,12 +26,11 @@ require (
 require atomicgo.dev/schedule v0.0.2 // indirect
 
 require (
-	atomicgo.dev/schedule v0.0.2 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/charmbracelet/bubbletea v0.24.1 // indirect
+	github.com/charmbracelet/bubbletea v0.24.2 // indirect
 	github.com/charmbracelet/lipgloss v0.7.1 // indirect
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
