@@ -293,6 +293,10 @@ func WithRender[T any](cmd *cobra.Command, args []string, c Controller[T], r Ren
 			return err
 		}
 
+		if m == nil { // If the renderer returns nil, we don't want to render anything
+			return nil
+		}
+
 		d.AppendModels(m).SetHeader(header)
 
 		if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
@@ -307,7 +311,7 @@ func WithRender[T any](cmd *cobra.Command, args []string, c Controller[T], r Ren
 			return err
 		}
 
-		if m != nil {
+		if m != nil { // If the renderer returns nil, we don't want to render anything
 			fmt.Println(m.View())
 		}
 		return nil
