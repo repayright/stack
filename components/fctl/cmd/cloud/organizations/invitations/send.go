@@ -2,6 +2,7 @@ package invitations
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -78,8 +79,8 @@ func (c *SendController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *SendController) Render(cmd *cobra.Command, args []string) error {
+func (c *SendController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Invitation sent to %s", c.store.Invitation.Email)
-	return nil
+	return nil, nil
 
 }

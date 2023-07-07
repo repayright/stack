@@ -2,6 +2,7 @@ package billing
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -73,21 +74,21 @@ func (c *SetupController) Run(cmd *cobra.Command, args []string) (fctl.Renderabl
 	return c, nil
 }
 
-func (c *SetupController) Render(cmd *cobra.Command, args []string) error {
+func (c *SetupController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	if !c.store.FoundBrowser && c.store.BillingUrl != "" {
 		pterm.Warning.WithWriter(cmd.OutOrStderr()).Printfln("Could not open browser, please visit %s", c.store.BillingUrl)
-		return nil
+		return nil, nil
 	}
 
 	if c.store.BillingUrl == "" {
 		pterm.Error.WithWriter(cmd.OutOrStderr()).Printfln("You already have an active subscription")
-		return nil
+		return nil, nil
 	}
 
 	if c.store.FoundBrowser && c.store.BillingUrl != "" {
 		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Billing Setup opened in your browser")
-		return nil
+		return nil, nil
 	}
 
-	return nil
+	return nil, nil
 }

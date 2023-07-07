@@ -5,6 +5,7 @@ import (
 
 	internal "github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -87,7 +88,7 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *ShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	fctl.Section.WithWriter(cmd.OutOrStdout()).Println("Information")
 	if c.store.Account.Volumes != nil && len(c.store.Account.Volumes) > 0 {
 		tableData := pterm.TableData{}
@@ -102,7 +103,7 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 			WithWriter(cmd.OutOrStdout()).
 			WithData(tableData).
 			Render(); err != nil {
-			return err
+			return nil, err
 		}
 	} else {
 		fctl.Println("No balances.")
@@ -110,5 +111,5 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintln(cmd.OutOrStdout())
 
-	return fctl.PrintMetadata(cmd.OutOrStdout(), c.store.Account.Metadata)
+	return nil, fctl.PrintMetadata(cmd.OutOrStdout(), c.store.Account.Metadata)
 }

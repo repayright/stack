@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -92,20 +93,20 @@ func (c *DeleteWebhookController) Run(cmd *cobra.Command, args []string) (fctl.R
 	return c, nil
 }
 
-func (c *DeleteWebhookController) Render(cmd *cobra.Command, args []string) error {
+func (c *DeleteWebhookController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	if !c.store.Success {
 		pterm.Warning.WithShowLineNumber(false).Printfln("Config %s not found", args[0])
-		return nil
+		return nil, nil
 	}
 
 	if c.store.ErrorResponse != nil {
 		pterm.Warning.WithShowLineNumber(false).Printfln(c.store.ErrorResponse.ErrorMessage)
-		return nil
+		return nil, nil
 	}
 
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Config deleted successfully")
 
-	return nil
+	return nil, nil
 }
 
 func NewDeleteCommand() *cobra.Command {

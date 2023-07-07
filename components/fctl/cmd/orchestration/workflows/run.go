@@ -6,6 +6,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/orchestration/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -101,7 +102,7 @@ func (c *WorkflowsRunController) Run(cmd *cobra.Command, args []string) (fctl.Re
 	return c, nil
 }
 
-func (c *WorkflowsRunController) Render(cmd *cobra.Command, args []string) error {
+func (c *WorkflowsRunController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Workflow instance created with ID: %s", c.store.WorkflowInstance.ID)
 	if c.wait {
@@ -112,7 +113,7 @@ func (c *WorkflowsRunController) Render(cmd *cobra.Command, args []string) error
 			panic(err)
 		}
 
-		return internal.PrintWorkflowInstance(cmd.OutOrStdout(), w.GetWorkflowResponse.Data, c.store.WorkflowInstance)
+		return nil, internal.PrintWorkflowInstance(cmd.OutOrStdout(), w.GetWorkflowResponse.Data, c.store.WorkflowInstance)
 	}
-	return nil
+	return nil, nil
 }

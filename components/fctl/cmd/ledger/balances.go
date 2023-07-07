@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -92,7 +93,7 @@ func (c *BalancesController) Run(cmd *cobra.Command, args []string) (fctl.Render
 	return c, nil
 }
 
-func (c *BalancesController) Render(cmd *cobra.Command, args []string) error {
+func (c *BalancesController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{"Account", "Asset", "Balance"})
 	for _, accountBalances := range c.store.Balances.Data {
@@ -105,7 +106,7 @@ func (c *BalancesController) Render(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader(true).
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

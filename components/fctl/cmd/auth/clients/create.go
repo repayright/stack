@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -126,7 +127,7 @@ func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
+func (c *CreateController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("ID"), c.store.Client.ID})
 	tableData = append(tableData, []string{pterm.LightCyan("Name"), c.store.Client.Name})
@@ -134,7 +135,7 @@ func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
 	tableData = append(tableData, []string{pterm.LightCyan("Public"), c.store.Client.IsPublic})
 	tableData = append(tableData, []string{pterm.LightCyan("Redirect URIs"), c.store.Client.RedirectUri})
 	tableData = append(tableData, []string{pterm.LightCyan("Post logout redirect URIs"), c.store.Client.PostLogoutRedirectUri})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()

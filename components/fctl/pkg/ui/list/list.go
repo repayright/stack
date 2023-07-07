@@ -5,7 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
 // TODO: This should extend list.Model from github.com/charmbracelet/bubbles/list
@@ -41,7 +41,7 @@ func NewDefaultListModel(items []list.Item, help bool) (*ListModel, error) {
 		return nil, errors.New("FIRST_ITEMS_NOT_ITEM")
 	}
 
-	m := NewListModel(items, NewItemDelegate(firstItem.GetHeight()), fctl.ViewWidth, fctl.ViewHeight, help).WithMaxPossibleWidth()
+	m := NewListModel(items, NewItemDelegate(firstItem.GetHeight()), theme.ViewWidth, theme.ViewHeight, help).WithMaxPossibleWidth()
 
 	m, err := m.WithMaxPossibleHeight()
 	if err != nil {
@@ -56,7 +56,7 @@ func (m ListModel) Init() tea.Cmd {
 }
 
 func (m ListModel) View() string {
-	return fctl.DocStyle.Render(m.list.View())
+	return theme.DocStyle.Render(m.list.View())
 }
 
 func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -93,20 +93,19 @@ func (m *ListModel) GetFooterHeight() int {
 // Each item has 1 breackline
 // It should be calculed from ItemDelegate.Height()
 func (m *ListModel) GetBodyHeight() (int, error) {
-	itemListLength, err := fctl.Reduce[list.Item, int](m.list.Items(), func(acc int, i list.Item, err error) (int, error) {
-		item, ok := i.(*Item)
+
+	sum := 0
+
+	for _, item := range m.list.Items() {
+		i, ok := item.(*Item)
 		if !ok {
-			return acc, errors.New("ITEM_NOT_ITEM")
+			return 0, errors.New("ITEM_NOT_ITEM")
 		}
 
-		return acc + item.GetHeight(), nil
-	}, 0)
-
-	if err != nil {
-		return 0, err
+		sum += i.GetHeight()
 	}
 
-	return itemListLength + len(m.list.Items()), nil
+	return sum + len(m.list.Items()), nil
 }
 
 // The height counter depends on row count

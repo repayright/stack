@@ -6,6 +6,7 @@ import (
 	"time"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -77,7 +78,7 @@ func (c *ListWebhookController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-func (c *ListWebhookController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListWebhookController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	// TODO: WebhooksConfig is missing ?
 	if err := pterm.DefaultTable.
 		WithHasHeader(true).
@@ -98,9 +99,9 @@ func (c *ListWebhookController) Render(cmd *cobra.Command, args []string) error 
 				[]string{"ID", "Created at", "Secret", "Endpoint", "Active", "Event types"},
 			),
 		).Render(); err != nil {
-		return errors.Wrap(err, "rendering table")
+		return nil, errors.Wrap(err, "rendering table")
 	}
-	return nil
+	return nil, nil
 }
 
 func NewListCommand() *cobra.Command {

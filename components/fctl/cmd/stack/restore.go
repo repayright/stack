@@ -7,6 +7,7 @@ import (
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -100,6 +101,6 @@ func (c *StackRestoreController) Run(cmd *cobra.Command, args []string) (fctl.Re
 	return c, nil
 }
 
-func (c *StackRestoreController) Render(cmd *cobra.Command, args []string) error {
+func (c *StackRestoreController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	return internal.PrintStackInformation(cmd, fctl.GetCurrentProfile(cmd, c.config), c.store.Stack, c.store.Versions)
 }

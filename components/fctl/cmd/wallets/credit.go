@@ -6,6 +6,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -144,7 +145,7 @@ func (c *CreditWalletController) Run(cmd *cobra.Command, args []string) (fctl.Re
 	return c, nil
 }
 
-func (c *CreditWalletController) Render(cmd *cobra.Command, args []string) error {
+func (c *CreditWalletController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Wallet credited successfully!")
-	return nil
+	return nil, nil
 }

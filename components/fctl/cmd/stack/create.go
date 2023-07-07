@@ -7,6 +7,7 @@ import (
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
@@ -172,6 +173,6 @@ func (c *StackCreateController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-func (c *StackCreateController) Render(cmd *cobra.Command, args []string) error {
+func (c *StackCreateController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	return internal.PrintStackInformation(cmd, c.profile, c.store.Stack, c.store.Versions)
 }

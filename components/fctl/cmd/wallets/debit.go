@@ -6,6 +6,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -159,13 +160,13 @@ func (c *DebitWalletController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-func (c *DebitWalletController) Render(cmd *cobra.Command, args []string) error {
+func (c *DebitWalletController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	if c.store.HoldID != nil && *c.store.HoldID != "" {
 		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Wallet debited successfully with hold id '%s'!", *c.store.HoldID)
 	} else {
 		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Wallet debited successfully!")
 	}
 
-	return nil
+	return nil, nil
 
 }

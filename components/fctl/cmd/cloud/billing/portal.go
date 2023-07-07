@@ -2,6 +2,7 @@ package billing
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -73,21 +74,21 @@ func (c *PortalController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *PortalController) Render(cmd *cobra.Command, args []string) error {
+func (c *PortalController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	if c.store.FoundBrowser && c.store.BillingPlanUrl != "" {
 		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Billing Portal opened in your browser")
-		return nil
+		return nil, nil
 	}
 
 	if !c.store.FoundBrowser && c.store.BillingPlanUrl != "" {
 		pterm.Error.WithWriter(cmd.OutOrStdout()).Printfln("Please open %s in your browser", c.store.BillingPlanUrl)
-		return nil
+		return nil, nil
 	}
 
 	if c.store.BillingPlanUrl == "" {
 		pterm.Error.WithWriter(cmd.OutOrStdout()).Printfln("Please subscribe to a plan to access Billing Portal")
-		return nil
+		return nil, nil
 	}
 
-	return nil
+	return nil, nil
 }

@@ -3,6 +3,7 @@ package organizations
 import (
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -83,12 +84,12 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	OrgMap := fctl.Map(c.store.Organizations, func(o *OrgRow) []string {
 		return []string{o.ID, o.Name, o.OwnerID, o.OwnerEmail, o.IsMine}
 	})
 
 	tableData := fctl.Prepend(OrgMap, []string{"ID", "Name", "Owner ID", "Owner email", "Is mine?"})
 
-	return pterm.DefaultTable.WithHasHeader().WithWriter(cmd.OutOrStdout()).WithData(tableData).Render()
+	return nil, pterm.DefaultTable.WithHasHeader().WithWriter(cmd.OutOrStdout()).WithData(tableData).Render()
 }

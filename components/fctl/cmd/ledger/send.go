@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/spf13/cobra"
@@ -124,6 +125,6 @@ func (c *SendController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 }
 
 // TODO: This need to use the ui.NewListModel
-func (c *SendController) Render(cmd *cobra.Command, args []string) error {
-	return internal.PrintTransaction(cmd.OutOrStdout(), *c.store.Transaction)
+func (c *SendController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
+	return nil, internal.PrintTransaction(cmd.OutOrStdout(), *c.store.Transaction)
 }

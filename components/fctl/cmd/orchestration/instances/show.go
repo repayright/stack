@@ -6,6 +6,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/orchestration/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -85,7 +86,7 @@ func (c *InstancesShowController) Run(cmd *cobra.Command, args []string) (fctl.R
 	return c, nil
 }
 
-func (c *InstancesShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *InstancesShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	// Print the instance information
 	fctl.Section.WithWriter(cmd.OutOrStdout()).Println("Information")
 	tableData := pterm.TableData{}
@@ -103,12 +104,12 @@ func (c *InstancesShowController) Render(cmd *cobra.Command, args []string) erro
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render(); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := internal.PrintWorkflowInstance(cmd.OutOrStdout(), c.store.Workflow, c.store.WorkflowInstance); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return nil, nil
 }

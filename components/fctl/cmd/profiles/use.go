@@ -2,6 +2,7 @@ package profiles
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -56,9 +57,9 @@ func (c *ProfilesUseController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-func (c *ProfilesUseController) Render(cmd *cobra.Command, args []string) error {
+func (c *ProfilesUseController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Selected profile updated!")
-	return nil
+	return nil, nil
 }
 
 func NewUseCommand() *cobra.Command {

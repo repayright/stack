@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/auth/clients/views"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -81,7 +82,7 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *ShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	views.PrintClient(cmd.OutOrStdout(), c.store.Client)
 
@@ -94,7 +95,7 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 				BulletStyle: pterm.NewStyle(pterm.FgLightCyan),
 			}
 		})).Render(); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -107,14 +108,14 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 				BulletStyle: pterm.NewStyle(pterm.FgLightCyan),
 			}
 		})).Render(); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	if len(c.store.Client.Secrets) > 0 {
 		if err := views.PrintSecrets(cmd.OutOrStdout(), c.store.Client.Secrets); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return nil, nil
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -68,7 +69,7 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := fctl.Map(c.store.Regions, func(i membershipclient.AnyRegion) []string {
 		return []string{
 			i.Id,
@@ -91,7 +92,7 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 		}
 	})
 	tableData = fctl.Prepend(tableData, []string{"ID", "Name", "Base url", "Public", "Active", "Last ping", "Owner"})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

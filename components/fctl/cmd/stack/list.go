@@ -1,11 +1,9 @@
 package stack
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui"
@@ -132,7 +130,7 @@ func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 	return c, nil
 }
 
-func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
+func (c *StackListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	// Default Columns
 	columns := ui.NewArrayColumn(
 		ui.NewColumn("Organization Id", maxLengthOrganizationId),
@@ -175,7 +173,6 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
 
 	// Add plain table option if --plain flag is set
 	isPlain := fctl.GetString(cmd, fctl.OutputFlag) == "plain"
-
 	var opt table.Option
 	if isPlain {
 		opt = ui.WithHeight(len(tableData))
@@ -187,24 +184,5 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) error {
 
 	t := ui.NewTableModel(opts...)
 
-	return displayStackList(cmd, t)
-}
-
-func displayStackList(cmd *cobra.Command, t *ui.TableModel) error {
-	isPlain := fctl.GetString(cmd, fctl.OutputFlag)
-
-	if isPlain == "plain" {
-		fmt.Println(t.View())
-		return nil
-	}
-
-	header := ui.NewHeader()
-
-	d := ui.NewDisplay().AppendModels(t).SetHeader(header)
-
-	if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
-		return err
-	}
-
-	return nil
+	return t, nil
 }

@@ -6,7 +6,7 @@ import (
 
 	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
 type Item struct {
@@ -66,7 +66,7 @@ func (d ItemDelegate) Render(w io.Writer, m blist.Model, index int, item blist.I
 		str = fmt.Sprintf("%s\n%s", i.GetTitle(), i.GetDescription())
 	}
 
-	str = fctl.ItemStyle.Render(str)
+	str = theme.ItemStyle.Render(str)
 
 	_, err := fmt.Fprint(w, str)
 	if err != nil {

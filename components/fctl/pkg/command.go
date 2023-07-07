@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/TylerBrock/colorjson"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
 	"github.com/segmentio/analytics-go/v3"
 	"github.com/segmentio/ksuid"
@@ -281,8 +283,34 @@ func WithRender[T any](cmd *cobra.Command, args []string, c Controller[T], r Ren
 			cmd.OutOrStdout().Write(out)
 			return nil
 		}
+	case "dynamic":
+
+		d := ui.NewDisplay()
+		header := ui.NewHeader()
+
+		m, err := r.Render(cmd, args)
+		if err != nil {
+			return err
+		}
+
+		d.AppendModels(m).SetHeader(header)
+
+		if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
+			return err
+		}
+
+		return nil
 	default:
-		return r.Render(cmd, args)
+		m, err := r.Render(cmd, args)
+
+		if err != nil {
+			return err
+		}
+
+		if m != nil {
+			fmt.Println(m.View())
+		}
+		return nil
 	}
 }
 

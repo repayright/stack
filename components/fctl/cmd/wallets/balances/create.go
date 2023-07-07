@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -96,9 +97,9 @@ func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
+func (c *CreateController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln(
 		"Balance created successfully with name: %s", c.store.BalanceName)
-	return nil
+	return nil, nil
 
 }

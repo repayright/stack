@@ -5,7 +5,6 @@ import (
 	"io"
 
 	blist "github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui"
@@ -84,31 +83,23 @@ func printMetadata(out io.Writer, stack *membershipclient.Stack) (*list.ListMode
 	}
 }
 
-func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) error {
+func PrintStackInformation(cmd *cobra.Command, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (ui.Model, error) {
 	out := cmd.OutOrStdout()
 	content, err := getContent(out, stack, versions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Plain
 	if flag := fctl.GetString(cmd, fctl.OutputFlag); flag == "plain" {
-		fctl.Println(content)
-		return nil
+		return ui.NewPlainOutput(content), nil
 	}
 
 	// Dynamic
-	model, err := ui.NewViewPortManager(content, out, *profile)
+	model, err := ui.NewViewPortManager(content, out)
 	if err != nil {
-		return err
-	}
-	header := ui.NewHeader()
-
-	d := ui.NewDisplay().AppendModels(model).SetHeader(header)
-
-	if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return model, nil
 }

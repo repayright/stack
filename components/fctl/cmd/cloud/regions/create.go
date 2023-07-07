@@ -3,6 +3,7 @@ package regions
 import (
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -82,11 +83,11 @@ func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
+func (c *CreateController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln(
 		"Region created successfully with ID: %s", c.store.RegionId)
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln(
 		"Your secret is (keep it safe, we will not be able to give it to you again): %s", c.store.Secret)
 
-	return nil
+	return nil, nil
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -86,7 +87,7 @@ func (c *PaymentsConnectorsListController) Run(cmd *cobra.Command, args []string
 	return c, nil
 }
 
-func (c *PaymentsConnectorsListController) Render(cmd *cobra.Command, args []string) error {
+func (c *PaymentsConnectorsListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := fctl.Map(c.store.Connectors, func(connector shared.ConnectorsResponseData) []string {
 		return []string{
 			string(*connector.Provider),
@@ -94,7 +95,7 @@ func (c *PaymentsConnectorsListController) Render(cmd *cobra.Command, args []str
 		}
 	})
 	tableData = fctl.Prepend(tableData, []string{"Provider", "Enabled"})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

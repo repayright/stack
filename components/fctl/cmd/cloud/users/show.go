@@ -2,6 +2,7 @@ package users
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -66,12 +67,12 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *ShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("ID"), c.store.Id})
 	tableData = append(tableData, []string{pterm.LightCyan("Email"), c.store.Email})
 
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()

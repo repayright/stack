@@ -2,6 +2,7 @@ package profiles
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -63,9 +64,9 @@ func (c *ProfilesRenameController) Run(cmd *cobra.Command, args []string) (fctl.
 	return c, nil
 }
 
-func (c *ProfilesRenameController) Render(cmd *cobra.Command, args []string) error {
+func (c *ProfilesRenameController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Profile renamed!")
-	return nil
+	return nil, nil
 }
 
 func NewRenameCommand() *cobra.Command {

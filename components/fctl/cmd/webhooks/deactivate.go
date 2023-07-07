@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
@@ -83,11 +84,11 @@ func (c *DesactivateWebhookController) Run(cmd *cobra.Command, args []string) (f
 	return c, nil
 }
 
-func (c *DesactivateWebhookController) Render(cmd *cobra.Command, args []string) error {
+func (c *DesactivateWebhookController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Config deactivated successfully")
 
-	return nil
+	return nil, nil
 }
 
 func NewDeactivateCommand() *cobra.Command {

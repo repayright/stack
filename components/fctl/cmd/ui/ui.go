@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -84,11 +85,11 @@ func (c *UiController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, 
 	return c, nil
 }
 
-func (c *UiController) Render(cmd *cobra.Command, args []string) error {
+func (c *UiController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	fmt.Println("Opening url: ", c.store.UIUrl)
 
-	return nil
+	return nil, nil
 }
 
 func NewCommand() *cobra.Command {

@@ -2,6 +2,7 @@ package ledger
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -72,14 +73,14 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := fctl.Map(c.store.Ledgers, func(ledger string) []string {
 		return []string{
 			ledger,
 		}
 	})
 	tableData = fctl.Prepend(tableData, []string{"Name"})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

@@ -3,6 +3,7 @@ package users
 import (
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -74,7 +75,7 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	usersRow := fctl.Map(c.store.Users, func(i User) []string {
 		return []string{
@@ -84,7 +85,7 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	})
 
 	tableData := fctl.Prepend(usersRow, []string{"ID", "Email"})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

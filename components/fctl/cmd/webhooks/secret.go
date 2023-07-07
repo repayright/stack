@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -91,10 +92,10 @@ func (c *ChangeSecretWebhookController) Run(cmd *cobra.Command, args []string) (
 	return c, nil
 }
 
-func (c *ChangeSecretWebhookController) Render(cmd *cobra.Command, args []string) error {
+func (c *ChangeSecretWebhookController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln(
 		"Config '%s' updated successfully with new secret", c.store.ID)
-	return nil
+	return nil, nil
 }
 
 func NewChangeSecretCommand() *cobra.Command {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -86,13 +87,13 @@ func (c *StatsController) Run(cmd *cobra.Command, args []string) (fctl.Renderabl
 }
 
 // TODO: This need to use the ui.NewListModel
-func (c *StatsController) Render(cmd *cobra.Command, args []string) error {
+func (c *StatsController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("Transactions"), fmt.Sprint(c.store.Stats.Transactions)})
 	tableData = append(tableData, []string{pterm.LightCyan("Accounts"), fmt.Sprint(c.store.Stats.Accounts)})
 
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()

@@ -2,6 +2,7 @@ package profiles
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -52,12 +53,12 @@ func (c *ProfilesShowController) Run(cmd *cobra.Command, args []string) (fctl.Re
 	return c, nil
 }
 
-func (c *ProfilesShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *ProfilesShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("Membership URI"), c.store.MembershipURI})
 	tableData = append(tableData, []string{pterm.LightCyan("Default organization"), c.store.DefaultOrganization})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()

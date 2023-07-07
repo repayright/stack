@@ -5,6 +5,7 @@ import (
 	"time"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -75,7 +76,7 @@ func (c *PaymentsListController) Run(cmd *cobra.Command, args []string) (fctl.Re
 	return c, nil
 }
 
-func (c *PaymentsListController) Render(cmd *cobra.Command, args []string) error {
+func (c *PaymentsListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := fctl.Map(c.store.Cursor.Data, func(payment shared.Payment) []string {
 		return []string{
 			payment.ID,
@@ -92,7 +93,7 @@ func (c *PaymentsListController) Render(cmd *cobra.Command, args []string) error
 	})
 	tableData = fctl.Prepend(tableData, []string{"ID", "Type", "Amount", "Asset", "Status",
 		"Scheme", "Reference", "Account ID", "Provider", "Created at"})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

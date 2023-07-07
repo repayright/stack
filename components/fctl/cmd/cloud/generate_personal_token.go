@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -67,8 +68,8 @@ func (c *GeneratePersonalTokenController) Run(cmd *cobra.Command, args []string)
 	return c, nil
 }
 
-func (c *GeneratePersonalTokenController) Render(cmd *cobra.Command, args []string) error {
+func (c *GeneratePersonalTokenController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	fmt.Fprintln(cmd.OutOrStdout(), c.store.Token)
-	return nil
+	return nil, nil
 }

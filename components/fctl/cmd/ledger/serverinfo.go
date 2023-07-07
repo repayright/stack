@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -82,7 +83,7 @@ func (c *ServerInfoController) Run(cmd *cobra.Command, args []string) (fctl.Rend
 	return c, nil
 }
 
-func (c *ServerInfoController) Render(cmd *cobra.Command, args []string) error {
+func (c *ServerInfoController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("Server"), fmt.Sprint(c.store.Server)})
 	tableData = append(tableData, []string{pterm.LightCyan("Version"), fmt.Sprint(c.store.Version)})
@@ -92,7 +93,7 @@ func (c *ServerInfoController) Render(cmd *cobra.Command, args []string) error {
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render(); err != nil {
-		return err
+		return nil, err
 	}
 
 	fctl.BasicTextCyan.WithWriter(cmd.OutOrStdout()).Printfln("Ledgers :")
@@ -106,8 +107,8 @@ func (c *ServerInfoController) Render(cmd *cobra.Command, args []string) error {
 			}
 		})).
 		Render(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return nil, nil
 }

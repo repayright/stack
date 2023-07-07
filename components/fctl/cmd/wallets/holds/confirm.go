@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -101,9 +102,9 @@ func (c *ConfirmController) Run(cmd *cobra.Command, args []string) (fctl.Rendera
 	return c, nil
 }
 
-func (c *ConfirmController) Render(cmd *cobra.Command, args []string) error {
+func (c *ConfirmController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Hold '%s' confirmed!", args[0])
 
-	return nil
+	return nil, nil
 
 }

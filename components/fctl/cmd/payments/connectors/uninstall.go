@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -96,7 +97,7 @@ func (c *PaymentsConnectorsUninstallController) Run(cmd *cobra.Command, args []s
 }
 
 // TODO: This need to use the ui.NewListModel
-func (c *PaymentsConnectorsUninstallController) Render(cmd *cobra.Command, args []string) error {
+func (c *PaymentsConnectorsUninstallController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' uninstalled!", c.store.ConnectorName)
-	return nil
+	return nil, nil
 }

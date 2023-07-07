@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/ui/theme"
 	"github.com/pterm/pterm"
 )
 
@@ -27,7 +27,7 @@ func ApplyStyleToString(header string) string {
 	lines := strings.Split(header, "\n")
 
 	for i := 0; i < len(lines); i++ {
-		lines[i] = fctl.HeaderStyle.Sprint(lines[i])
+		lines[i] = theme.HeaderStyle.Sprint(lines[i])
 	}
 
 	return strings.Join(lines, "\n")

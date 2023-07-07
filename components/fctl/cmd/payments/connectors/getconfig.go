@@ -6,6 +6,7 @@ import (
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	"github.com/formancehq/fctl/cmd/payments/connectors/views"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -90,8 +91,7 @@ func (c *PaymentsGetConfigController) Run(cmd *cobra.Command, args []string) (fc
 
 }
 
-// TODO: This need to use the ui.NewListModel
-func (c *PaymentsGetConfigController) Render(cmd *cobra.Command, args []string) error {
+func (c *PaymentsGetConfigController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	var err error
 
 	switch args[0] {
@@ -105,13 +105,14 @@ func (c *PaymentsGetConfigController) Render(cmd *cobra.Command, args []string) 
 		err = views.DisplayCurrencyCloudConfig(cmd, c.store.ConnectorConfig)
 	case internal.WiseConnector:
 		err = views.DisplayWiseConfig(cmd, c.store.ConnectorConfig)
-	case internal.MangoPayConnector:
-		err = views.DisplayMangoPayConfig(cmd, c.store.ConnectorConfig)
 	case internal.MoneycorpConnector:
 		err = views.DisplayMoneycorpConfig(cmd, c.store.ConnectorConfig)
+	case internal.MangoPayConnector:
+		err = views.DisplayMangoPayConfig(cmd, c.store.ConnectorConfig)
 	default:
 		pterm.Error.WithWriter(cmd.OutOrStderr()).Printfln("Connection unknown.")
 	}
-	return err
+
+	return nil, err
 
 }

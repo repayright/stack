@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
@@ -87,8 +88,8 @@ func (c *WorkflowsCreateController) Run(cmd *cobra.Command, args []string) (fctl
 	return c, nil
 }
 
-func (c *WorkflowsCreateController) Render(cmd *cobra.Command, args []string) error {
+func (c *WorkflowsCreateController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Workflow created with ID: %s", c.store.WorkflowId)
 
-	return nil
+	return nil, nil
 }

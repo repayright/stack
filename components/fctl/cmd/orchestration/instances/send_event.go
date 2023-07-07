@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
@@ -83,7 +84,7 @@ func (c *InstancesSendEventController) Run(cmd *cobra.Command, args []string) (f
 	return c, nil
 }
 
-func (c *InstancesSendEventController) Render(cmd *cobra.Command, args []string) error {
+func (c *InstancesSendEventController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Event '%s' sent", args[1])
-	return nil
+	return nil, nil
 }

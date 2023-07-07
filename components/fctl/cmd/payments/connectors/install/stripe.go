@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -82,9 +83,9 @@ func (c *PaymentsConnectorsStripeController) Run(cmd *cobra.Command, args []stri
 	return c, nil
 }
 
-func (c *PaymentsConnectorsStripeController) Render(cmd *cobra.Command, args []string) error {
+func (c *PaymentsConnectorsStripeController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' installed!", c.store.ConnectorName)
 
-	return nil
+	return nil, nil
 }

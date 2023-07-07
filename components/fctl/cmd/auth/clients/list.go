@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -98,7 +99,7 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := fctl.Map(c.store.Clients, func(o Client) []string {
 		return []string{
 			o.ID,
@@ -110,7 +111,7 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	})
 
 	tableData = fctl.Prepend(tableData, []string{"ID", "Name", "Description", "Scopes", "Public"})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

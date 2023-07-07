@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -90,10 +91,10 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	if len(c.store.Wallets) == 0 {
 		fctl.Println("No wallets found.")
-		return nil
+		return nil, nil
 	}
 
 	if err := pterm.DefaultTable.
@@ -111,7 +112,7 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 				[]string{"ID", "Name"},
 			),
 		).Render(); err != nil {
-		return errors.Wrap(err, "rendering table")
+		return nil, errors.Wrap(err, "rendering table")
 	}
-	return nil
+	return nil, nil
 }

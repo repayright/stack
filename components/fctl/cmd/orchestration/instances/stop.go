@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
@@ -74,9 +75,9 @@ func (c *InstancesStopController) Run(cmd *cobra.Command, args []string) (fctl.R
 	return c, nil
 }
 
-func (c *InstancesStopController) Render(cmd *cobra.Command, args []string) error {
+func (c *InstancesStopController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	// Print the instance information
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Workflow Instance with ID: %s successfully canceled ", c.store.InstanceID)
 
-	return nil
+	return nil, nil
 }

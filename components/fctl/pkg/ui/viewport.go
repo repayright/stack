@@ -7,8 +7,8 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
-	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
 // https://github.com/charmbracelet/bubbletea/blob/master/examples/pager/main.go#L92
@@ -100,15 +100,15 @@ func (m modelManager) GetListKeyMapHandler() *modelutils.KeyMapHandler {
 
 	return k
 }
-func NewViewPortManager(content string, out io.Writer, profile fctl.Profile) (*modelManager, error) {
-	width := fctl.ViewWidth
-	vp := viewport.New(width, fctl.ViewHeight)
+func NewViewPortManager(content string, out io.Writer) (*modelManager, error) {
+	width := theme.ViewWidth
+	vp := viewport.New(width, theme.ViewHeight)
 
 	// This paramaeter is working well
 	// It makes the terminal much smoother with a higher framerate
 	// But it breaks bubbletea output
 	// vp.HighPerformanceRendering = true
-	vp.Style = fctl.WindowStyle
+	vp.Style = theme.WindowStyle
 
 	renderer, err := glamour.NewTermRenderer(
 		glamour.WithAutoStyle(),
@@ -160,7 +160,7 @@ func (m modelManager) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			w, h := fctl.DocStyle.GetFrameSize()
+			w, h := theme.DocStyle.GetFrameSize()
 
 			m.vp.SetContent(m.content)
 			viewport.Sync(m.vp)
@@ -170,7 +170,7 @@ func (m modelManager) Update(msg tea.Msg) (Model, tea.Cmd) {
 		} else {
 			// width, height, err := terminal.GetSize(0)
 			// fmt.Println(width, height, err)
-			w, h := fctl.DocStyle.GetFrameSize()
+			w, h := theme.DocStyle.GetFrameSize()
 
 			m.vp.SetContent(m.content)
 			viewport.Sync(m.vp)

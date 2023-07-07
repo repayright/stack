@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -93,21 +94,21 @@ func (c *LoginController) Run(cmd *cobra.Command, args []string) (fctl.Renderabl
 	return c, cfg.Persist()
 }
 
-func (c *LoginController) Render(cmd *cobra.Command, args []string) error {
+func (c *LoginController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	fmt.Println("Please enter the following code on your browser:", c.store.DeviceCode)
 	fmt.Println("Link:", c.store.LoginURI)
 
 	if !c.store.Success && c.store.BrowserURL != "" {
 		fmt.Printf("Unable to find a browser, please open the following link: %s", c.store.BrowserURL)
-		return nil
+		return nil, nil
 	}
 
 	if c.store.Success {
 		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Logged!")
 	}
 
-	return nil
+	return nil, nil
 
 }
 

@@ -5,6 +5,7 @@ import (
 
 	blist "github.com/charmbracelet/bubbles/list"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -52,7 +53,7 @@ func (c *VersionController) Run(cmd *cobra.Command, args []string) (fctl.Rendera
 }
 
 // TODO: This need to use the ui.NewListModel
-func (c *VersionController) Render(cmd *cobra.Command, args []string) error {
+func (c *VersionController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	// Default List
 	items := []blist.Item{
@@ -63,12 +64,12 @@ func (c *VersionController) Render(cmd *cobra.Command, args []string) error {
 
 	model, err := list.NewDefaultListModel(items, false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	model = model.WithTitle("FCTL Information")
 
 	//Print the list
 	fmt.Println(model.View())
-	return nil
+	return nil, nil
 
 }

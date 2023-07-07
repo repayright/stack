@@ -6,6 +6,7 @@ import (
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	"github.com/formancehq/fctl/cmd/wallets/internal/views"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -95,6 +96,6 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
-	return views.PrintBalance(cmd.OutOrStdout(), c.store.Balance)
+func (c *ShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
+	return nil, views.PrintBalance(cmd.OutOrStdout(), c.store.Balance)
 }

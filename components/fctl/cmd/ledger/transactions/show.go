@@ -5,6 +5,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/spf13/cobra"
 )
@@ -98,6 +99,6 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
-	return internal.PrintExpandedTransaction(cmd.OutOrStdout(), c.store.Transaction)
+func (c *ShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
+	return nil, internal.PrintExpandedTransaction(cmd.OutOrStdout(), c.store.Transaction)
 }

@@ -5,8 +5,8 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
 var (
@@ -114,7 +114,7 @@ func (t TableModel) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (t TableModel) View() string {
-	return fctl.BaseStyle.Render(t.table.View()) + "\n"
+	return theme.BaseStyle.Render(t.table.View()) + "\n"
 }
 
 func (t *TableModel) WithDefaultStyle() *TableModel {
@@ -122,12 +122,12 @@ func (t *TableModel) WithDefaultStyle() *TableModel {
 	s := table.DefaultStyles()
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(fctl.TabBorderColor).
+		BorderForeground(theme.TabBorderColor).
 		BorderBottom(true).
 		Bold(false)
 	s.Selected = s.Selected.
-		Foreground(fctl.SelectedColorForeground).
-		Background(fctl.SelectedColorForegroundBackground).
+		Foreground(theme.SelectedColorForeground).
+		Background(theme.SelectedColorForegroundBackground).
 		Bold(false)
 
 	t.table.SetStyles(s)

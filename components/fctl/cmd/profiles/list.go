@@ -2,6 +2,7 @@ package profiles
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -60,7 +61,7 @@ func (c *ProfilesListController) Run(cmd *cobra.Command, args []string) (fctl.Re
 
 }
 
-func (c *ProfilesListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ProfilesListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	tableData := fctl.Map(c.store.Profiles, func(p *Profile) []string {
 		return []string{
 			p.Name,
@@ -74,7 +75,7 @@ func (c *ProfilesListController) Render(cmd *cobra.Command, args []string) error
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
-	return nil
+	return nil, nil
 }
 
 func NewListCommand() *cobra.Command {

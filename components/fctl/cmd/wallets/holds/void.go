@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
@@ -87,9 +88,9 @@ func (c *VoidController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *VoidController) Render(cmd *cobra.Command, args []string) error {
+func (c *VoidController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Hold '%s' voided!", args[0])
 
-	return nil
+	return nil, nil
 }

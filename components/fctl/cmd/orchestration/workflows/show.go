@@ -5,6 +5,7 @@ import (
 	"time"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
@@ -77,7 +78,7 @@ func (c *WorkflowsShowController) Run(cmd *cobra.Command, args []string) (fctl.R
 	return c, nil
 }
 
-func (c *WorkflowsShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *WorkflowsShowController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	fctl.Section.WithWriter(cmd.OutOrStdout()).Println("Information")
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("ID"), c.store.Workflow.ID})
@@ -94,7 +95,7 @@ func (c *WorkflowsShowController) Render(cmd *cobra.Command, args []string) erro
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render(); err != nil {
-		return err
+		return nil, err
 	}
 
 	fmt.Fprintln(cmd.OutOrStdout())
@@ -106,5 +107,5 @@ func (c *WorkflowsShowController) Render(cmd *cobra.Command, args []string) erro
 	}
 	fmt.Fprintln(cmd.OutOrStdout(), string(configAsBytes))
 
-	return nil
+	return nil, nil
 }

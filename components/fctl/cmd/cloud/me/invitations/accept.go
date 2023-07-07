@@ -2,6 +2,7 @@ package invitations
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -67,8 +68,8 @@ func (c *AcceptController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *AcceptController) Render(cmd *cobra.Command, args []string) error {
+func (c *AcceptController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Invitation %s accepted!", c.store.InvitationId)
-	return nil
+	return nil, nil
 
 }

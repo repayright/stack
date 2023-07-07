@@ -6,6 +6,7 @@ import (
 
 	internal "github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -145,10 +146,10 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	if len(c.store.Transaction.Data) == 0 {
 		fctl.Println("No transactions found.")
-		return nil
+		return nil, nil
 	}
 
 	tableData := fctl.Map(c.store.Transaction.Data, func(tx shared.ExpandedTransaction) []string {
@@ -166,7 +167,7 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	})
 	tableData = fctl.Prepend(tableData, []string{"ID", "Reference", "Date", "Metadata"})
 
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).

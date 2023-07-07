@@ -3,6 +3,7 @@ package stack
 import (
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -111,7 +112,7 @@ func (c *StackDeleteController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-func (c *StackDeleteController) Render(cmd *cobra.Command, args []string) error {
+func (c *StackDeleteController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Stack deleted.")
-	return nil
+	return nil, nil
 }

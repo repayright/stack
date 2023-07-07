@@ -7,6 +7,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/search/views"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -110,12 +111,12 @@ func (c *SearchController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, err
 }
 
-func (c *SearchController) Render(cmd *cobra.Command, args []string) error {
+func (c *SearchController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
 	var err error
 	// No Data
 	if (c.store.Response.Cursor != nil && len(c.store.Response.Cursor.Data) == 0) && len(c.store.Response.Data) == 0 {
 		fctl.Section.WithWriter(cmd.OutOrStdout()).Println("No data found")
-		return nil
+		return nil, nil
 	}
 
 	ok := fctl.ContainValue(targets, c.target)
@@ -124,7 +125,7 @@ func (c *SearchController) Render(cmd *cobra.Command, args []string) error {
 		//But no data
 		if len(c.store.Response.Cursor.Data) == 0 {
 			fctl.Section.WithWriter(cmd.OutOrStdout()).Println("No data found")
-			return nil
+			return nil, nil
 		}
 
 		// Display the data
@@ -153,7 +154,7 @@ func (c *SearchController) Render(cmd *cobra.Command, args []string) error {
 			for _, value := range values.([]any) {
 				dataAsJson, err := json.Marshal(value)
 				if err != nil {
-					return err
+					return nil, err
 				}
 
 				dataAsJsonString := string(dataAsJson)
@@ -167,14 +168,14 @@ func (c *SearchController) Render(cmd *cobra.Command, args []string) error {
 			}
 		}
 		tableData = fctl.Prepend(tableData, []string{"Kind", "Object"})
-		return pterm.DefaultTable.
+		return nil, pterm.DefaultTable.
 			WithHasHeader().
 			WithWriter(cmd.OutOrStdout()).
 			WithData(tableData).
 			Render()
 	}
 
-	return err
+	return nil, err
 }
 
 func NewCommand() *cobra.Command {
