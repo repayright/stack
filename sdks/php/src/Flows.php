@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace formance\stack;
 
-class Orchestration 
+class Flows 
 {
 
 	// SDK private variables namespaced with _ to avoid conflicts with API models

@@ -1,4 +1,4 @@
-# orchestration
+# flows
 
 ### Available Operations
 
@@ -32,10 +32,10 @@ s = sdk.SDK(
 )
 
 req = operations.CancelEventRequest(
-    instance_id='quae',
+    instance_id='dolorem',
 )
 
-res = s.orchestration.cancel_event(req)
+res = s.flows.cancel_event(req)
 
 if res.status_code == 200:
     # handle response
@@ -58,23 +58,22 @@ s = sdk.SDK(
 )
 
 req = shared.CreateWorkflowRequest(
-    name='Alison Mann',
+    name='Rose Rolfson',
     stages=[
         {
-            "rem": 'voluptates',
-            "quasi": 'repudiandae',
-            "sint": 'veritatis',
+            "excepturi": 'accusantium',
+            "iure": 'culpa',
         },
         {
-            "incidunt": 'enim',
-            "consequatur": 'est',
-            "quibusdam": 'explicabo',
-            "deserunt": 'distinctio',
+            "sapiente": 'architecto',
+            "mollitia": 'dolorem',
+            "culpa": 'consequuntur',
+            "repellat": 'mollitia',
         },
     ],
 )
 
-res = s.orchestration.create_workflow(req)
+res = s.flows.create_workflow(req)
 
 if res.create_workflow_response is not None:
     # handle response
@@ -97,10 +96,10 @@ s = sdk.SDK(
 )
 
 req = operations.DeleteWorkflowRequest(
-    flow_id='quibusdam',
+    flow_id='occaecati',
 )
 
-res = s.orchestration.delete_workflow(req)
+res = s.flows.delete_workflow(req)
 
 if res.status_code == 200:
     # handle response
@@ -123,10 +122,10 @@ s = sdk.SDK(
 )
 
 req = operations.GetInstanceRequest(
-    instance_id='labore',
+    instance_id='numquam',
 )
 
-res = s.orchestration.get_instance(req)
+res = s.flows.get_instance(req)
 
 if res.get_workflow_instance_response is not None:
     # handle response
@@ -149,10 +148,10 @@ s = sdk.SDK(
 )
 
 req = operations.GetInstanceHistoryRequest(
-    instance_id='modi',
+    instance_id='commodi',
 )
 
-res = s.orchestration.get_instance_history(req)
+res = s.flows.get_instance_history(req)
 
 if res.get_workflow_instance_history_response is not None:
     # handle response
@@ -175,11 +174,11 @@ s = sdk.SDK(
 )
 
 req = operations.GetInstanceStageHistoryRequest(
-    instance_id='qui',
-    number=397821,
+    instance_id='quam',
+    number=474697,
 )
 
-res = s.orchestration.get_instance_stage_history(req)
+res = s.flows.get_instance_stage_history(req)
 
 if res.get_workflow_instance_history_stage_response is not None:
     # handle response
@@ -202,10 +201,10 @@ s = sdk.SDK(
 )
 
 req = operations.GetWorkflowRequest(
-    flow_id='cupiditate',
+    flow_id='velit',
 )
 
-res = s.orchestration.get_workflow(req)
+res = s.flows.get_workflow(req)
 
 if res.get_workflow_response is not None:
     # handle response
@@ -229,10 +228,10 @@ s = sdk.SDK(
 
 req = operations.ListInstancesRequest(
     running=False,
-    workflow_id='quos',
+    workflow_id='error',
 )
 
-res = s.orchestration.list_instances(req)
+res = s.flows.list_instances(req)
 
 if res.list_runs_response is not None:
     # handle response
@@ -255,7 +254,7 @@ s = sdk.SDK(
 )
 
 
-res = s.orchestration.list_workflows()
+res = s.flows.list_workflows()
 
 if res.list_workflows_response is not None:
     # handle response
@@ -278,7 +277,7 @@ s = sdk.SDK(
 )
 
 
-res = s.orchestration.orchestrationget_server_info()
+res = s.flows.orchestrationget_server_info()
 
 if res.server_info is not None:
     # handle response
@@ -302,13 +301,13 @@ s = sdk.SDK(
 
 req = operations.RunWorkflowRequest(
     request_body={
-        "magni": 'assumenda',
+        "quis": 'vitae',
     },
     wait=False,
-    workflow_id='ipsam',
+    workflow_id='laborum',
 )
 
-res = s.orchestration.run_workflow(req)
+res = s.flows.run_workflow(req)
 
 if res.run_workflow_response is not None:
     # handle response
@@ -332,12 +331,12 @@ s = sdk.SDK(
 
 req = operations.SendEventRequest(
     request_body=operations.SendEventRequestBody(
-        name='Denise Pagac',
+        name='Bill Conn',
     ),
-    instance_id='facilis',
+    instance_id='tenetur',
 )
 
-res = s.orchestration.send_event(req)
+res = s.flows.send_event(req)
 
 if res.status_code == 200:
     # handle response

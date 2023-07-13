@@ -44,7 +44,7 @@ try {
     $request->confirmHoldRequest = new ConfirmHoldRequest();
     $request->confirmHoldRequest->amount = 100;
     $request->confirmHoldRequest->final = true;
-    $request->holdId = 'blanditiis';
+    $request->holdId = 'nisi';
 
     $response = $sdk->wallets->confirmHold($request);
 
@@ -79,10 +79,10 @@ $sdk = SDK::builder()
 try {
     $request = new CreateBalanceRequest();
     $request->createBalanceRequest = new CreateBalanceRequest();
-    $request->createBalanceRequest->expiresAt = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2021-02-02T01:24:52.629Z');
-    $request->createBalanceRequest->name = 'Sandy Huels';
-    $request->createBalanceRequest->priority = 606393;
-    $request->id = '7074ba44-69b6-4e21-8195-9890afa563e2';
+    $request->createBalanceRequest->expiresAt = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-05-20T03:14:12.839Z');
+    $request->createBalanceRequest->name = 'Fernando Aufderhar';
+    $request->createBalanceRequest->priority = 716075;
+    $request->id = 'a4469b6e-2141-4959-890a-fa563e2516fe';
 
     $response = $sdk->wallets->createBalance($request);
 
@@ -116,10 +116,10 @@ $sdk = SDK::builder()
 try {
     $request = new CreateWalletRequest();
     $request->metadata = [
-        'quasi' => 'iure',
-        'doloribus' => 'debitis',
+        'maxime' => 'deleniti',
+        'facilis' => 'in',
     ];
-    $request->name = 'Jasmine Lind';
+    $request->name = 'Diane VonRueden';
 
     $response = $sdk->wallets->createWallet($request);
 
@@ -156,18 +156,14 @@ try {
     $request = new CreditWalletRequest();
     $request->creditWalletRequest = new CreditWalletRequest();
     $request->creditWalletRequest->amount = new Monetary();
-    $request->creditWalletRequest->amount->amount = 100226;
-    $request->creditWalletRequest->amount->asset = 'architecto';
-    $request->creditWalletRequest->balance = 'repudiandae';
+    $request->creditWalletRequest->amount->amount = 469249;
+    $request->creditWalletRequest->amount->asset = 'repellat';
+    $request->creditWalletRequest->balance = 'quibusdam';
     $request->creditWalletRequest->metadata = [
-        'expedita' => 'nihil',
-        'repellat' => 'quibusdam',
+        'saepe' => 'pariatur',
     ];
-    $request->creditWalletRequest->reference = 'sed';
+    $request->creditWalletRequest->reference = 'accusantium';
     $request->creditWalletRequest->sources = [
-        new WalletSubject(),
-        new LedgerAccountSubject(),
-        new LedgerAccountSubject(),
         new WalletSubject(),
     ];
     $request->id = '921cddc6-9260-41fb-976b-0d5f0d30c5fb';

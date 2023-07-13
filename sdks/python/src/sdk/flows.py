@@ -5,7 +5,7 @@ from . import utils
 from sdk.models import operations, shared
 from typing import Optional
 
-class Orchestration:
+class Flows:
     _client: requests_http.Session
     _security_client: requests_http.Session
     _server_url: str

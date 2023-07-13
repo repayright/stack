@@ -57,13 +57,13 @@ func Float64(f float64) *float64 { return &f }
 // and standard method from web, mobile and desktop applications.
 // <SecurityDefinitions />
 type Formance struct {
-	Auth          *auth
-	Ledger        *ledger
-	Orchestration *orchestration
-	Payments      *payments
-	Search        *search
-	Wallets       *wallets
-	Webhooks      *webhooks
+	Auth     *auth
+	Flows    *flows
+	Ledger   *ledger
+	Payments *payments
+	Search   *search
+	Wallets  *wallets
+	Webhooks *webhooks
 
 	// Non-idiomatic field names below are to namespace fields from the fields names above to avoid name conflicts
 	_defaultClient  HTTPClient
@@ -145,7 +145,7 @@ func New(opts ...SDKOption) *Formance {
 		sdk._genVersion,
 	)
 
-	sdk.Ledger = newLedger(
+	sdk.Flows = newFlows(
 		sdk._defaultClient,
 		sdk._securityClient,
 		sdk._serverURL,
@@ -154,7 +154,7 @@ func New(opts ...SDKOption) *Formance {
 		sdk._genVersion,
 	)
 
-	sdk.Orchestration = newOrchestration(
+	sdk.Ledger = newLedger(
 		sdk._defaultClient,
 		sdk._securityClient,
 		sdk._serverURL,

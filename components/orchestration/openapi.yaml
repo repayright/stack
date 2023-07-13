@@ -10,7 +10,7 @@ paths:
       summary: Get server info
       operationId: getServerInfo
       tags:
-      - Orchestration
+      - Flows
       responses:
         200:
           description: Server information
@@ -26,7 +26,7 @@ paths:
       operationId: listWorkflows
       description: List registered workflows
       tags:
-      - Orchestration
+      - Flows
       responses:
         200:
           description: List of workflows
@@ -41,7 +41,7 @@ paths:
       operationId: createWorkflow
       description: Create a workflow
       tags:
-      - Orchestration
+      - Flows
       requestBody:
         content:
           application/json:
@@ -69,7 +69,7 @@ paths:
     get:
       summary: Get a flow by id
       tags:
-      - Orchestration
+      - Flows
       description: Get a flow by id
       operationId: getWorkflow
       responses:
@@ -84,7 +84,7 @@ paths:
     delete:
       summary: Delete a flow by id
       tags:
-      - Orchestration
+      - Flows
       description: Delete a flow by id
       operationId: deleteWorkflow
       responses:
@@ -92,7 +92,7 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         204:
           description: No content
-  
+
   /workflows/{workflowID}/instances:
     parameters:
     - in: path
@@ -114,7 +114,7 @@ paths:
         schema:
           type: boolean
       tags:
-      - Orchestration
+      - Flows
       requestBody:
         content:
           application/json:
@@ -151,7 +151,7 @@ paths:
         example: true
         required: false
       tags:
-      - Orchestration
+      - Flows
       responses:
         200:
           description: List of workflow instances
@@ -176,7 +176,7 @@ paths:
       description: Get a workflow instance by id
       operationId: getInstance
       tags:
-      - Orchestration
+      - Flows
       responses:
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -201,7 +201,7 @@ paths:
       description: Send an event to a running workflow
       operationId: sendEvent
       tags:
-      - Orchestration
+      - Flows
       requestBody:
         content:
           application/json:
@@ -232,7 +232,7 @@ paths:
       description: Cancel a running workflow
       operationId: cancelEvent
       tags:
-      - Orchestration
+      - Flows
       responses:
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -253,7 +253,7 @@ paths:
       description: Get a workflow instance history by id
       operationId: getInstanceHistory
       tags:
-      - Orchestration
+      - Flows
       responses:
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -285,7 +285,7 @@ paths:
       description: Get a workflow instance stage history
       operationId: getInstanceStageHistory
       tags:
-      - Orchestration
+      - Flows
       responses:
         default:
           $ref: '#/components/responses/ErrorResponse'

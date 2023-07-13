@@ -13,7 +13,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import org.apache.http.NameValuePair;
 
-public class Orchestration {
+public class Flows {
 	
 	private HTTPClient _defaultClient;
 	private HTTPClient _securityClient;
@@ -22,7 +22,7 @@ public class Orchestration {
 	private String _sdkVersion;
 	private String _genVersion;
 
-	public Orchestration(HTTPClient defaultClient, HTTPClient securityClient, String serverUrl, String language, String sdkVersion, String genVersion) {
+	public Flows(HTTPClient defaultClient, HTTPClient securityClient, String serverUrl, String language, String sdkVersion, String genVersion) {
 		this._defaultClient = defaultClient;
 		this._securityClient = securityClient;
 		this._serverUrl = serverUrl;

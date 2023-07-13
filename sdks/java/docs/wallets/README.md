@@ -38,12 +38,12 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("architecto") {{
+                .setSecurity(new Security("facilis") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
-            ConfirmHoldRequest req = new ConfirmHoldRequest("architecto") {{
+            ConfirmHoldRequest req = new ConfirmHoldRequest("in") {{
                 confirmHoldRequest = new ConfirmHoldRequest() {{
                     amount = 100L;
                     final_ = true;
@@ -82,15 +82,15 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("repudiandae") {{
+                .setSecurity(new Security("architecto") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
-            CreateBalanceRequest req = new CreateBalanceRequest("ullam") {{
-                createBalanceRequest = new CreateBalanceRequest("expedita") {{
-                    expiresAt = OffsetDateTime.parse("2022-01-01T10:06:00.916Z");
-                    priority = 841140L;
+            CreateBalanceRequest req = new CreateBalanceRequest("architecto") {{
+                createBalanceRequest = new CreateBalanceRequest("repudiandae") {{
+                    expiresAt = OffsetDateTime.parse("2022-04-15T07:14:46.128Z");
+                    priority = 469249L;
                 }};;
             }};            
 
@@ -124,17 +124,17 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("sed") {{
+                .setSecurity(new Security("repellat") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             com.formance.formance_sdk.models.shared.CreateWalletRequest req = new CreateWalletRequest(                new java.util.HashMap<String, String>() {{
+                                put("sed", "saepe");
                                 put("pariatur", "accusantium");
                                 put("consequuntur", "praesentium");
                                 put("natus", "magni");
-                                put("sunt", "quo");
-                            }}, "illum");            
+                            }}, "sunt");            
 
             CreateWalletResponse res = sdk.wallets.createWallet(req);
 
@@ -170,13 +170,14 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("pariatur") {{
+                .setSecurity(new Security("quo") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
-            CreditWalletRequest req = new CreditWalletRequest("maxime") {{
-                creditWalletRequest = new CreditWalletRequest(                new Monetary(411397L, "excepturi");,                 new java.util.HashMap<String, String>() {{
+            CreditWalletRequest req = new CreditWalletRequest("illum") {{
+                creditWalletRequest = new CreditWalletRequest(                new Monetary(864934L, "maxime");,                 new java.util.HashMap<String, String>() {{
+                                    put("excepturi", "odit");
                                     put("ea", "accusantium");
                                 }},                 new Object[]{{
                                     add(new WalletSubject("autem", "nam") {{

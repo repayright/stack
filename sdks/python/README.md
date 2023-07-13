@@ -68,6 +68,21 @@ if res.get_versions_response is not None:
 * [update_client](docs/auth/README.md#update_client) - Update client
 * [update_scope](docs/auth/README.md#update_scope) - Update scope
 
+### [flows](docs/flows/README.md)
+
+* [cancel_event](docs/flows/README.md#cancel_event) - Cancel a running workflow
+* [create_workflow](docs/flows/README.md#create_workflow) - Create workflow
+* [delete_workflow](docs/flows/README.md#delete_workflow) - Delete a flow by id
+* [get_instance](docs/flows/README.md#get_instance) - Get a workflow instance by id
+* [get_instance_history](docs/flows/README.md#get_instance_history) - Get a workflow instance history by id
+* [get_instance_stage_history](docs/flows/README.md#get_instance_stage_history) - Get a workflow instance stage history
+* [get_workflow](docs/flows/README.md#get_workflow) - Get a flow by id
+* [list_instances](docs/flows/README.md#list_instances) - List instances of a workflow
+* [list_workflows](docs/flows/README.md#list_workflows) - List registered workflows
+* [orchestrationget_server_info](docs/flows/README.md#orchestrationget_server_info) - Get server info
+* [run_workflow](docs/flows/README.md#run_workflow) - Run workflow
+* [send_event](docs/flows/README.md#send_event) - Send an event to a running workflow
+
 ### [ledger](docs/ledger/README.md)
 
 * [add_metadata_on_transaction](docs/ledger/README.md#add_metadata_on_transaction) - Set the metadata of a transaction by its ID
@@ -86,21 +101,6 @@ if res.get_versions_response is not None:
 * [list_transactions](docs/ledger/README.md#list_transactions) - List transactions from a ledger
 * [read_stats](docs/ledger/README.md#read_stats) - Get statistics from a ledger
 * [revert_transaction](docs/ledger/README.md#revert_transaction) - Revert a ledger transaction by its ID
-
-### [orchestration](docs/orchestration/README.md)
-
-* [cancel_event](docs/orchestration/README.md#cancel_event) - Cancel a running workflow
-* [create_workflow](docs/orchestration/README.md#create_workflow) - Create workflow
-* [delete_workflow](docs/orchestration/README.md#delete_workflow) - Delete a flow by id
-* [get_instance](docs/orchestration/README.md#get_instance) - Get a workflow instance by id
-* [get_instance_history](docs/orchestration/README.md#get_instance_history) - Get a workflow instance history by id
-* [get_instance_stage_history](docs/orchestration/README.md#get_instance_stage_history) - Get a workflow instance stage history
-* [get_workflow](docs/orchestration/README.md#get_workflow) - Get a flow by id
-* [list_instances](docs/orchestration/README.md#list_instances) - List instances of a workflow
-* [list_workflows](docs/orchestration/README.md#list_workflows) - List registered workflows
-* [orchestrationget_server_info](docs/orchestration/README.md#orchestrationget_server_info) - Get server info
-* [run_workflow](docs/orchestration/README.md#run_workflow) - Run workflow
-* [send_event](docs/orchestration/README.md#send_event) - Send an event to a running workflow
 
 ### [payments](docs/payments/README.md)
 

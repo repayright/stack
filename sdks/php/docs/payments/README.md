@@ -44,9 +44,8 @@ try {
     $request->asset = 'USD';
     $request->destination = 'acct_1Gqj58KZcSIg2N2q';
     $request->metadata = [
+        'facilis' => 'tempore',
         'labore' => 'delectus',
-        'eum' => 'non',
-        'eligendi' => 'sint',
     ];
 
     $response = $sdk->payments->connectorsStripeTransfer($request);
@@ -121,8 +120,8 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetConnectorTaskRequest();
-    $request->connector = Connector::CURRENCY_CLOUD;
-    $request->taskId = 'necessitatibus';
+    $request->connector = Connector::DUMMY_PAY;
+    $request->taskId = 'eligendi';
 
     $response = $sdk->payments->getConnectorTask($request);
 
@@ -189,15 +188,12 @@ $sdk = SDK::builder()
 
 try {
     $request = new InstallConnectorRequest();
-    $request->requestBody = new BankingCircleConfig();
-    $request->requestBody->authorizationEndpoint = 'XXX';
+    $request->requestBody = new ModulrConfig();
+    $request->requestBody->apiKey = 'XXX';
+    $request->requestBody->apiSecret = 'XXX';
     $request->requestBody->endpoint = 'XXX';
-    $request->requestBody->password = 'XXX';
     $request->requestBody->pollingPeriod = '60s';
-    $request->requestBody->userCertificate = 'XXX';
-    $request->requestBody->userCertificateKey = 'XXX';
-    $request->requestBody->username = 'XXX';
-    $request->connector = Connector::DUMMY_PAY;
+    $request->connector = Connector::CURRENCY_CLOUD;
 
     $response = $sdk->payments->installConnector($request);
 
@@ -291,7 +287,7 @@ try {
     $request = new ListConnectorTasksRequest();
     $request->connector = Connector::MONEYCORP;
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->pageSize = 952749;
+    $request->pageSize = 572252;
 
     $response = $sdk->payments->listConnectorTasks($request);
 
@@ -359,10 +355,12 @@ $sdk = SDK::builder()
 try {
     $request = new ListPaymentsRequest();
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->pageSize = 447125;
+    $request->pageSize = 223081;
     $request->sort = [
-        'illum',
-        'maiores',
+        'a',
+        'dolorum',
+        'in',
+        'in',
     ];
 
     $response = $sdk->payments->listPayments($request);
@@ -426,9 +424,12 @@ $sdk = SDK::builder()
 try {
     $request = new PaymentslistAccountsRequest();
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->pageSize = 699479;
+    $request->pageSize = 846409;
     $request->sort = [
+        'rerum',
+        'dicta',
         'magnam',
+        'cumque',
     ];
 
     $response = $sdk->payments->paymentslistAccounts($request);
@@ -499,7 +500,7 @@ $sdk = SDK::builder()
 
 try {
     $request = new ResetConnectorRequest();
-    $request->connector = Connector::MANGOPAY;
+    $request->connector = Connector::MODULR;
 
     $response = $sdk->payments->resetConnector($request);
 
@@ -568,8 +569,8 @@ $sdk = SDK::builder()
 try {
     $request = new UpdateMetadataRequest();
     $request->paymentMetadata = new PaymentMetadata();
-    $request->paymentMetadata->key = 'aliquid';
-    $request->paymentId = 'laborum';
+    $request->paymentMetadata->key = 'laborum';
+    $request->paymentId = 'accusamus';
 
     $response = $sdk->payments->updateMetadata($request);
 

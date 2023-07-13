@@ -40,9 +40,8 @@ sdk.payments.connectorsStripeTransfer({
   asset: "USD",
   destination: "acct_1Gqj58KZcSIg2N2q",
   metadata: {
+    "facilis": "tempore",
     "labore": "delectus",
-    "eum": "non",
-    "eligendi": "sint",
   },
 }).then((res: ConnectorsStripeTransferResponse) => {
   if (res.statusCode == 200) {
@@ -101,8 +100,8 @@ const sdk = new SDK({
 });
 
 sdk.payments.getConnectorTask({
-  connector: Connector.CurrencyCloud,
-  taskId: "necessitatibus",
+  connector: Connector.DummyPay,
+  taskId: "eligendi",
 }).then((res: GetConnectorTaskResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -155,15 +154,12 @@ const sdk = new SDK({
 
 sdk.payments.installConnector({
   requestBody: {
-    authorizationEndpoint: "XXX",
+    apiKey: "XXX",
+    apiSecret: "XXX",
     endpoint: "XXX",
-    password: "XXX",
     pollingPeriod: "60s",
-    userCertificate: "XXX",
-    userCertificateKey: "XXX",
-    username: "XXX",
   },
-  connector: Connector.DummyPay,
+  connector: Connector.CurrencyCloud,
 }).then((res: InstallConnectorResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -238,7 +234,7 @@ const sdk = new SDK({
 sdk.payments.listConnectorTasks({
   connector: Connector.Moneycorp,
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 952749,
+  pageSize: 572252,
 }).then((res: ListConnectorTasksResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -291,10 +287,12 @@ const sdk = new SDK({
 
 sdk.payments.listPayments({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 447125,
+  pageSize: 223081,
   sort: [
-    "illum",
-    "maiores",
+    "a",
+    "dolorum",
+    "in",
+    "in",
   ],
 }).then((res: ListPaymentsResponse) => {
   if (res.statusCode == 200) {
@@ -345,9 +343,12 @@ const sdk = new SDK({
 
 sdk.payments.paymentslistAccounts({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 699479,
+  pageSize: 846409,
   sort: [
+    "rerum",
+    "dicta",
     "magnam",
+    "cumque",
   ],
 }).then((res: PaymentslistAccountsResponse) => {
   if (res.statusCode == 200) {
@@ -402,7 +403,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.resetConnector({
-  connector: Connector.Mangopay,
+  connector: Connector.Modulr,
 }).then((res: ResetConnectorResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -454,9 +455,9 @@ const sdk = new SDK({
 
 sdk.payments.updateMetadata({
   paymentMetadata: {
-    key: "aliquid",
+    key: "laborum",
   },
-  paymentId: "laborum",
+  paymentId: "accusamus",
 }).then((res: UpdateMetadataResponse) => {
   if (res.statusCode == 200) {
     // handle response

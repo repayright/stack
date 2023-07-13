@@ -7,7 +7,7 @@ import * as operations from "./models/operations";
 import * as shared from "./models/shared";
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-export class Orchestration {
+export class Flows {
   _defaultClient: AxiosInstance;
   _securityClient: AxiosInstance;
   _serverURL: string;

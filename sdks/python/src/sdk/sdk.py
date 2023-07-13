@@ -3,8 +3,8 @@
 import requests as requests_http
 from . import utils
 from .auth import Auth
+from .flows import Flows
 from .ledger import Ledger
-from .orchestration import Orchestration
 from .payments import Payments
 from .search import Search
 from .wallets import Wallets
@@ -34,8 +34,8 @@ class SDK:
     <SecurityDefinitions />
     """
     auth: Auth
+    flows: Flows
     ledger: Ledger
-    orchestration: Orchestration
     payments: Payments
     search: Search
     wallets: Wallets
@@ -92,7 +92,7 @@ class SDK:
             self._gen_version
         )
         
-        self.ledger = Ledger(
+        self.flows = Flows(
             self._client,
             self._security_client,
             self._server_url,
@@ -101,7 +101,7 @@ class SDK:
             self._gen_version
         )
         
-        self.orchestration = Orchestration(
+        self.ledger = Ledger(
             self._client,
             self._security_client,
             self._server_url,

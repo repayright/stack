@@ -43,8 +43,8 @@ public class SDK {
 	
   	
     public Auth auth;
+    public Flows flows;
     public Ledger ledger;
-    public Orchestration orchestration;
     public Payments payments;
     public Search search;
     public Wallets wallets;
@@ -168,7 +168,7 @@ public class SDK {
 			this._genVersion
 		);
 		
-		this.ledger = new Ledger(
+		this.flows = new Flows(
 			this._defaultClient,
 			this._securityClient,
 			this._serverUrl,
@@ -177,7 +177,7 @@ public class SDK {
 			this._genVersion
 		);
 		
-		this.orchestration = new Orchestration(
+		this.ledger = new Ledger(
 			this._defaultClient,
 			this._securityClient,
 			this._serverUrl,

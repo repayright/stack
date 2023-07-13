@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-type orchestration struct {
+type flows struct {
 	defaultClient  HTTPClient
 	securityClient HTTPClient
 	serverURL      string
@@ -21,8 +21,8 @@ type orchestration struct {
 	genVersion     string
 }
 
-func newOrchestration(defaultClient, securityClient HTTPClient, serverURL, language, sdkVersion, genVersion string) *orchestration {
-	return &orchestration{
+func newFlows(defaultClient, securityClient HTTPClient, serverURL, language, sdkVersion, genVersion string) *flows {
+	return &flows{
 		defaultClient:  defaultClient,
 		securityClient: securityClient,
 		serverURL:      serverURL,
@@ -34,7 +34,7 @@ func newOrchestration(defaultClient, securityClient HTTPClient, serverURL, langu
 
 // CancelEvent - Cancel a running workflow
 // Cancel a running workflow
-func (s *orchestration) CancelEvent(ctx context.Context, request operations.CancelEventRequest) (*operations.CancelEventResponse, error) {
+func (s *flows) CancelEvent(ctx context.Context, request operations.CancelEventRequest) (*operations.CancelEventResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/instances/{instanceID}/abort", request, nil)
 	if err != nil {
@@ -85,7 +85,7 @@ func (s *orchestration) CancelEvent(ctx context.Context, request operations.Canc
 
 // CreateWorkflow - Create workflow
 // Create a workflow
-func (s *orchestration) CreateWorkflow(ctx context.Context, request shared.CreateWorkflowRequest) (*operations.CreateWorkflowResponse, error) {
+func (s *flows) CreateWorkflow(ctx context.Context, request shared.CreateWorkflowRequest) (*operations.CreateWorkflowResponse, error) {
 	baseURL := s.serverURL
 	url := strings.TrimSuffix(baseURL, "/") + "/api/orchestration/workflows"
 
@@ -149,7 +149,7 @@ func (s *orchestration) CreateWorkflow(ctx context.Context, request shared.Creat
 
 // DeleteWorkflow - Delete a flow by id
 // Delete a flow by id
-func (s *orchestration) DeleteWorkflow(ctx context.Context, request operations.DeleteWorkflowRequest) (*operations.DeleteWorkflowResponse, error) {
+func (s *flows) DeleteWorkflow(ctx context.Context, request operations.DeleteWorkflowRequest) (*operations.DeleteWorkflowResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/workflows/{flowId}", request, nil)
 	if err != nil {
@@ -200,7 +200,7 @@ func (s *orchestration) DeleteWorkflow(ctx context.Context, request operations.D
 
 // GetInstance - Get a workflow instance by id
 // Get a workflow instance by id
-func (s *orchestration) GetInstance(ctx context.Context, request operations.GetInstanceRequest) (*operations.GetInstanceResponse, error) {
+func (s *flows) GetInstance(ctx context.Context, request operations.GetInstanceRequest) (*operations.GetInstanceResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/instances/{instanceID}", request, nil)
 	if err != nil {
@@ -260,7 +260,7 @@ func (s *orchestration) GetInstance(ctx context.Context, request operations.GetI
 
 // GetInstanceHistory - Get a workflow instance history by id
 // Get a workflow instance history by id
-func (s *orchestration) GetInstanceHistory(ctx context.Context, request operations.GetInstanceHistoryRequest) (*operations.GetInstanceHistoryResponse, error) {
+func (s *flows) GetInstanceHistory(ctx context.Context, request operations.GetInstanceHistoryRequest) (*operations.GetInstanceHistoryResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/instances/{instanceID}/history", request, nil)
 	if err != nil {
@@ -320,7 +320,7 @@ func (s *orchestration) GetInstanceHistory(ctx context.Context, request operatio
 
 // GetInstanceStageHistory - Get a workflow instance stage history
 // Get a workflow instance stage history
-func (s *orchestration) GetInstanceStageHistory(ctx context.Context, request operations.GetInstanceStageHistoryRequest) (*operations.GetInstanceStageHistoryResponse, error) {
+func (s *flows) GetInstanceStageHistory(ctx context.Context, request operations.GetInstanceStageHistoryRequest) (*operations.GetInstanceStageHistoryResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/instances/{instanceID}/stages/{number}/history", request, nil)
 	if err != nil {
@@ -380,7 +380,7 @@ func (s *orchestration) GetInstanceStageHistory(ctx context.Context, request ope
 
 // GetWorkflow - Get a flow by id
 // Get a flow by id
-func (s *orchestration) GetWorkflow(ctx context.Context, request operations.GetWorkflowRequest) (*operations.GetWorkflowResponse, error) {
+func (s *flows) GetWorkflow(ctx context.Context, request operations.GetWorkflowRequest) (*operations.GetWorkflowResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/workflows/{flowId}", request, nil)
 	if err != nil {
@@ -440,7 +440,7 @@ func (s *orchestration) GetWorkflow(ctx context.Context, request operations.GetW
 
 // ListInstances - List instances of a workflow
 // List instances of a workflow
-func (s *orchestration) ListInstances(ctx context.Context, request operations.ListInstancesRequest) (*operations.ListInstancesResponse, error) {
+func (s *flows) ListInstances(ctx context.Context, request operations.ListInstancesRequest) (*operations.ListInstancesResponse, error) {
 	baseURL := s.serverURL
 	url := strings.TrimSuffix(baseURL, "/") + "/api/orchestration/instances"
 
@@ -501,7 +501,7 @@ func (s *orchestration) ListInstances(ctx context.Context, request operations.Li
 
 // ListWorkflows - List registered workflows
 // List registered workflows
-func (s *orchestration) ListWorkflows(ctx context.Context) (*operations.ListWorkflowsResponse, error) {
+func (s *flows) ListWorkflows(ctx context.Context) (*operations.ListWorkflowsResponse, error) {
 	baseURL := s.serverURL
 	url := strings.TrimSuffix(baseURL, "/") + "/api/orchestration/workflows"
 
@@ -557,7 +557,7 @@ func (s *orchestration) ListWorkflows(ctx context.Context) (*operations.ListWork
 }
 
 // OrchestrationgetServerInfo - Get server info
-func (s *orchestration) OrchestrationgetServerInfo(ctx context.Context) (*operations.OrchestrationgetServerInfoResponse, error) {
+func (s *flows) OrchestrationgetServerInfo(ctx context.Context) (*operations.OrchestrationgetServerInfoResponse, error) {
 	baseURL := s.serverURL
 	url := strings.TrimSuffix(baseURL, "/") + "/api/orchestration/_info"
 
@@ -614,7 +614,7 @@ func (s *orchestration) OrchestrationgetServerInfo(ctx context.Context) (*operat
 
 // RunWorkflow - Run workflow
 // Run workflow
-func (s *orchestration) RunWorkflow(ctx context.Context, request operations.RunWorkflowRequest) (*operations.RunWorkflowResponse, error) {
+func (s *flows) RunWorkflow(ctx context.Context, request operations.RunWorkflowRequest) (*operations.RunWorkflowResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/workflows/{workflowID}/instances", request, nil)
 	if err != nil {
@@ -685,7 +685,7 @@ func (s *orchestration) RunWorkflow(ctx context.Context, request operations.RunW
 
 // SendEvent - Send an event to a running workflow
 // Send an event to a running workflow
-func (s *orchestration) SendEvent(ctx context.Context, request operations.SendEventRequest) (*operations.SendEventResponse, error) {
+func (s *flows) SendEvent(ctx context.Context, request operations.SendEventRequest) (*operations.SendEventResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/orchestration/instances/{instanceID}/events", request, nil)
 	if err != nil {

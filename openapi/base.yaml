@@ -112,7 +112,7 @@ x-tagGroups:
       - Webhooks
   - name: Flows
     tags:
-      - Orchestration
+      - Flows
 
 paths:
   /versions:

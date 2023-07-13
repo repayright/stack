@@ -37,9 +37,9 @@ class SDK
   	
 	public Auth $auth;
 	
-	public Ledger $ledger;
+	public Flows $flows;
 	
-	public Orchestration $orchestration;
+	public Ledger $ledger;
 	
 	public Payments $payments;
 	
@@ -111,7 +111,7 @@ class SDK
 			$this->_genVersion
 		);
 		
-		$this->ledger = new Ledger(
+		$this->flows = new Flows(
 			$this->_defaultClient,
 			$this->_securityClient,
 			$this->_serverUrl,
@@ -120,7 +120,7 @@ class SDK
 			$this->_genVersion
 		);
 		
-		$this->orchestration = new Orchestration(
+		$this->ledger = new Ledger(
 			$this->_defaultClient,
 			$this->_securityClient,
 			$this->_serverUrl,

@@ -40,9 +40,8 @@ req = shared.StripeTransferRequest(
     asset='USD',
     destination='acct_1Gqj58KZcSIg2N2q',
     metadata={
+        "facilis": 'tempore',
         "labore": 'delectus',
-        "eum": 'non',
-        "eligendi": 'sint',
     },
 )
 
@@ -101,8 +100,8 @@ s = sdk.SDK(
 )
 
 req = operations.GetConnectorTaskRequest(
-    connector=shared.Connector.CURRENCY_CLOUD,
-    task_id='necessitatibus',
+    connector=shared.Connector.DUMMY_PAY,
+    task_id='eligendi',
 )
 
 res = s.payments.get_connector_task(req)
@@ -154,16 +153,13 @@ s = sdk.SDK(
 )
 
 req = operations.InstallConnectorRequest(
-    request_body=shared.BankingCircleConfig(
-        authorization_endpoint='XXX',
+    request_body=shared.ModulrConfig(
+        api_key='XXX',
+        api_secret='XXX',
         endpoint='XXX',
-        password='XXX',
         polling_period='60s',
-        user_certificate='XXX',
-        user_certificate_key='XXX',
-        username='XXX',
     ),
-    connector=shared.Connector.DUMMY_PAY,
+    connector=shared.Connector.CURRENCY_CLOUD,
 )
 
 res = s.payments.install_connector(req)
@@ -237,7 +233,7 @@ s = sdk.SDK(
 req = operations.ListConnectorTasksRequest(
     connector=shared.Connector.MONEYCORP,
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    page_size=952749,
+    page_size=572252,
 )
 
 res = s.payments.list_connector_tasks(req)
@@ -290,10 +286,12 @@ s = sdk.SDK(
 
 req = operations.ListPaymentsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    page_size=447125,
+    page_size=223081,
     sort=[
-        'illum',
-        'maiores',
+        'a',
+        'dolorum',
+        'in',
+        'in',
     ],
 )
 
@@ -344,9 +342,12 @@ s = sdk.SDK(
 
 req = operations.PaymentslistAccountsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    page_size=699479,
+    page_size=846409,
     sort=[
+        'rerum',
+        'dicta',
         'magnam',
+        'cumque',
     ],
 )
 
@@ -401,7 +402,7 @@ s = sdk.SDK(
 )
 
 req = operations.ResetConnectorRequest(
-    connector=shared.Connector.MANGOPAY,
+    connector=shared.Connector.MODULR,
 )
 
 res = s.payments.reset_connector(req)
@@ -454,9 +455,9 @@ s = sdk.SDK(
 
 req = operations.UpdateMetadataRequest(
     payment_metadata=shared.PaymentMetadata(
-        key='aliquid',
+        key='laborum',
     ),
-    payment_id='laborum',
+    payment_id='accusamus',
 )
 
 res = s.payments.update_metadata(req)

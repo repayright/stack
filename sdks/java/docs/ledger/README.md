@@ -37,17 +37,16 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("nobis") {{
+                .setSecurity(new Security("ipsa") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             AddMetadataOnTransactionRequest req = new AddMetadataOnTransactionRequest("ledger001", 1234L) {{
-                idempotencyKey = "enim";
+                idempotencyKey = "omnis";
                 requestBody = new java.util.HashMap<String, String>() {{
-                    put("nemo", "minima");
-                    put("excepturi", "accusantium");
-                    put("iure", "culpa");
+                    put("cum", "perferendis");
+                    put("doloremque", "reprehenderit");
                 }};
                 async = true;
                 dryRun = true;
@@ -83,18 +82,18 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("doloribus") {{
+                .setSecurity(new Security("ut") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             AddMetadataToAccountRequest req = new AddMetadataToAccountRequest(                new java.util.HashMap<String, String>() {{
-                                put("architecto", "mollitia");
-                                put("dolorem", "culpa");
-                                put("consequuntur", "repellat");
-                                put("mollitia", "occaecati");
+                                put("dicta", "corporis");
+                                put("dolore", "iusto");
+                                put("dicta", "harum");
+                                put("enim", "accusamus");
                             }}, "users:001", "ledger001") {{
-                idempotencyKey = "numquam";
+                idempotencyKey = "commodi";
                 async = true;
                 dryRun = true;
             }};            
@@ -129,7 +128,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("commodi") {{
+                .setSecurity(new Security("repudiandae") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -137,8 +136,7 @@ public class Application {
             CountAccountsRequest req = new CountAccountsRequest("ledger001") {{
                 address = "users:.+";
                 metadata = new java.util.HashMap<String, Object>() {{
-                    put("molestiae", "velit");
-                    put("error", "quia");
+                    put("ipsum", "quidem");
                 }};
             }};            
 
@@ -173,7 +171,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("quis") {{
+                .setSecurity(new Security("molestias") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -181,15 +179,14 @@ public class Application {
             CountTransactionsRequest req = new CountTransactionsRequest("ledger001") {{
                 account = "users:001";
                 destination = "users:001";
-                endTime = OffsetDateTime.parse("2022-04-29T17:10:10.440Z");
+                endTime = OffsetDateTime.parse("2021-04-09T11:24:10.949Z");
                 metadata = new java.util.HashMap<String, String>() {{
-                    put("enim", "odit");
-                    put("quo", "sequi");
-                    put("tenetur", "ipsam");
+                    put("praesentium", "rem");
+                    put("voluptates", "quasi");
                 }};
                 reference = "ref:001";
                 source = "users:001";
-                startTime = OffsetDateTime.parse("2021-05-11T16:11:54.761Z");
+                startTime = OffsetDateTime.parse("2021-04-10T08:07:33.561Z");
             }};            
 
             CountTransactionsResponse res = sdk.ledger.countTransactions(req);
@@ -226,15 +223,24 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("aut") {{
+                .setSecurity(new Security("veritatis") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             CreateTransactionRequest req = new CreateTransactionRequest(                new PostTransaction(                new java.util.HashMap<String, String>() {{
-                                                put("error", "temporibus");
+                                                put("incidunt", "enim");
+                                                put("consequatur", "est");
+                                                put("quibusdam", "explicabo");
+                                                put("deserunt", "distinctio");
                                             }}) {{
                                 postings = new com.formance.formance_sdk.models.shared.Posting[]{{
+                                    add(new Posting(100L, "COIN", "users:002", "users:001") {{
+                                        amount = 100L;
+                                        asset = "COIN";
+                                        destination = "users:002";
+                                        source = "users:001";
+                                    }}),
                                     add(new Posting(100L, "COIN", "users:002", "users:001") {{
                                         amount = 100L;
                                         asset = "COIN";
@@ -264,12 +270,13 @@ public class Application {
                                 )
                                 ") {{
                                     vars = new java.util.HashMap<String, Object>() {{
-                                        put("reiciendis", "voluptatibus");
+                                        put("modi", "qui");
+                                        put("aliquid", "cupiditate");
                                     }};
                                 }};;
-                                timestamp = OffsetDateTime.parse("2021-08-05T19:50:46.898Z");
+                                timestamp = OffsetDateTime.parse("2022-12-17T07:42:55.593Z");
                             }};, "ledger001") {{
-                idempotencyKey = "praesentium";
+                idempotencyKey = "magni";
                 async = true;
                 dryRun = true;
             }};            
@@ -304,7 +311,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("voluptatibus") {{
+                .setSecurity(new Security("assumenda") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -341,7 +348,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("ipsa") {{
+                .setSecurity(new Security("ipsam") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -349,7 +356,7 @@ public class Application {
             GetBalancesRequest req = new GetBalancesRequest("ledger001") {{
                 address = "users:001";
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
-                pageSize = 604846L;
+                pageSize = 4695L;
             }};            
 
             GetBalancesResponse res = sdk.ledger.getBalances(req);
@@ -382,7 +389,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("voluptate") {{
+                .setSecurity(new Security("fugit") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -420,7 +427,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("cum") {{
+                .setSecurity(new Security("dolorum") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -455,7 +462,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("perferendis") {{
+                .setSecurity(new Security("excepturi") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -492,7 +499,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("doloremque") {{
+                .setSecurity(new Security("tempora") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -530,7 +537,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("reprehenderit") {{
+                .setSecurity(new Security("facilis") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -541,10 +548,11 @@ public class Application {
                 balanceOperator = ListAccountsBalanceOperator.GTE;
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
                 metadata = new java.util.HashMap<String, String>() {{
-                    put("maiores", "dicta");
-                    put("corporis", "dolore");
+                    put("labore", "delectus");
+                    put("eum", "non");
+                    put("eligendi", "sint");
                 }};
-                pageSize = 480894L;
+                pageSize = 396098L;
             }};            
 
             ListAccountsResponse res = sdk.ledger.listAccounts(req);
@@ -578,16 +586,16 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("dicta") {{
+                .setSecurity(new Security("provident") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             ListLogsRequest req = new ListLogsRequest("ledger001") {{
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
-                endTime = OffsetDateTime.parse("2022-05-13T20:56:04.612Z");
-                pageSize = 880476L;
-                startTime = OffsetDateTime.parse("2022-01-30T20:15:26.045Z");
+                endTime = OffsetDateTime.parse("2021-04-14T09:13:11.675Z");
+                pageSize = 638921L;
+                startTime = OffsetDateTime.parse("2022-02-09T13:58:59.361Z");
             }};            
 
             ListLogsResponse res = sdk.ledger.listLogs(req);
@@ -621,7 +629,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("quae") {{
+                .setSecurity(new Security("a") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -630,16 +638,15 @@ public class Application {
                 account = "users:001";
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
                 destination = "users:001";
-                endTime = OffsetDateTime.parse("2022-04-23T05:56:38.936Z");
+                endTime = OffsetDateTime.parse("2022-02-08T14:21:47.573Z");
                 metadata = new java.util.HashMap<String, String>() {{
-                    put("excepturi", "pariatur");
-                    put("modi", "praesentium");
-                    put("rem", "voluptates");
+                    put("illum", "maiores");
+                    put("rerum", "dicta");
                 }};
-                pageSize = 93940L;
+                pageSize = 297437L;
                 reference = "ref:001";
                 source = "users:001";
-                startTime = OffsetDateTime.parse("2021-04-10T08:07:33.561Z");
+                startTime = OffsetDateTime.parse("2020-07-23T21:23:35.691Z");
             }};            
 
             ListTransactionsResponse res = sdk.ledger.listTransactions(req);
@@ -673,7 +680,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("veritatis") {{
+                .setSecurity(new Security("ea") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -710,7 +717,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("itaque") {{
+                .setSecurity(new Security("aliquid") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();

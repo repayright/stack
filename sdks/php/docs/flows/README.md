@@ -1,4 +1,4 @@
-# orchestration
+# flows
 
 ### Available Operations
 
@@ -36,9 +36,9 @@ $sdk = SDK::builder()
 
 try {
     $request = new CancelEventRequest();
-    $request->instanceID = 'quae';
+    $request->instanceID = 'dolorem';
 
-    $response = $sdk->orchestration->cancelEvent($request);
+    $response = $sdk->flows->cancelEvent($request);
 
     if ($response->statusCode === 200) {
         // handle response
@@ -69,22 +69,21 @@ $sdk = SDK::builder()
 
 try {
     $request = new CreateWorkflowRequest();
-    $request->name = 'Alison Mann';
+    $request->name = 'Rose Rolfson';
     $request->stages = [
         [
-            'rem' => 'voluptates',
-            'quasi' => 'repudiandae',
-            'sint' => 'veritatis',
+            'excepturi' => 'accusantium',
+            'iure' => 'culpa',
         ],
         [
-            'incidunt' => 'enim',
-            'consequatur' => 'est',
-            'quibusdam' => 'explicabo',
-            'deserunt' => 'distinctio',
+            'sapiente' => 'architecto',
+            'mollitia' => 'dolorem',
+            'culpa' => 'consequuntur',
+            'repellat' => 'mollitia',
         ],
     ];
 
-    $response = $sdk->orchestration->createWorkflow($request);
+    $response = $sdk->flows->createWorkflow($request);
 
     if ($response->createWorkflowResponse !== null) {
         // handle response
@@ -115,9 +114,9 @@ $sdk = SDK::builder()
 
 try {
     $request = new DeleteWorkflowRequest();
-    $request->flowId = 'quibusdam';
+    $request->flowId = 'occaecati';
 
-    $response = $sdk->orchestration->deleteWorkflow($request);
+    $response = $sdk->flows->deleteWorkflow($request);
 
     if ($response->statusCode === 200) {
         // handle response
@@ -148,9 +147,9 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetInstanceRequest();
-    $request->instanceID = 'labore';
+    $request->instanceID = 'numquam';
 
-    $response = $sdk->orchestration->getInstance($request);
+    $response = $sdk->flows->getInstance($request);
 
     if ($response->getWorkflowInstanceResponse !== null) {
         // handle response
@@ -181,9 +180,9 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetInstanceHistoryRequest();
-    $request->instanceID = 'modi';
+    $request->instanceID = 'commodi';
 
-    $response = $sdk->orchestration->getInstanceHistory($request);
+    $response = $sdk->flows->getInstanceHistory($request);
 
     if ($response->getWorkflowInstanceHistoryResponse !== null) {
         // handle response
@@ -214,10 +213,10 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetInstanceStageHistoryRequest();
-    $request->instanceID = 'qui';
-    $request->number = 397821;
+    $request->instanceID = 'quam';
+    $request->number = 474697;
 
-    $response = $sdk->orchestration->getInstanceStageHistory($request);
+    $response = $sdk->flows->getInstanceStageHistory($request);
 
     if ($response->getWorkflowInstanceHistoryStageResponse !== null) {
         // handle response
@@ -248,9 +247,9 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetWorkflowRequest();
-    $request->flowId = 'cupiditate';
+    $request->flowId = 'velit';
 
-    $response = $sdk->orchestration->getWorkflow($request);
+    $response = $sdk->flows->getWorkflow($request);
 
     if ($response->getWorkflowResponse !== null) {
         // handle response
@@ -282,9 +281,9 @@ $sdk = SDK::builder()
 try {
     $request = new ListInstancesRequest();
     $request->running = false;
-    $request->workflowID = 'quos';
+    $request->workflowID = 'error';
 
-    $response = $sdk->orchestration->listInstances($request);
+    $response = $sdk->flows->listInstances($request);
 
     if ($response->listRunsResponse !== null) {
         // handle response
@@ -313,7 +312,7 @@ $sdk = SDK::builder()
     ->build();
 
 try {
-    $response = $sdk->orchestration->listWorkflows();
+    $response = $sdk->flows->listWorkflows();
 
     if ($response->listWorkflowsResponse !== null) {
         // handle response
@@ -342,7 +341,7 @@ $sdk = SDK::builder()
     ->build();
 
 try {
-    $response = $sdk->orchestration->orchestrationgetServerInfo();
+    $response = $sdk->flows->orchestrationgetServerInfo();
 
     if ($response->serverInfo !== null) {
         // handle response
@@ -374,12 +373,12 @@ $sdk = SDK::builder()
 try {
     $request = new RunWorkflowRequest();
     $request->requestBody = [
-        'magni' => 'assumenda',
+        'quis' => 'vitae',
     ];
     $request->wait = false;
-    $request->workflowID = 'ipsam';
+    $request->workflowID = 'laborum';
 
-    $response = $sdk->orchestration->runWorkflow($request);
+    $response = $sdk->flows->runWorkflow($request);
 
     if ($response->runWorkflowResponse !== null) {
         // handle response
@@ -412,10 +411,10 @@ $sdk = SDK::builder()
 try {
     $request = new SendEventRequest();
     $request->requestBody = new SendEventRequestBody();
-    $request->requestBody->name = 'Denise Pagac';
-    $request->instanceID = 'facilis';
+    $request->requestBody->name = 'Bill Conn';
+    $request->instanceID = 'tenetur';
 
-    $response = $sdk->orchestration->sendEvent($request);
+    $response = $sdk->flows->sendEvent($request);
 
     if ($response->statusCode === 200) {
         // handle response

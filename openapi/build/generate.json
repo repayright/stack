@@ -3276,7 +3276,7 @@
         "summary": "Get server info",
         "operationId": "orchestrationgetServerInfo",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "responses": {
           "200": {
@@ -3301,7 +3301,7 @@
         "operationId": "listWorkflows",
         "description": "List registered workflows",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "responses": {
           "200": {
@@ -3324,7 +3324,7 @@
         "operationId": "createWorkflow",
         "description": "Create a workflow",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "requestBody": {
           "content": {
@@ -3368,7 +3368,7 @@
       "get": {
         "summary": "Get a flow by id",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "description": "Get a flow by id",
         "operationId": "getWorkflow",
@@ -3391,7 +3391,7 @@
       "delete": {
         "summary": "Delete a flow by id",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "description": "Delete a flow by id",
         "operationId": "deleteWorkflow",
@@ -3434,7 +3434,7 @@
           }
         ],
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "requestBody": {
           "content": {
@@ -3490,7 +3490,7 @@
           }
         ],
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "responses": {
           "200": {
@@ -3527,7 +3527,7 @@
         "description": "Get a workflow instance by id",
         "operationId": "getInstance",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "responses": {
           "200": {
@@ -3564,7 +3564,7 @@
         "description": "Send an event to a running workflow",
         "operationId": "sendEvent",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "requestBody": {
           "content": {
@@ -3611,7 +3611,7 @@
         "description": "Cancel a running workflow",
         "operationId": "cancelEvent",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "responses": {
           "204": {
@@ -3641,7 +3641,7 @@
         "description": "Get a workflow instance history by id",
         "operationId": "getInstanceHistory",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "responses": {
           "200": {
@@ -3688,7 +3688,7 @@
         "description": "Get a workflow instance stage history",
         "operationId": "getInstanceStageHistory",
         "tags": [
-          "Orchestration"
+          "Flows"
         ],
         "responses": {
           "200": {
@@ -7927,7 +7927,7 @@
     {
       "name": "Flows",
       "tags": [
-        "Orchestration"
+        "Flows"
       ]
     }
   ]

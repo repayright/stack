@@ -49,7 +49,7 @@ func main() {
             Amount: formance.Int64(100),
             Final: formance.Bool(true),
         },
-        HoldID: "blanditiis",
+        HoldID: "nisi",
     })
     if err != nil {
         log.Fatal(err)
@@ -89,11 +89,11 @@ func main() {
     ctx := context.Background()
     res, err := s.Wallets.CreateBalance(ctx, operations.CreateBalanceRequest{
         CreateBalanceRequest: &shared.CreateBalanceRequest{
-            ExpiresAt: types.MustTimeFromString("2021-02-02T01:24:52.629Z"),
-            Name: "Sandy Huels",
-            Priority: formance.Int64(606393),
+            ExpiresAt: types.MustTimeFromString("2022-05-20T03:14:12.839Z"),
+            Name: "Fernando Aufderhar",
+            Priority: formance.Int64(716075),
         },
-        ID: "7074ba44-69b6-4e21-8195-9890afa563e2",
+        ID: "a4469b6e-2141-4959-890a-fa563e2516fe",
     })
     if err != nil {
         log.Fatal(err)
@@ -131,10 +131,10 @@ func main() {
     ctx := context.Background()
     res, err := s.Wallets.CreateWallet(ctx, shared.CreateWalletRequest{
         Metadata: map[string]string{
-            "quasi": "iure",
-            "doloribus": "debitis",
+            "maxime": "deleniti",
+            "facilis": "in",
         },
-        Name: "Jasmine Lind",
+        Name: "Diane VonRueden",
     })
     if err != nil {
         log.Fatal(err)
@@ -174,23 +174,19 @@ func main() {
     res, err := s.Wallets.CreditWallet(ctx, operations.CreditWalletRequest{
         CreditWalletRequest: &shared.CreditWalletRequest{
             Amount: shared.Monetary{
-                Amount: 100226,
-                Asset: "architecto",
+                Amount: 469249,
+                Asset: "repellat",
             },
-            Balance: formance.String("repudiandae"),
+            Balance: formance.String("quibusdam"),
             Metadata: map[string]string{
-                "expedita": "nihil",
-                "repellat": "quibusdam",
+                "saepe": "pariatur",
             },
-            Reference: formance.String("sed"),
+            Reference: formance.String("accusantium"),
             Sources: []shared.Subject{
-                shared.Subject{},
-                shared.Subject{},
-                shared.Subject{},
                 shared.Subject{},
             },
         },
-        ID: "d028921c-ddc6-4926-81fb-576b0d5f0d30",
+        ID: "8921cddc-6926-401f-b576-b0d5f0d30c5f",
     })
     if err != nil {
         log.Fatal(err)
@@ -230,13 +226,10 @@ func main() {
     res, err := s.Wallets.DebitWallet(ctx, operations.DebitWalletRequest{
         DebitWalletRequest: &shared.DebitWalletRequest{
             Amount: shared.Monetary{
-                Amount: 764912,
-                Asset: "corporis",
+                Amount: 729991,
+                Asset: "nobis",
             },
             Balances: []string{
-                "libero",
-                "nobis",
-                "dolores",
                 "quis",
             },
             Description: formance.String("totam"),

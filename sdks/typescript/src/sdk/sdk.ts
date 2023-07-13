@@ -4,10 +4,10 @@
 
 import * as utils from "../internal/utils";
 import { Auth } from "./auth";
+import { Flows } from "./flows";
 import { Ledger } from "./ledger";
 import * as operations from "./models/operations";
 import * as shared from "./models/shared";
-import { Orchestration } from "./orchestration";
 import { Payments } from "./payments";
 import { Search } from "./search";
 import { Wallets } from "./wallets";
@@ -65,8 +65,8 @@ export type SDKProps = {
  */
 export class SDK {
   public auth: Auth;
+  public flows: Flows;
   public ledger: Ledger;
-  public orchestration: Orchestration;
   public payments: Payments;
   public search: Search;
   public wallets: Wallets;
@@ -106,7 +106,7 @@ export class SDK {
       this._genVersion
     );
 
-    this.ledger = new Ledger(
+    this.flows = new Flows(
       this._defaultClient,
       this._securityClient,
       this._serverURL,
@@ -115,7 +115,7 @@ export class SDK {
       this._genVersion
     );
 
-    this.orchestration = new Orchestration(
+    this.ledger = new Ledger(
       this._defaultClient,
       this._securityClient,
       this._serverURL,

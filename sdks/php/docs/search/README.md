@@ -28,22 +28,23 @@ try {
     $request = new Query();
     $request->after = [
         'users:002',
-        'users:002',
-        'users:002',
-        'users:002',
     ];
     $request->cursor = 'YXVsdCBhbmQgYSBtYXhpbXVtIG1heF9yZXN1bHRzLol=';
     $request->ledgers = [
         'quickstart',
+        'quickstart',
+        'quickstart',
     ];
-    $request->pageSize = 581273;
+    $request->pageSize = 313218;
     $request->policy = 'OR';
     $request->raw = [
-        'accusamus' => 'delectus',
-        'quidem' => 'provident',
+        'delectus' => 'quidem',
+        'provident' => 'nam',
+        'id' => 'blanditiis',
+        'deleniti' => 'sapiente',
     ];
     $request->sort = 'txid:asc';
-    $request->target = 'nam';
+    $request->target = 'amet';
     $request->terms = [
         'destination=central_bank1',
         'destination=central_bank1',

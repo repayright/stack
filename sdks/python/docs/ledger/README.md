@@ -36,10 +36,11 @@ s = sdk.SDK(
 )
 
 req = operations.AddMetadataOnTransactionRequest(
-    idempotency_key='dolorem',
+    idempotency_key='ipsam',
     request_body={
-        "explicabo": 'nobis',
-        "enim": 'omnis',
+        "possimus": 'aut',
+        "quasi": 'error',
+        "temporibus": 'laborum',
     },
     async_=True,
     dry_run=True,
@@ -70,10 +71,12 @@ s = sdk.SDK(
 )
 
 req = operations.AddMetadataToAccountRequest(
-    idempotency_key='nemo',
+    idempotency_key='quasi',
     request_body={
-        "excepturi": 'accusantium',
-        "iure": 'culpa',
+        "voluptatibus": 'vero',
+        "nihil": 'praesentium',
+        "voluptatibus": 'ipsa',
+        "omnis": 'voluptate',
     },
     address='users:001',
     async_=True,
@@ -107,10 +110,9 @@ req = operations.CountAccountsRequest(
     address='users:.+',
     ledger='ledger001',
     metadata={
-        "sapiente": 'architecto',
-        "mollitia": 'dolorem',
-        "culpa": 'consequuntur',
-        "repellat": 'mollitia',
+        "perferendis": 'doloremque',
+        "reprehenderit": 'ut',
+        "maiores": 'dicta',
     },
 )
 
@@ -140,15 +142,15 @@ s = sdk.SDK(
 req = operations.CountTransactionsRequest(
     account='users:001',
     destination='users:001',
-    end_time=dateutil.parser.isoparse('2022-06-30T02:19:51.375Z'),
+    end_time=dateutil.parser.isoparse('2022-09-14T21:48:41.971Z'),
     ledger='ledger001',
     metadata={
-        "quam": 'molestiae',
-        "velit": 'error',
+        "dicta": 'harum',
+        "enim": 'accusamus',
     },
     reference='ref:001',
     source='users:001',
-    start_time=dateutil.parser.isoparse('2022-08-30T15:03:11.112Z'),
+    start_time=dateutil.parser.isoparse('2022-01-30T20:15:26.045Z'),
 )
 
 res = s.ledger.count_transactions(req)
@@ -175,14 +177,18 @@ s = sdk.SDK(
 )
 
 req = operations.CreateTransactionRequest(
-    idempotency_key='vitae',
+    idempotency_key='quae',
     post_transaction=shared.PostTransaction(
         metadata={
-            "animi": 'enim',
-            "odit": 'quo',
-            "sequi": 'tenetur',
+            "quidem": 'molestias',
         },
         postings=[
+            shared.Posting(
+                amount=100,
+                asset='COIN',
+                destination='users:002',
+                source='users:001',
+            ),
             shared.Posting(
                 amount=100,
                 asset='COIN',
@@ -207,12 +213,13 @@ req = operations.CreateTransactionRequest(
         )
         ',
             vars={
-                "possimus": 'aut',
-                "quasi": 'error',
-                "temporibus": 'laborum',
+                "modi": 'praesentium',
+                "rem": 'voluptates',
+                "quasi": 'repudiandae',
+                "sint": 'veritatis',
             },
         ),
-        timestamp=dateutil.parser.isoparse('2022-01-11T05:45:42.485Z'),
+        timestamp=dateutil.parser.isoparse('2022-03-02T21:33:21.372Z'),
     ),
     async_=True,
     dry_run=True,
@@ -272,7 +279,7 @@ req = operations.GetBalancesRequest(
     address='users:001',
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
     ledger='ledger001',
-    page_size=976460,
+    page_size=318569,
 )
 
 res = s.ledger.get_balances(req)
@@ -407,12 +414,9 @@ req = operations.ListAccountsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
     ledger='ledger001',
     metadata={
-        "nihil": 'praesentium',
-        "voluptatibus": 'ipsa',
-        "omnis": 'voluptate',
-        "cum": 'perferendis',
+        "est": 'quibusdam',
     },
-    page_size=39187,
+    page_size=131797,
 )
 
 res = s.ledger.list_accounts(req)
@@ -440,10 +444,10 @@ s = sdk.SDK(
 
 req = operations.ListLogsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    end_time=dateutil.parser.isoparse('2022-09-19T18:36:39.009Z'),
+    end_time=dateutil.parser.isoparse('2021-07-27T01:56:50.693Z'),
     ledger='ledger001',
-    page_size=979587,
-    start_time=dateutil.parser.isoparse('2022-08-22T19:15:58.586Z'),
+    page_size=841386,
+    start_time=dateutil.parser.isoparse('2022-09-26T08:57:48.803Z'),
 )
 
 res = s.ledger.list_logs(req)
@@ -473,15 +477,17 @@ req = operations.ListTransactionsRequest(
     account='users:001',
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
     destination='users:001',
-    end_time=dateutil.parser.isoparse('2022-07-09T11:22:20.922Z'),
+    end_time=dateutil.parser.isoparse('2022-08-08T19:05:24.174Z'),
     ledger='ledger001',
     metadata={
-        "harum": 'enim',
+        "quos": 'perferendis',
+        "magni": 'assumenda',
+        "ipsam": 'alias',
     },
-    page_size=880476,
+    page_size=146441,
     reference='ref:001',
     source='users:001',
-    start_time=dateutil.parser.isoparse('2022-01-30T20:15:26.045Z'),
+    start_time=dateutil.parser.isoparse('2021-11-11T04:17:07.569Z'),
 )
 
 res = s.ledger.list_transactions(req)

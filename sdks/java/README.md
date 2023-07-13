@@ -81,6 +81,21 @@ public class Application {
 * [updateClient](docs/auth/README.md#updateclient) - Update client
 * [updateScope](docs/auth/README.md#updatescope) - Update scope
 
+### [flows](docs/flows/README.md)
+
+* [cancelEvent](docs/flows/README.md#cancelevent) - Cancel a running workflow
+* [createWorkflow](docs/flows/README.md#createworkflow) - Create workflow
+* [deleteWorkflow](docs/flows/README.md#deleteworkflow) - Delete a flow by id
+* [getInstance](docs/flows/README.md#getinstance) - Get a workflow instance by id
+* [getInstanceHistory](docs/flows/README.md#getinstancehistory) - Get a workflow instance history by id
+* [getInstanceStageHistory](docs/flows/README.md#getinstancestagehistory) - Get a workflow instance stage history
+* [getWorkflow](docs/flows/README.md#getworkflow) - Get a flow by id
+* [listInstances](docs/flows/README.md#listinstances) - List instances of a workflow
+* [listWorkflows](docs/flows/README.md#listworkflows) - List registered workflows
+* [orchestrationgetServerInfo](docs/flows/README.md#orchestrationgetserverinfo) - Get server info
+* [runWorkflow](docs/flows/README.md#runworkflow) - Run workflow
+* [sendEvent](docs/flows/README.md#sendevent) - Send an event to a running workflow
+
 ### [ledger](docs/ledger/README.md)
 
 * [addMetadataOnTransaction](docs/ledger/README.md#addmetadataontransaction) - Set the metadata of a transaction by its ID
@@ -99,21 +114,6 @@ public class Application {
 * [listTransactions](docs/ledger/README.md#listtransactions) - List transactions from a ledger
 * [readStats](docs/ledger/README.md#readstats) - Get statistics from a ledger
 * [revertTransaction](docs/ledger/README.md#reverttransaction) - Revert a ledger transaction by its ID
-
-### [orchestration](docs/orchestration/README.md)
-
-* [cancelEvent](docs/orchestration/README.md#cancelevent) - Cancel a running workflow
-* [createWorkflow](docs/orchestration/README.md#createworkflow) - Create workflow
-* [deleteWorkflow](docs/orchestration/README.md#deleteworkflow) - Delete a flow by id
-* [getInstance](docs/orchestration/README.md#getinstance) - Get a workflow instance by id
-* [getInstanceHistory](docs/orchestration/README.md#getinstancehistory) - Get a workflow instance history by id
-* [getInstanceStageHistory](docs/orchestration/README.md#getinstancestagehistory) - Get a workflow instance stage history
-* [getWorkflow](docs/orchestration/README.md#getworkflow) - Get a flow by id
-* [listInstances](docs/orchestration/README.md#listinstances) - List instances of a workflow
-* [listWorkflows](docs/orchestration/README.md#listworkflows) - List registered workflows
-* [orchestrationgetServerInfo](docs/orchestration/README.md#orchestrationgetserverinfo) - Get server info
-* [runWorkflow](docs/orchestration/README.md#runworkflow) - Run workflow
-* [sendEvent](docs/orchestration/README.md#sendevent) - Send an event to a running workflow
 
 ### [payments](docs/payments/README.md)
 

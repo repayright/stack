@@ -37,10 +37,11 @@ const sdk = new SDK({
 });
 
 sdk.ledger.addMetadataOnTransaction({
-  idempotencyKey: "dolorem",
+  idempotencyKey: "ipsam",
   requestBody: {
-    "explicabo": "nobis",
-    "enim": "omnis",
+    "possimus": "aut",
+    "quasi": "error",
+    "temporibus": "laborum",
   },
   async: true,
   dryRun: true,
@@ -71,10 +72,12 @@ const sdk = new SDK({
 });
 
 sdk.ledger.addMetadataToAccount({
-  idempotencyKey: "nemo",
+  idempotencyKey: "quasi",
   requestBody: {
-    "excepturi": "accusantium",
-    "iure": "culpa",
+    "voluptatibus": "vero",
+    "nihil": "praesentium",
+    "voluptatibus": "ipsa",
+    "omnis": "voluptate",
   },
   address: "users:001",
   async: true,
@@ -108,10 +111,9 @@ sdk.ledger.countAccounts({
   address: "users:.+",
   ledger: "ledger001",
   metadata: {
-    "sapiente": "architecto",
-    "mollitia": "dolorem",
-    "culpa": "consequuntur",
-    "repellat": "mollitia",
+    "perferendis": "doloremque",
+    "reprehenderit": "ut",
+    "maiores": "dicta",
   },
 }).then((res: CountAccountsResponse) => {
   if (res.statusCode == 200) {
@@ -140,15 +142,15 @@ const sdk = new SDK({
 sdk.ledger.countTransactions({
   account: "users:001",
   destination: "users:001",
-  endTime: new Date("2022-06-30T02:19:51.375Z"),
+  endTime: new Date("2022-09-14T21:48:41.971Z"),
   ledger: "ledger001",
   metadata: {
-    "quam": "molestiae",
-    "velit": "error",
+    "dicta": "harum",
+    "enim": "accusamus",
   },
   reference: "ref:001",
   source: "users:001",
-  startTime: new Date("2022-08-30T15:03:11.112Z"),
+  startTime: new Date("2022-01-30T20:15:26.045Z"),
 }).then((res: CountTransactionsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -174,14 +176,18 @@ const sdk = new SDK({
 });
 
 sdk.ledger.createTransaction({
-  idempotencyKey: "vitae",
+  idempotencyKey: "quae",
   postTransaction: {
     metadata: {
-      "animi": "enim",
-      "odit": "quo",
-      "sequi": "tenetur",
+      "quidem": "molestias",
     },
     postings: [
+      {
+        amount: 100,
+        asset: "COIN",
+        destination: "users:002",
+        source: "users:001",
+      },
       {
         amount: 100,
         asset: "COIN",
@@ -206,12 +212,13 @@ sdk.ledger.createTransaction({
     )
     ",
       vars: {
-        "possimus": "aut",
-        "quasi": "error",
-        "temporibus": "laborum",
+        "modi": "praesentium",
+        "rem": "voluptates",
+        "quasi": "repudiandae",
+        "sint": "veritatis",
       },
     },
-    timestamp: new Date("2022-01-11T05:45:42.485Z"),
+    timestamp: new Date("2022-03-02T21:33:21.372Z"),
   },
   async: true,
   dryRun: true,
@@ -271,7 +278,7 @@ sdk.ledger.getBalances({
   address: "users:001",
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   ledger: "ledger001",
-  pageSize: 976460,
+  pageSize: 318569,
 }).then((res: GetBalancesResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -407,12 +414,9 @@ sdk.ledger.listAccounts({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   ledger: "ledger001",
   metadata: {
-    "nihil": "praesentium",
-    "voluptatibus": "ipsa",
-    "omnis": "voluptate",
-    "cum": "perferendis",
+    "est": "quibusdam",
   },
-  pageSize: 39187,
+  pageSize: 131797,
 }).then((res: ListAccountsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -439,10 +443,10 @@ const sdk = new SDK({
 
 sdk.ledger.listLogs({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  endTime: new Date("2022-09-19T18:36:39.009Z"),
+  endTime: new Date("2021-07-27T01:56:50.693Z"),
   ledger: "ledger001",
-  pageSize: 979587,
-  startTime: new Date("2022-08-22T19:15:58.586Z"),
+  pageSize: 841386,
+  startTime: new Date("2022-09-26T08:57:48.803Z"),
 }).then((res: ListLogsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -471,15 +475,17 @@ sdk.ledger.listTransactions({
   account: "users:001",
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   destination: "users:001",
-  endTime: new Date("2022-07-09T11:22:20.922Z"),
+  endTime: new Date("2022-08-08T19:05:24.174Z"),
   ledger: "ledger001",
   metadata: {
-    "harum": "enim",
+    "quos": "perferendis",
+    "magni": "assumenda",
+    "ipsam": "alias",
   },
-  pageSize: 880476,
+  pageSize: 146441,
   reference: "ref:001",
   source: "users:001",
-  startTime: new Date("2022-01-30T20:15:26.045Z"),
+  startTime: new Date("2021-11-11T04:17:07.569Z"),
 }).then((res: ListTransactionsResponse) => {
   if (res.statusCode == 200) {
     // handle response

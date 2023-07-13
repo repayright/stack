@@ -24,22 +24,23 @@ const sdk = new SDK({
 sdk.search.search({
   after: [
     "users:002",
-    "users:002",
-    "users:002",
-    "users:002",
   ],
   cursor: "YXVsdCBhbmQgYSBtYXhpbXVtIG1heF9yZXN1bHRzLol=",
   ledgers: [
     "quickstart",
+    "quickstart",
+    "quickstart",
   ],
-  pageSize: 581273,
+  pageSize: 313218,
   policy: "OR",
   raw: {
-    "accusamus": "delectus",
-    "quidem": "provident",
+    "delectus": "quidem",
+    "provident": "nam",
+    "id": "blanditiis",
+    "deleniti": "sapiente",
   },
   sort: "txid:asc",
-  target: "nam",
+  target: "amet",
   terms: [
     "destination=central_bank1",
     "destination=central_bank1",
