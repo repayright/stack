@@ -10,6 +10,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/login"
 	"github.com/formancehq/fctl/cmd/stack"
+	"github.com/formancehq/fctl/cmd/webhooks"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -35,7 +36,7 @@ func NewRootCommand() *cobra.Command {
 			// auth.NewCommand(),
 			// cloud.NewCommand(),
 			// search.NewCommand(),
-			// webhooks.NewCommand(),
+			webhooks.NewCommand(),
 			// wallets.NewCommand(),
 			// orchestration.NewCommand(),
 		),

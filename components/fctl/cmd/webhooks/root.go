@@ -17,5 +17,6 @@ func NewCommand() *cobra.Command {
 			NewDeleteCommand(),
 			NewChangeSecretCommand(),
 		),
+		fctl.WithGoFlagSet(fctl.WithGlobalFlags(nil)),
 	)
 }
