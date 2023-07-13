@@ -47,7 +47,7 @@ type StackCreateControllerConfig struct {
 	args        []string
 }
 
-func NewStackCreateControllerConfig(ctx *context.Context) *StackCreateControllerConfig {
+func NewStackCreateControllerConfig() *StackCreateControllerConfig {
 	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 	flags.Bool(unprotectFlag, false, "Unprotect stacks (no confirmation on write commands)")
 	flags.String(regionFlag, "", "Region on which deploy the stack")
@@ -55,7 +55,7 @@ func NewStackCreateControllerConfig(ctx *context.Context) *StackCreateController
 
 	fctl.WithGlobalFlags(flags)
 	return &StackCreateControllerConfig{
-		context:     *ctx,
+		context:     nil,
 		use:         useCreate,
 		description: descriptionCreate,
 		aliases: []string{
@@ -225,7 +225,7 @@ func (c *StackCreateController) Render() error {
 
 func NewCreateCommand() *cobra.Command {
 
-	config := NewStackCreateControllerConfig(nil)
+	config := NewStackCreateControllerConfig()
 
 	return fctl.NewMembershipCommand(config.use,
 		fctl.WithShortDescription(config.description),
