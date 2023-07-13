@@ -1,7 +1,11 @@
 package webhooks
 
 import (
+	"context"
+	"flag"
 	"fmt"
+	"io"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -10,15 +14,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useDesactivateWebhook         = "deactivate <config-id>"
+	descriptionDesactivateWebhook = "Deactivate one config"
+)
+
 type DesactivateWebhookStore struct {
 	Success bool `json:"success"`
 }
-
-type DesactivateWebhookController struct {
-	store *DesactivateWebhookStore
-}
-
-var _ fctl.Controller[*DesactivateWebhookStore] = (*DesactivateWebhookController)(nil)
 
 func NewDefaultDesactivateWebhookStore() *DesactivateWebhookStore {
 	return &DesactivateWebhookStore{
@@ -26,44 +29,105 @@ func NewDefaultDesactivateWebhookStore() *DesactivateWebhookStore {
 	}
 }
 
-func NewDesactivateWebhookController() *DesactivateWebhookController {
-	return &DesactivateWebhookController{
-		store: NewDefaultDesactivateWebhookStore(),
+type DesactivateWebhookControllerConfig struct {
+	context     context.Context
+	use         string
+	description string
+	aliases     []string
+	out         io.Writer
+	flags       *flag.FlagSet
+	args        []string
+}
+
+func NewDesactivateWebhookControllerConfig() *DesactivateWebhookControllerConfig {
+	flags := flag.NewFlagSet(useDesactivateWebhook, flag.ExitOnError)
+	fctl.WithGlobalFlags(flags)
+	fctl.WithConfirmFlag(flags)
+
+	return &DesactivateWebhookControllerConfig{
+		context:     nil,
+		use:         useDesactivateWebhook,
+		description: descriptionDesactivateWebhook,
+		aliases: []string{
+			"deac",
+		},
+		out:   os.Stdout,
+		flags: flags,
+		args:  []string{},
 	}
 }
+
+var _ fctl.Controller[*DesactivateWebhookStore] = (*DesactivateWebhookController)(nil)
+
+type DesactivateWebhookController struct {
+	store  *DesactivateWebhookStore
+	config DesactivateWebhookControllerConfig
+}
+
+func NewDesactivateWebhookController(config DesactivateWebhookControllerConfig) *DesactivateWebhookController {
+	return &DesactivateWebhookController{
+		store:  NewDefaultDesactivateWebhookStore(),
+		config: config,
+	}
+}
+
+func (c *DesactivateWebhookController) GetFlags() *flag.FlagSet {
+	return c.config.flags
+}
+
+func (c *DesactivateWebhookController) GetContext() context.Context {
+	return c.config.context
+}
+
+func (c *DesactivateWebhookController) SetContext(ctx context.Context) {
+	c.config.context = ctx
+}
+
 func (c *DesactivateWebhookController) GetStore() *DesactivateWebhookStore {
 	return c.store
 }
 
-func (c *DesactivateWebhookController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	cfg, err := fctl.GetConfig(cmd)
+func (c *DesactivateWebhookController) SetArgs(args []string) {
+	c.config.args = append([]string{}, args...)
+}
+
+func (c *DesactivateWebhookController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.flags
+	ctx := c.config.context
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "fctl.GetConfig")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to deactivate a webhook") {
+	if !fctl.CheckStackApprobation(flags, stack, "You are about to deactivate a webhook") {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	request := operations.DeactivateConfigRequest{
-		ID: args[0],
+	if len(c.config.args) < 1 {
+		return nil, fmt.Errorf("missing config id")
 	}
-	response, err := client.Webhooks.DeactivateConfig(cmd.Context(), request)
+
+	request := operations.DeactivateConfigRequest{
+		ID: c.config.args[0],
+	}
+	response, err := client.Webhooks.DeactivateConfig(ctx, request)
 	if err != nil {
 		return nil, errors.Wrap(err, "deactivating config")
 	}
@@ -83,19 +147,22 @@ func (c *DesactivateWebhookController) Run(cmd *cobra.Command, args []string) (f
 	return c, nil
 }
 
-func (c *DesactivateWebhookController) Render(cmd *cobra.Command, args []string) error {
+func (c *DesactivateWebhookController) Render() error {
 
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Config deactivated successfully")
+	pterm.Success.WithWriter(c.config.out).Printfln("Config deactivated successfully")
 
 	return nil
 }
 
 func NewDeactivateCommand() *cobra.Command {
-	return fctl.NewCommand("deactivate <config-id>",
-		fctl.WithShortDescription("Deactivate one config"),
-		fctl.WithConfirmFlag(),
-		fctl.WithAliases("deac"),
+
+	config := NewDesactivateWebhookControllerConfig()
+
+	return fctl.NewCommand(config.use,
+		fctl.WithShortDescription(config.description),
+		fctl.WithAliases(config.aliases...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*DesactivateWebhookStore](NewDesactivateWebhookController()),
+		fctl.WithGoFlagSet(config.flags),
+		fctl.WithController[*DesactivateWebhookStore](NewDesactivateWebhookController(*config)),
 	)
 }
