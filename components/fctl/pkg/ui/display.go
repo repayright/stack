@@ -8,60 +8,66 @@ import (
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 )
 
-type Display struct {
-	header Header
-	body   *Model
-
-	time time.Time
+type Display[T any] struct {
+	header       Header
+	body         modelutils.Controller[T]
+	bodyRenderer modelutils.Model
+	time         time.Time
 }
 
-func NewDisplay() *Display {
-	return &Display{
+func NewDisplay[T any]() *Display[T] {
+	return &Display[T]{
 		body: nil,
 	}
 }
 
-func (d *Display) SetHeader(model *Header) *Display {
+func (d *Display[T]) SetHeader(model *Header) *Display[T] {
 	d.header = *model
 	return d
 }
 
-func (d *Display) SetCurrentModel(model *Model) *Display {
-	d.body = model
+func (d *Display[T]) SetBody(c modelutils.Controller[T]) *Display[T] {
+	d.body = c
 	return d
 }
 
-func (d *Display) ResetModels() *Display {
+func (d *Display[T]) ResetModels() *Display[T] {
 	d.body = nil
 	return d
 }
 
-func (d *Display) GetListKeyMapHandler() *modelutils.KeyMapHandler {
-	var keys *modelutils.KeyMapHandler
+func (d *Display[T]) GetKeyMapAction() *modelutils.KeyMapHandler[T] {
 	if d.body != nil {
-		keys = (*d.body).GetListKeyMapHandler()
-		return keys
+		return d.body.GetKeyMapAction()
 	}
 	return nil
 
 }
 
-func (d *Display) Init() tea.Cmd {
+func (d *Display[T]) Init() tea.Cmd {
 	var cmd tea.Cmd = nil
 	d.time = time.Now()
 
-	// Init modelKeys
-	var keys *modelutils.KeyMapHandler = d.GetListKeyMapHandler()
-	d.header = *d.header.AddKeyBinding(keys)
+	var keys *modelutils.KeyMapHandler[T] = d.GetKeyMapAction()
+	if keys != nil {
+		d.header = *d.header.AddKeyBinding(keys)
+	}
 
 	if d.body != nil {
-		cmd = tea.Batch(cmd, (*d.body).Init())
+
+		m, err := d.body.Render()
+		if err != nil {
+			panic(err)
+		}
+
+		d.bodyRenderer = m
+		cmd = tea.Batch(cmd, m.Init())
 	}
 
 	return cmd
 }
 
-func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (d *Display[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmds []tea.Cmd
 	)
@@ -77,17 +83,19 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.WindowSizeMsg:
 			msg.Height -= 15
-			m, cmd := (*d.body).Update(msg)
+
+			m, cmd := d.bodyRenderer.Update(msg)
 			if cmd != nil {
 				cmds = append(cmds, cmd)
 			}
-			*d.body = m
+
+			d.bodyRenderer = m
 		case tea.KeyMsg:
-			m, cmd := (*d.body).Update(msg)
+			m, cmd := d.bodyRenderer.Update(msg)
 			if cmd != nil {
 				cmds = append(cmds, cmd)
 			}
-			*d.body = m
+			d.bodyRenderer = m
 		}
 
 	}
@@ -95,13 +103,13 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return d, tea.Batch(cmds...)
 }
 
-func (d *Display) View() string {
+func (d *Display[T]) View() string {
 	var s []string = []string{
-		d.header.View(),
+		//d.header.View(),
 	}
 
 	if d.body != nil {
-		s = append(s, (*d.body).View())
+		s = append(s, d.bodyRenderer.View())
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top, s...)

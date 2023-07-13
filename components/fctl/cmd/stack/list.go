@@ -3,10 +3,12 @@ package stack
 import (
 	"time"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -38,68 +40,106 @@ type StackListStore struct {
 	Stacks []Stack `json:"stacks"`
 }
 
-type StackListController struct {
-	store        *StackListStore
-	profile      *fctl.Profile
-	organization string
-}
-
-var _ fctl.Controller[*StackListStore] = (*StackListController)(nil)
-
 func NewDefaultStackListStore() *StackListStore {
 	return &StackListStore{
 		Stacks: []Stack{},
 	}
 }
 
+type StackListController struct {
+	contextCommand *cobra.Command
+	store          *StackListStore
+	profile        *fctl.Profile
+	organization   string
+	config         *StackListControllerConfig
+}
+
+var _ modelutils.Controller[*StackListStore] = (*StackListController)(nil)
+
+func NewStackListControllerConfig() *StackListControllerConfig {
+	return &StackListControllerConfig{
+		deletedFlag: false,
+	}
+}
+
+func NewDefaultStackListControllerConfig() *StackListControllerConfig {
+
+	return &StackListControllerConfig{
+		deletedFlag: false,
+	}
+}
+
+func (c *StackListController) GetContextualConfig() *StackListControllerConfig {
+	return c.config
+}
+
 func NewStackListController() *StackListController {
 	return &StackListController{
-		store: NewDefaultStackListStore(),
+		store:  NewDefaultStackListStore(),
+		config: New,
 	}
 }
 
 func NewListCommand() *cobra.Command {
-	return fctl.NewMembershipCommand("list",
-		fctl.WithAliases("ls", "l"),
+
+	c := NewStackListController()
+
+	return fctl.NewMembershipCommand("list", fctl.WithAliases("ls", "l"),
 		fctl.WithShortDescription("List stacks"),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithBoolFlag(deletedFlag, false, "Display deleted stacks"),
-		fctl.WithController[*StackListStore](NewStackListController()),
+		fctl.WithController[*StackListStore](),
 	)
+
 }
+
+func (c *StackListController) Init() {
+
+	if c.config == nil {
+		c.config = NewDefaultStackListControllerConfig()
+	}
+
+	// c.contextCommand = fctl.NewMembershipCommand(c.config.use, c.config.options...)
+
+}
+
 func (c *StackListController) GetStore() *StackListStore {
 	return c.store
 }
 
-func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *StackListController) Run() error {
+	cmd := c.GetContextualCmd()
+	if cmd == nil {
+		return errors.New("contextual command is nil")
+	}
 
 	cfg, err := fctl.GetConfig(cmd)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	profile := fctl.GetCurrentProfile(cmd, cfg)
 
 	organization, err := fctl.ResolveOrganizationID(cmd, cfg)
 	if err != nil {
-		return nil, errors.Wrap(err, "searching default organization")
+		return errors.Wrap(err, "searching default organization")
 	}
 
 	apiClient, err := fctl.NewMembershipClient(cmd, cfg)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	rsp, _, err := apiClient.DefaultApi.ListStacks(cmd.Context(), organization).
 		Deleted(fctl.GetBool(cmd, deletedFlag)).
 		Execute()
 	if err != nil {
-		return nil, errors.Wrap(err, "listing stacks")
+		return errors.Wrap(err, "listing stacks")
 	}
 
 	c.profile = profile
 	if len(rsp.Data) == 0 {
-		return c, nil
+		return nil
 	}
 
 	c.organization = organization
@@ -126,11 +166,11 @@ func (c *StackListController) Run(cmd *cobra.Command, args []string) (fctl.Rende
 		}
 	})
 
-	return c, nil
+	return nil
 }
 
-func (c *StackListController) Render(cmd *cobra.Command, args []string) (ui.Model, error) {
-
+func (c *StackListController) Render() (modelutils.Model, error) {
+	cmd := c.GetContextualCmd()
 	// Create table rows
 	tableData := fctl.Map(c.store.Stacks, func(stack Stack) table.Row {
 		data := []string{
@@ -180,4 +220,55 @@ func (c *StackListController) Render(cmd *cobra.Command, args []string) (ui.Mode
 	opts = ui.NewTableOptions(ui.WithFullScreenTable(columns), tableData)
 
 	return ui.NewTableModel(columns, opts...), nil
+}
+
+func (c *StackListController) GetKeyMapAction() *modelutils.KeyMapHandler[*StackListStore] {
+	k := modelutils.NewKeyMapHandler[*StackListStore]()
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("q", "esc", "ctrl+c"),
+			key.WithHelp("q", "Quit the application"),
+		),
+		func() *modelutils.Controller[*StackListStore] {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("up", "k"),
+			key.WithHelp("up/k", "move up"),
+		),
+		func() *modelutils.Controller[*StackListStore] {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("down", "j"),
+			key.WithHelp("down/j", "move down"),
+		),
+		func() *modelutils.Controller[*StackListStore] {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("?"),
+			key.WithHelp("? ", "Toggle help"),
+		),
+		func() *modelutils.Controller[*StackListStore] {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "show selected item"),
+		),
+		func() *modelutils.Controller[*StackListStore] {
+			return nil
+		},
+	)
+
+	return k
 }

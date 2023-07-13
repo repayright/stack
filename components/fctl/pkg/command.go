@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
 	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/pkg/errors"
 	"github.com/segmentio/analytics-go/v3"
 	"github.com/segmentio/ksuid"
@@ -227,10 +228,11 @@ func WithPreRunE(fn func(cmd *cobra.Command, args []string) error) CommandOption
 	}
 }
 
-func WithController[T any](c Controller[T]) CommandOptionFn {
+func WithController[T any](c modelutils.Controller[T]) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.RunE = func(cmd *cobra.Command, args []string) error {
-			renderable, err := c.Run(cmd, args)
+
+			err := c.Run()
 
 			// If the controller return an argument error, we want to print the usage
 			// of the command instead of the error message.
@@ -243,7 +245,7 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 				return err
 			}
 
-			err = WithRender(cmd, args, c, renderable)
+			err = render(cmd, args, c)
 
 			if err != nil {
 				return err
@@ -253,13 +255,13 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 		}
 	}
 }
-func WithRender[T any](cmd *cobra.Command, args []string, c Controller[T], r Renderable) error {
+func render[T any](cmd *cobra.Command, args []string, c modelutils.Controller[T]) error {
 	flags := GetString(cmd, OutputFlag)
 
 	switch flags {
 	case "json":
 		// Inject into export struct
-		export := ExportedData{
+		export := modelutils.ExportedData{
 			Data: c.GetStore(),
 		}
 
@@ -285,20 +287,19 @@ func WithRender[T any](cmd *cobra.Command, args []string, c Controller[T], r Ren
 		}
 	case "dynamic":
 
-		d := ui.NewDisplay()
+		d := ui.NewDisplay[T]()
 		header := ui.NewHeader()
+		d.SetBody(c).SetHeader(header)
+		d.Init()
 
-		m, err := r.Render(cmd, args)
+		m, err := c.Render()
 		if err != nil {
 			return err
 		}
-
-		if m == nil { // If the renderer returns nil, we don't want to render anything
+		// If the renderer returns nil, we don't want to render anything
+		if m == nil {
 			return nil
 		}
-
-		d.SetCurrentModel(&m).SetHeader(header)
-		d.Init()
 
 		if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
 			return err
@@ -306,7 +307,7 @@ func WithRender[T any](cmd *cobra.Command, args []string, c Controller[T], r Ren
 
 		return nil
 	default:
-		m, err := r.Render(cmd, args)
+		m, err := c.Render()
 
 		if err != nil {
 			return err

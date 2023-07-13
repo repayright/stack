@@ -7,54 +7,55 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type KeyMapHandler struct {
-	list []key.Binding
+type KeyMapHandler[T any] struct {
+	keyMapsAction map[*key.Binding]func() *Controller[T]
 }
 
-func NewKeyMapHandler() *KeyMapHandler {
-	return &KeyMapHandler{
-		list: []key.Binding{},
+func NewKeyMapHandler[T any]() *KeyMapHandler[T] {
+	return &KeyMapHandler[T]{
+		keyMapsAction: make(map[*key.Binding]func() *Controller[T]),
 	}
 }
 
-func (k *KeyMapHandler) GetListKeyMap() []key.Binding {
-	return k.list
+func (k *KeyMapHandler[T]) GetKeyMapAction() map[*key.Binding]func() *Controller[T] {
+	return k.keyMapsAction
 }
 
-func (k *KeyMapHandler) AddNewBinding(keymap key.Binding) *KeyMapHandler {
-	k.list = append(k.list, keymap)
+func (k *KeyMapHandler[T]) AddNewKeyBinding(key key.Binding, action func() *Controller[T]) *KeyMapHandler[T] {
+	// k.keyMapsAction = append(k.keyMapsAction, keymap)
+	k.keyMapsAction[&key] = action
 	return k
 }
 
-func (k *KeyMapHandler) Reset() *KeyMapHandler {
-	k.list = []key.Binding{}
+func (k *KeyMapHandler[T]) Reset() *KeyMapHandler[T] {
+	k.keyMapsAction = make(map[*key.Binding]func() *Controller[T])
 	return k
 }
 
-func (k *KeyMapHandler) Init() *tea.Cmd {
+func (k *KeyMapHandler[T]) Init() *tea.Cmd {
 	return nil
 }
 
-func (k *KeyMapHandler) Update(msg tea.Msg) *tea.Cmd {
+func (k *KeyMapHandler[T]) Update(msg tea.Msg) *tea.Cmd {
 	return nil
 }
 
-func (k *KeyMapHandler) View() string {
+func (k *KeyMapHandler[T]) View() string {
 	var s string = ""
-	for _, keymap := range k.list {
+	for k, _ := range k.keyMapsAction {
 
-		h := keymap.Help()
+		h := k.Help()
 		s += h.Key + ": " + h.Desc + "\n"
 	}
 
 	return s
 }
 
-func GetFlatMappingKeys(handlers ...KeyMapHandler) []string {
+func GetFlatMappingKeys[T any](handlers ...KeyMapHandler[T]) []string {
 	var keys []string
 	for _, handler := range handlers {
-		for _, keymap := range handler.GetListKeyMap() {
-			keys = append(keys, strings.Join(keymap.Keys(), ", "))
+		for k, _ := range handler.GetKeyMapAction() {
+			keys = append(keys, strings.Join(k.Keys(), ", "))
 		}
 	}
 
