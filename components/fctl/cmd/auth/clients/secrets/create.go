@@ -31,16 +31,6 @@ func NewCreateController() *CreateController {
 	}
 }
 
-func NewCreateCommand() *cobra.Command {
-	return fctl.NewCommand("create <client-id> <secret-name>",
-		fctl.WithAliases("c"),
-		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithShortDescription("Create secret"),
-		fctl.WithConfirmFlag(),
-		fctl.WithController[*CreateStore](NewCreateController()),
-	)
-}
-
 func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
@@ -104,4 +94,14 @@ func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
 		WithData(tableData).
 		Render()
 
+}
+
+func NewCreateCommand() *cobra.Command {
+	return fctl.NewCommand("create <client-id> <secret-name>",
+		fctl.WithAliases("c"),
+		fctl.WithArgs(cobra.ExactArgs(2)),
+		fctl.WithShortDescription("Create secret"),
+		fctl.WithConfirmFlag(),
+		fctl.WithController[*CreateStore](NewCreateController()),
+	)
 }

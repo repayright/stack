@@ -32,17 +32,6 @@ func NewBalancesController() *BalancesController {
 	}
 }
 
-func NewBalancesCommand() *cobra.Command {
-	c := NewBalancesController()
-	return fctl.NewCommand("balances",
-		fctl.WithAliases("balance", "bal", "b"),
-		fctl.WithStringFlag(c.addressFlag, "", "Filter on specific address"),
-		fctl.WithShortDescription("Read balances"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*BalancesStore](c),
-	)
-}
-
 func (c *BalancesController) GetStore() *BalancesStore {
 	return c.store
 }
@@ -110,4 +99,15 @@ func (c *BalancesController) Render(cmd *cobra.Command, args []string) error {
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
+}
+
+func NewBalancesCommand() *cobra.Command {
+	c := NewBalancesController()
+	return fctl.NewCommand("balances",
+		fctl.WithAliases("balance", "bal", "b"),
+		fctl.WithStringFlag(c.addressFlag, "", "Filter on specific address"),
+		fctl.WithShortDescription("Read balances"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*BalancesStore](c),
+	)
 }

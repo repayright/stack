@@ -29,15 +29,6 @@ func NewSetupController() *SetupController {
 	}
 }
 
-func NewSetupCommand() *cobra.Command {
-	return fctl.NewCommand("setup",
-		fctl.WithAliases("s"),
-		fctl.WithShortDescription("Create a new billing account"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*SetupStore](NewSetupController()),
-	)
-}
-
 func (c *SetupController) GetStore() *SetupStore {
 	return c.store
 }
@@ -90,4 +81,12 @@ func (c *SetupController) Render(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+func NewSetupCommand() *cobra.Command {
+	return fctl.NewCommand("setup",
+		fctl.WithAliases("s"),
+		fctl.WithShortDescription("Create a new billing account"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*SetupStore](NewSetupController()),
+	)
 }

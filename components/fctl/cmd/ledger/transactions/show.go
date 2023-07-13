@@ -28,16 +28,6 @@ func NewShowController() *ShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <transaction-id>",
-		fctl.WithShortDescription("Print a transaction"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases("sh"),
-		fctl.WithValidArgs("last"),
-		fctl.WithController[*ShowStore](NewShowController()),
-	)
-}
-
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
@@ -100,4 +90,14 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 
 func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 	return internal.PrintExpandedTransaction(cmd.OutOrStdout(), c.store.Transaction)
+}
+
+func NewShowCommand() *cobra.Command {
+	return fctl.NewCommand("show <transaction-id>",
+		fctl.WithShortDescription("Print a transaction"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithAliases("sh"),
+		fctl.WithValidArgs("last"),
+		fctl.WithController[*ShowStore](NewShowController()),
+	)
 }

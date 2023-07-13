@@ -32,17 +32,6 @@ func NewListController() *ListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	c := NewListController()
-	return fctl.NewCommand("list",
-		fctl.WithShortDescription("List all wallets"),
-		fctl.WithAliases("ls", "l"),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ListStore](c),
-	)
-}
-
 func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
@@ -114,4 +103,14 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "rendering table")
 	}
 	return nil
+}
+func NewListCommand() *cobra.Command {
+	c := NewListController()
+	return fctl.NewCommand("list",
+		fctl.WithShortDescription("List all wallets"),
+		fctl.WithAliases("ls", "l"),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*ListStore](c),
+	)
 }

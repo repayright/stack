@@ -28,16 +28,6 @@ func NewRevertController() *RevertController {
 	}
 }
 
-func NewRevertCommand() *cobra.Command {
-	return fctl.NewCommand("revert <transaction-id>",
-		fctl.WithConfirmFlag(),
-		fctl.WithShortDescription("Revert a transaction"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithValidArgs("last"),
-		fctl.WithController[*RevertStore](NewRevertController()),
-	)
-}
-
 func (c *RevertController) GetStore() *RevertStore {
 	return c.store
 }
@@ -106,4 +96,13 @@ func (c *RevertController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 
 func (c *RevertController) Render(cmd *cobra.Command, args []string) error {
 	return internal.PrintTransaction(cmd.OutOrStdout(), *c.store.Transaction)
+}
+func NewRevertCommand() *cobra.Command {
+	return fctl.NewCommand("revert <transaction-id>",
+		fctl.WithConfirmFlag(),
+		fctl.WithShortDescription("Revert a transaction"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithValidArgs("last"),
+		fctl.WithController[*RevertStore](NewRevertController()),
+	)
 }

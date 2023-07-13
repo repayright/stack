@@ -34,15 +34,6 @@ func NewListController() *ListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List organizations"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ListStore](NewListController()),
-	)
-}
-
 func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
@@ -91,4 +82,13 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	tableData := fctl.Prepend(OrgMap, []string{"ID", "Name", "Owner ID", "Owner email", "Is mine?"})
 
 	return pterm.DefaultTable.WithHasHeader().WithWriter(cmd.OutOrStdout()).WithData(tableData).Render()
+}
+
+func NewListCommand() *cobra.Command {
+	return fctl.NewCommand("list",
+		fctl.WithAliases("ls", "l"),
+		fctl.WithShortDescription("List organizations"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*ListStore](NewListController()),
+	)
 }

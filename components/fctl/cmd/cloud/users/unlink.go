@@ -26,15 +26,6 @@ func NewUnlinkController() *UnlinkController {
 	}
 }
 
-func NewUnlinkCommand() *cobra.Command {
-	return fctl.NewCommand("unlink <user-id>",
-		fctl.WithAliases("u", "un"),
-		fctl.WithShortDescription("unlink user from organization"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*UnlinkStore](NewUnlinkController()),
-	)
-}
-
 func (c *UnlinkController) GetStore() *UnlinkStore {
 	return c.store
 }
@@ -72,4 +63,13 @@ func (c *UnlinkController) Render(cmd *cobra.Command, args []string) error {
 
 	return nil
 
+}
+
+func NewUnlinkCommand() *cobra.Command {
+	return fctl.NewCommand("unlink <user-id>",
+		fctl.WithAliases("u", "un"),
+		fctl.WithShortDescription("unlink user from organization"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*UnlinkStore](NewUnlinkController()),
+	)
 }

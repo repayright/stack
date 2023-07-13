@@ -35,14 +35,6 @@ func NewInstancesSendEventController() *InstancesSendEventController {
 	}
 }
 
-func NewSendEventCommand() *cobra.Command {
-	return fctl.NewCommand("send-event <instance-id> <event>",
-		fctl.WithShortDescription("Send an event to an instance"),
-		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*InstancesSendEventStore](NewInstancesSendEventController()),
-	)
-}
-
 func (c *InstancesSendEventController) GetStore() *InstancesSendEventStore {
 	return c.store
 }
@@ -86,4 +78,12 @@ func (c *InstancesSendEventController) Run(cmd *cobra.Command, args []string) (f
 func (c *InstancesSendEventController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Event '%s' sent", args[1])
 	return nil
+}
+
+func NewSendEventCommand() *cobra.Command {
+	return fctl.NewCommand("send-event <instance-id> <event>",
+		fctl.WithShortDescription("Send an event to an instance"),
+		fctl.WithArgs(cobra.ExactArgs(2)),
+		fctl.WithController[*InstancesSendEventStore](NewInstancesSendEventController()),
+	)
 }

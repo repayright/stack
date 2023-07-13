@@ -42,17 +42,6 @@ func NewPaymentsConnectorsCurrencyCloudController() *PaymentsConnectorsCurrencyC
 	}
 }
 
-func NewCurrencyCloudCommand() *cobra.Command {
-	c := NewPaymentsConnectorsCurrencyCloudController()
-	return fctl.NewCommand(internal.CurrencyCloudConnector+" <login-id> <api-key>",
-		fctl.WithShortDescription("Install a Currency Cloud connector"),
-		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
-		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
-		fctl.WithController[*PaymentsConnectorsCurrencyCloudStore](c),
-	)
-}
-
 func (c *PaymentsConnectorsCurrencyCloudController) GetStore() *PaymentsConnectorsCurrencyCloudStore {
 	return c.store
 }
@@ -102,4 +91,15 @@ func (c *PaymentsConnectorsCurrencyCloudController) Render(cmd *cobra.Command, a
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' installed!", c.store.ConnectorName)
 
 	return nil
+}
+
+func NewCurrencyCloudCommand() *cobra.Command {
+	c := NewPaymentsConnectorsCurrencyCloudController()
+	return fctl.NewCommand(internal.CurrencyCloudConnector+" <login-id> <api-key>",
+		fctl.WithShortDescription("Install a Currency Cloud connector"),
+		fctl.WithArgs(cobra.ExactArgs(2)),
+		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
+		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
+		fctl.WithController[*PaymentsConnectorsCurrencyCloudStore](c),
+	)
 }

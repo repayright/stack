@@ -30,15 +30,6 @@ func NewShowController() *ShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <address>",
-		fctl.WithShortDescription("Show account"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases("sh", "s"),
-		fctl.WithController[*ShowStore](NewShowController()),
-	)
-}
-
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
@@ -111,4 +102,13 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 	fmt.Fprintln(cmd.OutOrStdout())
 
 	return fctl.PrintMetadata(cmd.OutOrStdout(), c.store.Account.Metadata)
+}
+
+func NewShowCommand() *cobra.Command {
+	return fctl.NewCommand("show <address>",
+		fctl.WithShortDescription("Show account"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithAliases("sh", "s"),
+		fctl.WithController[*ShowStore](NewShowController()),
+	)
 }

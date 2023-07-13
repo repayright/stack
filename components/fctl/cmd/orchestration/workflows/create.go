@@ -30,15 +30,6 @@ func NewWorkflowsCreateController() *WorkflowsCreateController {
 	}
 }
 
-func NewCreateCommand() *cobra.Command {
-	return fctl.NewCommand("create <file>|-",
-		fctl.WithShortDescription("Create a workflow"),
-		fctl.WithAliases("cr", "c"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*WorkflowsCreateStore](NewWorkflowsCreateController()),
-	)
-}
-
 func (c *WorkflowsCreateController) GetStore() *WorkflowsCreateStore {
 	return c.store
 }
@@ -91,4 +82,13 @@ func (c *WorkflowsCreateController) Render(cmd *cobra.Command, args []string) er
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Workflow created with ID: %s", c.store.WorkflowId)
 
 	return nil
+}
+
+func NewCreateCommand() *cobra.Command {
+	return fctl.NewCommand("create <file>|-",
+		fctl.WithShortDescription("Create a workflow"),
+		fctl.WithAliases("cr", "c"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*WorkflowsCreateStore](NewWorkflowsCreateController()),
+	)
 }

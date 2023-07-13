@@ -38,21 +38,6 @@ func NewCreditWalletController() *CreditWalletController {
 		sourceFlag:   "source",
 	}
 }
-func NewCreditWalletCommand() *cobra.Command {
-	c := NewCreditWalletController()
-	return fctl.NewCommand("credit <amount> <asset>",
-		fctl.WithShortDescription("Credit a wallets"),
-		fctl.WithAliases("cr"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithStringFlag(c.balanceFlag, "", "Balance to credit"),
-		fctl.WithStringSliceFlag(c.sourceFlag, []string{}, `Use --source account=<account> | --source wallet=id:<wallet-id>[/<balance>] | --source wallet=name:<wallet-name>[/<balance>]`),
-		internal.WithTargetingWalletByName(),
-		internal.WithTargetingWalletByID(),
-		fctl.WithController[*CreditWalletStore](c),
-	)
-}
 
 func (c *CreditWalletController) GetStore() *CreditWalletStore {
 	return c.store
@@ -147,4 +132,19 @@ func (c *CreditWalletController) Run(cmd *cobra.Command, args []string) (fctl.Re
 func (c *CreditWalletController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Wallet credited successfully!")
 	return nil
+}
+func NewCreditWalletCommand() *cobra.Command {
+	c := NewCreditWalletController()
+	return fctl.NewCommand("credit <amount> <asset>",
+		fctl.WithShortDescription("Credit a wallets"),
+		fctl.WithAliases("cr"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.ExactArgs(2)),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+		fctl.WithStringFlag(c.balanceFlag, "", "Balance to credit"),
+		fctl.WithStringSliceFlag(c.sourceFlag, []string{}, `Use --source account=<account> | --source wallet=id:<wallet-id>[/<balance>] | --source wallet=name:<wallet-name>[/<balance>]`),
+		internal.WithTargetingWalletByName(),
+		internal.WithTargetingWalletByID(),
+		fctl.WithController[*CreditWalletStore](c),
+	)
 }

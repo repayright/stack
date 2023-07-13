@@ -37,16 +37,6 @@ func NewPaymentsGetConfigController() *PaymentsGetConfigController {
 	}
 }
 
-func NewGetConfigCommand() *cobra.Command {
-	return fctl.NewCommand("get-config <connector-name>",
-		fctl.WithAliases("getconfig", "getconf", "gc", "get", "g"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithValidArgs(connectorsAvailable...),
-		fctl.WithShortDescription(fmt.Sprintf("Read a connector config (Connectors available: %s)", connectorsAvailable)),
-		fctl.WithController[*PaymentsGetConfigStore](NewPaymentsGetConfigController()),
-	)
-}
-
 func (c *PaymentsGetConfigController) GetStore() *PaymentsGetConfigStore {
 	return c.store
 }
@@ -152,4 +142,14 @@ func displayMoneycorpConfig(cmd *cobra.Command, connectorConfig *shared.Connecto
 		return err
 	}
 	return nil
+}
+
+func NewGetConfigCommand() *cobra.Command {
+	return fctl.NewCommand("get-config <connector-name>",
+		fctl.WithAliases("getconfig", "getconf", "gc", "get", "g"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithValidArgs(connectorsAvailable...),
+		fctl.WithShortDescription(fmt.Sprintf("Read a connector config (Connectors available: %s)", connectorsAvailable)),
+		fctl.WithController[*PaymentsGetConfigStore](NewPaymentsGetConfigController()),
+	)
 }

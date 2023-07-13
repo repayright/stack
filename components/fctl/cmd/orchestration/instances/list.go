@@ -43,18 +43,6 @@ func NewInstancesListController() *InstancesListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	c := NewInstancesListController()
-	return fctl.NewCommand("list",
-		fctl.WithShortDescription("List all workflows instances"),
-		fctl.WithAliases("ls", "l"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithStringFlag(c.workflowFlag, "", "Filter on workflow id"),
-		fctl.WithBoolFlag(c.runningFlag, false, "Filter on running instances"),
-		fctl.WithController[*InstancesListStore](c),
-	)
-}
-
 func (c *InstancesListController) GetStore() *InstancesListStore {
 	return c.store
 }
@@ -132,4 +120,16 @@ func (c *InstancesListController) Render(cmd *cobra.Command, args []string) erro
 	}
 
 	return nil
+}
+
+func NewListCommand() *cobra.Command {
+	c := NewInstancesListController()
+	return fctl.NewCommand("list",
+		fctl.WithShortDescription("List all workflows instances"),
+		fctl.WithAliases("ls", "l"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithStringFlag(c.workflowFlag, "", "Filter on workflow id"),
+		fctl.WithBoolFlag(c.runningFlag, false, "Filter on running instances"),
+		fctl.WithController[*InstancesListStore](c),
+	)
 }

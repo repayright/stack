@@ -30,16 +30,6 @@ func NewDeleteController() *DeleteController {
 	}
 }
 
-func NewDeleteCommand() *cobra.Command {
-	return fctl.NewCommand("delete <id>",
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithShortDescription("Delete an invitation"),
-		fctl.WithAliases("del"),
-		fctl.WithConfirmFlag(),
-		fctl.WithController[*DeleteStore](NewDeleteController()),
-	)
-}
-
 func (c *DeleteController) GetStore() *DeleteStore {
 	return c.store
 }
@@ -80,4 +70,14 @@ func (c *DeleteController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 func (c *DeleteController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Invitation %s deleted", args[0])
 	return nil
+}
+
+func NewDeleteCommand() *cobra.Command {
+	return fctl.NewCommand("delete <id>",
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithShortDescription("Delete an invitation"),
+		fctl.WithAliases("del"),
+		fctl.WithConfirmFlag(),
+		fctl.WithController[*DeleteStore](NewDeleteController()),
+	)
 }

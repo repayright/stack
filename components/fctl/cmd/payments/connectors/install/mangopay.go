@@ -40,17 +40,6 @@ func NewPaymentsConnectorsMangoPayController() *PaymentsConnectorsMangoPayContro
 	}
 }
 
-func NewMangoPayCommand() *cobra.Command {
-	c := NewPaymentsConnectorsMangoPayController()
-	return fctl.NewCommand(internal.MangoPayConnector+" <clientID> <apiKey>",
-		fctl.WithShortDescription("Install a MangoPay connector"),
-		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
-		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
-		fctl.WithController[*PaymentsConnectorsMangoPayStore](c),
-	)
-}
-
 func (c *PaymentsConnectorsMangoPayController) GetStore() *PaymentsConnectorsMangoPayStore {
 	return c.store
 }
@@ -108,4 +97,14 @@ func (c *PaymentsConnectorsMangoPayController) Render(cmd *cobra.Command, args [
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector %s installed!", c.store.ConnectorName)
 
 	return nil
+}
+func NewMangoPayCommand() *cobra.Command {
+	c := NewPaymentsConnectorsMangoPayController()
+	return fctl.NewCommand(internal.MangoPayConnector+" <clientID> <apiKey>",
+		fctl.WithShortDescription("Install a MangoPay connector"),
+		fctl.WithArgs(cobra.ExactArgs(2)),
+		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
+		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
+		fctl.WithController[*PaymentsConnectorsMangoPayStore](c),
+	)
 }

@@ -35,15 +35,6 @@ func NewServerInfoController() *ServerInfoController {
 	}
 }
 
-func NewServerInfoCommand() *cobra.Command {
-	return fctl.NewCommand("server-infos",
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithAliases("si"),
-		fctl.WithShortDescription("Read server info"),
-		fctl.WithController[*ServerInfoStore](NewServerInfoController()),
-	)
-}
-
 func (c *ServerInfoController) GetStore() *ServerInfoStore {
 	return c.store
 }
@@ -110,4 +101,13 @@ func (c *ServerInfoController) Render(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func NewServerInfoCommand() *cobra.Command {
+	return fctl.NewCommand("server-infos",
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithAliases("si"),
+		fctl.WithShortDescription("Read server info"),
+		fctl.WithController[*ServerInfoStore](NewServerInfoController()),
+	)
 }

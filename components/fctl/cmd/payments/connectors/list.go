@@ -34,14 +34,6 @@ func NewPaymentsConnectorsListController() *PaymentsConnectorsListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List all enabled connectors"),
-		fctl.WithController[*PaymentsConnectorsListStore](NewPaymentsConnectorsListController()),
-	)
-}
-
 func (c *PaymentsConnectorsListController) GetStore() *PaymentsConnectorsListStore {
 	return c.store
 }
@@ -99,4 +91,12 @@ func (c *PaymentsConnectorsListController) Render(cmd *cobra.Command, args []str
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
+}
+
+func NewListCommand() *cobra.Command {
+	return fctl.NewCommand("list",
+		fctl.WithAliases("ls", "l"),
+		fctl.WithShortDescription("List all enabled connectors"),
+		fctl.WithController[*PaymentsConnectorsListStore](NewPaymentsConnectorsListController()),
+	)
 }

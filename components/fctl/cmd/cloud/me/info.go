@@ -28,15 +28,6 @@ func NewInfoController() *InfoController {
 	}
 }
 
-func NewInfoCommand() *cobra.Command {
-	return fctl.NewCommand("info",
-		fctl.WithAliases("i", "in"),
-		fctl.WithShortDescription("Display user information"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*InfoStore](NewInfoController()),
-	)
-}
-
 func (c *InfoController) GetStore() *InfoStore {
 	return c.store
 }
@@ -73,4 +64,13 @@ func (c *InfoController) Render(cmd *cobra.Command, args []string) error {
 		WithData(tableData).
 		Render()
 
+}
+
+func NewInfoCommand() *cobra.Command {
+	return fctl.NewCommand("info",
+		fctl.WithAliases("i", "in"),
+		fctl.WithShortDescription("Display user information"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*InfoStore](NewInfoController()),
+	)
 }

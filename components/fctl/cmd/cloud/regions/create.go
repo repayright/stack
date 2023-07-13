@@ -27,15 +27,6 @@ func NewCreateController() *CreateController {
 	}
 }
 
-func NewCreateCommand() *cobra.Command {
-	return fctl.NewCommand("create [name]",
-		fctl.WithAliases("sh", "s"),
-		fctl.WithShortDescription("Show region details"),
-		fctl.WithArgs(cobra.RangeArgs(0, 1)),
-		fctl.WithController[*CreateStore](NewCreateController()),
-	)
-}
-
 func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
@@ -89,4 +80,13 @@ func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
 		"Your secret is (keep it safe, we will not be able to give it to you again): %s", c.store.Secret)
 
 	return nil
+}
+
+func NewCreateCommand() *cobra.Command {
+	return fctl.NewCommand("create [name]",
+		fctl.WithAliases("sh", "s"),
+		fctl.WithShortDescription("Show region details"),
+		fctl.WithArgs(cobra.RangeArgs(0, 1)),
+		fctl.WithController[*CreateStore](NewCreateController()),
+	)
 }

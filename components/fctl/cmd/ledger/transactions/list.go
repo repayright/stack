@@ -47,25 +47,6 @@ func NewListController() *ListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	c := NewListController()
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List transactions"),
-		fctl.WithStringFlag(c.accountFlag, "", "Filter on account"),
-		fctl.WithStringFlag(c.destinationFlag, "", "Filter on destination account"),
-		fctl.WithStringFlag(c.endTimeFlag, "", "Consider transactions before date"),
-		fctl.WithStringFlag(c.startTimeFlag, "", "Consider transactions after date"),
-		fctl.WithStringFlag(c.sourceFlag, "", "Filter on source account"),
-		fctl.WithStringFlag(c.referenceFlag, "", "Filter on reference"),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{}, "Filter transactions with metadata"),
-		fctl.WithIntFlag(c.pageSizeFlag, 5, "Page size"),
-		fctl.WithHiddenFlag(c.metadataFlag),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ListStore](c),
-	)
-}
-
 func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
@@ -171,4 +152,23 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
+}
+
+func NewListCommand() *cobra.Command {
+	c := NewListController()
+	return fctl.NewCommand("list",
+		fctl.WithAliases("ls", "l"),
+		fctl.WithShortDescription("List transactions"),
+		fctl.WithStringFlag(c.accountFlag, "", "Filter on account"),
+		fctl.WithStringFlag(c.destinationFlag, "", "Filter on destination account"),
+		fctl.WithStringFlag(c.endTimeFlag, "", "Consider transactions before date"),
+		fctl.WithStringFlag(c.startTimeFlag, "", "Consider transactions after date"),
+		fctl.WithStringFlag(c.sourceFlag, "", "Filter on source account"),
+		fctl.WithStringFlag(c.referenceFlag, "", "Filter on reference"),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{}, "Filter transactions with metadata"),
+		fctl.WithIntFlag(c.pageSizeFlag, 5, "Page size"),
+		fctl.WithHiddenFlag(c.metadataFlag),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*ListStore](c),
+	)
 }

@@ -32,16 +32,6 @@ func NewDefaultPaymentsConnectorsModulrStore() *PaymentsConnectorsModulrStore {
 	}
 }
 
-func NewPaymentsConnectorsModulrController() *PaymentsConnectorsModulrController {
-	return &PaymentsConnectorsModulrController{
-		store:                NewDefaultPaymentsConnectorsModulrStore(),
-		endpointFlag:         "endpoint",
-		defaultEndpoint:      "https://api-sandbox.modulrfinance.com",
-		pollingPeriodFlag:    "polling-period",
-		defaultpollingPeriod: "2m",
-	}
-}
-
 func NewModulrCommand() *cobra.Command {
 	c := NewPaymentsConnectorsModulrController()
 	return fctl.NewCommand(internal.ModulrConnector+" <api-key> <api-secret>",
@@ -101,4 +91,14 @@ func (c *PaymentsConnectorsModulrController) Render(cmd *cobra.Command, args []s
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' installed!", c.store.ConnectorName)
 
 	return nil
+}
+
+func NewPaymentsConnectorsModulrController() *PaymentsConnectorsModulrController {
+	return &PaymentsConnectorsModulrController{
+		store:                NewDefaultPaymentsConnectorsModulrStore(),
+		endpointFlag:         "endpoint",
+		defaultEndpoint:      "https://api-sandbox.modulrfinance.com",
+		pollingPeriodFlag:    "polling-period",
+		defaultpollingPeriod: "2m",
+	}
 }

@@ -29,15 +29,6 @@ func NewPortalController() *PortalController {
 	}
 }
 
-func NewPortalCommand() *cobra.Command {
-	return fctl.NewCommand("portal",
-		fctl.WithAliases("p"),
-		fctl.WithShortDescription("Access to Billing Portal"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*PortalStore](NewPortalController()),
-	)
-}
-
 func (c *PortalController) GetStore() *PortalStore {
 	return c.store
 }
@@ -90,4 +81,13 @@ func (c *PortalController) Render(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func NewPortalCommand() *cobra.Command {
+	return fctl.NewCommand("portal",
+		fctl.WithAliases("p"),
+		fctl.WithShortDescription("Access to Billing Portal"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*PortalStore](NewPortalController()),
+	)
 }
