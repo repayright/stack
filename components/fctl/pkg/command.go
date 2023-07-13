@@ -253,9 +253,9 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 
 	flags.Bool(InsecureTlsFlag, false, "insecure TLS")
 	flags.Bool(TelemetryFlag, false, "enable telemetry")
+	flags.Bool(DebugFlag, false, "debug mode")
 	flags.String(ProfileFlag, "", "config profile to use")
 	flags.String(FileFlag, fmt.Sprintf("%s/.formance/fctl.config", homedir), "config file to use")
-	flags.Bool(DebugFlag, false, "debug mode")
 	flags.String(outputFlag, "plain", "output format (plain, json)")
 
 	return flags
@@ -489,6 +489,9 @@ func NewCommand(use string, opts ...CommandOption) *cobra.Command {
 			}
 		},
 	}
+
+	cmd.Flags().AddGoFlagSet(WithGlobalFlags(nil))
+
 	for _, opt := range opts {
 		opt.apply(cmd)
 	}
