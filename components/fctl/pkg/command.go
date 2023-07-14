@@ -258,12 +258,14 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 func WithController[T any](c Controller[T]) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
-			if c.GetContext() == nil {
-				c.SetContext(cmd.Context())
+			config := c.GetConfig()
+
+			if config.GetContext() == nil {
+				config.SetContext(cmd.Context())
 			}
 
 			if len(args) > 0 {
-				c.SetArgs(args)
+				config.SetArgs(args)
 			}
 
 			return nil
@@ -282,7 +284,9 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 				return err
 			}
 
-			err = WithRender(c.GetFlags(), args, c, renderable)
+			config := c.GetConfig()
+
+			err = WithRender(config.GetFlags(), args, c, renderable)
 
 			if err != nil {
 				return err

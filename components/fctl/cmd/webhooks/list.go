@@ -1,10 +1,8 @@
 package webhooks
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"time"
@@ -32,71 +30,47 @@ func NewDefaultListWebhookStore() *ListWebhookStore {
 	}
 }
 
-type ListWebhookControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
-}
-
-func NewListWebhookControllerConfig() *ListWebhookControllerConfig {
+func NewListWebhookControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useListWebhook, flag.ExitOnError)
-	fctl.WithGlobalFlags(flags)
 
-	return &ListWebhookControllerConfig{
-		context:     nil,
-		use:         useListWebhook,
-		description: descriptionListWebhook,
-		aliases: []string{
-			"ls", "l",
+	return fctl.NewControllerConfig(
+		useListWebhook,
+		descriptionListWebhook,
+		[]string{
+			"list",
+			"ls",
 		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*ListWebhookStore] = (*ListWebhookController)(nil)
 
 type ListWebhookController struct {
 	store  *ListWebhookStore
-	config ListWebhookControllerConfig
+	config fctl.ControllerConfig
 }
 
-func NewListWebhookController(config ListWebhookControllerConfig) *ListWebhookController {
+func NewListWebhookController(config fctl.ControllerConfig) *ListWebhookController {
 	return &ListWebhookController{
 		store:  NewDefaultListWebhookStore(),
 		config: config,
 	}
 }
 
-func (c *ListWebhookController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *ListWebhookController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *ListWebhookController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *ListWebhookController) GetStore() *ListWebhookStore {
 	return c.store
 }
 
-func (c *ListWebhookController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *ListWebhookController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *ListWebhookController) Run() (fctl.Renderable, error) {
 
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -141,7 +115,7 @@ func (c *ListWebhookController) Render() error {
 	// TODO: WebhooksConfig is missing ?
 	if err := pterm.DefaultTable.
 		WithHasHeader(true).
-		WithWriter(c.config.out).
+		WithWriter(c.config.GetOut()).
 		WithData(
 			fctl.Prepend(
 				fctl.Map(c.store.Webhooks,
@@ -167,9 +141,9 @@ func NewListCommand() *cobra.Command {
 
 	config := NewListWebhookControllerConfig()
 
-	return fctl.NewCommand(config.use,
-		fctl.WithShortDescription(config.description),
-		fctl.WithAliases(config.aliases...),
+	return fctl.NewCommand(config.GetUse(),
+		fctl.WithShortDescription(config.GetDescription()),
+		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithController[*ListWebhookStore](NewListWebhookController(*config)),
 	)
 }

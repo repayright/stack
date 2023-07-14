@@ -1,10 +1,8 @@
 package webhooks
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -31,78 +29,55 @@ func NewDefaultDeleteWebhookStore() *DeleteWebhookStore {
 	}
 }
 
-type DeleteWebhookControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
-	fctlConfig  *fctl.Config
-}
-
-func NewDeleteWebhookControllerConfig() *DeleteWebhookControllerConfig {
+func NewDeleteWebhookControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useDeleteWebhook, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
-	fctl.WithGlobalFlags(flags)
 
-	return &DeleteWebhookControllerConfig{
-		context:     nil,
-		use:         useDeleteWebhook,
-		description: descriptionDeleteWebhook,
-		aliases: []string{
-			"rm", "del", "d",
+	return fctl.NewControllerConfig(
+		useDeleteWebhook,
+		descriptionDeleteWebhook,
+		[]string{
+			"delete",
+			"del",
 		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
+		os.Stdout,
+		flags,
+	)
+
 }
 
 var _ fctl.Controller[*DeleteWebhookStore] = (*DeleteWebhookController)(nil)
 
 type DeleteWebhookController struct {
-	store  *DeleteWebhookStore
-	config DeleteWebhookControllerConfig
+	store      *DeleteWebhookStore
+	config     fctl.ControllerConfig
+	fctlConfig *fctl.Config
 }
 
-func NewDeleteWebhookController(config DeleteWebhookControllerConfig) *DeleteWebhookController {
+func NewDeleteWebhookController(config fctl.ControllerConfig) *DeleteWebhookController {
 	return &DeleteWebhookController{
 		store:  NewDefaultDeleteWebhookStore(),
 		config: config,
 	}
 }
 
-func (c *DeleteWebhookController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *DeleteWebhookController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *DeleteWebhookController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *DeleteWebhookController) GetStore() *DeleteWebhookStore {
 	return c.store
 }
 
-func (c *DeleteWebhookController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *DeleteWebhookController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *DeleteWebhookController) Run() (fctl.Renderable, error) {
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "fctl.GetConfig")
 	}
-	c.config.fctlConfig = cfg
+	c.fctlConfig = cfg
 
 	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
@@ -123,12 +98,12 @@ func (c *DeleteWebhookController) Run() (fctl.Renderable, error) {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	if len(c.config.args) == 0 {
+	if len(c.config.GetArgs()) == 0 {
 		return nil, errors.New("missing config id")
 	}
 
 	request := operations.DeleteConfigRequest{
-		ID: c.config.args[0],
+		ID: c.config.GetArgs()[0],
 	}
 	response, err := webhookClient.Webhooks.DeleteConfig(ctx, request)
 	if err != nil {
@@ -155,7 +130,7 @@ func (c *DeleteWebhookController) Run() (fctl.Renderable, error) {
 
 func (c *DeleteWebhookController) Render() error {
 	if !c.store.Success {
-		pterm.Warning.WithShowLineNumber(false).Printfln("Config %s not found", c.config.args[0])
+		pterm.Warning.WithShowLineNumber(false).Printfln("Config %s not found", c.config.GetArgs()[0])
 		return nil
 	}
 
@@ -164,18 +139,18 @@ func (c *DeleteWebhookController) Render() error {
 		return nil
 	}
 
-	pterm.Success.WithWriter(c.config.out).Printfln("Config deleted successfully")
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Config deleted successfully")
 
 	return nil
 }
 
 func NewDeleteCommand() *cobra.Command {
 	config := NewDeleteWebhookControllerConfig()
-	return fctl.NewCommand(config.use,
-		fctl.WithShortDescription(config.description),
-		fctl.WithAliases(config.aliases...),
+	return fctl.NewCommand(config.GetUse(),
+		fctl.WithShortDescription(config.GetDescription()),
+		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithGoFlagSet(config.flags),
+		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*DeleteWebhookStore](NewDeleteWebhookController(*config)),
 	)
 }

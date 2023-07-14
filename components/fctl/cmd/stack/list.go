@@ -1,10 +1,8 @@
 package stack
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"time"
 
@@ -39,34 +37,20 @@ func NewDefaultStackListStore() *StackListStore {
 	}
 }
 
-type StackListControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
-}
-
-func NewStackListControllerConfig() *StackListControllerConfig {
+func NewStackListControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 	flags.Bool(deletedFlag, false, "Show deleted stacks")
 
-	fctl.WithGlobalFlags(flags)
-
-	return &StackListControllerConfig{
-		context:     nil,
-		use:         useList,
-		description: description,
-		aliases: []string{
+	return fctl.NewControllerConfig(
+		useList,
+		description,
+		[]string{
+			"list",
 			"ls",
-			"l",
 		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*StackListStore] = (*StackListController)(nil)
@@ -74,39 +58,27 @@ var _ fctl.Controller[*StackListStore] = (*StackListController)(nil)
 type StackListController struct {
 	store   *StackListStore
 	profile *fctl.Profile
-	config  StackListControllerConfig
+	config  fctl.ControllerConfig
 }
 
-func NewStackListController(config StackListControllerConfig) *StackListController {
+func NewStackListController(config fctl.ControllerConfig) *StackListController {
 	return &StackListController{
 		store:  NewDefaultStackListStore(),
 		config: config,
 	}
 }
 
-func (c *StackListController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *StackListController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *StackListController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *StackListController) GetStore() *StackListStore {
 	return c.store
 }
 
-func (c *StackListController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *StackListController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *StackListController) Run() (fctl.Renderable, error) {
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -169,7 +141,7 @@ func (c *StackListController) Render() error {
 			stack.Dashboard,
 			stack.RegionID,
 		}
-		if fctl.GetBool(c.config.flags, deletedFlag) {
+		if fctl.GetBool(c.config.GetFlags(), deletedFlag) {
 			if stack.DeletedAt != nil {
 				data = append(data, *stack.DeletedAt)
 			} else {
@@ -180,7 +152,7 @@ func (c *StackListController) Render() error {
 	})
 
 	headers := []string{"ID", "Name", "Dashboard", "Region"}
-	if fctl.GetBool(c.config.flags, deletedFlag) {
+	if fctl.GetBool(c.config.GetFlags(), deletedFlag) {
 		headers = append(headers, "Deleted at")
 	}
 
@@ -196,13 +168,10 @@ func (c *StackListController) Render() error {
 func NewListCommand() *cobra.Command {
 	config := NewStackListControllerConfig()
 
-	options := []fctl.CommandOption{
-		fctl.WithAliases(config.aliases...),
-		fctl.WithShortDescription(config.description),
-		fctl.WithArgs(cobra.ExactArgs(0)), //////////////// <--- This is used by cobra to validate the number of arguments passed to the command
-		fctl.WithGoFlagSet(config.flags),
+	return fctl.NewMembershipCommand(config.GetUse(), fctl.WithAliases(config.GetAliases()...),
+		fctl.WithShortDescription(config.GetDescription()),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*StackListStore](NewStackListController(*config)),
-	}
-
-	return fctl.NewMembershipCommand(config.use, options...)
+	)
 }

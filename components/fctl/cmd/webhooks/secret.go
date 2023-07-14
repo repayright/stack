@@ -1,10 +1,8 @@
 package webhooks
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -33,73 +31,48 @@ func NewDefaultChangeSecretStore() *ChangeSecretStore {
 	}
 }
 
-type ChangeSecretControllerConfig struct {
-	context          context.Context
-	use              string
-	shortDescription string
-	description      string
-	aliases          []string
-	out              io.Writer
-	flags            *flag.FlagSet
-	args             []string
-}
-
-func NewChangeSecretControllerConfig() *ChangeSecretControllerConfig {
+func NewChangeSecretControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useChangeSecret, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
-	fctl.WithGlobalFlags(flags)
 
-	return &ChangeSecretControllerConfig{
-		context:          nil,
-		use:              useChangeSecret,
-		shortDescription: shortDescriptionChangeSecret,
-		description:      descriptionChangeSecret,
-		aliases: []string{
-			"cs",
-		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
+	c := fctl.NewControllerConfig(
+		useChangeSecret,
+		descriptionChangeSecret,
+		[]string{"cs"},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(shortDescriptionChangeSecret)
+
+	return c
 }
 
 var _ fctl.Controller[*ChangeSecretStore] = (*ChangeSecretWebhookController)(nil)
 
 type ChangeSecretWebhookController struct {
 	store  *ChangeSecretStore
-	config ChangeSecretControllerConfig
+	config fctl.ControllerConfig
 }
 
-func NewChangeSecretWebhookController(config ChangeSecretControllerConfig) *ChangeSecretWebhookController {
+func NewChangeSecretWebhookController(config fctl.ControllerConfig) *ChangeSecretWebhookController {
 	return &ChangeSecretWebhookController{
 		store:  NewDefaultChangeSecretStore(),
 		config: config,
 	}
 }
 
-func (c *ChangeSecretWebhookController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *ChangeSecretWebhookController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *ChangeSecretWebhookController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *ChangeSecretWebhookController) GetStore() *ChangeSecretStore {
 	return c.store
 }
 
-func (c *ChangeSecretWebhookController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *ChangeSecretWebhookController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *ChangeSecretWebhookController) Run() (fctl.Renderable, error) {
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -127,12 +100,12 @@ func (c *ChangeSecretWebhookController) Run() (fctl.Renderable, error) {
 
 	secret := ""
 
-	if len(c.config.args) == 0 {
+	if len(c.config.GetArgs()) == 0 {
 		return nil, fmt.Errorf("missing config-id")
 	}
 
-	if len(c.config.args) > 1 {
-		secret = c.config.args[1]
+	if len(c.config.GetArgs()) > 1 {
+		secret = c.config.GetArgs()[1]
 	}
 
 	response, err := client.Webhooks.
@@ -140,7 +113,7 @@ func (c *ChangeSecretWebhookController) Run() (fctl.Renderable, error) {
 			ConfigChangeSecret: &shared.ConfigChangeSecret{
 				Secret: secret,
 			},
-			ID: c.config.args[0],
+			ID: c.config.GetArgs()[0],
 		})
 	if err != nil {
 		return nil, errors.Wrap(err, "changing secret")
@@ -161,7 +134,7 @@ func (c *ChangeSecretWebhookController) Run() (fctl.Renderable, error) {
 }
 
 func (c *ChangeSecretWebhookController) Render() error {
-	pterm.Success.WithWriter(c.config.out).Printfln(
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln(
 		"Config '%s' updated successfully with new secret", c.store.ID)
 	return nil
 }
@@ -170,12 +143,12 @@ func NewChangeSecretCommand() *cobra.Command {
 
 	config := NewChangeSecretControllerConfig()
 
-	return fctl.NewCommand(config.use,
-		fctl.WithShortDescription(config.shortDescription),
-		fctl.WithDescription(config.description),
-		fctl.WithAliases(config.aliases...),
+	return fctl.NewCommand(config.GetUse(),
+		fctl.WithShortDescription(*config.GetShortDescription()),
+		fctl.WithDescription(config.GetDescription()),
+		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
-		fctl.WithGoFlagSet(config.flags),
+		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*ChangeSecretStore](NewChangeSecretWebhookController(*config)),
 	)
 }

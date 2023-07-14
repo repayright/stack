@@ -1,10 +1,8 @@
 package stack
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 
@@ -35,75 +33,48 @@ func NewDefaultStackShowStore() *StackShowStore {
 	}
 }
 
-type StackShowControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
-	fctlConfig  *fctl.Config
-}
-
-func NewStackShowControllerConfig() *StackShowControllerConfig {
+func NewStackShowControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 	flags.String(internal.StackNameFlag, "", "Stack name")
 
-	fctl.WithGlobalFlags(flags)
-
-	return &StackShowControllerConfig{
-		context:     nil,
-		use:         useShow,
-		description: descriptionShow,
-		aliases: []string{
+	return fctl.NewControllerConfig(
+		useShow,
+		descriptionShow,
+		[]string{
+			"show",
 			"sh",
-			"s",
 		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*StackShowStore] = (*StackShowController)(nil)
 
 type StackShowController struct {
-	store  *StackShowStore
-	config StackShowControllerConfig
+	store      *StackShowStore
+	config     fctl.ControllerConfig
+	fctlConfig *fctl.Config
 }
 
-func NewStackShowController(config StackShowControllerConfig) *StackShowController {
+func NewStackShowController(config fctl.ControllerConfig) *StackShowController {
 	return &StackShowController{
 		store:  NewDefaultStackShowStore(),
 		config: config,
 	}
 }
 
-func (c *StackShowController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *StackShowController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *StackShowController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *StackShowController) GetStore() *StackShowStore {
 	return c.store
 }
 
-func (c *StackShowController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
-
+func (c *StackShowController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *StackShowController) Run() (fctl.Renderable, error) {
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -120,11 +91,11 @@ func (c *StackShowController) Run() (fctl.Renderable, error) {
 	}
 
 	var stack *membershipclient.Stack
-	if len(c.config.args) == 1 {
+	if len(c.config.GetArgs()) == 1 {
 		if fctl.GetString(flags, internal.StackNameFlag) != "" {
 			return nil, errors.New("need either an id of a name specified using --name flag")
 		}
-		stackResponse, httpResponse, err := apiClient.DefaultApi.ReadStack(ctx, organization, c.config.args[0]).Execute()
+		stackResponse, httpResponse, err := apiClient.DefaultApi.ReadStack(ctx, organization, c.config.GetArgs()[0]).Execute()
 		if err != nil {
 			if httpResponse.StatusCode == http.StatusNotFound {
 				return nil, errStackNotFound
@@ -168,23 +139,23 @@ func (c *StackShowController) Run() (fctl.Renderable, error) {
 
 	c.store.Stack = stack
 	c.store.Versions = versions.GetVersionsResponse
-	c.config.fctlConfig = cfg
+	c.fctlConfig = cfg
 
 	return c, nil
 
 }
 
 func (c *StackShowController) Render() error {
-	return internal.PrintStackInformation(c.config.out, fctl.GetCurrentProfile(c.config.flags, c.config.fctlConfig), c.store.Stack, c.store.Versions)
+	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetFlags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 }
 
 func NewShowCommand() *cobra.Command {
 	config := NewStackShowControllerConfig()
-	return fctl.NewMembershipCommand(config.use,
-		fctl.WithAliases(config.aliases...),
-		fctl.WithShortDescription(config.description),
+	return fctl.NewMembershipCommand(config.GetUse(),
+		fctl.WithAliases(config.GetAliases()...),
+		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
-		fctl.WithGoFlagSet(config.flags),
+		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*StackShowStore](NewStackShowController(*config)),
 	)
 }

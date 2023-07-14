@@ -1,10 +1,8 @@
 package login
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -44,69 +42,44 @@ func NewDefaultLoginStore() *LoginStore {
 	}
 }
 
-type LoginControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
-}
-
-func NewLoginControllerConfig() *LoginControllerConfig {
+func NewLoginControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useLogin, flag.ExitOnError)
 	flags.String(fctl.MembershipURIFlag, "", "service url")
-	fctl.WithGlobalFlags(flags)
 
-	return &LoginControllerConfig{
-		context:     nil,
-		use:         useLogin,
-		description: descriptionLogin,
-		aliases:     []string{},
-		out:         os.Stdout,
-		flags:       flags,
-		args:        []string{},
-	}
+	return fctl.NewControllerConfig(
+		useLogin,
+		descriptionLogin,
+		[]string{},
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*LoginStore] = (*LoginController)(nil)
 
 type LoginController struct {
 	store  *LoginStore
-	config LoginControllerConfig
+	config fctl.ControllerConfig
 }
 
-func NewLoginController(config LoginControllerConfig) *LoginController {
+func NewLoginController(config fctl.ControllerConfig) *LoginController {
 	return &LoginController{
 		store:  NewDefaultLoginStore(),
 		config: config,
 	}
 }
 
-func (c *LoginController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *LoginController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *LoginController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *LoginController) GetStore() *LoginStore {
 	return c.store
 }
 
-func (c *LoginController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *LoginController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *LoginController) Run() (fctl.Renderable, error) {
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -162,7 +135,7 @@ func (c *LoginController) Render() error {
 	}
 
 	if c.store.Success {
-		pterm.Success.WithWriter(c.config.out).Printfln("Logged!")
+		pterm.Success.WithWriter(c.config.GetOut()).Printfln("Logged!")
 	}
 
 	return nil
@@ -171,10 +144,10 @@ func (c *LoginController) Render() error {
 
 func NewCommand() *cobra.Command {
 	config := NewLoginControllerConfig()
-	return fctl.NewCommand(config.use,
-		fctl.WithShortDescription(config.description),
+	return fctl.NewCommand(config.GetUse(),
+		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithGoFlagSet(config.flags),
+		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*LoginStore](NewLoginController(*config)),
 	)
 }
