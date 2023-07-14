@@ -1,7 +1,9 @@
 package wallets
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
@@ -13,17 +15,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useDebitWallet         = "debit <amount> <asset>"
+	descriptionDebitWallet = "Debit a wallet"
+	pendingFlag            = "pending"
+	metadataFlag           = "metadata"
+	descriptionFlag        = "description"
+	balanceFlag            = "balance"
+	destinationFlag        = "destination"
+)
+
 type DebitWalletStore struct {
 	HoldID  *string `json:"holdId"`
 	Success bool    `json:"success"`
 }
 type DebitWalletController struct {
-	store           *DebitWalletStore
-	pendingFlag     string
-	metadataFlag    string
-	descriptionFlag string
-	balanceFlag     string
-	destinationFlag string
+	store  *DebitWalletStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*DebitWalletStore] = (*DebitWalletController)(nil)
@@ -34,15 +42,36 @@ func NewDefaultDebitWalletStore() *DebitWalletStore {
 		Success: false,
 	}
 }
+func NewDebitConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useDebitWallet, flag.ExitOnError)
+	flags.String(descriptionFlag, "", "Debit description")
+	flags.String(pendingFlag, "", "Create a pending debit")
+	flags.String(balanceFlag, "", "Balance to debit")
+	flags.String(destinationFlag, "",
+		`Use --destination account=<account> | --destination wallet=id:<wallet-id>[/<balance>] | --destination wallet=name:<wallet-name>[/<balance>]`)
+	fctl.WithMetadataFlag(flags)
+	fctl.WithConfirmFlag(flags)
+	internal.WithTargetingWalletByName(flags)
+	internal.WithTargetingWalletByID(flags)
 
-func NewDebitWalletController() *DebitWalletController {
+	c := fctl.NewControllerConfig(
+		useDebitWallet,
+		descriptionDebitWallet,
+		[]string{
+			"deb",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(descriptionDebitWallet)
+
+	return c
+}
+func NewDebitWalletController(config fctl.ControllerConfig) *DebitWalletController {
 	return &DebitWalletController{
-		store:           NewDefaultDebitWalletStore(),
-		pendingFlag:     "pending",
-		metadataFlag:    "metadata",
-		descriptionFlag: "description",
-		balanceFlag:     "balance",
-		destinationFlag: "destination",
+		store:  NewDefaultDebitWalletStore(),
+		config: config,
 	}
 }
 
@@ -50,47 +79,56 @@ func (c *DebitWalletController) GetStore() *DebitWalletStore {
 	return c.store
 }
 
-func (c *DebitWalletController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *DebitWalletController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *DebitWalletController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "retrieving config")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to debit a wallets") {
+	if !fctl.CheckStackApprobation(flags, stack, "You are about to debit a wallets") {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	pending := fctl.GetBool(cmd, c.pendingFlag)
+	pending := fctl.GetBool(flags, pendingFlag)
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(cmd, c.metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, metadataFlag))
 	if err != nil {
 		return nil, err
 	}
 
-	amountStr := args[0]
-	asset := args[1]
-	walletID, err := internal.RequireWalletID(cmd, client)
+	if len(c.config.GetArgs()) < 2 {
+		return nil, errors.New("missing amount and asset")
+	}
+
+	amountStr := c.config.GetArgs()[0]
+	asset := c.config.GetArgs()[1]
+	walletID, err := internal.RequireWalletID(flags, ctx, client)
 	if err != nil {
 		return nil, err
 	}
 
-	description := fctl.GetString(cmd, c.descriptionFlag)
+	description := fctl.GetString(flags, descriptionFlag)
 
 	amount, err := strconv.ParseInt(amountStr, 10, 32)
 	if err != nil {
@@ -98,14 +136,14 @@ func (c *DebitWalletController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	}
 
 	var destination *shared.Subject
-	if destinationStr := fctl.GetString(cmd, c.destinationFlag); destinationStr != "" {
-		destination, err = internal.ParseSubject(destinationStr, cmd, client)
+	if destinationStr := fctl.GetString(flags, destinationFlag); destinationStr != "" {
+		destination, err = internal.ParseSubject(destinationStr, flags, ctx, client)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	response, err := client.Wallets.DebitWallet(cmd.Context(), operations.DebitWalletRequest{
+	response, err := client.Wallets.DebitWallet(ctx, operations.DebitWalletRequest{
 		DebitWalletRequest: &shared.DebitWalletRequest{
 			Amount: shared.Monetary{
 				Asset:  asset,
@@ -115,7 +153,7 @@ func (c *DebitWalletController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 			Metadata:    metadata,
 			Description: &description,
 			Destination: destination,
-			Balances:    fctl.GetStringSlice(cmd, c.balanceFlag),
+			Balances:    fctl.GetStringSlice(flags, balanceFlag),
 		},
 		ID: walletID,
 	})
@@ -140,11 +178,11 @@ func (c *DebitWalletController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-func (c *DebitWalletController) Render(cmd *cobra.Command, args []string) error {
+func (c *DebitWalletController) Render() error {
 	if c.store.HoldID != nil && *c.store.HoldID != "" {
-		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Wallet debited successfully with hold id '%s'!", *c.store.HoldID)
+		pterm.Success.WithWriter(c.config.GetOut()).Printfln("Wallet debited successfully with hold id '%s'!", *c.store.HoldID)
 	} else {
-		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Wallet debited successfully!")
+		pterm.Success.WithWriter(c.config.GetOut()).Printfln("Wallet debited successfully!")
 	}
 
 	return nil
@@ -152,20 +190,12 @@ func (c *DebitWalletController) Render(cmd *cobra.Command, args []string) error 
 }
 
 func NewDebitWalletCommand() *cobra.Command {
-	c := NewDebitWalletController()
-	return fctl.NewCommand("debit <amount> <asset>",
-		fctl.WithShortDescription("Debit a wallet"),
-		fctl.WithAliases("deb"),
-		fctl.WithConfirmFlag(),
+	c := NewDebitConfig()
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithShortDescription(*c.GetShortDescription()),
+		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.RangeArgs(2, 3)),
-		fctl.WithStringFlag(c.descriptionFlag, "", "Debit description"),
-		fctl.WithBoolFlag(c.pendingFlag, false, "Create a pending debit"),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithStringSliceFlag(c.balanceFlag, []string{""}, "Balance to debit"),
-		fctl.WithStringFlag(c.destinationFlag, "",
-			`Use --destination account=<account> | --destination wallet=id:<wallet-id>[/<balance>] | --destination wallet=name:<wallet-name>[/<balance>]`),
-		internal.WithTargetingWalletByName(),
-		internal.WithTargetingWalletByID(),
-		fctl.WithController[*DebitWalletStore](c),
+		fctl.WithGoFlagSet(c.GetFlags()),
+		fctl.WithController[*DebitWalletStore](NewDebitWalletController(*c)),
 	)
 }
