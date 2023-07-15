@@ -1,12 +1,18 @@
 package ui
 
 import (
+	"flag"
 	"fmt"
-	"os/exec"
-	"runtime"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/spf13/cobra"
+)
+
+const (
+	useUI              = "ui"
+	shortDescriptionUI = "Open UI"
+	descriptionUI      = "Open UI in browser (if available), otherwise print the url to the console."
 )
 
 type UiStruct struct {
@@ -15,7 +21,8 @@ type UiStruct struct {
 }
 
 type UiController struct {
-	store *UiStruct
+	store  *UiStruct
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*UiStruct] = (*UiController)(nil)
@@ -26,65 +33,69 @@ func NewDefaultUiStore() *UiStruct {
 		FoundBrowser: false,
 	}
 }
+func NewUiConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useUI, flag.ExitOnError)
 
-func NewUiController() *UiController {
-	return &UiController{
-		store: NewDefaultUiStore(),
-	}
-}
-
-func openUrl(url string) error {
-	var (
-		cmd  string
-		args []string
+	c := fctl.NewControllerConfig(
+		useUI,
+		descriptionUI,
+		[]string{},
+		os.Stdout,
+		flags,
 	)
 
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
+	c.SetShortDescription(shortDescriptionUI)
+
+	return c
 }
+
+func NewUiController(config fctl.ControllerConfig) *UiController {
+	return &UiController{
+		store:  NewDefaultUiStore(),
+		config: config,
+	}
+}
+
 func (c *UiController) GetStore() *UiStruct {
 	return c.store
 }
 
-func (c *UiController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *UiController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *UiController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organization, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organization)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organization)
 	if err != nil {
 		return nil, err
 	}
 
-	profile := fctl.GetCurrentProfile(cmd, cfg)
+	profile := fctl.GetCurrentProfile(flags, cfg)
 	stackUrl := profile.ServicesBaseUrl(stack)
 
 	c.store.UIUrl = stackUrl.String()
 
-	if err := openUrl(c.store.UIUrl); err != nil {
+	if err := OpenUrl(c.store.UIUrl); err != nil {
 		c.store.FoundBrowser = true
 	}
 
 	return c, nil
 }
 
-func (c *UiController) Render(cmd *cobra.Command, args []string) error {
+func (c *UiController) Render() error {
 
 	fmt.Println("Opening url: ", c.store.UIUrl)
 
@@ -92,9 +103,10 @@ func (c *UiController) Render(cmd *cobra.Command, args []string) error {
 }
 
 func NewCommand() *cobra.Command {
-	return fctl.NewStackCommand("ui",
-		fctl.WithShortDescription("Open UI"),
+	config := NewUiConfig()
+	return fctl.NewStackCommand(useUI,
+		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*UiStruct](NewUiController()),
+		fctl.WithController[*UiStruct](NewUiController(*config)),
 	)
 }
