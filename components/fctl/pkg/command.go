@@ -264,6 +264,11 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 
 func WithController[T any](c Controller[T]) CommandOptionFn {
 	return func(cmd *cobra.Command) {
+		// config := c.GetConfig()
+
+		// cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
+		// cmd.Flags().AddGoFlagSet(config.GetFlags())
+
 		cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 			config := c.GetConfig()
 
@@ -305,7 +310,7 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 }
 func WithRender[T any](flags *flag.FlagSet, args []string, c Controller[T], r Renderable) error {
 	flag := GetString(flags, OutputFlag)
-
+	fmt.Println(flag)
 	switch flag {
 	case "json":
 		// Inject into export struct

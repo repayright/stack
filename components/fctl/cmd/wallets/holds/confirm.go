@@ -133,7 +133,6 @@ func NewConfirmCommand() *cobra.Command {
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
-		fctl.WithGoFlagSet(c.GetFlags()),
 		fctl.WithController[*ConfirmStore](NewConfirmController(*c)),
 	)
 }

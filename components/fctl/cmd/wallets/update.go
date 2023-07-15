@@ -137,7 +137,6 @@ func NewUpdateCommand() *cobra.Command {
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithGoFlagSet(c.GetFlags()),
 		fctl.WithController[*UpdateStore](NewUpdateController(*c)),
 	)
 }
