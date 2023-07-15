@@ -148,7 +148,6 @@ func NewDeleteCommand() *cobra.Command {
 	config := NewDeleteWebhookControllerConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*DeleteWebhookStore](NewDeleteWebhookController(*config)),
 	)

@@ -194,7 +194,6 @@ func NewDebitWalletCommand() *cobra.Command {
 	c := NewDebitConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(*c.GetShortDescription()),
-		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.RangeArgs(2, 3)),
 		fctl.WithController[*DebitWalletStore](NewDebitWalletController(*c)),
 	)

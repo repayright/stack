@@ -124,7 +124,6 @@ func NewActivateCommand() *cobra.Command {
 	config := NewActivateConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*ActivateStore](NewActivateController(*config)),
 	)

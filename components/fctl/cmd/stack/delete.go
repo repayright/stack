@@ -140,7 +140,6 @@ func NewDeleteCommand() *cobra.Command {
 	config := NewStackDeleteControllerConfig()
 	return fctl.NewMembershipCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
 		fctl.WithController[*DeletedStackStore](NewStackDeleteController(*config)),
 	)

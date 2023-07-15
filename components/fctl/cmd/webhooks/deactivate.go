@@ -134,7 +134,6 @@ func NewDeactivateCommand() *cobra.Command {
 
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*DesactivateWebhookStore](NewDesactivateWebhookController(*config)),
 	)

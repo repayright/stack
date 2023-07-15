@@ -136,7 +136,6 @@ func NewCreateCommand() *cobra.Command {
 	config := NewCreateConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.MinimumNArgs(2)),
 		fctl.WithController[*CreateStore](NewCreateWebhookController(*config)),
 	)
