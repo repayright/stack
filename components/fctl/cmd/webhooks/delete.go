@@ -70,7 +70,7 @@ func (c *DeleteWebhookController) GetConfig() fctl.ControllerConfig {
 }
 
 func (c *DeleteWebhookController) Run() (fctl.Renderable, error) {
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)

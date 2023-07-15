@@ -1,7 +1,9 @@
 package holds
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal/views"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -11,11 +13,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useShowHold              = "show <hold-id>"
+	shortDescriptionShowHold = "Show a hold"
+)
+
 type ShowStore struct {
 	Hold shared.ExpandedDebitHold `json:"hold"`
 }
 type ShowController struct {
-	store *ShowStore
+	store  *ShowStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
@@ -23,51 +31,71 @@ var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
 func NewDefaultShowStore() *ShowStore {
 	return &ShowStore{}
 }
+func NewShowConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useShowHold, flag.ExitOnError)
 
-func NewShowController() *ShowController {
-	return &ShowController{
-		store: NewDefaultShowStore(),
-	}
-}
-
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <hold-id>",
-		fctl.WithShortDescription("Show a hold"),
-		fctl.WithAliases("sh"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*ShowStore](NewShowController()),
+	c := fctl.NewControllerConfig(
+		useShowHold,
+		shortDescriptionShowHold,
+		[]string{
+			"sh",
+		},
+		os.Stdout,
+		flags,
 	)
+
+	c.SetShortDescription(shortDescriptionShowHold)
+
+	return c
+}
+func NewShowController(config fctl.ControllerConfig) *ShowController {
+	return &ShowController{
+		store:  NewDefaultShowStore(),
+		config: config,
+	}
 }
 
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ShowController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *ShowController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "retrieving config")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	request := operations.GetHoldRequest{
-		HoldID: args[0],
+	if len(c.config.GetArgs()) != 1 {
+		return nil, fmt.Errorf("expected 1 argument, got %d", len(c.config.GetArgs()))
 	}
-	response, err := client.Wallets.GetHold(cmd.Context(), request)
+
+	request := operations.GetHoldRequest{
+		HoldID: c.config.GetArgs()[0],
+	}
+	response, err := client.Wallets.GetHold(ctx, request)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting hold")
 	}
@@ -85,8 +113,20 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *ShowController) Render() error {
 
-	return views.PrintHold(cmd.OutOrStdout(), c.store.Hold)
+	return views.PrintHold(c.config.GetOut(), c.store.Hold)
 
+}
+func NewShowCommand() *cobra.Command {
+
+	c := NewShowConfig()
+
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithShortDescription(c.GetDescription()),
+		fctl.WithAliases(c.GetAliases()...),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithGoFlagSet(c.GetFlags()),
+		fctl.WithController[*ShowStore](NewShowController(*c)),
+	)
 }

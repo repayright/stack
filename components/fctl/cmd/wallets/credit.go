@@ -74,7 +74,7 @@ func (c *CreditWalletController) GetConfig() fctl.ControllerConfig {
 
 func (c *CreditWalletController) Run() (fctl.Renderable, error) {
 
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)

@@ -51,6 +51,7 @@ func NewDebitConfig() *fctl.ControllerConfig {
 		`Use --destination account=<account> | --destination wallet=id:<wallet-id>[/<balance>] | --destination wallet=name:<wallet-name>[/<balance>]`)
 	fctl.WithMetadataFlag(flags)
 	fctl.WithConfirmFlag(flags)
+
 	internal.WithTargetingWalletByName(flags)
 	internal.WithTargetingWalletByID(flags)
 
@@ -84,7 +85,7 @@ func (c *DebitWalletController) GetConfig() fctl.ControllerConfig {
 }
 
 func (c *DebitWalletController) Run() (fctl.Renderable, error) {
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {

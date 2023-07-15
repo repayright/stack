@@ -73,7 +73,7 @@ func (c *StackShowController) GetConfig() fctl.ControllerConfig {
 }
 
 func (c *StackShowController) Run() (fctl.Renderable, error) {
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
@@ -146,7 +146,7 @@ func (c *StackShowController) Run() (fctl.Renderable, error) {
 }
 
 func (c *StackShowController) Render() error {
-	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetFlags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 }
 
 func NewShowCommand() *cobra.Command {

@@ -157,6 +157,12 @@ func WithGoFlagSet(flags *flag.FlagSet) CommandOptionFn {
 	}
 }
 
+func WithPersistentGoFlagSet(flags *flag.FlagSet) CommandOptionFn {
+	return func(cmd *cobra.Command) {
+		cmd.PersistentFlags().AddGoFlagSet(flags)
+	}
+}
+
 func WithPersistentStringFlag(name, defaultValue, help string) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.PersistentFlags().String(name, defaultValue, help)
@@ -287,7 +293,7 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 
 			config := c.GetConfig()
 
-			err = WithRender(config.GetFlags(), args, c, renderable)
+			err = WithRender(config.GetPFlags(), args, c, renderable)
 
 			if err != nil {
 				return err

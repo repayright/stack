@@ -29,17 +29,18 @@ type ControllerConfig struct {
 	aliases          []string
 	out              io.Writer
 	flags            *flag.FlagSet
+	pflags           *flag.FlagSet
 	args             []string
 }
 
 func NewControllerConfig(use string, description string, aliases []string, out io.Writer, flags *flag.FlagSet) *ControllerConfig {
-	WithGlobalFlags(flags)
 	return &ControllerConfig{
 		use:         use,
 		description: description,
 		aliases:     aliases,
 		out:         out,
 		flags:       flags,
+		pflags:      WithGlobalFlags(nil),
 	}
 
 }
@@ -81,6 +82,32 @@ func (c *ControllerConfig) SetArgs(args []string) {
 
 func (c *ControllerConfig) GetFlags() *flag.FlagSet {
 	return c.flags
+}
+
+// Return the pflags & flags merged together in a new FlagSet
+// This is done to avoid mutating the original flag.FlagSet
+// which is used by the controller to parse the flags
+// and the pflags are used by the controller to parse the persistent one
+func (c *ControllerConfig) GetAllFLags() *flag.FlagSet {
+
+	// Create a new FlagSet
+	flags := flag.NewFlagSet(c.use, flag.ExitOnError)
+
+	// Add the flags from the pflags
+	c.pflags.VisitAll(func(f *flag.Flag) {
+		flags.Var(f.Value, f.Name, f.Usage)
+	})
+
+	// Add the flags from the flags
+	c.flags.VisitAll(func(f *flag.Flag) {
+		flags.Var(f.Value, f.Name, f.Usage)
+	})
+
+	return flags
+}
+
+func (c *ControllerConfig) GetPFlags() *flag.FlagSet {
+	return c.pflags
 }
 
 func (c *ControllerConfig) GetContext() context.Context {

@@ -1,7 +1,9 @@
 package holds
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -10,12 +12,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useVoid         = "void <hold-id>"
+	descriptionVoid = "Void a hold"
+)
+
 type VoidStore struct {
 	Success bool   `json:"success"`
 	HoldId  string `json:"holdId"`
 }
 type VoidController struct {
-	store *VoidStore
+	store  *VoidStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*VoidStore] = (*VoidController)(nil)
@@ -24,51 +32,72 @@ func NewDefaultVoidStore() *VoidStore {
 	return &VoidStore{}
 }
 
-func NewVoidController() *VoidController {
-	return &VoidController{
-		store: NewDefaultVoidStore(),
-	}
+func NewVoidConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useVoid, flag.ExitOnError)
+
+	c := fctl.NewControllerConfig(
+		useVoid,
+		descriptionVoid,
+		[]string{
+			"deb",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(descriptionVoid)
+
+	return c
 }
 
-func NewVoidCommand() *cobra.Command {
-	return fctl.NewCommand("void <hold-id>",
-		fctl.WithShortDescription("Void a hold"),
-		fctl.WithAliases("v"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*VoidStore](NewVoidController()),
-	)
+func NewVoidController(config fctl.ControllerConfig) *VoidController {
+	return &VoidController{
+		store:  NewDefaultVoidStore(),
+		config: config,
+	}
 }
 
 func (c *VoidController) GetStore() *VoidStore {
 	return c.store
 }
 
-func (c *VoidController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *VoidController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *VoidController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "retrieving config")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	stackClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	stackClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	request := operations.VoidHoldRequest{
-		HoldID: args[0],
+	if len(c.config.GetArgs()) != 1 {
+		return nil, fmt.Errorf("expected 1 argument, got %d", len(c.config.GetArgs()))
 	}
-	response, err := stackClient.Wallets.VoidHold(cmd.Context(), request)
+
+	request := operations.VoidHoldRequest{
+		HoldID: c.config.GetArgs()[0],
+	}
+	response, err := stackClient.Wallets.VoidHold(ctx, request)
 	if err != nil {
 		return nil, errors.Wrap(err, "voiding hold")
 	}
@@ -82,14 +111,27 @@ func (c *VoidController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	}
 
 	c.store.Success = true //Todo: check status code 204/200
-	c.store.HoldId = args[0]
+	c.store.HoldId = c.config.GetArgs()[0]
 
 	return c, nil
 }
 
-func (c *VoidController) Render(cmd *cobra.Command, args []string) error {
+func (c *VoidController) Render() error {
 
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Hold '%s' voided!", args[0])
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Hold '%s' voided!", c.config.GetArgs()[0])
 
 	return nil
+}
+
+func NewVoidCommand() *cobra.Command {
+
+	c := NewVoidConfig()
+
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithShortDescription(c.GetDescription()),
+		fctl.WithAliases(c.GetAliases()...),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithGoFlagSet(c.GetFlags()),
+		fctl.WithController[*VoidStore](NewVoidController(*c)),
+	)
 }

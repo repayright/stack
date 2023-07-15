@@ -78,7 +78,7 @@ func (c *LoginController) GetConfig() fctl.ControllerConfig {
 }
 
 func (c *LoginController) Run() (fctl.Renderable, error) {
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
@@ -148,6 +148,7 @@ func NewCommand() *cobra.Command {
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithGoFlagSet(config.GetFlags()),
+		fctl.WithPersistentGoFlagSet(config.GetPFlags()),
 		fctl.WithController[*LoginStore](NewLoginController(*config)),
 	)
 }
