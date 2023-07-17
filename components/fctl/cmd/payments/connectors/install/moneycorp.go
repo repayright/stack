@@ -1,7 +1,9 @@
 package install
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -12,59 +14,89 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type PaymentsConnectorsMoneycorpStore struct {
+const (
+	useMoneycorpConnector         = internal.MoneycorpConnector + " <clientID> <apiKey>"
+	descriptionMoneycorpConnector = "Install Moneycorp connector"
+	defaultEndpointMoneyCorp      = "https://sandbox-corpapi.moneycorp.com"
+)
+
+type MoneycorpStore struct {
 	Success       bool   `json:"success"`
 	ConnectorName string `json:"connectorName"`
 }
-type PaymentsConnectorsMoneycorpController struct {
-	store                *PaymentsConnectorsMoneycorpStore
-	endpointFlag         string
-	defaultEndpoint      string
-	pollingPeriodFlag    string
-	defaultpollingPeriod string
-}
 
-func NewDefaultPaymentsConnectorsMoneycorpStore() *PaymentsConnectorsMoneycorpStore {
-	return &PaymentsConnectorsMoneycorpStore{
+func NewMoneycorpStore() *MoneycorpStore {
+	return &MoneycorpStore{
 		Success:       false,
 		ConnectorName: internal.MoneycorpConnector,
 	}
 }
-func NewPaymentsConnectorsMoneycorpController() *PaymentsConnectorsMoneycorpController {
-	return &PaymentsConnectorsMoneycorpController{
-		store:                NewDefaultPaymentsConnectorsMoneycorpStore(),
-		endpointFlag:         "endpoint",
-		defaultEndpoint:      "https://sandbox-corpapi.moneycorp.com",
-		pollingPeriodFlag:    "polling-period",
-		defaultpollingPeriod: "2m",
+
+func NewMoneycorpConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useMoneycorpConnector, flag.ExitOnError)
+	flags.String(EndpointFlag, defaultEndpointMoneyCorp, "API endpoint")
+	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
+	c := fctl.NewControllerConfig(
+		useMoneycorpConnector,
+		descriptionMoneycorpConnector,
+		[]string{},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(descriptionMoneycorpConnector)
+
+	return c
+}
+
+type MoneycorpController struct {
+	store  *MoneycorpStore
+	config fctl.ControllerConfig
+}
+
+func NewMoneycorpController(config fctl.ControllerConfig) *MoneycorpController {
+	return &MoneycorpController{
+		store:  NewMoneycorpStore(),
+		config: config,
 	}
 }
 
-func (c *PaymentsConnectorsMoneycorpController) GetStore() *PaymentsConnectorsMoneycorpStore {
+func (c *MoneycorpController) GetStore() *MoneycorpStore {
 	return c.store
 }
+func (c *MoneycorpController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-func (c *PaymentsConnectorsMoneycorpController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	cfg, err := fctl.GetConfig(cmd)
+func (c *MoneycorpController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
+	if len(args) < 2 {
+		return nil, errors.New("missing required arguments")
+	}
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to install connector '%s'", internal.MoneycorpConnector) {
+	if !fctl.CheckStackApprobation(flags, stack, "You are about to install connector '%s'", internal.MoneycorpConnector) {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	paymentsClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	paymentsClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
@@ -74,11 +106,11 @@ func (c *PaymentsConnectorsMoneycorpController) Run(cmd *cobra.Command, args []s
 		RequestBody: shared.MoneycorpConfig{
 			ClientID:      args[0],
 			APIKey:        args[1],
-			Endpoint:      fctl.GetString(cmd, c.endpointFlag),
-			PollingPeriod: fctl.Ptr(fctl.GetString(cmd, c.pollingPeriodFlag)),
+			Endpoint:      fctl.GetString(flags, EndpointFlag),
+			PollingPeriod: fctl.Ptr(fctl.GetString(flags, PollingPeriodFlag)),
 		},
 	}
-	response, err := paymentsClient.Payments.InstallConnector(cmd.Context(), request)
+	response, err := paymentsClient.Payments.InstallConnector(ctx, request)
 	if err != nil {
 		return nil, errors.Wrap(err, "installing connector")
 	}
@@ -87,28 +119,26 @@ func (c *PaymentsConnectorsMoneycorpController) Run(cmd *cobra.Command, args []s
 		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector installed!")
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Connector installed!")
 
 	c.store.Success = true
 
 	return c, nil
 }
 
-func (c *PaymentsConnectorsMoneycorpController) Render(cmd *cobra.Command, args []string) error {
+func (c *MoneycorpController) Render() error {
 
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector %s installed!", c.store.ConnectorName)
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Connector %s installed!", c.store.ConnectorName)
 
 	return nil
 }
 
 func NewMoneycorpCommand() *cobra.Command {
-	c := NewPaymentsConnectorsMoneycorpController()
+	config := NewMoneycorpConfig()
+	c := NewMoneycorpController(*config)
 
-	return fctl.NewCommand(internal.MoneycorpConnector+" <clientID> <apiKey>",
-		fctl.WithShortDescription("Install a Moneycorp connector"),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
-		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
-		fctl.WithController[*PaymentsConnectorsMoneycorpStore](c),
+		fctl.WithController[*MoneycorpStore](c),
 	)
 }

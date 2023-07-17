@@ -1,7 +1,9 @@
 package connectors
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -10,57 +12,88 @@ import (
 )
 
 var (
-	PaymentsConnectorsList = "develop"
+	PaymentsConnectorsList    = "develop"
+	useListConnectors         = "list"
+	descriptionListConnectors = "List all enabled connectors"
 )
 
-type PaymentsConnectorsListStore struct {
+type ListStore struct {
 	Connectors []shared.ConnectorsResponseData `json:"connectors"`
 }
-type PaymentsConnectorsListController struct {
-	store *PaymentsConnectorsListStore
-}
 
-var _ fctl.Controller[*PaymentsConnectorsListStore] = (*PaymentsConnectorsListController)(nil)
-
-func NewDefaultPaymentsConnectorsListStore() *PaymentsConnectorsListStore {
-	return &PaymentsConnectorsListStore{
+func NewListStore() *ListStore {
+	return &ListStore{
 		Connectors: []shared.ConnectorsResponseData{},
 	}
 }
 
-func NewPaymentsConnectorsListController() *PaymentsConnectorsListController {
-	return &PaymentsConnectorsListController{
-		store: NewDefaultPaymentsConnectorsListStore(),
+func NewListConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useListConnectors, flag.ExitOnError)
+
+	c := fctl.NewControllerConfig(
+		useListConnectors,
+		descriptionListConnectors,
+		[]string{
+			"list",
+			"ls",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(descriptionListConnectors)
+
+	return c
+}
+
+var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+
+func NewListController(config fctl.ControllerConfig) *ListController {
+	return &ListController{
+		store:  NewListStore(),
+		config: config,
 	}
 }
 
-func (c *PaymentsConnectorsListController) GetStore() *PaymentsConnectorsListStore {
+type ListController struct {
+	store  *ListStore
+	config fctl.ControllerConfig
+}
+
+func (c *ListController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *PaymentsConnectorsListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ListController) Run() (fctl.Renderable, error) {
 
-	cfg, err := fctl.GetConfig(cmd)
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.Payments.ListAllConnectors(cmd.Context())
+	response, err := client.Payments.ListAllConnectors(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +111,7 @@ func (c *PaymentsConnectorsListController) Run(cmd *cobra.Command, args []string
 	return c, nil
 }
 
-func (c *PaymentsConnectorsListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render() error {
 	tableData := fctl.Map(c.store.Connectors, func(connector shared.ConnectorsResponseData) []string {
 		return []string{
 			string(*connector.Provider),
@@ -88,15 +121,14 @@ func (c *PaymentsConnectorsListController) Render(cmd *cobra.Command, args []str
 	tableData = fctl.Prepend(tableData, []string{"Provider", "Enabled"})
 	return pterm.DefaultTable.
 		WithHasHeader().
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 }
 
 func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List all enabled connectors"),
-		fctl.WithController[*PaymentsConnectorsListStore](NewPaymentsConnectorsListController()),
+	c := NewListConfig()
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithController[*ListStore](NewListController(*c)),
 	)
 }

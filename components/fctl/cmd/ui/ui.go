@@ -65,7 +65,7 @@ func (c *UiController) GetConfig() fctl.ControllerConfig {
 }
 
 func (c *UiController) Run() (fctl.Renderable, error) {
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
