@@ -1,9 +1,16 @@
 package profiles
 
 import (
+	"flag"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"os"
+)
+
+const (
+	useListProfile         = "list"
+	descriptionListProfile = "List all profiles"
 )
 
 type Profile struct {
@@ -13,11 +20,6 @@ type Profile struct {
 type ProfilesListStore struct {
 	Profiles []*Profile `json:"profiles"`
 }
-type ProfilesListController struct {
-	store *ProfilesListStore
-}
-
-var _ fctl.Controller[*ProfilesListStore] = (*ProfilesListController)(nil)
 
 func NewDefaultProfilesListStore() *ProfilesListStore {
 	return &ProfilesListStore{
@@ -25,24 +27,54 @@ func NewDefaultProfilesListStore() *ProfilesListStore {
 	}
 }
 
-func NewProfilesListController() *ProfilesListController {
-	return &ProfilesListController{
-		store: NewDefaultProfilesListStore(),
+func NewListConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useListProfile, flag.ExitOnError)
+	return fctl.NewControllerConfig(
+		useListProfile,
+		descriptionListProfile,
+		[]string{
+			"ls",
+			"l",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
+var _ fctl.Controller[*ProfilesListStore] = (*ListController)(nil)
+
+type ListController struct {
+	store  *ProfilesListStore
+	config fctl.ControllerConfig
+}
+
+func NewListController(config fctl.ControllerConfig) *ListController {
+	return &ListController{
+		store:  NewDefaultProfilesListStore(),
+		config: config,
 	}
 }
 
-func (c *ProfilesListController) GetStore() *ProfilesListStore {
+func (c *ListController) GetStore() *ProfilesListStore {
 	return c.store
 }
 
-func (c *ProfilesListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ListController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *ListController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
+	profiles := cfg.GetProfiles()
 
-	p := fctl.MapKeys(cfg.GetProfiles())
-	currentProfileName := fctl.GetCurrentProfileName(cmd, cfg)
+	p := fctl.MapKeys(profiles)
+	currentProfileName := fctl.GetCurrentProfileName(flags, cfg)
 
 	for _, k := range p {
 		c.store.Profiles = append(c.store.Profiles, &Profile{
@@ -60,7 +92,7 @@ func (c *ProfilesListController) Run(cmd *cobra.Command, args []string) (fctl.Re
 
 }
 
-func (c *ProfilesListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render() error {
 	tableData := fctl.Map(c.store.Profiles, func(p *Profile) []string {
 		return []string{
 			p.Name,
@@ -71,16 +103,17 @@ func (c *ProfilesListController) Render(cmd *cobra.Command, args []string) error
 
 	pterm.DefaultTable.
 		WithHasHeader().
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 	return nil
 }
 
 func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithAliases("l"),
-		fctl.WithShortDescription("List profiles"),
-		fctl.WithController[*ProfilesListStore](NewProfilesListController()),
+	config := NewListConfig()
+	return fctl.NewCommand(config.GetUse(),
+		fctl.WithAliases(config.GetAliases()...),
+		fctl.WithShortDescription(config.GetDescription()),
+		fctl.WithController[*ProfilesListStore](NewListController(*config)),
 	)
 }
