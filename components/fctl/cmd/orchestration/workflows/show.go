@@ -1,7 +1,9 @@
 package workflows
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -13,42 +15,75 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type WorkflowsShowStore struct {
+const (
+	useShow              = "show <id>"
+	shortDescriptionShow = "Show a workflow"
+)
+
+type ShowStore struct {
 	Workflow shared.Workflow `json:"workflow"`
 }
-type WorkflowsShowController struct {
-	store *WorkflowsShowStore
+
+func NewShowConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
+
+	c := fctl.NewControllerConfig(
+		useShow,
+		shortDescriptionShow,
+		[]string{
+			"s",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(shortDescriptionShow)
+
+	return c
 }
 
-var _ fctl.Controller[*WorkflowsShowStore] = (*WorkflowsShowController)(nil)
-
-func NewDefaultWorkflowsShowStore() *WorkflowsShowStore {
-	return &WorkflowsShowStore{}
+type ShowController struct {
+	store  *ShowStore
+	config fctl.ControllerConfig
 }
 
-func NewWorkflowsShowController() *WorkflowsShowController {
-	return &WorkflowsShowController{
-		store: NewDefaultWorkflowsShowStore(),
+func NewShowStore() *ShowStore {
+	return &ShowStore{}
+}
+
+var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
+
+func NewShowController(config fctl.ControllerConfig) *ShowController {
+	return &ShowController{
+		store:  NewShowStore(),
+		config: config,
 	}
 }
 
-func (c *WorkflowsShowController) GetStore() *WorkflowsShowStore {
+func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *WorkflowsShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ShowController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	soc, err := fctl.GetStackOrganizationConfig(cmd)
+func (c *ShowController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
+
+	soc, err := fctl.GetStackOrganizationConfig(flags, ctx)
 	if err != nil {
 		return nil, err
 	}
-	client, err := fctl.NewStackClient(cmd, soc.Config, soc.Stack)
+	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
 	response, err := client.Orchestration.
-		GetWorkflow(cmd.Context(), operations.GetWorkflowRequest{
+		GetWorkflow(ctx, operations.GetWorkflowRequest{
 			FlowID: args[0],
 		})
 	if err != nil {
@@ -68,8 +103,11 @@ func (c *WorkflowsShowController) Run(cmd *cobra.Command, args []string) (fctl.R
 	return c, nil
 }
 
-func (c *WorkflowsShowController) Render(cmd *cobra.Command, args []string) error {
-	fctl.Section.WithWriter(cmd.OutOrStdout()).Println("Information")
+func (c *ShowController) Render() error {
+
+	out := c.config.GetOut()
+
+	fctl.Section.WithWriter(out).Println("Information")
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("ID"), c.store.Workflow.ID})
 	tableData = append(tableData, []string{pterm.LightCyan("Name"), func() string {
@@ -82,29 +120,28 @@ func (c *WorkflowsShowController) Render(cmd *cobra.Command, args []string) erro
 	tableData = append(tableData, []string{pterm.LightCyan("Updated at"), c.store.Workflow.UpdatedAt.Format(time.RFC3339)})
 
 	if err := pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(out).
 		WithData(tableData).
 		Render(); err != nil {
 		return err
 	}
 
-	fmt.Fprintln(cmd.OutOrStdout())
+	fmt.Fprintln(out)
 
-	fctl.Section.WithWriter(cmd.OutOrStdout()).Println("Configuration")
+	fctl.Section.WithWriter(out).Println("Configuration")
 	configAsBytes, err := yaml.Marshal(c.store.Workflow.Config)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Fprintln(cmd.OutOrStdout(), string(configAsBytes))
+	fmt.Fprintln(out, string(configAsBytes))
 
 	return nil
 }
 
 func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <id>",
-		fctl.WithShortDescription("Show a workflow"),
-		fctl.WithAliases("s"),
+	config := NewShowConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*WorkflowsShowStore](NewWorkflowsShowController()),
+		fctl.WithController[*ShowStore](NewShowController(*config)),
 	)
 }

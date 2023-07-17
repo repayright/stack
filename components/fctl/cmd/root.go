@@ -4,19 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/formancehq/fctl/cmd/payments"
-	"github.com/formancehq/fctl/cmd/profiles"
-	"github.com/formancehq/fctl/cmd/search"
+	"github.com/formancehq/fctl/cmd/orchestration"
 	"os"
 	"os/signal"
 	"runtime/debug"
 
-	"github.com/formancehq/fctl/cmd/login"
-	"github.com/formancehq/fctl/cmd/stack"
-	"github.com/formancehq/fctl/cmd/ui"
-	"github.com/formancehq/fctl/cmd/version"
-	"github.com/formancehq/fctl/cmd/wallets"
-	"github.com/formancehq/fctl/cmd/webhooks"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -31,20 +23,20 @@ func NewRootCommand() *cobra.Command {
 		fctl.WithShortDescription("Formance Control CLI"),
 		fctl.WithSilenceUsage(),
 		fctl.WithChildCommands(
-			ui.NewCommand(),
-			version.NewCommand(),
-			login.NewCommand(),
-			// NewPromptCommand(),
-			// ledger.NewCommand(),
-			payments.NewCommand(),
-			profiles.NewCommand(),
-			stack.NewCommand(),
-			// auth.NewCommand(),
-			// cloud.NewCommand(),
-			search.NewCommand(),
-			webhooks.NewCommand(),
-			wallets.NewCommand(),
-			// orchestration.NewCommand(),
+			//ui.NewCommand(),
+			//version.NewCommand(),
+			//login.NewCommand(),
+			//// NewPromptCommand(),
+			//// ledger.NewCommand(),
+			//payments.NewCommand(),
+			//profiles.NewCommand(),
+			//stack.NewCommand(),
+			//// auth.NewCommand(),
+			//// cloud.NewCommand(),
+			//search.NewCommand(),
+			//webhooks.NewCommand(),
+			//wallets.NewCommand(),
+			orchestration.NewCommand(),
 		),
 		fctl.WithGoFlagSet(fctl.GlobalFlags),
 	)

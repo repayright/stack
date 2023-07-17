@@ -1,7 +1,9 @@
 package workflows
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -11,6 +13,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useList              = "list"
+	shortDescriptionList = "List all workflows"
+)
+
 type Workflow struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
@@ -18,41 +25,70 @@ type Workflow struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-type WorkflowsListStore struct {
+type ListStore struct {
 	Workflows []Workflow `json:"workflows"`
 }
-type WorkflowsListController struct {
-	store *WorkflowsListStore
+
+func NewListConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useList, flag.ExitOnError)
+
+	c := fctl.NewControllerConfig(
+		useList,
+		shortDescriptionList,
+		[]string{
+			"list",
+			"ls",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(shortDescriptionList)
+
+	return c
 }
 
-var _ fctl.Controller[*WorkflowsListStore] = (*WorkflowsListController)(nil)
-
-func NewDefaultWorkflowsListStore() *WorkflowsListStore {
-	return &WorkflowsListStore{}
+func NewDefaultListStore() *ListStore {
+	return &ListStore{}
 }
 
-func NewWorkflowsListController() *WorkflowsListController {
-	return &WorkflowsListController{
-		store: NewDefaultWorkflowsListStore(),
+type ListController struct {
+	store  *ListStore
+	config fctl.ControllerConfig
+}
+
+var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+
+func NewListController(config fctl.ControllerConfig) *ListController {
+	return &ListController{
+		store:  NewDefaultListStore(),
+		config: config,
 	}
 }
 
-func (c *WorkflowsListController) GetStore() *WorkflowsListStore {
+func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *WorkflowsListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ListController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	soc, err := fctl.GetStackOrganizationConfig(cmd)
+func (c *ListController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
+
+	soc, err := fctl.GetStackOrganizationConfig(flags, ctx)
 	if err != nil {
 		return nil, err
 	}
-	client, err := fctl.NewStackClient(cmd, soc.Config, soc.Stack)
+	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	response, err := client.Orchestration.ListWorkflows(cmd.Context())
+	response, err := client.Orchestration.ListWorkflows(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +118,7 @@ func (c *WorkflowsListController) Run(cmd *cobra.Command, args []string) (fctl.R
 	return c, nil
 }
 
-func (c *WorkflowsListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render() error {
 	if len(c.store.Workflows) == 0 {
 		fctl.Println("No workflows found.")
 		return nil
@@ -90,7 +126,7 @@ func (c *WorkflowsListController) Render(cmd *cobra.Command, args []string) erro
 
 	if err := pterm.DefaultTable.
 		WithHasHeader(true).
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(
 			fctl.Prepend(
 				fctl.Map(c.store.Workflows,
@@ -111,10 +147,9 @@ func (c *WorkflowsListController) Render(cmd *cobra.Command, args []string) erro
 	return nil
 }
 func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithShortDescription("List all workflows"),
-		fctl.WithAliases("ls", "l"),
+	config := NewListConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*WorkflowsListStore](NewWorkflowsListController()),
+		fctl.WithController[*ListStore](NewListController(*config)),
 	)
 }
