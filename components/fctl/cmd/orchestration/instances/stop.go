@@ -1,7 +1,9 @@
 package instances
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -10,42 +12,75 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type InstancesStopStore struct {
+const (
+	useStop              = "stop <instance-id>"
+	shortDescriptionStop = "Stop a specific workflow instance"
+)
+
+type StopStore struct {
 	Success    bool   `json:"success"`
 	InstanceID string `json:"instanceId"`
 }
-type InstancesStopController struct {
-	store *InstancesStopStore
+
+func NewStopConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useStop, flag.ExitOnError)
+
+	c := fctl.NewControllerConfig(
+		useStop,
+		shortDescriptionStop,
+		[]string{},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(shortDescriptionStop)
+
+	return c
 }
 
-var _ fctl.Controller[*InstancesStopStore] = (*InstancesStopController)(nil)
-
-func NewDefaultInstancesStopStore() *InstancesStopStore {
-	return &InstancesStopStore{}
+type StopController struct {
+	store  *StopStore
+	config fctl.ControllerConfig
 }
 
-func NewInstancesStopController() *InstancesStopController {
-	return &InstancesStopController{
-		store: NewDefaultInstancesStopStore(),
+var _ fctl.Controller[*StopStore] = (*StopController)(nil)
+
+func NewStopStore() *StopStore {
+	return &StopStore{}
+}
+
+func NewStopController(config fctl.ControllerConfig) *StopController {
+	return &StopController{
+		store:  NewStopStore(),
+		config: config,
 	}
 }
 
-func (c *InstancesStopController) GetStore() *InstancesStopStore {
+func (c *StopController) GetStore() *StopStore {
 	return c.store
 }
 
-func (c *InstancesStopController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	soc, err := fctl.GetStackOrganizationConfig(cmd)
+func (c *StopController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *StopController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetFlags()
+	args := c.config.GetArgs()
+	ctx := c.config.GetContext()
+
+	soc, err := fctl.GetStackOrganizationConfig(flags, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(cmd, soc.Config, soc.Stack)
+	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	response, err := client.Orchestration.CancelEvent(cmd.Context(), operations.CancelEventRequest{
+	response, err := client.Orchestration.CancelEvent(ctx, operations.CancelEventRequest{
 		InstanceID: args[0],
 	})
 	if err != nil {
@@ -66,17 +101,17 @@ func (c *InstancesStopController) Run(cmd *cobra.Command, args []string) (fctl.R
 	return c, nil
 }
 
-func (c *InstancesStopController) Render(cmd *cobra.Command, args []string) error {
+func (c *StopController) Render() error {
 	// Print the instance information
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Workflow Instance with ID: %s successfully canceled ", c.store.InstanceID)
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Workflow Instance with ID: %s successfully canceled ", c.store.InstanceID)
 
 	return nil
 }
 
 func NewStopCommand() *cobra.Command {
-	return fctl.NewCommand("stop <instance-id>",
-		fctl.WithShortDescription("Stop a specific workflow instance"),
+	config := NewStopConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*InstancesStopStore](NewInstancesStopController()),
+		fctl.WithController[*StopStore](NewStopController(*config)),
 	)
 }

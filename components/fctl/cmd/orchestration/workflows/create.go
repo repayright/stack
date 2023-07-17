@@ -1,51 +1,85 @@
 package workflows
 
 import (
+	"flag"
 	"fmt"
+	"gopkg.in/yaml.v3"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
-type WorkflowsCreateStore struct {
+const (
+	useCreate              = "create <file>|-"
+	shortDescriptionCreate = "Create a workflow"
+)
+
+type CreateStore struct {
 	WorkflowId string `json:"workflowId"`
 }
-type WorkflowsCreateController struct {
-	store *WorkflowsCreateStore
+
+func NewCreateConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
+
+	c := fctl.NewControllerConfig(
+		useCreate,
+		shortDescriptionCreate,
+		[]string{
+			"cr", "c",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(shortDescriptionCreate)
+
+	return c
 }
 
-var _ fctl.Controller[*WorkflowsCreateStore] = (*WorkflowsCreateController)(nil)
-
-func NewDefaultWorkflowsCreateStore() *WorkflowsCreateStore {
-	return &WorkflowsCreateStore{}
+type CreateController struct {
+	store  *CreateStore
+	config fctl.ControllerConfig
 }
 
-func NewWorkflowsCreateController() *WorkflowsCreateController {
-	return &WorkflowsCreateController{
-		store: NewDefaultWorkflowsCreateStore(),
+var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
+
+func NewCreateStore() *CreateStore {
+	return &CreateStore{}
+}
+
+func NewCreateController(config fctl.ControllerConfig) *CreateController {
+	return &CreateController{
+		store:  NewCreateStore(),
+		config: config,
 	}
 }
 
-func (c *WorkflowsCreateController) GetStore() *WorkflowsCreateStore {
+func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
 
-func (c *WorkflowsCreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *CreateController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+func (c *CreateController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
 
-	soc, err := fctl.GetStackOrganizationConfig(cmd)
+	soc, err := fctl.GetStackOrganizationConfig(flags, ctx)
 	if err != nil {
 		return nil, err
 	}
-	client, err := fctl.NewStackClient(cmd, soc.Config, soc.Stack)
+	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	script, err := fctl.ReadFile(cmd, soc.Stack, args[0])
+	script, err := fctl.ReadFile(flags, soc.Stack, args[0])
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +91,7 @@ func (c *WorkflowsCreateController) Run(cmd *cobra.Command, args []string) (fctl
 
 	//nolint:gosimple
 	response, err := client.Orchestration.
-		CreateWorkflow(cmd.Context(), shared.CreateWorkflowRequest{
+		CreateWorkflow(ctx, shared.CreateWorkflowRequest{
 			Name:   config.Name,
 			Stages: config.Stages,
 		})
@@ -78,17 +112,16 @@ func (c *WorkflowsCreateController) Run(cmd *cobra.Command, args []string) (fctl
 	return c, nil
 }
 
-func (c *WorkflowsCreateController) Render(cmd *cobra.Command, args []string) error {
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Workflow created with ID: %s", c.store.WorkflowId)
+func (c *CreateController) Render() error {
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Workflow created with ID: %s", c.store.WorkflowId)
 
 	return nil
 }
 
 func NewCreateCommand() *cobra.Command {
-	return fctl.NewCommand("create <file>|-",
-		fctl.WithShortDescription("Create a workflow"),
-		fctl.WithAliases("cr", "c"),
+	config := NewCreateConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*WorkflowsCreateStore](NewWorkflowsCreateController()),
+		fctl.WithController[*CreateStore](NewCreateController(*config)),
 	)
 }
