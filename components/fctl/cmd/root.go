@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/formancehq/fctl/cmd/payments"
 	"github.com/formancehq/fctl/cmd/profiles"
 	"github.com/formancehq/fctl/cmd/search"
 	"os"
@@ -35,7 +36,7 @@ func NewRootCommand() *cobra.Command {
 			login.NewCommand(),
 			// NewPromptCommand(),
 			// ledger.NewCommand(),
-			// payments.NewCommand(),
+			payments.NewCommand(),
 			profiles.NewCommand(),
 			stack.NewCommand(),
 			// auth.NewCommand(),
@@ -48,7 +49,7 @@ func NewRootCommand() *cobra.Command {
 		fctl.WithGoFlagSet(fctl.GlobalFlags),
 	)
 
-	cmd.RegisterFlagCompletionFunc(fctl.ProfileFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	err := cmd.RegisterFlagCompletionFunc(fctl.ProfileFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		flags := fctl.ConvertPFlagSetToFlagSet(cmd.Flags())
 
 		cfg, err := fctl.GetConfig(flags)
@@ -61,6 +62,11 @@ func NewRootCommand() *cobra.Command {
 		}
 		return ret, cobra.ShellCompDirectiveDefault
 	})
+
+	if err != nil {
+		panic(err)
+	}
+
 	return cmd
 }
 
