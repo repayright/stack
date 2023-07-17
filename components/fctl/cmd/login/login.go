@@ -15,26 +15,15 @@ const (
 	descriptionLogin = "Login to the service"
 )
 
-type Dialog interface {
-	DisplayURIAndCode(uri, code string)
-}
-type DialogFn func(uri, code string)
-
-func (fn DialogFn) DisplayURIAndCode(uri, code string) {
-	fn(uri, code)
+type Store struct {
+	DeviceCode string `json:"deviceCode"`
+	LoginURI   string `json:"loginUri"`
+	BrowserURL string `json:"browserUrl"`
+	Success    bool   `json:"success"`
 }
 
-type LoginStore struct {
-	profile    *fctl.Profile `json:"-"`
-	DeviceCode string        `json:"deviceCode"`
-	LoginURI   string        `json:"loginUri"`
-	BrowserURL string        `json:"browserUrl"`
-	Success    bool          `json:"success"`
-}
-
-func NewDefaultLoginStore() *LoginStore {
-	return &LoginStore{
-		profile:    nil,
+func NewStore() *Store {
+	return &Store{
 		DeviceCode: "",
 		LoginURI:   "",
 		BrowserURL: "",
@@ -42,7 +31,7 @@ func NewDefaultLoginStore() *LoginStore {
 	}
 }
 
-func NewLoginControllerConfig() *fctl.ControllerConfig {
+func NewConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useLogin, flag.ExitOnError)
 	flags.String(fctl.MembershipURIFlag, "", "service url")
 
@@ -57,21 +46,21 @@ func NewLoginControllerConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*LoginStore] = (*LoginController)(nil)
+var _ fctl.Controller[*Store] = (*LoginController)(nil)
 
 type LoginController struct {
-	store  *LoginStore
+	store  *Store
 	config fctl.ControllerConfig
 }
 
-func NewLoginController(config fctl.ControllerConfig) *LoginController {
+func NewController(config fctl.ControllerConfig) *LoginController {
 	return &LoginController{
-		store:  NewDefaultLoginStore(),
+		store:  NewStore(),
 		config: config,
 	}
 }
 
-func (c *LoginController) GetStore() *LoginStore {
+func (c *LoginController) GetStore() *Store {
 	return c.store
 }
 
@@ -98,8 +87,6 @@ func (c *LoginController) Run() (fctl.Renderable, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	c.store.profile = profile
 
 	ret, err := LogIn(ctx, DialogFn(func(uri, code string) {
 		c.store.DeviceCode = code
@@ -145,10 +132,10 @@ func (c *LoginController) Render() error {
 }
 
 func NewCommand() *cobra.Command {
-	config := NewLoginControllerConfig()
+	config := NewConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*LoginStore](NewLoginController(*config)),
+		fctl.WithController[*Store](NewController(*config)),
 	)
 }
