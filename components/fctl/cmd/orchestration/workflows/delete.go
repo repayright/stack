@@ -67,7 +67,7 @@ func (c *DeleteController) GetConfig() fctl.ControllerConfig {
 
 func (c *DeleteController) Run() (fctl.Renderable, error) {
 
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()
 
