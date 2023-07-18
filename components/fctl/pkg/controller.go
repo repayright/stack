@@ -88,7 +88,7 @@ func (c *ControllerConfig) GetFlags() *flag.FlagSet {
 	return c.flags
 }
 
-// Return the pflags & flags merged together in a new FlagSet
+// GetAllFLags Return the pflags & flags merged together in a new FlagSet
 // This is done to avoid mutating the original flag.FlagSet
 // which is used by the controller to parse the flags
 // and the pflags are used by the controller to parse the persistent one

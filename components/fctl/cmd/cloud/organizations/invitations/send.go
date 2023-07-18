@@ -21,7 +21,7 @@ type SendStore struct {
 	Invitation InvitationSend `json:"invitation"`
 }
 
-func NewDefaultSendStore() *SendStore {
+func NewSendStore() *SendStore {
 	return &SendStore{
 		Invitation: InvitationSend{},
 	}
@@ -49,7 +49,7 @@ type SendController struct {
 
 func NewSendController(config fctl.ControllerConfig) *SendController {
 	return &SendController{
-		store:  NewDefaultSendStore(),
+		store:  NewSendStore(),
 		config: config,
 	}
 }

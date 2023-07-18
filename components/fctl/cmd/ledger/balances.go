@@ -23,7 +23,7 @@ type BalancesStore struct {
 	Balances shared.BalancesCursorResponseCursor `json:"balances"`
 }
 
-func NewDefaultBalancesStore() *BalancesStore {
+func NewBalancesStore() *BalancesStore {
 	return &BalancesStore{}
 }
 
@@ -52,7 +52,7 @@ var _ fctl.Controller[*BalancesStore] = (*BalancesController)(nil)
 
 func NewBalancesController(config fctl.ControllerConfig) *BalancesController {
 	return &BalancesController{
-		store:  NewDefaultBalancesStore(),
+		store:  NewBalancesStore(),
 		config: config,
 	}
 }

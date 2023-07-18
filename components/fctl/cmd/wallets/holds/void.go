@@ -28,7 +28,7 @@ type VoidController struct {
 
 var _ fctl.Controller[*VoidStore] = (*VoidController)(nil)
 
-func NewDefaultVoidStore() *VoidStore {
+func NewVoidStore() *VoidStore {
 	return &VoidStore{}
 }
 
@@ -50,7 +50,7 @@ func NewVoidConfig() *fctl.ControllerConfig {
 
 func NewVoidController(config fctl.ControllerConfig) *VoidController {
 	return &VoidController{
-		store:  NewDefaultVoidStore(),
+		store:  NewVoidStore(),
 		config: config,
 	}
 }

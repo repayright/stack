@@ -29,7 +29,7 @@ type CreateController struct {
 
 var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
 
-func NewDefaultCreateStore() *CreateStore {
+func NewCreateStore() *CreateStore {
 	return &CreateStore{}
 }
 func NewCreateConfig() *fctl.ControllerConfig {
@@ -55,7 +55,7 @@ func NewCreateConfig() *fctl.ControllerConfig {
 }
 func NewCreateController(config fctl.ControllerConfig) *CreateController {
 	return &CreateController{
-		store:  NewDefaultCreateStore(),
+		store:  NewCreateStore(),
 		config: config,
 	}
 }

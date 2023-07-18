@@ -24,7 +24,7 @@ const (
 
 var targets = []string{"TRANSACTION", "ACCOUNT", "ASSET", "PAYMENT"}
 
-type SearchStore struct {
+type Store struct {
 	Response *shared.Response `json:"response"`
 }
 
@@ -43,16 +43,8 @@ func NewSearchConfig() *fctl.ControllerConfig {
 	)
 }
 
-type SearchController struct {
-	store  *SearchStore
-	target string
-	config fctl.ControllerConfig
-}
-
-var _ fctl.Controller[*SearchStore] = (*SearchController)(nil)
-
-func NewDefaultSearchStore() *SearchStore {
-	return &SearchStore{
+func NewStore() *Store {
+	return &Store{
 		Response: &shared.Response{
 			Data: make(map[string]interface{}, 0),
 			Cursor: &shared.ResponseCursor{
@@ -62,22 +54,30 @@ func NewDefaultSearchStore() *SearchStore {
 	}
 }
 
-func NewSearchController(config fctl.ControllerConfig) *SearchController {
-	return &SearchController{
-		store:  NewDefaultSearchStore(),
+var _ fctl.Controller[*Store] = (*Controller)(nil)
+
+type Controller struct {
+	store  *Store
+	target string
+	config fctl.ControllerConfig
+}
+
+func NewController(config fctl.ControllerConfig) *Controller {
+	return &Controller{
+		store:  NewStore(),
 		config: config,
 	}
 }
 
-func (c *SearchController) GetStore() *SearchStore {
+func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *SearchController) GetConfig() fctl.ControllerConfig {
+func (c *Controller) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *SearchController) Run() (fctl.Renderable, error) {
+func (c *Controller) Run() (fctl.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
@@ -140,7 +140,7 @@ func (c *SearchController) Run() (fctl.Renderable, error) {
 	return c, err
 }
 
-func (c *SearchController) Render() error {
+func (c *Controller) Render() error {
 	var err error
 	out := c.config.GetOut()
 	// No Data
@@ -213,6 +213,6 @@ func NewCommand() *cobra.Command {
 	return fctl.NewStackCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MinimumNArgs(1)),
 		fctl.WithValidArgs(append(targets, defaultTarget)...),
-		fctl.WithController[*SearchStore](NewSearchController(*config)),
+		fctl.WithController[*Store](NewController(*config)),
 	)
 }

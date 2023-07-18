@@ -29,7 +29,7 @@ type ShowController struct {
 
 var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
 
-func NewDefaultShowStore() *ShowStore {
+func NewShowStore() *ShowStore {
 	return &ShowStore{
 		Wallet: shared.WalletWithBalances{},
 	}
@@ -54,7 +54,7 @@ func NewShowConfig() *fctl.ControllerConfig {
 
 func NewShowController(config fctl.ControllerConfig) *ShowController {
 	return &ShowController{
-		store:  NewDefaultShowStore(),
+		store:  NewShowStore(),
 		config: config,
 	}
 }

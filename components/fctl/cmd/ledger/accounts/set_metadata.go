@@ -17,6 +17,15 @@ const (
 	shortSetMetadata = "Set metadata on address"
 )
 
+type SetMetadataStore struct {
+	Success bool `json:"success"`
+}
+
+func NewSetMetadataStore() *SetMetadataStore {
+	return &SetMetadataStore{
+		Success: false,
+	}
+}
 func NewSetMetadataConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useSetMetadata, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
@@ -31,16 +40,6 @@ func NewSetMetadataConfig() *fctl.ControllerConfig {
 		os.Stdout,
 		flags,
 	)
-}
-
-type SetMetadataStore struct {
-	Success bool `json:"success"`
-}
-
-func NewSetMetadataStore() *SetMetadataStore {
-	return &SetMetadataStore{
-		Success: false,
-	}
 }
 
 var _ fctl.Controller[*SetMetadataStore] = (*SetMetadataController)(nil)

@@ -19,11 +19,12 @@ const (
 type DeleteStore struct {
 	Success bool `json:"success"`
 }
-type DeleteController struct {
-	store  *DeleteStore
-	config fctl.ControllerConfig
-}
 
+func NewDeleteStore() *DeleteStore {
+	return &DeleteStore{
+		Success: false,
+	}
+}
 func NewDeleteConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useDelete, flag.ExitOnError)
 
@@ -42,10 +43,9 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 
 var _ fctl.Controller[*DeleteStore] = (*DeleteController)(nil)
 
-func NewDeleteStore() *DeleteStore {
-	return &DeleteStore{
-		Success: false,
-	}
+type DeleteController struct {
+	store  *DeleteStore
+	config fctl.ControllerConfig
 }
 
 func NewDeleteController(config fctl.ControllerConfig) *DeleteController {

@@ -17,7 +17,7 @@ type DeleteStore struct {
 	Success bool `json:"success"`
 }
 
-func NewDefaultDeleteStore() *DeleteStore {
+func NewDeleteStore() *DeleteStore {
 	return &DeleteStore{}
 }
 func NewDeleteConfig() *fctl.ControllerConfig {
@@ -43,7 +43,7 @@ type DeleteController struct {
 
 func NewDeleteController(config fctl.ControllerConfig) *DeleteController {
 	return &DeleteController{
-		store:  NewDefaultDeleteStore(),
+		store:  NewDeleteStore(),
 		config: config,
 	}
 }

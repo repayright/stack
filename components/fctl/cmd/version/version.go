@@ -17,20 +17,20 @@ var (
 	BuildDate    = "-"
 )
 
-type VersionStore struct {
+type Store struct {
 	Version   string `json:"version"`
 	BuildDate string `json:"buildDate"`
 	Commit    string `json:"commit"`
 }
-type VersionController struct {
-	store  *VersionStore
+type Controller struct {
+	store  *Store
 	config fctl.ControllerConfig
 }
 
-var _ fctl.Controller[*VersionStore] = (*VersionController)(nil)
+var _ fctl.Controller[*Store] = (*Controller)(nil)
 
-func NewDefaultVersionStore() *VersionStore {
-	return &VersionStore{
+func NewDefaultStore() *Store {
+	return &Store{
 		Version:   Version,
 		BuildDate: BuildDate,
 		Commit:    Commit,
@@ -47,26 +47,26 @@ func NewVersionConfig() *fctl.ControllerConfig {
 		flags,
 	)
 }
-func NewVersionController(config fctl.ControllerConfig) *VersionController {
-	return &VersionController{
-		store:  NewDefaultVersionStore(),
+func NewController(config fctl.ControllerConfig) *Controller {
+	return &Controller{
+		store:  NewDefaultStore(),
 		config: config,
 	}
 }
 
-func (c *VersionController) GetStore() *VersionStore {
+func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *VersionController) GetConfig() fctl.ControllerConfig {
+func (c *Controller) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *VersionController) Run() (fctl.Renderable, error) {
+func (c *Controller) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *VersionController) Render() error {
+func (c *Controller) Render() error {
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("Version"), c.store.Version})
 	tableData = append(tableData, []string{pterm.LightCyan("Date"), c.store.BuildDate})
@@ -80,6 +80,6 @@ func NewCommand() *cobra.Command {
 	c := NewVersionConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*VersionStore](NewVersionController(*c)),
+		fctl.WithController[*Store](NewController(*c)),
 	)
 }

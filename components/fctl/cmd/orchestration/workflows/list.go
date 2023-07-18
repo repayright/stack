@@ -29,6 +29,10 @@ type ListStore struct {
 	Workflows []Workflow `json:"workflows"`
 }
 
+func NewListStore() *ListStore {
+	return &ListStore{}
+}
+
 func NewListConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 
@@ -47,10 +51,6 @@ func NewListConfig() *fctl.ControllerConfig {
 	return c
 }
 
-func NewDefaultListStore() *ListStore {
-	return &ListStore{}
-}
-
 type ListController struct {
 	store  *ListStore
 	config fctl.ControllerConfig
@@ -60,7 +60,7 @@ var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
 func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store:  NewDefaultListStore(),
+		store:  NewListStore(),
 		config: config,
 	}
 }
