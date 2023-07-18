@@ -1,31 +1,55 @@
 package billing
 
 import (
+	"flag"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"os"
+)
+
+const (
+	usePortal   = "portal"
+	shortPortal = "Open the billing portal"
 )
 
 type PortalStore struct {
 	FoundBrowser   bool   `json:"foundBrowser"`
 	BillingPlanUrl string `json:"billingPlanUrl"`
 }
-type PortalController struct {
-	store *PortalStore
-}
 
-var _ fctl.Controller[*PortalStore] = (*PortalController)(nil)
-
-func NewDefaultPortalStore() *PortalStore {
+func NewPortalStore() *PortalStore {
 	return &PortalStore{
 		BillingPlanUrl: "",
 		FoundBrowser:   true,
 	}
 }
 
-func NewPortalController() *PortalController {
+func NewPortalConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(usePortal, flag.ExitOnError)
+	return fctl.NewControllerConfig(
+		usePortal,
+		shortPortal,
+		shortPortal,
+		[]string{
+			"p",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
+var _ fctl.Controller[*PortalStore] = (*PortalController)(nil)
+
+type PortalController struct {
+	store  *PortalStore
+	config fctl.ControllerConfig
+}
+
+func NewPortalController(config fctl.ControllerConfig) *PortalController {
 	return &PortalController{
-		store: NewDefaultPortalStore(),
+		store:  NewPortalStore(),
+		config: config,
 	}
 }
 
@@ -33,24 +57,31 @@ func (c *PortalController) GetStore() *PortalStore {
 	return c.store
 }
 
-func (c *PortalController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *PortalController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *PortalController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	apiClient, err := fctl.NewMembershipClient(cmd, cfg)
+	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	billing, _, err := apiClient.DefaultApi.BillingPortal(cmd.Context(), organizationID).Execute()
+	billing, _, err := apiClient.DefaultApi.BillingPortal(ctx, organizationID).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -64,19 +95,21 @@ func (c *PortalController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *PortalController) Render(cmd *cobra.Command, args []string) error {
+func (c *PortalController) Render() error {
+	out := c.config.GetOut()
+
 	if c.store.FoundBrowser && c.store.BillingPlanUrl != "" {
-		pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Billing Portal opened in your browser")
+		pterm.Success.WithWriter(out).Printfln("Billing Portal opened in your browser")
 		return nil
 	}
 
 	if !c.store.FoundBrowser && c.store.BillingPlanUrl != "" {
-		pterm.Error.WithWriter(cmd.OutOrStdout()).Printfln("Please open %s in your browser", c.store.BillingPlanUrl)
+		pterm.Error.WithWriter(out).Printfln("Please open %s in your browser", c.store.BillingPlanUrl)
 		return nil
 	}
 
 	if c.store.BillingPlanUrl == "" {
-		pterm.Error.WithWriter(cmd.OutOrStdout()).Printfln("Please subscribe to a plan to access Billing Portal")
+		pterm.Error.WithWriter(out).Printfln("Please subscribe to a plan to access Billing Portal")
 		return nil
 	}
 
@@ -84,11 +117,10 @@ func (c *PortalController) Render(cmd *cobra.Command, args []string) error {
 }
 
 func NewPortalCommand() *cobra.Command {
-	return fctl.NewCommand("portal",
-		fctl.WithAliases("p"),
-		fctl.WithShortDescription("Access to Billing Portal"),
+	config := NewPortalConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithDeprecated("Please contact Formances Sales Team."),
-		fctl.WithController[*PortalStore](NewPortalController()),
+		fctl.WithController[*PortalStore](NewPortalController(*config)),
 	)
 }

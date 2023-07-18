@@ -1,10 +1,17 @@
 package users
 
 import (
+	"flag"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"os"
+)
+
+const (
+	useList   = "list"
+	shortList = "List users"
 )
 
 type User struct {
@@ -15,19 +22,36 @@ type User struct {
 type ListStore struct {
 	Users []User `json:"users"`
 }
-type ListController struct {
-	store *ListStore
-}
-
-var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
 func NewDefaultListStore() *ListStore {
 	return &ListStore{}
 }
 
-func NewListController() *ListController {
+var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+
+type ListController struct {
+	store  *ListStore
+	config fctl.ControllerConfig
+}
+
+func NewListConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useList, flag.ExitOnError)
+	return fctl.NewControllerConfig(
+		useList,
+		shortList,
+		shortList,
+		[]string{
+			"l", "ls",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
+func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store: NewDefaultListStore(),
+		store:  NewDefaultListStore(),
+		config: config,
 	}
 }
 
@@ -35,23 +59,31 @@ func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ListController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *ListController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	apiClient, err := fctl.NewMembershipClient(cmd, cfg)
+	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	usersResponse, _, err := apiClient.DefaultApi.ListUsers(cmd.Context(), organizationID).Execute()
+	usersResponse, _, err := apiClient.DefaultApi.ListUsers(ctx, organizationID).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +98,7 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render() error {
 
 	usersRow := fctl.Map(c.store.Users, func(i User) []string {
 		return []string{
@@ -78,15 +110,15 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	tableData := fctl.Prepend(usersRow, []string{"ID", "Email"})
 	return pterm.DefaultTable.
 		WithHasHeader().
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 
 }
 func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List users"),
-		fctl.WithController[*ListStore](NewListController()),
+
+	config := NewListConfig()
+	return fctl.NewCommand(config.GetUse(),
+		fctl.WithController[*ListStore](NewListController(*config)),
 	)
 }
