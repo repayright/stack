@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	useDebitWallet         = "debit <amount> <asset>"
-	descriptionDebitWallet = "Debit a wallet"
-	pendingFlag            = "pending"
-	metadataFlag           = "metadata"
-	descriptionFlag        = "description"
-	balanceFlag            = "balance"
-	destinationFlag        = "destination"
+	useDebit        = "debit <amount> <asset>"
+	shortDebit      = "Debit a wallet"
+	pendingFlag     = "pending"
+	metadataFlag    = "metadata"
+	descriptionFlag = "description"
+	balanceFlag     = "balance"
+	destinationFlag = "destination"
 )
 
 type DebitWalletStore struct {
@@ -43,7 +43,7 @@ func NewDefaultDebitWalletStore() *DebitWalletStore {
 	}
 }
 func NewDebitConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useDebitWallet, flag.ExitOnError)
+	flags := flag.NewFlagSet(useDebit, flag.ExitOnError)
 	flags.String(descriptionFlag, "", "Debit description")
 	flags.String(pendingFlag, "", "Create a pending debit")
 	flags.String(balanceFlag, "", "Balance to debit")
@@ -56,16 +56,15 @@ func NewDebitConfig() *fctl.ControllerConfig {
 	internal.WithTargetingWalletByID(flags)
 
 	c := fctl.NewControllerConfig(
-		useDebitWallet,
-		descriptionDebitWallet,
+		useDebit,
+		shortDebit,
+		shortDebit,
 		[]string{
 			"deb",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(descriptionDebitWallet)
 
 	return c
 }
@@ -193,7 +192,6 @@ func (c *DebitWalletController) Render() error {
 func NewDebitWalletCommand() *cobra.Command {
 	c := NewDebitConfig()
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(*c.GetShortDescription()),
 		fctl.WithArgs(cobra.RangeArgs(2, 3)),
 		fctl.WithController[*DebitWalletStore](NewDebitWalletController(*c)),
 	)

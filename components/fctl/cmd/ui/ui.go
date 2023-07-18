@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	useUI              = "ui"
-	shortDescriptionUI = "Open UI"
-	descriptionUI      = "Open UI in browser (if available), otherwise print the url to the console."
+	useUI         = "ui"
+	shortUI       = "Open UI"
+	descriptionUI = "Open UI in browser (if available), otherwise print the url to the console."
 )
 
 type UiStruct struct {
@@ -36,17 +36,14 @@ func NewDefaultUiStore() *UiStruct {
 func NewUiConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useUI, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useUI,
 		descriptionUI,
+		shortUI,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionUI)
-
-	return c
 }
 
 func NewUiController(config fctl.ControllerConfig) *UiController {
@@ -105,7 +102,6 @@ func (c *UiController) Render() error {
 func NewCommand() *cobra.Command {
 	config := NewUiConfig()
 	return fctl.NewStackCommand(useUI,
-		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithController[*UiStruct](NewUiController(*config)),
 	)

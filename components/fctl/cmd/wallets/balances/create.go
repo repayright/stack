@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	useCreate         = "create <balance-name>"
-	descriptionCreate = "Create a balance"
+	useCreate   = "create <balance-name>"
+	shortCreate = "Create a balance"
 )
 
 type CreateStore struct {
@@ -42,15 +42,14 @@ func NewCreateConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useCreate,
-		descriptionCreate,
+		shortCreate,
+		shortCreate,
 		[]string{
 			"c", "cr",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(descriptionCreate)
 
 	return c
 }

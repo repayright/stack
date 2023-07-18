@@ -34,6 +34,7 @@ func NewUpdateConfig() *fctl.ControllerConfig {
 	c := fctl.NewControllerConfig(
 		useUpdate,
 		shortUpdate,
+		shortUpdate,
 		[]string{
 			"up",
 		},

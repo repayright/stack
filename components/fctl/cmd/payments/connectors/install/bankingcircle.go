@@ -18,7 +18,7 @@ const (
 	authorizationEndpointFlag    = "authorization-endpoint"
 	defaultEndpointBankingCircle = "https://sandbox.bankingcircle.com"
 	defaultAuthorizationEndpoint = "https://authorizationsandbox.bankingcircleconnect.com"
-	useBankingCircleConnector    = internal.BankingCircleConnector + " <username> <password>"
+	useBankingCircle             = internal.BankingCircleConnector + " <username> <password>"
 	descriptionBankingCircle     = "Install Banking Circle connector"
 )
 
@@ -34,22 +34,18 @@ func NewBankingCircleStore() *BankingCircleStore {
 }
 
 func NewBankingCircleConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useBankingCircleConnector, flag.ExitOnError)
+	flags := flag.NewFlagSet(useBankingCircle, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointBankingCircle, "API endpoint")
 	flags.String(authorizationEndpointFlag, defaultAuthorizationEndpoint, "Authorization endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	c := fctl.NewControllerConfig(
-		useBankingCircleConnector,
+	return fctl.NewControllerConfig(
+		useBankingCircle,
+		descriptionBankingCircle,
 		descriptionBankingCircle,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(descriptionBankingCircle)
-
-	return c
-
 }
 
 type BankingCircleController struct {
@@ -123,7 +119,7 @@ func (c *BankingCircleController) Render() error {
 }
 func NewBankingCircleCommand() *cobra.Command {
 	c := NewBankingCircleConfig()
-	return fctl.NewCommand(internal.BankingCircleConnector+" <username> <password>",
+	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
 		fctl.WithController[*BankingCircleStore](NewBankingCircleController(*c)),
 	)

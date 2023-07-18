@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	useMoneycorpConnector         = internal.MoneycorpConnector + " <clientID> <apiKey>"
-	descriptionMoneycorpConnector = "Install Moneycorp connector"
-	defaultEndpointMoneyCorp      = "https://sandbox-corpapi.moneycorp.com"
+	useMoneycorpConnector    = internal.MoneycorpConnector + " <clientID> <apiKey>"
+	shortMoneycorpConnector  = "Install Moneycorp connector"
+	defaultEndpointMoneyCorp = "https://sandbox-corpapi.moneycorp.com"
 )
 
 type MoneycorpStore struct {
@@ -36,17 +36,15 @@ func NewMoneycorpConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useMoneycorpConnector, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointMoneyCorp, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useMoneycorpConnector,
-		descriptionMoneycorpConnector,
+		shortMoneycorpConnector,
+		shortMoneycorpConnector,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
 
-	c.SetShortDescription(descriptionMoneycorpConnector)
-
-	return c
 }
 
 type MoneycorpController struct {

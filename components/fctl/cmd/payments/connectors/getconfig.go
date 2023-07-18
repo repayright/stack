@@ -1,7 +1,9 @@
 package connectors
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	"github.com/formancehq/fctl/cmd/payments/connectors/views"
@@ -13,7 +15,10 @@ import (
 )
 
 var (
-	connectorsAvailable = []string{internal.StripeConnector} //internal.ModulrConnector, internal.BankingCircleConnector, internal.CurrencyCloudConnector, internal.WiseConnector}
+	connectorsAvailable  = []string{internal.StripeConnector} //internal.ModulrConnector, internal.BankingCircleConnector, internal.CurrencyCloudConnector, internal.WiseConnector}
+	useGetConfig         = "get-config <connector-name>"
+	descriptionGetConfig = fmt.Sprintf("Read a connector config (Connectors available: %s)", connectorsAvailable)
+	shortGetConfig       = fmt.Sprintf("Read a connector config (Connectors available: %s)", connectorsAvailable)
 )
 
 type GetConfigStore struct {
@@ -29,10 +34,25 @@ var _ fctl.Controller[*GetConfigStore] = (*GetConfigController)(nil)
 func NewGetConfigStore() *GetConfigStore {
 	return &GetConfigStore{}
 }
+func NewGetConfigConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useGetConfig, flag.ExitOnError)
 
-func NewGetConfigController() *GetConfigController {
+	return fctl.NewControllerConfig(
+		useGetConfig,
+		descriptionGetConfig,
+		shortGetConfig,
+		[]string{
+			"getconfig", "getconf", "gc", "get", "g",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
+func NewGetConfigController(config fctl.ControllerConfig) *GetConfigController {
 	return &GetConfigController{
-		store: NewGetConfigStore(),
+		store:  NewGetConfigStore(),
+		config: config,
 	}
 }
 
@@ -116,11 +136,10 @@ func (c *GetConfigController) Render() error {
 }
 
 func NewGetConfigCommand() *cobra.Command {
-	return fctl.NewCommand("get-config <connector-name>",
-		fctl.WithAliases("getconfig", "getconf", "gc", "get", "g"),
+	config := NewGetConfigConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgs(connectorsAvailable...),
-		fctl.WithShortDescription(fmt.Sprintf("Read a connector config (Connectors available: %s)", connectorsAvailable)),
-		fctl.WithController[*GetConfigStore](NewGetConfigController()),
+		fctl.WithController[*GetConfigStore](NewGetConfigController(*config)),
 	)
 }

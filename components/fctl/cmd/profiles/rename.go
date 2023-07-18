@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	useRename              = "rename <old-name> <new-name>"
-	shortDescriptionRename = "Rename a profile"
+	useRename   = "rename <old-name> <new-name>"
+	shortRename = "Rename a profile"
 )
 
 type RenameStore struct {
@@ -27,17 +27,14 @@ func NewRenameStore() *RenameStore {
 func NewRenameConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useRename, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useRename,
-		shortDescriptionRename,
+		shortRename,
+		shortRename,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionRename)
-
-	return c
 }
 
 var _ fctl.Controller[*RenameStore] = (*RenameController)(nil)
@@ -105,7 +102,6 @@ func NewRenameCommand() *cobra.Command {
 	config := NewRenameConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
 		fctl.WithController[*RenameStore](NewRenameController(*config)),
 	)

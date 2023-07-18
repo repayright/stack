@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	useWiseConnector              = internal.WiseConnector + " <api-key>"
-	descriptionWiseConnector      = "Install Wise connector"
-	shortDescriptionWiseConnector = "Install Wise connector"
+	useWise         = internal.WiseConnector + " <api-key>"
+	descriptionWise = "Install Wise connector"
+	shortWise       = "Install Wise connector"
 )
 
 type WiseStore struct {
@@ -31,19 +31,17 @@ func NewWiseStore() *WiseStore {
 	}
 }
 func NewWiseConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useWiseConnector, flag.ExitOnError)
+	flags := flag.NewFlagSet(useWise, flag.ExitOnError)
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	c := fctl.NewControllerConfig(
-		useWiseConnector,
-		descriptionWiseConnector,
+	return fctl.NewControllerConfig(
+		useWise,
+		descriptionWise,
+		shortWise,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
 
-	c.SetShortDescription(shortDescriptionWiseConnector)
-
-	return c
 }
 
 var _ fctl.Controller[*WiseStore] = (*WiseController)(nil)

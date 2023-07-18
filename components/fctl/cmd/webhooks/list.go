@@ -36,6 +36,7 @@ func NewListWebhookControllerConfig() *fctl.ControllerConfig {
 	return fctl.NewControllerConfig(
 		useListWebhook,
 		descriptionListWebhook,
+		descriptionListWebhook,
 		[]string{
 			"list",
 			"ls",
@@ -142,7 +143,6 @@ func NewListCommand() *cobra.Command {
 	config := NewListWebhookControllerConfig()
 
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithController[*ListWebhookStore](NewListWebhookController(*config)),
 	)
 }

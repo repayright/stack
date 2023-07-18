@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	useDelete              = "delete <name>"
-	shortDescriptionDelete = "Delete a profile"
-	descriptionDelete      = "Delete a profile"
+	useDelete         = "delete <name>"
+	shortDelete       = "Delete a profile"
+	descriptionDelete = "Delete a profile"
 )
 
 type DeleteStore struct {
@@ -27,9 +27,10 @@ type DeleteController struct {
 func NewDeleteConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useDelete, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useDelete,
 		descriptionDelete,
+		shortDelete,
 		[]string{
 			"del",
 		},
@@ -37,9 +38,6 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(shortDescriptionDelete)
-
-	return c
 }
 
 var _ fctl.Controller[*DeleteStore] = (*DeleteController)(nil)
@@ -100,7 +98,6 @@ func NewDeleteCommand() *cobra.Command {
 	config := NewDeleteConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
 		fctl.WithController[*DeleteStore](NewDeleteController(*config)),
 	)

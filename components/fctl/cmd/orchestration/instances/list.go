@@ -15,11 +15,11 @@ import (
 )
 
 const (
-	workflowFlag         = "workflow"
-	runningFlag          = "running"
-	useList              = "list"
-	descriptionList      = "List all workflow instances"
-	shortDescriptionList = "List all workflow instances"
+	workflowFlag    = "workflow"
+	runningFlag     = "running"
+	useList         = "list"
+	descriptionList = "List all workflow instances"
+	shortList       = "List all workflow instances"
 )
 
 type WorkflowInstance struct {
@@ -44,6 +44,7 @@ func NewListConfig() *fctl.ControllerConfig {
 	c := fctl.NewControllerConfig(
 		useList,
 		descriptionList,
+		shortList,
 		[]string{
 			"list",
 			"ls",
@@ -51,8 +52,6 @@ func NewListConfig() *fctl.ControllerConfig {
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionList)
 
 	return c
 }
