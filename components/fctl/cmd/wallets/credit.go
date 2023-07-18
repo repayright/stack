@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	useCreditWallet        = "credit <amount> <asset>"
-	shortDescriptionCredit = "Credit a wallet"
-	sourceFlag             = "source"
+	useCredit   = "credit <amount> <asset>"
+	shortCredit = "Credit a wallet"
+	sourceFlag  = "source"
 )
 
 type CreditWalletStore struct {
@@ -43,7 +43,7 @@ func NewCreditWalletController(config fctl.ControllerConfig) *CreditWalletContro
 	}
 }
 func NewCreditConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useCreditWallet, flag.ExitOnError)
+	flags := flag.NewFlagSet(useCredit, flag.ExitOnError)
 	fctl.WithMetadataFlag(flags)
 	fctl.WithConfirmFlag(flags)
 
@@ -54,8 +54,9 @@ func NewCreditConfig() *fctl.ControllerConfig {
 	internal.WithTargetingWalletByID(flags)
 
 	return fctl.NewControllerConfig(
-		useCreditWallet,
-		shortDescriptionCredit,
+		useCredit,
+		shortCredit,
+		shortCredit,
 		[]string{
 			"list",
 			"ls",

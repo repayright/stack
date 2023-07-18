@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	useListPayment              = "list"
-	descriptionListPayment      = "List all payments"
-	shortDescriptionListPayment = "List all payments"
+	useList         = "list"
+	descriptionList = "List all payments"
+	shortList       = "List all payments"
 )
 
 type ListStore struct {
@@ -28,11 +28,12 @@ type ListController struct {
 }
 
 func NewListConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useListPayment, flag.ExitOnError)
+	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
-		useListPayment,
-		descriptionListPayment,
+	return fctl.NewControllerConfig(
+		useList,
+		descriptionList,
+		shortList,
 		[]string{
 			"list",
 			"ls",
@@ -41,8 +42,6 @@ func NewListConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(shortDescriptionListPayment)
-	return c
 }
 
 var _ fctl.Controller[*ListStore] = (*ListController)(nil)

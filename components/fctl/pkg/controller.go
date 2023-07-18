@@ -28,7 +28,7 @@ type ControllerConfig struct {
 	context          context.Context
 	use              string
 	description      string
-	shortDescription *string
+	shortDescription string
 	aliases          []string
 	out              io.Writer
 	flags            *flag.FlagSet
@@ -36,14 +36,15 @@ type ControllerConfig struct {
 	args             []string
 }
 
-func NewControllerConfig(use string, description string, aliases []string, out io.Writer, flags *flag.FlagSet) *ControllerConfig {
+func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet) *ControllerConfig {
 	return &ControllerConfig{
-		use:         use,
-		description: description,
-		aliases:     aliases,
-		out:         out,
-		flags:       flags,
-		pflags:      GlobalFlags,
+		use:              use,
+		description:      description,
+		shortDescription: shortDescription,
+		aliases:          aliases,
+		out:              out,
+		flags:            flags,
+		pflags:           GlobalFlags,
 	}
 
 }
@@ -55,12 +56,12 @@ func (c *ControllerConfig) GetDescription() string {
 	return c.description
 }
 
-func (c *ControllerConfig) GetShortDescription() *string {
+func (c *ControllerConfig) GetShortDescription() string {
 	return c.shortDescription
 }
 
 func (c *ControllerConfig) SetShortDescription(shortDescription string) {
-	c.shortDescription = &shortDescription
+	c.shortDescription = shortDescription
 }
 
 func (c *ControllerConfig) GetAliases() []string {

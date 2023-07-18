@@ -17,7 +17,7 @@ import (
 const (
 	defaultEndpointMangoPay = "https://api.sandbox.mangopay.com"
 	useMangoPay             = internal.MangoPayConnector + " <clientID> <apiKey>"
-	descriptionMangoPay     = "Install MangoPay connector"
+	shortMangoPay           = "Install MangoPay connector"
 )
 
 type MangoPayStore struct {
@@ -35,17 +35,14 @@ func NewMangoPayConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useMangoPay, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointMangoPay, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useMangoPay,
-		descriptionMangoPay,
+		shortMangoPay,
+		shortMangoPay,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(descriptionMangoPay)
-
-	return c
 }
 
 type MangoPayController struct {

@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	useDesactivateWebhook         = "deactivate <config-id>"
-	descriptionDesactivateWebhook = "Deactivate one config"
+	useDesactivate   = "deactivate <config-id>"
+	shortDesactivate = "Deactivate one config"
 )
 
 type DesactivateWebhookStore struct {
@@ -28,12 +28,13 @@ func NewDefaultDesactivateWebhookStore() *DesactivateWebhookStore {
 }
 
 func NewDesactivateConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useDesactivateWebhook, flag.ExitOnError)
+	flags := flag.NewFlagSet(useDesactivate, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
 	return fctl.NewControllerConfig(
-		useDesactivateWebhook,
-		descriptionDesactivateWebhook,
+		useDesactivate,
+		shortDesactivate,
+		shortDesactivate,
 		[]string{
 			"deactivate",
 			"des",

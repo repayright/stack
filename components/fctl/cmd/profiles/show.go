@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	useShow              = "show <name>"
-	shortDescriptionShow = "Show a profile"
-	descriptionShow      = "Show a profile"
+	useShow         = "show <name>"
+	shortShow       = "Show a profile"
+	descriptionShow = "Show a profile"
 )
 
 type ProfilesShowStore struct {
@@ -24,9 +24,10 @@ type ProfilesShowStore struct {
 func NewShowConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useShow,
 		descriptionShow,
+		shortShow,
 		[]string{
 			"s",
 		},
@@ -34,9 +35,6 @@ func NewShowConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(shortDescriptionShow)
-
-	return c
 }
 
 func NewShowStore() *ProfilesShowStore {
@@ -106,8 +104,6 @@ func NewShowCommand() *cobra.Command {
 	config := NewShowConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases(config.GetAliases()...),
-		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
 		fctl.WithController[*ProfilesShowStore](NewShowController(*config)),
 	)

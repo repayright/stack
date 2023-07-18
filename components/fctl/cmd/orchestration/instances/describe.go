@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	useDescribeInstance         = "describe <instance-id>"
-	descriptionDescribeInstance = "Describe a specific workflow instance"
+	useDescribe         = "describe <instance-id>"
+	descriptionDescribe = "Describe a specific workflow instance"
 )
 
 type DescribeStore struct {
@@ -27,19 +27,18 @@ func NewDescribeStore() *DescribeStore {
 	return &DescribeStore{}
 }
 func NewDescribeConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useDescribeInstance, flag.ExitOnError)
+	flags := flag.NewFlagSet(useDescribe, flag.ExitOnError)
 
 	c := fctl.NewControllerConfig(
-		useDescribeInstance,
-		descriptionDescribeInstance,
+		useDescribe,
+		descriptionDescribe,
+		descriptionDescribe,
 		[]string{
 			"des",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(descriptionDescribeInstance)
 
 	return c
 }

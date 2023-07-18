@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	useShowWallet        = "show"
-	shortDescriptionShow = "Show a wallet"
+	useShow   = "show"
+	shortShow = "Show a wallet"
 )
 
 type ShowStore struct {
@@ -36,13 +36,14 @@ func NewDefaultShowStore() *ShowStore {
 }
 
 func NewShowConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useShowWallet, flag.ExitOnError)
+	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 	internal.WithTargetingWalletByID(flags)
 	internal.WithTargetingWalletByName(flags)
 	return fctl.NewControllerConfig(
-		useShowWallet,
-		shortDescriptionShow,
+		useShow,
+		shortShow,
+		shortShow,
 		[]string{
 			"sh",
 		},

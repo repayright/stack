@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	useShowHold              = "show <hold-id>"
-	shortDescriptionShowHold = "Show a hold"
+	useShow   = "show <hold-id>"
+	shortShow = "Show a hold"
 )
 
 type ShowStore struct {
@@ -32,11 +32,12 @@ func NewDefaultShowStore() *ShowStore {
 	return &ShowStore{}
 }
 func NewShowConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useShowHold, flag.ExitOnError)
+	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
-		useShowHold,
-		shortDescriptionShowHold,
+	return fctl.NewControllerConfig(
+		useShow,
+		shortShow,
+		shortShow,
 		[]string{
 			"sh",
 		},
@@ -44,9 +45,6 @@ func NewShowConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(shortDescriptionShowHold)
-
-	return c
 }
 func NewShowController(config fctl.ControllerConfig) *ShowController {
 	return &ShowController{

@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	useDeleteWebhook         = "delete <config-id>"
-	descriptionDeleteWebhook = "Delete a config"
+	useDelete              = "delete <config-id>"
+	shortDescriptionDelete = "Delete a config"
 )
 
 type DeleteWebhookStore struct {
@@ -30,12 +30,13 @@ func NewDefaultDeleteWebhookStore() *DeleteWebhookStore {
 }
 
 func NewDeleteWebhookControllerConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useDeleteWebhook, flag.ExitOnError)
+	flags := flag.NewFlagSet(useDelete, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
 	return fctl.NewControllerConfig(
-		useDeleteWebhook,
-		descriptionDeleteWebhook,
+		useDelete,
+		shortDescriptionDelete,
+		shortDescriptionDelete,
 		[]string{
 			"delete",
 			"del",

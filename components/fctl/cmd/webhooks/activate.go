@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	useActivateWebhook         = "activate <config-id>"
-	descriptionActivateWebhook = "Activate one config"
+	useActivate         = "activate <config-id>"
+	descriptionActivate = "Activate one config"
+	shortActivate       = "Activate one config"
 )
 
 type ActivateStore struct {
@@ -25,6 +26,19 @@ func NewActivateStore() *ActivateStore {
 	return &ActivateStore{
 		Success: true,
 	}
+}
+func NewActivateConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useActivate, flag.ExitOnError)
+	fctl.WithConfirmFlag(flags)
+
+	return fctl.NewControllerConfig(
+		useActivate,
+		descriptionActivate,
+		shortActivate,
+		[]string{"ac"},
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*ActivateStore] = (*Activate)(nil)
@@ -105,19 +119,6 @@ func (c *Activate) Render() error {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Config activated successfully")
 
 	return nil
-}
-
-func NewActivateConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useActivateWebhook, flag.ExitOnError)
-	fctl.WithConfirmFlag(flags)
-
-	return fctl.NewControllerConfig(
-		useActivateWebhook,
-		descriptionActivateWebhook,
-		[]string{"ac"},
-		os.Stdout,
-		flags,
-	)
 }
 
 func NewActivateCommand() *cobra.Command {

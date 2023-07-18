@@ -15,10 +15,10 @@ import (
 )
 
 const (
-	defaultEndpointCurrencyCloud  = "https://devapi.currencycloud.com"
-	useCurrencyCloud              = internal.CurrencyCloudConnector + " <login-id> <api-key>"
-	descriptionCurrencyCloud      = "Install CurrencyCloud connector"
-	shortDescriptionCurrencyCloud = "Install CurrencyCloud connector"
+	defaultEndpointCurrencyCloud = "https://devapi.currencycloud.com"
+	useCurrencyCloud             = internal.CurrencyCloudConnector + " <login-id> <api-key>"
+	descriptionCurrencyCloud     = "Install CurrencyCloud connector"
+	shortCurrencyCloud           = "Install CurrencyCloud connector"
 )
 
 type CurrencyCloudStore struct {
@@ -36,18 +36,14 @@ func NewCurrencyCloudConfig() *fctl.ControllerConfig {
 	flags.String(EndpointFlag, defaultEndpointCurrencyCloud, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useCurrencyCloud,
 		descriptionCurrencyCloud,
+		shortCurrencyCloud,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionCurrencyCloud)
-
-	return c
-
 }
 
 type CurrencyCloudController struct {

@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	secretFlag               = "secret"
-	useCreateWebhook         = "create <endpoint> [<event-type>...]"
-	descriptionCreateWebhook = "Create a new config. At least one event type is required."
+	secretFlag        = "secret"
+	useCreate         = "create <endpoint> [<event-type>...]"
+	descriptionCreate = "Create a new config. At least one event type is required."
+	shortCreate       = "Create a new config"
 )
 
 type CreateStore struct {
@@ -30,13 +31,14 @@ func NewDefaultCreateWebhookStore() *CreateStore {
 }
 
 func NewCreateConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useCreateWebhook, flag.ExitOnError)
+	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 	flags.String(secretFlag, "", "Bring your own webhooks signing secret. If not passed or empty, a secret is automatically generated. The format is a string of bytes of size 24, base64 encoded. (larger size after encoding)")
 	fctl.WithConfirmFlag(flags)
 
 	return fctl.NewControllerConfig(
-		useCreateWebhook,
-		descriptionCreateWebhook,
+		useCreate,
+		descriptionCreate,
+		shortCreate,
 		[]string{"cr"},
 		os.Stdout,
 		flags,

@@ -31,19 +31,16 @@ type SearchStore struct {
 func NewSearchConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useSearch, flag.ExitOnError)
 	flags.Int(sizeFlag, 5, "Number of items to fetch")
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useSearch,
 		descriptionSearch,
+		shortDescription,
 		[]string{
 			"se",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescription)
-
-	return c
 }
 
 type SearchController struct {
@@ -214,10 +211,8 @@ func (c *SearchController) Render() error {
 func NewCommand() *cobra.Command {
 	config := NewSearchConfig()
 	return fctl.NewStackCommand(config.GetUse(),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.MinimumNArgs(1)),
 		fctl.WithValidArgs(append(targets, defaultTarget)...),
-		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithController[*SearchStore](NewSearchController(*config)),
 	)
 }
