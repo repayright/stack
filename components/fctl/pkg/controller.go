@@ -10,6 +10,7 @@ import (
 type Renderable interface {
 	Render() error
 }
+
 type Controller[T any] interface {
 	GetStore() T
 
@@ -20,6 +21,8 @@ type Controller[T any] interface {
 type ExportedData struct {
 	Data interface{} `json:"data"`
 }
+
+var GlobalFlags *flag.FlagSet = WithGlobalFlags(nil)
 
 type ControllerConfig struct {
 	context          context.Context
@@ -40,7 +43,7 @@ func NewControllerConfig(use string, description string, aliases []string, out i
 		aliases:     aliases,
 		out:         out,
 		flags:       flags,
-		pflags:      WithGlobalFlags(nil),
+		pflags:      GlobalFlags,
 	}
 
 }
@@ -93,15 +96,19 @@ func (c *ControllerConfig) GetAllFLags() *flag.FlagSet {
 	// Create a new FlagSet
 	flags := flag.NewFlagSet(c.use, flag.ExitOnError)
 
-	// Add the flags from the pflags
-	c.pflags.VisitAll(func(f *flag.Flag) {
-		flags.Var(f.Value, f.Name, f.Usage)
-	})
+	// Regroup pflag in 1 flagset
+	if c.pflags != nil {
+		c.pflags.VisitAll(func(f *flag.Flag) {
+			flags.Var(f.Value, f.Name, f.Usage)
+		})
+	}
 
-	// Add the flags from the flags
-	c.flags.VisitAll(func(f *flag.Flag) {
-		flags.Var(f.Value, f.Name, f.Usage)
-	})
+	// Regroup flags in 1 flagset
+	if c.flags != nil {
+		c.flags.VisitAll(func(f *flag.Flag) {
+			flags.Var(f.Value, f.Name, f.Usage)
+		})
+	}
 
 	return flags
 }
