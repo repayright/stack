@@ -82,23 +82,23 @@ func (c *Controller) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()
-
+	out := c.config.GetOut()
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID, out)
 	if err != nil {
 		return nil, err
 	}
 
-	searchClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
+	searchClient, err := fctl.NewStackClient(flags, ctx, cfg, stack, out)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (c *Controller) Render() error {
 	if ok && c.store.Response.Cursor != nil {
 		//But no data
 		if len(c.store.Response.Cursor.Data) == 0 {
-			fctl.Section.WithWriter(c.config.GetOut()).Println("No data found")
+			fctl.Section.WithWriter(out).Println("No data found")
 			return nil
 		}
 

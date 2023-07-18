@@ -82,12 +82,12 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
-	soc, err := fctl.GetStackOrganizationConfig(flags, ctx)
+	soc, err := fctl.GetStackOrganizationConfig(flags, ctx, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
+	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack, c.config.GetOut())
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
@@ -129,7 +129,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 func (c *ListController) Render() error {
 
 	if len(c.store.WorkflowInstance) == 0 {
-		fctl.Println("No workflows found.")
+		fmt.Fprintln(c.config.GetOut(), "No workflows found.")
 		return nil
 	}
 	if err := pterm.DefaultTable.

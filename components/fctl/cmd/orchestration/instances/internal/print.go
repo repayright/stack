@@ -108,7 +108,7 @@ func PrintStage(out io.Writer, ctx context.Context, i int, client *formance.Form
 		cyanWriter.Printfln("Send %d %s from %s to %s", stageSend.Amount.Amount,
 			stageSend.Amount.Asset, StageSourceName(stageSend.Source),
 			StageDestinationName(stageSend.Destination))
-		fctl.Println()
+		fmt.Fprintln(out)
 
 		stageResponse, err := client.Orchestration.GetInstanceStageHistory(ctx, operations.GetInstanceStageHistoryRequest{
 			InstanceID: id,

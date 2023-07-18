@@ -70,12 +70,12 @@ func (c *Controller) Run() (fctl.Renderable, error) {
 		return nil, err
 	}
 
-	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(flags, ctx, cfg, organization)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organization, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (c *Controller) Run() (fctl.Renderable, error) {
 
 func (c *Controller) Render() error {
 
-	fmt.Println("Opening url: ", c.store.UIUrl)
+	fmt.Fprintln(c.config.GetOut(), "Opening url: ", c.store.UIUrl)
 
 	return nil
 }

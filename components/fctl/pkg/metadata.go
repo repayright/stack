@@ -25,7 +25,7 @@ func ParseMetadata(array []string) (metadata.Metadata, error) {
 func PrintMetadata(out io.Writer, metadata metadata.Metadata) error {
 	Section.WithWriter(out).Println("Metadata")
 	if len(metadata) == 0 {
-		Println("No metadata.")
+		fmt.Fprintln(out, "No metadata.")
 		return nil
 	}
 	tableData := pterm.TableData{}

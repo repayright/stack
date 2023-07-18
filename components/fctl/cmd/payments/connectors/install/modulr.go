@@ -72,12 +72,12 @@ func (c *ModulrController) Run() (fctl.Renderable, error) {
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()
 
-	soc, err := fctl.GetStackOrganizationConfigApprobation(flags, ctx, "You are about to install connector '%s'", internal.ModulrConnector)
+	soc, err := fctl.GetStackOrganizationConfigApprobation(flags, ctx, fmt.Sprintf("You are about to install connector '%s'", internal.ModulrConnector), c.config.GetOut())
 	if err != nil {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	paymentsClient, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
+	paymentsClient, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}

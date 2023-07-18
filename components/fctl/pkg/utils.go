@@ -35,6 +35,10 @@ func ContainValue[V comparable](array []V, value V) bool {
 	return false
 }
 
+func Ptr[T any](t T) *T {
+	return &t
+}
+
 func Open(url string) error {
 	var (
 		cmd  string

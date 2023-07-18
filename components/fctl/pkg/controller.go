@@ -3,6 +3,7 @@ package fctl
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 )
@@ -22,8 +23,6 @@ type ExportedData struct {
 	Data interface{} `json:"data"`
 }
 
-var GlobalFlags *flag.FlagSet = WithGlobalFlags(nil)
-
 type ControllerConfig struct {
 	context          context.Context
 	use              string
@@ -35,6 +34,24 @@ type ControllerConfig struct {
 	pflags           *flag.FlagSet
 	args             []string
 }
+
+var GlobalFlags *flag.FlagSet = func() *flag.FlagSet {
+	flags := flag.NewFlagSet("global", flag.ContinueOnError)
+
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+
+	flags.Bool(InsecureTlsFlag, false, "insecure TLS")
+	flags.Bool(TelemetryFlag, false, "enable telemetry")
+	flags.Bool(DebugFlag, false, "debug mode")
+	flags.String(ProfileFlag, "", "config profile to use")
+	flags.String(FileFlag, fmt.Sprintf("%s/.formance/fctl.config", homedir), "config file to use")
+	flags.String(outputFlag, "plain", "output format (plain, json)")
+
+	return flags
+}()
 
 func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet) *ControllerConfig {
 	return &ControllerConfig{
@@ -74,6 +91,9 @@ func (c *ControllerConfig) GetOut() io.Writer {
 	}
 
 	return c.out
+}
+func (c *ControllerConfig) SetOut(out io.Writer) {
+	c.out = out
 }
 
 func (c *ControllerConfig) GetArgs() []string {

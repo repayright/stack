@@ -73,19 +73,19 @@ func (c *DeleteController) GetConfig() fctl.ControllerConfig {
 func (c *DeleteController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
-
+	out := c.config.GetOut()
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "fctl.GetConfig")
 	}
 	c.fctlConfig = cfg
 
-	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID, out)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (c *DeleteController) Run() (fctl.Renderable, error) {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	webhookClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
+	webhookClient, err := fctl.NewStackClient(flags, ctx, cfg, stack, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}

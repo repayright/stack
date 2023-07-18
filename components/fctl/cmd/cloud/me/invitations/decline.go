@@ -71,7 +71,7 @@ func (c *DeclineController) Run() (fctl.Renderable, error) {
 		return nil, err
 	}
 
-	client, err := fctl.NewMembershipClient(flags, ctx, cfg)
+	client, err := fctl.NewMembershipClient(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 
 	"github.com/formancehq/fctl/membershipclient"
 	"github.com/formancehq/formance-sdk-go"
@@ -13,10 +14,10 @@ func getVersion() string {
 	return Version
 }
 
-func NewMembershipClient(flags *flag.FlagSet, ctx context.Context, cfg *Config) (*membershipclient.APIClient, error) {
+func NewMembershipClient(flags *flag.FlagSet, ctx context.Context, cfg *Config, out io.Writer) (*membershipclient.APIClient, error) {
 	profile := GetCurrentProfile(flags, cfg)
 
-	httpClient := GetHttpClient(flags, map[string][]string{})
+	httpClient := GetHttpClient(flags, map[string][]string{}, out)
 
 	configuration := membershipclient.NewConfiguration()
 
@@ -33,9 +34,9 @@ func NewMembershipClient(flags *flag.FlagSet, ctx context.Context, cfg *Config) 
 	return membershipclient.NewAPIClient(configuration), nil
 }
 
-func NewStackClient(flags *flag.FlagSet, ctx context.Context, cfg *Config, stack *membershipclient.Stack) (*formance.Formance, error) {
+func NewStackClient(flags *flag.FlagSet, ctx context.Context, cfg *Config, stack *membershipclient.Stack, out io.Writer) (*formance.Formance, error) {
 	profile := GetCurrentProfile(flags, cfg)
-	httpClient := GetHttpClient(flags, map[string][]string{})
+	httpClient := GetHttpClient(flags, map[string][]string{}, out)
 
 	token, err := profile.GetStackToken(ctx, httpClient, stack)
 	if err != nil {
@@ -48,7 +49,9 @@ func NewStackClient(flags *flag.FlagSet, ctx context.Context, cfg *Config, stack
 			GetHttpClient(flags, map[string][]string{
 				"Authorization": {fmt.Sprintf("Bearer %s", token)},
 				"User-Agent":    {"fctl/" + getVersion()},
-			}),
+			},
+				out,
+			),
 		),
 	), nil
 }
