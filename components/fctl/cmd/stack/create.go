@@ -1,10 +1,8 @@
 package stack
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 
@@ -37,35 +35,22 @@ func NewDefaultStackCreateStore() *StackCreateStore {
 	}
 }
 
-type StackCreateControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
-}
-
-func NewStackCreateControllerConfig() *StackCreateControllerConfig {
+func NewStackCreateControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 	flags.Bool(unprotectFlag, false, "Unprotect stacks (no confirmation on write commands)")
 	flags.String(regionFlag, "", "Region on which deploy the stack")
 	flags.Bool(nowaitFlag, false, "Not wait stack availability")
 
-	fctl.WithGlobalFlags(flags)
-	return &StackCreateControllerConfig{
-		context:     nil,
-		use:         useCreate,
-		description: descriptionCreate,
-		aliases: []string{
+	return fctl.NewControllerConfig(
+		useCreate,
+		descriptionCreate,
+		[]string{
 			"cr",
 			"c",
 		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*StackCreateStore] = (*StackCreateController)(nil)
@@ -73,39 +58,27 @@ var _ fctl.Controller[*StackCreateStore] = (*StackCreateController)(nil)
 type StackCreateController struct {
 	store   *StackCreateStore
 	profile *fctl.Profile
-	config  StackCreateControllerConfig
+	config  fctl.ControllerConfig
 }
 
-func NewStackCreateController(config StackCreateControllerConfig) *StackCreateController {
+func NewStackCreateController(config fctl.ControllerConfig) *StackCreateController {
 	return &StackCreateController{
 		store:  NewDefaultStackCreateStore(),
 		config: config,
 	}
 }
 
-func (c *StackCreateController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *StackCreateController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *StackCreateController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *StackCreateController) GetStore() *StackCreateStore {
 	return c.store
 }
 
-func (c *StackCreateController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *StackCreateController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *StackCreateController) Run() (fctl.Renderable, error) {
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -128,8 +101,8 @@ func (c *StackCreateController) Run() (fctl.Renderable, error) {
 	}
 
 	name := ""
-	if len(c.config.args) > 0 {
-		name = c.config.args[0]
+	if len(c.config.GetArgs()) > 0 {
+		name = c.config.GetArgs()[0]
 	} else {
 		name, err = pterm.DefaultInteractiveTextInput.WithMultiLine(false).Show("Enter a name")
 		if err != nil {
@@ -196,7 +169,7 @@ func (c *StackCreateController) Run() (fctl.Renderable, error) {
 		}
 	}
 
-	fctl.BasicTextCyan.WithWriter(c.config.out).Printfln("Your dashboard will be reachable on: %s",
+	fctl.BasicTextCyan.WithWriter(c.config.GetOut()).Printfln("Your dashboard will be reachable on: %s",
 		profile.ServicesBaseUrl(stackResponse.Data).String())
 
 	stackClient, err := fctl.NewStackClient(flags, ctx, cfg, stackResponse.Data)
@@ -220,18 +193,18 @@ func (c *StackCreateController) Run() (fctl.Renderable, error) {
 }
 
 func (c *StackCreateController) Render() error {
-	return internal.PrintStackInformation(c.config.out, c.profile, c.store.Stack, c.store.Versions)
+	return internal.PrintStackInformation(c.config.GetOut(), c.profile, c.store.Stack, c.store.Versions)
 }
 
 func NewCreateCommand() *cobra.Command {
 
 	config := NewStackCreateControllerConfig()
 
-	return fctl.NewMembershipCommand(config.use,
-		fctl.WithShortDescription(config.description),
-		fctl.WithAliases(config.aliases...),
+	return fctl.NewMembershipCommand(config.GetUse(),
+		fctl.WithShortDescription(config.GetDescription()),
+		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.RangeArgs(0, 1)),
-		fctl.WithGoFlagSet(config.flags),
+		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*StackCreateStore](NewStackCreateController(*config)),
 	)
 }

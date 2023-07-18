@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/TylerBrock/colorjson"
 	"github.com/formancehq/fctl/membershipclient"
@@ -12,7 +13,6 @@ import (
 	"github.com/segmentio/analytics-go/v3"
 	"github.com/segmentio/ksuid"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -264,12 +264,14 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 func WithController[T any](c Controller[T]) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
-			if c.GetContext() == nil {
-				c.SetContext(cmd.Context())
+			config := c.GetConfig()
+
+			if config.GetContext() == nil {
+				config.SetContext(cmd.Context())
 			}
 
 			if len(args) > 0 {
-				c.SetArgs(args)
+				config.SetArgs(args)
 			}
 
 			return nil
@@ -288,7 +290,9 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 				return err
 			}
 
-			err = WithRender(c.GetFlags(), c, renderable)
+			config := c.GetConfig()
+
+			err = WithRender(config.GetFlags(), c, renderable)
 
 			if err != nil {
 				return err

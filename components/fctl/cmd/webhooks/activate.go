@@ -1,10 +1,8 @@
 package webhooks
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -19,82 +17,42 @@ const (
 	descriptionActivateWebhook = "Activate one config"
 )
 
-type ActivateWebhookStore struct {
+type ActivateStore struct {
 	Success bool `json:"success"`
 }
 
-func NewDefaultVersionStore() *ActivateWebhookStore {
-	return &ActivateWebhookStore{
+func NewActivateStore() *ActivateStore {
+	return &ActivateStore{
 		Success: true,
 	}
 }
 
-type ActivateWebhookControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
+var _ fctl.Controller[*ActivateStore] = (*Activate)(nil)
+
+type Activate struct {
+	store  *ActivateStore
+	config fctl.ControllerConfig
 }
 
-func NewActivateWebhookControllerConfig() *ActivateWebhookControllerConfig {
-	flags := flag.NewFlagSet(useActivateWebhook, flag.ExitOnError)
-	fctl.WithGlobalFlags(flags)
-	fctl.WithConfirmFlag(flags)
-
-	return &ActivateWebhookControllerConfig{
-		context:     nil,
-		use:         useActivateWebhook,
-		description: descriptionActivateWebhook,
-		aliases: []string{
-			"ac", "a",
-		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
-}
-
-var _ fctl.Controller[*ListWebhookStore] = (*ListWebhookController)(nil)
-
-type ActivateWebhookController struct {
-	store  *ActivateWebhookStore
-	config ActivateWebhookControllerConfig
-}
-
-func NewActivateWebhookController(config ActivateWebhookControllerConfig) *ActivateWebhookController {
-	return &ActivateWebhookController{
-		store:  NewDefaultVersionStore(),
+func NewActivateController(config fctl.ControllerConfig) *Activate {
+	return &Activate{
+		store:  NewActivateStore(),
 		config: config,
 	}
 }
 
-func (c *ActivateWebhookController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *ActivateWebhookController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *ActivateWebhookController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
-func (c *ActivateWebhookController) GetStore() *ActivateWebhookStore {
+func (c *Activate) GetStore() *ActivateStore {
 	return c.store
 }
 
-func (c *ActivateWebhookController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *Activate) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
-func (c *ActivateWebhookController) Run() (fctl.Renderable, error) {
+func (c *Activate) Run() (fctl.Renderable, error) {
 
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -120,12 +78,12 @@ func (c *ActivateWebhookController) Run() (fctl.Renderable, error) {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	if len(c.config.args) < 1 {
+	if len(c.config.GetArgs()) < 1 {
 		return nil, fmt.Errorf("missing config id")
 	}
 
 	request := operations.ActivateConfigRequest{
-		ID: c.config.args[0],
+		ID: c.config.GetArgs()[0],
 	}
 	response, err := client.Webhooks.ActivateConfig(ctx, request)
 	if err != nil {
@@ -143,19 +101,32 @@ func (c *ActivateWebhookController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *ActivateWebhookController) Render() error {
-	pterm.Success.WithWriter(c.config.out).Printfln("Config activated successfully")
+func (c *Activate) Render() error {
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Config activated successfully")
 
 	return nil
 }
 
+func NewActivateConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useActivateWebhook, flag.ExitOnError)
+	fctl.WithConfirmFlag(flags)
+
+	return fctl.NewControllerConfig(
+		useActivateWebhook,
+		descriptionActivateWebhook,
+		[]string{"ac"},
+		os.Stdout,
+		flags,
+	)
+}
+
 func NewActivateCommand() *cobra.Command {
-	config := NewActivateWebhookControllerConfig()
-	return fctl.NewCommand(config.use,
-		fctl.WithShortDescription(config.description),
-		fctl.WithAliases(config.aliases...),
+	config := NewActivateConfig()
+	return fctl.NewCommand(config.GetUse(),
+		fctl.WithShortDescription(config.GetDescription()),
+		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithGoFlagSet(config.flags),
-		fctl.WithController[*ActivateWebhookStore](NewActivateWebhookController(*config)),
+		fctl.WithGoFlagSet(config.GetFlags()),
+		fctl.WithController[*ActivateStore](NewActivateController(*config)),
 	)
 }
