@@ -17,7 +17,7 @@ var (
 	PaymentsConnectorsUninstall = "develop"
 	useUninstall                = "uninstall <connector-name>"
 	descriptionUninstall        = "Uninstall a connector"
-	shortDescriptionUninstall   = "Uninstall a connector"
+	shortUninstall              = "Uninstall a connector"
 )
 
 type UninstallStore struct {
@@ -29,19 +29,16 @@ func NewUninstallConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useUninstall, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useUninstall,
 		descriptionUninstall,
+		shortUninstall,
 		[]string{
 			"uninstall", "u", "un",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionUninstall)
-
-	return c
 }
 
 func NewUninstallStore() *UninstallStore {
@@ -131,7 +128,6 @@ func NewUninstallCommand() *cobra.Command {
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgs(internal.AllConnectors...),
-		fctl.WithShortDescription(*c.GetShortDescription()),
 		fctl.WithController[*UninstallStore](NewUninstallController(*c)),
 	)
 }

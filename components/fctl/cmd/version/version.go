@@ -10,11 +10,11 @@ import (
 )
 
 var (
-	useVersion         = "version"
-	descriptionVersion = "Get version"
-	Version            = "develop"
-	Commit             = "-"
-	BuildDate          = "-"
+	useVersion   = "version"
+	shortVersion = "Get version"
+	Version      = "develop"
+	Commit       = "-"
+	BuildDate    = "-"
 )
 
 type VersionStore struct {
@@ -38,17 +38,14 @@ func NewDefaultVersionStore() *VersionStore {
 }
 func NewVersionConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useVersion, flag.ExitOnError)
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useVersion,
-		descriptionVersion,
+		shortVersion,
+		shortVersion,
 		[]string{"v"},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(descriptionVersion)
-
-	return c
 }
 func NewVersionController(config fctl.ControllerConfig) *VersionController {
 	return &VersionController{
@@ -82,7 +79,6 @@ func (c *VersionController) Render() error {
 func NewCommand() *cobra.Command {
 	c := NewVersionConfig()
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(*c.GetShortDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithController[*VersionStore](NewVersionController(*c)),
 	)

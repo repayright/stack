@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	useCreate              = "create <file>|-"
-	shortDescriptionCreate = "Create a workflow"
+	useCreate   = "create <file>|-"
+	shortCreate = "Create a workflow"
 )
 
 type CreateStore struct {
@@ -27,15 +27,14 @@ func NewCreateConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useCreate,
-		shortDescriptionCreate,
+		shortCreate,
+		shortCreate,
 		[]string{
 			"cr", "c",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionCreate)
 
 	return c
 }

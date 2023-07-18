@@ -38,6 +38,7 @@ func NewConfig() *fctl.ControllerConfig {
 	return fctl.NewControllerConfig(
 		useLogin,
 		descriptionLogin,
+		descriptionLogin,
 		[]string{
 			"log",
 		},
@@ -134,7 +135,6 @@ func (c *LoginController) Render() error {
 func NewCommand() *cobra.Command {
 	config := NewConfig()
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithController[*Store](NewController(*config)),
 	)

@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	stripeApiKeyFLag           = "api-key"
-	useStripeConnector         = internal.StripeConnector + " <api-key>"
-	descriptionStripeConnector = "Install Stripe connector"
+	stripeApiKeyFLag     = "api-key"
+	useStripeConnector   = internal.StripeConnector + " <api-key>"
+	shortStripeConnector = "Install Stripe connector"
 )
 
 type StripeStore struct {
@@ -33,17 +33,15 @@ func NewStripeConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useStripeConnector, flag.ExitOnError)
 	flags.String(stripeApiKeyFLag, "", "Stripe API key")
 	fctl.WithConfirmFlag(flags)
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useStripeConnector,
-		descriptionStripeConnector,
+		shortStripeConnector,
+		shortStripeConnector,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
 
-	c.SetShortDescription(descriptionStripeConnector)
-
-	return c
 }
 
 var _ fctl.Controller[*StripeStore] = (*StripeController)(nil)

@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	useVoid         = "void <hold-id>"
-	descriptionVoid = "Void a hold"
+	useVoid   = "void <hold-id>"
+	shortVoid = "Void a hold"
 )
 
 type VoidStore struct {
@@ -35,9 +35,10 @@ func NewDefaultVoidStore() *VoidStore {
 func NewVoidConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useVoid, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useVoid,
-		descriptionVoid,
+		shortVoid,
+		shortVoid,
 		[]string{
 			"deb",
 		},
@@ -45,9 +46,6 @@ func NewVoidConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(descriptionVoid)
-
-	return c
 }
 
 func NewVoidController(config fctl.ControllerConfig) *VoidController {

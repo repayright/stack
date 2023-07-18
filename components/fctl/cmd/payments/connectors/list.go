@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	PaymentsConnectorsList    = "develop"
-	useListConnectors         = "list"
-	descriptionListConnectors = "List all enabled connectors"
+	PaymentsConnectorsList = "develop"
+	useList                = "list"
+	descriptionList        = "List all enabled connectors"
 )
 
 type ListStore struct {
@@ -28,11 +28,12 @@ func NewListStore() *ListStore {
 }
 
 func NewListConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useListConnectors, flag.ExitOnError)
+	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
-		useListConnectors,
-		descriptionListConnectors,
+	return fctl.NewControllerConfig(
+		useList,
+		descriptionList,
+		"",
 		[]string{
 			"list",
 			"ls",
@@ -41,9 +42,6 @@ func NewListConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(descriptionListConnectors)
-
-	return c
 }
 
 var _ fctl.Controller[*ListStore] = (*ListController)(nil)

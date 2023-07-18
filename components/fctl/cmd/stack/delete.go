@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	useDelete         = "delete (<stack-id> | --name=<stack-name>)"
-	descriptionDelete = "Delete a stack"
+	useDelete   = "delete (<stack-id> | --name=<stack-name>)"
+	shortDelete = "Delete a stack"
 )
 
 type DeletedStackStore struct {
@@ -36,7 +36,8 @@ func NewStackDeleteControllerConfig() *fctl.ControllerConfig {
 
 	return fctl.NewControllerConfig(
 		useDelete,
-		descriptionDelete,
+		shortDelete,
+		shortDelete,
 		[]string{
 			"delete",
 			"del",

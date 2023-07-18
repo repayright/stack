@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	variableFlag        = "variable"
-	waitFlag            = "wait"
-	useRun              = "run <id>"
-	shortDescriptionRun = "Run a workflow"
+	variableFlag = "variable"
+	waitFlag     = "wait"
+	useRun       = "run <id>"
+	shortRun     = "Run a workflow"
 )
 
 type RunStore struct {
@@ -38,15 +38,14 @@ func NewRunConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useRun,
-		shortDescriptionRun,
+		shortRun,
+		shortRun,
 		[]string{
 			"r",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionRun)
 
 	return c
 }

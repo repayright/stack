@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	useSendEvent              = "send-event <instance-id> <event>"
-	shortDescriptionSendEvent = "Send an event to an instance"
+	useSendEvent   = "send-event <instance-id> <event>"
+	shortSendEvent = "Send an event to an instance"
 )
 
 type SendEventStore struct {
@@ -28,7 +28,8 @@ func NewSendEventConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useSendEvent,
-		shortDescriptionSendEvent,
+		shortSendEvent,
+		shortSendEvent,
 		[]string{
 			"se",
 		},
@@ -36,7 +37,6 @@ func NewSendEventConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(shortDescriptionSendEvent)
 	return c
 }
 

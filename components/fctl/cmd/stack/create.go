@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	unprotectFlag     = "unprotect"
-	regionFlag        = "region"
-	nowaitFlag        = "no-wait"
-	useCreate         = "create [name]"
-	descriptionCreate = "Create a new stack"
+	unprotectFlag = "unprotect"
+	regionFlag    = "region"
+	nowaitFlag    = "no-wait"
+	useCreate     = "create [name]"
+	shortCreate   = "Create a new stack"
 )
 
 type StackCreateStore struct {
@@ -43,7 +43,8 @@ func NewStackCreateControllerConfig() *fctl.ControllerConfig {
 
 	return fctl.NewControllerConfig(
 		useCreate,
-		descriptionCreate,
+		shortCreate,
+		shortCreate,
 		[]string{
 			"cr",
 			"c",

@@ -12,7 +12,7 @@ import (
 
 const (
 	useProfile         = "use <name>"
-	shortDescription   = "Use a profile"
+	shortProfile       = "Use a profile"
 	descriptionProfile = "Select a profile to use"
 )
 
@@ -29,19 +29,16 @@ func NewDefaultUseStore() *UseStore {
 func NewUseConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useProfile, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useProfile,
 		descriptionProfile,
+		shortProfile,
 		[]string{
 			"u",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescription)
-
-	return c
 }
 
 type UseController struct {
@@ -97,9 +94,7 @@ func NewUseCommand() *cobra.Command {
 	config := NewUseConfig()
 
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
 		fctl.WithController[*UseStore](NewUseController(*config)),
 	)

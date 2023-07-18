@@ -38,12 +38,11 @@ func NewChangeSecretControllerConfig() *fctl.ControllerConfig {
 	c := fctl.NewControllerConfig(
 		useChangeSecret,
 		descriptionChangeSecret,
+		shortDescriptionChangeSecret,
 		[]string{"cs"},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionChangeSecret)
 
 	return c
 }
@@ -144,8 +143,6 @@ func NewChangeSecretCommand() *cobra.Command {
 	config := NewChangeSecretControllerConfig()
 
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithShortDescription(*config.GetShortDescription()),
-		fctl.WithDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
 		fctl.WithController[*ChangeSecretStore](NewChangeSecretWebhookController(*config)),
 	)

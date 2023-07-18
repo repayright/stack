@@ -16,7 +16,7 @@ import (
 const (
 	deletedFlag = "deleted"
 	useList     = "list"
-	description = "List stacks"
+	shortList   = "List stacks"
 )
 
 type Stack struct {
@@ -43,7 +43,8 @@ func NewStackListControllerConfig() *fctl.ControllerConfig {
 
 	return fctl.NewControllerConfig(
 		useList,
-		description,
+		shortList,
+		shortList,
 		[]string{
 			"list",
 			"ls",

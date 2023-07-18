@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	useShow              = "show <id>"
-	shortDescriptionShow = "Show a workflow"
+	useShow   = "show <id>"
+	shortShow = "Show a workflow"
 )
 
 type ShowStore struct {
@@ -29,15 +29,14 @@ func NewShowConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useShow,
-		shortDescriptionShow,
+		shortShow,
+		shortShow,
 		[]string{
 			"s",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionShow)
 
 	return c
 }

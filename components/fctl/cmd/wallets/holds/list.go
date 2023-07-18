@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	useListHolds         = "list"
-	descriptionListHolds = "List holds of a wallets"
+	useList   = "list"
+	shortList = "List holds of a wallets"
 )
 
 type ListStore struct {
@@ -33,13 +33,14 @@ func NewDefaultListStore() *ListStore {
 	return &ListStore{}
 }
 func NewListConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useListHolds, flag.ExitOnError)
+	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 	internal.WithTargetingWalletByName(flags)
 	internal.WithTargetingWalletByID(flags)
 	fctl.WithMetadataFlag(flags)
-	c := fctl.NewControllerConfig(
-		useListHolds,
-		descriptionListHolds,
+	return fctl.NewControllerConfig(
+		useList,
+		shortList,
+		shortList,
 		[]string{
 			"ls", "l",
 		},
@@ -47,9 +48,6 @@ func NewListConfig() *fctl.ControllerConfig {
 		flags,
 	)
 
-	c.SetShortDescription(descriptionListHolds)
-
-	return c
 }
 func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{

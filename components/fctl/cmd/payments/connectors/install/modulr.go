@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	defaultEndpointModulr      = "https://api-sandbox.modulrfinance.com"
-	useModulrConnector         = internal.ModulrConnector + " <api-key> <api-secret>"
-	descriptionModulrConnector = "Install Modulr connector"
+	defaultEndpointModulr = "https://api-sandbox.modulrfinance.com"
+	useModulrConnector    = internal.ModulrConnector + " <api-key> <api-secret>"
+	shortModulrConnector  = "Install Modulr connector"
 )
 
 type ModulrStore struct {
@@ -34,17 +34,15 @@ func NewModulrConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useModulrConnector, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointModulr, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	c := fctl.NewControllerConfig(
+	return fctl.NewControllerConfig(
 		useModulrConnector,
-		descriptionModulrConnector,
+		shortModulrConnector,
+		shortModulrConnector,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
 
-	c.SetShortDescription(descriptionModulrConnector)
-
-	return c
 }
 
 type ModulrController struct {

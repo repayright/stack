@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	useSetOrg              = "set-default-organization <organization-id>"
-	shortDescriptionSetOrg = "Set default organization"
-	descriptionSetOrg      = "Set default organization"
+	useSetOrg         = "set-default-organization <organization-id>"
+	shortSetOrg       = "Set default organization"
+	descriptionSetOrg = "Set default organization"
 )
 
 type SetOrgStore struct {
@@ -26,14 +26,14 @@ func NewSetOrgConfig() *fctl.ControllerConfig {
 	c := fctl.NewControllerConfig(
 		useSetOrg,
 		descriptionSetOrg,
+		shortSetOrg,
 		[]string{
-			"u",
+			"set-org",
+			"sdo",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionSetOrg)
 
 	return c
 }
@@ -100,8 +100,6 @@ func NewSetDefaultOrganizationCommand() *cobra.Command {
 	config := NewSetOrgConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases("sdo"),
-		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
 		fctl.WithController[*SetOrgStore](NewSetOrgController(*config)),
 	)

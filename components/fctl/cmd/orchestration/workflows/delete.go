@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	useDelete              = "delete <workflow-id>"
-	shortDescriptionDelete = "Delete a workflow"
+	useDelete   = "delete <workflow-id>"
+	shortDelete = "Delete a workflow"
 )
 
 type DeleteStore struct {
@@ -31,15 +31,14 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useDelete,
-		shortDescriptionDelete,
+		shortDelete,
+		shortDelete,
 		[]string{
 			"del", "d",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionDelete)
 
 	return c
 }

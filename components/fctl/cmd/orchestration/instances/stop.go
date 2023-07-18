@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	useStop              = "stop <instance-id>"
-	shortDescriptionStop = "Stop a specific workflow instance"
+	useStop   = "stop <instance-id>"
+	shortStop = "Stop a specific workflow instance"
 )
 
 type StopStore struct {
@@ -27,13 +27,12 @@ func NewStopConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useStop,
-		shortDescriptionStop,
+		shortStop,
+		shortStop,
 		[]string{},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionStop)
 
 	return c
 }

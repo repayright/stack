@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	useList              = "list"
-	shortDescriptionList = "List all workflows"
+	useList   = "list"
+	shortList = "List all workflows"
 )
 
 type Workflow struct {
@@ -34,7 +34,8 @@ func NewListConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useList,
-		shortDescriptionList,
+		shortList,
+		shortList,
 		[]string{
 			"list",
 			"ls",
@@ -42,8 +43,6 @@ func NewListConfig() *fctl.ControllerConfig {
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionList)
 
 	return c
 }

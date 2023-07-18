@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	useShow         = "show (<stack-id> | --name=<stack-name>)"
-	descriptionShow = "Show a stack"
+	useShow   = "show (<stack-id> | --name=<stack-name>)"
+	shortShow = "Show a stack"
 )
 
 var errStackNotFound = errors.New("stack not found")
@@ -39,7 +39,8 @@ func NewStackShowControllerConfig() *fctl.ControllerConfig {
 
 	return fctl.NewControllerConfig(
 		useShow,
-		descriptionShow,
+		shortShow,
+		shortShow,
 		[]string{
 			"show",
 			"sh",

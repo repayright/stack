@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	useListProfile         = "list"
-	descriptionListProfile = "List all profiles"
+	useList         = "list"
+	descriptionList = "List all profiles"
 )
 
 type Profile struct {
@@ -28,10 +28,11 @@ func NewDefaultProfilesListStore() *ProfilesListStore {
 }
 
 func NewListConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useListProfile, flag.ExitOnError)
+	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 	return fctl.NewControllerConfig(
-		useListProfile,
-		descriptionListProfile,
+		useList,
+		descriptionList,
+		descriptionList,
 		[]string{
 			"ls",
 			"l",
@@ -112,7 +113,6 @@ func (c *ListController) Render() error {
 func NewListCommand() *cobra.Command {
 	config := NewListConfig()
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithController[*ProfilesListStore](NewListController(*config)),
 	)

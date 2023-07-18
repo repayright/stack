@@ -15,10 +15,10 @@ import (
 )
 
 const (
-	useConfirmHold         = "confirm <hold-id>"
-	descriptionConfirmHold = "Confirm a hold"
-	finalFlag              = "final"
-	amountFlag             = "amount"
+	useConfirm   = "confirm <hold-id>"
+	shortConfirm = "Confirm a hold"
+	finalFlag    = "final"
+	amountFlag   = "amount"
 )
 
 type ConfirmStore struct {
@@ -36,21 +36,20 @@ func NewDefaultConfirmStore() *ConfirmStore {
 	return &ConfirmStore{}
 }
 func NewConfirmConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useConfirmHold, flag.ExitOnError)
+	flags := flag.NewFlagSet(useConfirm, flag.ExitOnError)
 	flags.Bool(finalFlag, false, "Is final debit (close hold)")
 	flags.Int(amountFlag, 0, "Amount to confirm")
 
 	c := fctl.NewControllerConfig(
-		useConfirmHold,
-		descriptionConfirmHold,
+		useConfirm,
+		shortConfirm,
+		shortConfirm,
 		[]string{
 			"c", "conf",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(descriptionConfirmHold)
 
 	return c
 }
@@ -131,7 +130,6 @@ func (c *ConfirmController) Render() error {
 func NewConfirmCommand() *cobra.Command {
 	c := NewConfirmConfig()
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
 		fctl.WithController[*ConfirmStore](NewConfirmController(*c)),
 	)

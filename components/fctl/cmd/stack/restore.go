@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	useRestore         = "restore <stack-id>"
-	descriptionRestore = "Restore a stack"
+	useRestore   = "restore <stack-id>"
+	shortRestore = "Restore a stack"
 )
 
 type StackRestoreStore struct {
@@ -37,7 +37,8 @@ func NewStackRestoreControllerConfig() *fctl.ControllerConfig {
 
 	return fctl.NewControllerConfig(
 		useRestore,
-		descriptionRestore,
+		shortRestore,
+		shortRestore,
 		[]string{
 			"restore",
 			"re",

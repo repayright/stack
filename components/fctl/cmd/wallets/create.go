@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	useCreateWallet         = "create <name>"
-	descriptionCreateWallet = "Create a new wallet"
+	useCreate   = "create <name>"
+	shortCreate = "Create a new wallet"
 )
 
 type CreateStore struct {
@@ -31,12 +31,13 @@ func NewDefaultCreateStore() *CreateStore {
 	return &CreateStore{}
 }
 func NewCreateConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useCreateWallet, flag.ExitOnError)
+	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 	fctl.WithMetadataFlag(flags)
 	fctl.WithConfirmFlag(flags)
 	return fctl.NewControllerConfig(
-		useCreateWallet,
-		descriptionCreateWallet,
+		useCreate,
+		shortCreate,
+		shortCreate,
 		[]string{
 			"cr",
 		},

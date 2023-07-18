@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	useShow              = "show <instance-id>"
-	shortDescriptionShow = "Show a specific workflow instance"
+	useShow   = "show <instance-id>"
+	shortShow = "Show a specific workflow instance"
 )
 
 type ShowStore struct {
@@ -33,15 +33,14 @@ func NewShowConfig() *fctl.ControllerConfig {
 
 	c := fctl.NewControllerConfig(
 		useShow,
-		shortDescriptionShow,
+		shortShow,
+		shortShow,
 		[]string{
 			"sh",
 		},
 		os.Stdout,
 		flags,
 	)
-
-	c.SetShortDescription(shortDescriptionShow)
 
 	return c
 }
