@@ -30,14 +30,6 @@ func NewInstancesStopController() *InstancesStopController {
 	}
 }
 
-func NewStopCommand() *cobra.Command {
-	return fctl.NewCommand("stop <instance-id>",
-		fctl.WithShortDescription("Stop a specific workflow instance"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*InstancesStopStore](NewInstancesStopController()),
-	)
-}
-
 func (c *InstancesStopController) GetStore() *InstancesStopStore {
 	return c.store
 }
@@ -79,4 +71,12 @@ func (c *InstancesStopController) Render(cmd *cobra.Command, args []string) erro
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Workflow Instance with ID: %s successfully canceled ", c.store.InstanceID)
 
 	return nil
+}
+
+func NewStopCommand() *cobra.Command {
+	return fctl.NewCommand("stop <instance-id>",
+		fctl.WithShortDescription("Stop a specific workflow instance"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*InstancesStopStore](NewInstancesStopController()),
+	)
 }

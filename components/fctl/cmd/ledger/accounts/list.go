@@ -32,17 +32,6 @@ func NewListController() *ListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	c := NewListController()
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List accounts"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{}, "Filter accounts with metadata"),
-		fctl.WithController[*ListStore](c),
-	)
-}
-
 func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
@@ -110,4 +99,15 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
+}
+
+func NewListCommand() *cobra.Command {
+	c := NewListController()
+	return fctl.NewCommand("list",
+		fctl.WithAliases("ls", "l"),
+		fctl.WithShortDescription("List accounts"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{}, "Filter accounts with metadata"),
+		fctl.WithController[*ListStore](c),
+	)
 }

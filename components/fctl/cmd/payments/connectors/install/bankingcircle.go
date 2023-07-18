@@ -46,18 +46,6 @@ func NewPaymentsConnectorsBankingCircleController() *PaymentsConnectorsBankingCi
 	}
 }
 
-func NewBankingCircleCommand() *cobra.Command {
-	c := NewPaymentsConnectorsBankingCircleController()
-	return fctl.NewCommand(internal.BankingCircleConnector+" <username> <password>",
-		fctl.WithShortDescription("Install a Banking Circle connector"),
-		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
-		fctl.WithStringFlag(c.authorizationEndpointFlag, c.defaultAuthorizationEndpoint, "Authorization endpoint"),
-		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
-		fctl.WithController[*PaymentsConnectorsBankingCircleStore](c),
-	)
-}
-
 func (c *PaymentsConnectorsBankingCircleController) GetStore() *PaymentsConnectorsBankingCircleStore {
 	return c.store
 }
@@ -103,4 +91,15 @@ func (c *PaymentsConnectorsBankingCircleController) Render(cmd *cobra.Command, a
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' installed!", c.store.ConnectorName)
 
 	return nil
+}
+func NewBankingCircleCommand() *cobra.Command {
+	c := NewPaymentsConnectorsBankingCircleController()
+	return fctl.NewCommand(internal.BankingCircleConnector+" <username> <password>",
+		fctl.WithShortDescription("Install a Banking Circle connector"),
+		fctl.WithArgs(cobra.ExactArgs(2)),
+		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
+		fctl.WithStringFlag(c.authorizationEndpointFlag, c.defaultAuthorizationEndpoint, "Authorization endpoint"),
+		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
+		fctl.WithController[*PaymentsConnectorsBankingCircleStore](c),
+	)
 }

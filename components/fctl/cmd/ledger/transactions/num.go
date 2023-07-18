@@ -44,24 +44,6 @@ func NewNumController() *NumController {
 	}
 }
 
-func NewNumCommand() *cobra.Command {
-	c := NewNumController()
-
-	return fctl.NewCommand("num -|<filename>",
-		fctl.WithShortDescription("Execute a numscript script on a ledger"),
-		fctl.WithDescription(`More help on variables can be found here: https://docs.formance.com/oss/ledger/reference/numscript/variables`),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithConfirmFlag(),
-		fctl.WithStringSliceFlag(c.amountVarFlag, []string{""}, "Pass a variable of type 'amount'"),
-		fctl.WithStringSliceFlag(c.portionVarFlag, []string{""}, "Pass a variable of type 'portion'"),
-		fctl.WithStringSliceFlag(c.accountVarFlag, []string{""}, "Pass a variable of type 'account'"),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithStringFlag(c.timestampFlag, "", "Timestamp to use (format RFC3339)"),
-		fctl.WithStringFlag(c.referenceFlag, "", "Reference to add to the generated transaction"),
-		fctl.WithController[*NumStore](c),
-	)
-}
-
 func (c *NumController) GetStore() *NumStore {
 	return c.store
 }
@@ -183,4 +165,22 @@ func (c *NumController) Run(cmd *cobra.Command, args []string) (fctl.Renderable,
 func (c *NumController) Render(cmd *cobra.Command, args []string) error {
 
 	return internal.PrintTransaction(cmd.OutOrStdout(), *c.store.Transaction)
+}
+
+func NewNumCommand() *cobra.Command {
+	c := NewNumController()
+
+	return fctl.NewCommand("num -|<filename>",
+		fctl.WithShortDescription("Execute a numscript script on a ledger"),
+		fctl.WithDescription(`More help on variables can be found here: https://docs.formance.com/oss/ledger/reference/numscript/variables`),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithConfirmFlag(),
+		fctl.WithStringSliceFlag(c.amountVarFlag, []string{""}, "Pass a variable of type 'amount'"),
+		fctl.WithStringSliceFlag(c.portionVarFlag, []string{""}, "Pass a variable of type 'portion'"),
+		fctl.WithStringSliceFlag(c.accountVarFlag, []string{""}, "Pass a variable of type 'account'"),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+		fctl.WithStringFlag(c.timestampFlag, "", "Timestamp to use (format RFC3339)"),
+		fctl.WithStringFlag(c.referenceFlag, "", "Reference to add to the generated transaction"),
+		fctl.WithController[*NumStore](c),
+	)
 }

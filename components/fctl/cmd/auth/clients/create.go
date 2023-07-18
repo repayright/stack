@@ -48,22 +48,6 @@ func NewCreateController() *CreateController {
 	}
 }
 
-func NewCreateCommand() *cobra.Command {
-	c := NewCreateController()
-	return fctl.NewCommand("create <name>",
-		fctl.WithAliases("c"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithConfirmFlag(),
-		fctl.WithBoolFlag(c.publicFlag, false, "Is client public"),
-		fctl.WithBoolFlag(c.trustedFlag, false, "Is the client trusted"),
-		fctl.WithStringFlag(c.descriptionFlag, "", "Client description"),
-		fctl.WithStringSliceFlag(c.redirectUriFlag, []string{}, "Redirect URIS"),
-		fctl.WithStringSliceFlag(c.postLogoutRedirectUriFlag, []string{}, "Post logout redirect uris"),
-		fctl.WithShortDescription("Create client"),
-		fctl.WithController[*CreateStore](c),
-	)
-}
-
 func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
@@ -138,4 +122,20 @@ func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
+}
+
+func NewCreateCommand() *cobra.Command {
+	c := NewCreateController()
+	return fctl.NewCommand("create <name>",
+		fctl.WithAliases("c"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithConfirmFlag(),
+		fctl.WithBoolFlag(c.publicFlag, false, "Is client public"),
+		fctl.WithBoolFlag(c.trustedFlag, false, "Is the client trusted"),
+		fctl.WithStringFlag(c.descriptionFlag, "", "Client description"),
+		fctl.WithStringSliceFlag(c.redirectUriFlag, []string{}, "Redirect URIS"),
+		fctl.WithStringSliceFlag(c.postLogoutRedirectUriFlag, []string{}, "Post logout redirect uris"),
+		fctl.WithShortDescription("Create client"),
+		fctl.WithController[*CreateStore](c),
+	)
 }

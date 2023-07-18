@@ -33,14 +33,6 @@ func NewInstancesShowController() *InstancesShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <instance-id>",
-		fctl.WithShortDescription("Show a specific workflow instance"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*InstancesShowStore](NewInstancesShowController()),
-	)
-}
-
 func (c *InstancesShowController) GetStore() *InstancesShowStore {
 	return c.store
 }
@@ -118,4 +110,12 @@ func (c *InstancesShowController) Render(cmd *cobra.Command, args []string) erro
 	}
 
 	return nil
+}
+
+func NewShowCommand() *cobra.Command {
+	return fctl.NewCommand("show <instance-id>",
+		fctl.WithShortDescription("Show a specific workflow instance"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*InstancesShowStore](NewInstancesShowController()),
+	)
 }

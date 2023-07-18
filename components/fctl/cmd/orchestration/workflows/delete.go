@@ -29,14 +29,6 @@ func NewWorkflowsDeleteController() *WorkflowsDeleteController {
 		store: NewDefaultWorkflowsDeleteStore(),
 	}
 }
-func NewDeleteCommand() *cobra.Command {
-	return fctl.NewCommand("delete <workflow-id>",
-		fctl.WithAliases("del", "d"),
-		fctl.WithShortDescription("Soft delete a workflow"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*WorkflowsDeleteStore](NewWorkflowsDeleteController()),
-	)
-}
 
 func (c *WorkflowsDeleteController) GetStore() *WorkflowsDeleteStore {
 	return c.store
@@ -91,4 +83,13 @@ func (c *WorkflowsDeleteController) Run(cmd *cobra.Command, args []string) (fctl
 func (c *WorkflowsDeleteController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithShowLineNumber().Printfln("Workflow %s Deleted!", c.store.WorkflowId)
 	return nil
+}
+
+func NewDeleteCommand() *cobra.Command {
+	return fctl.NewCommand("delete <workflow-id>",
+		fctl.WithAliases("del", "d"),
+		fctl.WithShortDescription("Soft delete a workflow"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*WorkflowsDeleteStore](NewWorkflowsDeleteController()),
+	)
 }

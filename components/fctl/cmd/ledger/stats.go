@@ -30,15 +30,6 @@ func NewStatsController() *StatsController {
 	}
 }
 
-func NewStatsCommand() *cobra.Command {
-	return fctl.NewCommand("stats",
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithAliases("st"),
-		fctl.WithShortDescription("Read ledger stats"),
-		fctl.WithController[*StatsStore](NewStatsController()),
-	)
-}
-
 func (c *StatsController) GetStore() *StatsStore {
 	return c.store
 }
@@ -96,4 +87,13 @@ func (c *StatsController) Render(cmd *cobra.Command, args []string) error {
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
+}
+
+func NewStatsCommand() *cobra.Command {
+	return fctl.NewCommand("stats",
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithAliases("st"),
+		fctl.WithShortDescription("Read ledger stats"),
+		fctl.WithController[*StatsStore](NewStatsController()),
+	)
 }

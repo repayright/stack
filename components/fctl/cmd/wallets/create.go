@@ -31,18 +31,6 @@ func NewCreateController() *CreateController {
 	}
 }
 
-func NewCreateCommand() *cobra.Command {
-	c := NewCreateController()
-	return fctl.NewCommand("create <name>",
-		fctl.WithShortDescription("Create a new wallet"),
-		fctl.WithAliases("cr"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithController[*CreateStore](c),
-	)
-}
-
 func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
@@ -104,4 +92,15 @@ func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln(
 		"Wallet created successfully with ID: %s", c.store.WalletID)
 	return nil
+}
+func NewCreateCommand() *cobra.Command {
+	c := NewCreateController()
+	return fctl.NewCommand("create <name>",
+		fctl.WithShortDescription("Create a new wallet"),
+		fctl.WithAliases("cr"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+		fctl.WithController[*CreateStore](c),
+	)
 }

@@ -37,14 +37,6 @@ func NewVersionController() *VersionController {
 	}
 }
 
-func NewCommand() *cobra.Command {
-	return fctl.NewCommand("version",
-		fctl.WithShortDescription("Get version"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*VersionStore](NewVersionController()),
-	)
-}
-
 func (c *VersionController) GetStore() *VersionStore {
 	return c.store
 }
@@ -63,4 +55,11 @@ func (c *VersionController) Render(cmd *cobra.Command, args []string) error {
 		WithWriter(cmd.OutOrStdout()).
 		WithData(tableData).
 		Render()
+}
+func NewCommand() *cobra.Command {
+	return fctl.NewCommand("version",
+		fctl.WithShortDescription("Get version"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*VersionStore](NewVersionController()),
+	)
 }

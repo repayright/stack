@@ -46,25 +46,6 @@ func NewDebitWalletController() *DebitWalletController {
 	}
 }
 
-func NewDebitWalletCommand() *cobra.Command {
-	c := NewDebitWalletController()
-	return fctl.NewCommand("debit <amount> <asset>",
-		fctl.WithShortDescription("Debit a wallet"),
-		fctl.WithAliases("deb"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.RangeArgs(2, 3)),
-		fctl.WithStringFlag(c.descriptionFlag, "", "Debit description"),
-		fctl.WithBoolFlag(c.pendingFlag, false, "Create a pending debit"),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithStringSliceFlag(c.balanceFlag, []string{""}, "Balance to debit"),
-		fctl.WithStringFlag(c.destinationFlag, "",
-			`Use --destination account=<account> | --destination wallet=id:<wallet-id>[/<balance>] | --destination wallet=name:<wallet-name>[/<balance>]`),
-		internal.WithTargetingWalletByName(),
-		internal.WithTargetingWalletByID(),
-		fctl.WithController[*DebitWalletStore](c),
-	)
-}
-
 func (c *DebitWalletController) GetStore() *DebitWalletStore {
 	return c.store
 }
@@ -168,4 +149,23 @@ func (c *DebitWalletController) Render(cmd *cobra.Command, args []string) error 
 
 	return nil
 
+}
+
+func NewDebitWalletCommand() *cobra.Command {
+	c := NewDebitWalletController()
+	return fctl.NewCommand("debit <amount> <asset>",
+		fctl.WithShortDescription("Debit a wallet"),
+		fctl.WithAliases("deb"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.RangeArgs(2, 3)),
+		fctl.WithStringFlag(c.descriptionFlag, "", "Debit description"),
+		fctl.WithBoolFlag(c.pendingFlag, false, "Create a pending debit"),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+		fctl.WithStringSliceFlag(c.balanceFlag, []string{""}, "Balance to debit"),
+		fctl.WithStringFlag(c.destinationFlag, "",
+			`Use --destination account=<account> | --destination wallet=id:<wallet-id>[/<balance>] | --destination wallet=name:<wallet-name>[/<balance>]`),
+		internal.WithTargetingWalletByName(),
+		internal.WithTargetingWalletByID(),
+		fctl.WithController[*DebitWalletStore](c),
+	)
 }

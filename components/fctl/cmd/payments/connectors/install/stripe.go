@@ -36,17 +36,6 @@ func NewPaymentsConnectorsStripeController() *PaymentsConnectorsStripeController
 	}
 }
 
-func NewStripeCommand() *cobra.Command {
-	c := NewPaymentsConnectorsStripeController()
-	return fctl.NewCommand(internal.StripeConnector+" <api-key>",
-		fctl.WithShortDescription("Install a stripe connector"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithStringFlag(c.stripeApiKeyFlag, "", "Stripe API key"),
-		fctl.WithController[*PaymentsConnectorsStripeStore](c),
-	)
-}
-
 func (c *PaymentsConnectorsStripeController) GetStore() *PaymentsConnectorsStripeStore {
 	return c.store
 }
@@ -87,4 +76,14 @@ func (c *PaymentsConnectorsStripeController) Render(cmd *cobra.Command, args []s
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' installed!", c.store.ConnectorName)
 
 	return nil
+}
+func NewStripeCommand() *cobra.Command {
+	c := NewPaymentsConnectorsStripeController()
+	return fctl.NewCommand(internal.StripeConnector+" <api-key>",
+		fctl.WithShortDescription("Install a stripe connector"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithStringFlag(c.stripeApiKeyFlag, "", "Stripe API key"),
+		fctl.WithController[*PaymentsConnectorsStripeStore](c),
+	)
 }

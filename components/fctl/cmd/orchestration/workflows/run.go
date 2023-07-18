@@ -40,18 +40,6 @@ func NewWorkflowsRunController() *WorkflowsRunController {
 	}
 }
 
-func NewRunCommand() *cobra.Command {
-	c := NewWorkflowsRunController()
-	return fctl.NewCommand("run <id>",
-		fctl.WithShortDescription("Run a workflow"),
-		fctl.WithAliases("r"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithBoolFlag(c.waitFlag, false, "Wait end of the run"),
-		fctl.WithStringSliceFlag(c.variableFlag, []string{}, "Variable to pass to the workflow"),
-		fctl.WithController[*WorkflowsRunStore](c),
-	)
-}
-
 func (c *WorkflowsRunController) GetStore() *WorkflowsRunStore {
 	return c.store
 }
@@ -123,4 +111,16 @@ func (c *WorkflowsRunController) Render(cmd *cobra.Command, args []string) error
 		return internal.PrintWorkflowInstance(cmd.OutOrStdout(), w.GetWorkflowResponse.Data, c.store.WorkflowInstance)
 	}
 	return nil
+}
+
+func NewRunCommand() *cobra.Command {
+	c := NewWorkflowsRunController()
+	return fctl.NewCommand("run <id>",
+		fctl.WithShortDescription("Run a workflow"),
+		fctl.WithAliases("r"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithBoolFlag(c.waitFlag, false, "Wait end of the run"),
+		fctl.WithStringSliceFlag(c.variableFlag, []string{}, "Variable to pass to the workflow"),
+		fctl.WithController[*WorkflowsRunStore](c),
+	)
 }

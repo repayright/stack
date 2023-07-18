@@ -34,19 +34,6 @@ func NewSendController() *SendController {
 	}
 }
 
-func NewSendCommand() *cobra.Command {
-	c := NewSendController()
-	return fctl.NewCommand("send [<source>] <destination> <amount> <asset>",
-		fctl.WithAliases("s", "se"),
-		fctl.WithShortDescription("Send from one account to another"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.RangeArgs(3, 4)),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithStringFlag(c.referenceFlag, "", "Reference to add to the generated transaction"),
-		fctl.WithController[*SendStore](c),
-	)
-}
-
 func (c *SendController) GetStore() *SendStore {
 	return c.store
 }
@@ -127,4 +114,17 @@ func (c *SendController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 // TODO: This need to use the ui.NewListModel
 func (c *SendController) Render(cmd *cobra.Command, args []string) error {
 	return internal.PrintTransaction(cmd.OutOrStdout(), *c.store.Transaction)
+}
+
+func NewSendCommand() *cobra.Command {
+	c := NewSendController()
+	return fctl.NewCommand("send [<source>] <destination> <amount> <asset>",
+		fctl.WithAliases("s", "se"),
+		fctl.WithShortDescription("Send from one account to another"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.RangeArgs(3, 4)),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+		fctl.WithStringFlag(c.referenceFlag, "", "Reference to add to the generated transaction"),
+		fctl.WithController[*SendStore](c),
+	)
 }

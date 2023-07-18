@@ -31,19 +31,6 @@ func NewShowController() *ShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	c := NewShowController()
-	return fctl.NewCommand("show",
-		fctl.WithShortDescription("Show a wallets"),
-		fctl.WithAliases("sh"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		internal.WithTargetingWalletByID(),
-		internal.WithTargetingWalletByName(),
-		fctl.WithController[*ShowStore](c),
-	)
-}
-
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
@@ -99,4 +86,17 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 
 func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 	return views.PrintWalletWithMetadata(cmd.OutOrStdout(), c.store.Wallet)
+}
+
+func NewShowCommand() *cobra.Command {
+	c := NewShowController()
+	return fctl.NewCommand("show",
+		fctl.WithShortDescription("Show a wallets"),
+		fctl.WithAliases("sh"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		internal.WithTargetingWalletByID(),
+		internal.WithTargetingWalletByName(),
+		fctl.WithController[*ShowStore](c),
+	)
 }

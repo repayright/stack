@@ -10,18 +10,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useUpdate   = "update"
+	shortUpdate = "Update a wallets"
+	description = "Update a wallets"
+)
+
 type UpdateStore struct {
 	Success bool `json:"success"`
 }
-type UpdateController struct {
-	store        *UpdateStore
-	metadataFlag string
+
+func NewDefaultUpdateStore() *UpdateStore {
+	return &UpdateStore{
+		Success: false,
+	}
 }
 
 var _ fctl.Controller[*UpdateStore] = (*UpdateController)(nil)
 
-func NewDefaultUpdateStore() *UpdateStore {
-	return &UpdateStore{}
+type UpdateController struct {
+	store        *UpdateStore
+	metadataFlag string
 }
 
 func NewUpdateController() *UpdateController {
@@ -29,18 +38,6 @@ func NewUpdateController() *UpdateController {
 		store:        NewDefaultUpdateStore(),
 		metadataFlag: "metadata",
 	}
-}
-
-func NewUpdateCommand() *cobra.Command {
-	c := NewUpdateController()
-	return fctl.NewCommand("update <wallet-id>",
-		fctl.WithShortDescription("Update a wallets"),
-		fctl.WithAliases("up"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
-		fctl.WithController[*UpdateStore](c),
-	)
 }
 
 func (c *UpdateController) GetStore() *UpdateStore {
@@ -103,4 +100,15 @@ func (c *UpdateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 func (c *UpdateController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Wallet updated successfully!")
 	return nil
+}
+func NewUpdateCommand() *cobra.Command {
+	c := NewUpdateController()
+	return fctl.NewCommand("update <wallet-id>",
+		fctl.WithShortDescription("Update a wallets"),
+		fctl.WithAliases("up"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+		fctl.WithController[*UpdateStore](c),
+	)
 }

@@ -39,17 +39,6 @@ func NewPaymentsConnectorsMoneycorpController() *PaymentsConnectorsMoneycorpCont
 		defaultpollingPeriod: "2m",
 	}
 }
-func NewMoneycorpCommand() *cobra.Command {
-	c := NewPaymentsConnectorsMoneycorpController()
-
-	return fctl.NewCommand(internal.MoneycorpConnector+" <clientID> <apiKey>",
-		fctl.WithShortDescription("Install a Moneycorp connector"),
-		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
-		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
-		fctl.WithController[*PaymentsConnectorsMoneycorpStore](c),
-	)
-}
 
 func (c *PaymentsConnectorsMoneycorpController) GetStore() *PaymentsConnectorsMoneycorpStore {
 	return c.store
@@ -110,4 +99,16 @@ func (c *PaymentsConnectorsMoneycorpController) Render(cmd *cobra.Command, args 
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector %s installed!", c.store.ConnectorName)
 
 	return nil
+}
+
+func NewMoneycorpCommand() *cobra.Command {
+	c := NewPaymentsConnectorsMoneycorpController()
+
+	return fctl.NewCommand(internal.MoneycorpConnector+" <clientID> <apiKey>",
+		fctl.WithShortDescription("Install a Moneycorp connector"),
+		fctl.WithArgs(cobra.ExactArgs(2)),
+		fctl.WithStringFlag(c.endpointFlag, c.defaultEndpoint, "API endpoint"),
+		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
+		fctl.WithController[*PaymentsConnectorsMoneycorpStore](c),
+	)
 }

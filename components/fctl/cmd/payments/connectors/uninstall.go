@@ -38,17 +38,6 @@ func NewPaymentsConnectorsUninstallController() *PaymentsConnectorsUninstallCont
 	}
 }
 
-func NewUninstallCommand() *cobra.Command {
-	return fctl.NewCommand("uninstall <connector-name>",
-		fctl.WithAliases("uninstall", "u", "un"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithValidArgs(internal.AllConnectors...),
-		fctl.WithShortDescription("Uninstall a connector"),
-		fctl.WithController[*PaymentsConnectorsUninstallStore](NewPaymentsConnectorsUninstallController()),
-	)
-}
-
 func (c *PaymentsConnectorsUninstallController) GetStore() *PaymentsConnectorsUninstallStore {
 	return c.store
 }
@@ -99,4 +88,14 @@ func (c *PaymentsConnectorsUninstallController) Run(cmd *cobra.Command, args []s
 func (c *PaymentsConnectorsUninstallController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' uninstalled!", c.store.ConnectorName)
 	return nil
+}
+func NewUninstallCommand() *cobra.Command {
+	return fctl.NewCommand("uninstall <connector-name>",
+		fctl.WithAliases("uninstall", "u", "un"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithValidArgs(internal.AllConnectors...),
+		fctl.WithShortDescription("Uninstall a connector"),
+		fctl.WithController[*PaymentsConnectorsUninstallStore](NewPaymentsConnectorsUninstallController()),
+	)
 }

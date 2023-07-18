@@ -39,18 +39,6 @@ func NewListController() *ListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	c := NewListController()
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List invitations"),
-		fctl.WithStringFlag(c.statusFlag, "", "Filter invitations by status"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithStringFlag(c.organizationFlag, "", "Filter invitations by organization"),
-		fctl.WithController[*ListStore](c),
-	)
-}
-
 func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
@@ -102,4 +90,16 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 		WithData(tableData).
 		Render()
 
+}
+
+func NewListCommand() *cobra.Command {
+	c := NewListController()
+	return fctl.NewCommand("list",
+		fctl.WithAliases("ls", "l"),
+		fctl.WithShortDescription("List invitations"),
+		fctl.WithStringFlag(c.statusFlag, "", "Filter invitations by status"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithStringFlag(c.organizationFlag, "", "Filter invitations by organization"),
+		fctl.WithController[*ListStore](c),
+	)
 }

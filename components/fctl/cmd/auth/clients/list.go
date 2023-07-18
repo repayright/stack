@@ -37,15 +37,6 @@ func NewListController() *ListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithShortDescription("List clients"),
-		fctl.WithController[*ListStore](NewListController()),
-	)
-}
-
 func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
@@ -116,4 +107,13 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 		WithData(tableData).
 		Render()
 
+}
+
+func NewListCommand() *cobra.Command {
+	return fctl.NewCommand("list",
+		fctl.WithAliases("ls", "l"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithShortDescription("List clients"),
+		fctl.WithController[*ListStore](NewListController()),
+	)
 }

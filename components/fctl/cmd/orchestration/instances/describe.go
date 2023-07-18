@@ -35,15 +35,6 @@ func NewInstancesDescribeController() *InstancesDescribeController {
 	}
 }
 
-func NewDescribeCommand() *cobra.Command {
-	c := NewInstancesDescribeController()
-	return fctl.NewCommand("describe <instance-id>",
-		fctl.WithShortDescription("Describe a specific workflow instance"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*InstancesDescribeStore](c),
-	)
-}
-
 func (c *InstancesDescribeController) GetStore() *InstancesDescribeStore {
 	return c.store
 }
@@ -344,4 +335,12 @@ func historyItemError(format string, args ...any) pterm.BulletListItem {
 		TextStyle: fctl.StyleRed,
 		Text:      fmt.Sprintf(format, args...),
 	}
+}
+func NewDescribeCommand() *cobra.Command {
+	c := NewInstancesDescribeController()
+	return fctl.NewCommand("describe <instance-id>",
+		fctl.WithShortDescription("Describe a specific workflow instance"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*InstancesDescribeStore](c),
+	)
 }

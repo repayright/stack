@@ -55,22 +55,6 @@ func NewUpdateController() *UpdateController {
 	}
 }
 
-func NewUpdateCommand() *cobra.Command {
-	c := NewUpdateController()
-	return fctl.NewCommand("update <client-id>",
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithShortDescription("Update client"),
-		fctl.WithAliases("u", "upd"),
-		fctl.WithConfirmFlag(),
-		fctl.WithBoolFlag(c.publicFlag, false, "Is client public"),
-		fctl.WithBoolFlag(c.trustedFlag, false, "Is the client trusted"),
-		fctl.WithStringFlag(c.descriptionFlag, "", "Client description"),
-		fctl.WithStringSliceFlag(c.redirectUriFlag, []string{}, "Redirect URIS"),
-		fctl.WithStringSliceFlag(c.postLogoutRedirectUriFlag, []string{}, "Post logout redirect uris"),
-		fctl.WithController[*UpdateStore](c),
-	)
-}
-
 func (c *UpdateController) GetStore() *UpdateStore {
 	return c.store
 }
@@ -148,4 +132,20 @@ func (c *UpdateController) Render(cmd *cobra.Command, args []string) error {
 		WithData(tableData).
 		Render()
 
+}
+
+func NewUpdateCommand() *cobra.Command {
+	c := NewUpdateController()
+	return fctl.NewCommand("update <client-id>",
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithShortDescription("Update client"),
+		fctl.WithAliases("u", "upd"),
+		fctl.WithConfirmFlag(),
+		fctl.WithBoolFlag(c.publicFlag, false, "Is client public"),
+		fctl.WithBoolFlag(c.trustedFlag, false, "Is the client trusted"),
+		fctl.WithStringFlag(c.descriptionFlag, "", "Client description"),
+		fctl.WithStringSliceFlag(c.redirectUriFlag, []string{}, "Redirect URIS"),
+		fctl.WithStringSliceFlag(c.postLogoutRedirectUriFlag, []string{}, "Post logout redirect uris"),
+		fctl.WithController[*UpdateStore](c),
+	)
 }

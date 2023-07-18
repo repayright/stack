@@ -31,18 +31,6 @@ func NewCreateController() *CreateController {
 	}
 }
 
-func NewCreateCommand() *cobra.Command {
-	return fctl.NewCommand("create <balance-name>",
-		fctl.WithShortDescription("Create a new balance"),
-		fctl.WithAliases("c", "cr"),
-		fctl.WithConfirmFlag(),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		internal.WithTargetingWalletByID(),
-		internal.WithTargetingWalletByName(),
-		fctl.WithController[*CreateStore](NewCreateController()),
-	)
-}
-
 func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
@@ -101,4 +89,15 @@ func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
 		"Balance created successfully with name: %s", c.store.BalanceName)
 	return nil
 
+}
+func NewCreateCommand() *cobra.Command {
+	return fctl.NewCommand("create <balance-name>",
+		fctl.WithShortDescription("Create a new balance"),
+		fctl.WithAliases("c", "cr"),
+		fctl.WithConfirmFlag(),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		internal.WithTargetingWalletByID(),
+		internal.WithTargetingWalletByName(),
+		fctl.WithController[*CreateStore](NewCreateController()),
+	)
 }

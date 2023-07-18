@@ -36,18 +36,6 @@ func NewConfirmController() *ConfirmController {
 	}
 }
 
-func NewConfirmCommand() *cobra.Command {
-	c := NewConfirmController()
-	return fctl.NewCommand("confirm <hold-id>",
-		fctl.WithShortDescription("Confirm a hold"),
-		fctl.WithAliases("c", "conf"),
-		fctl.WithArgs(cobra.RangeArgs(1, 2)),
-		fctl.WithBoolFlag(c.finalFlag, false, "Is final debit (close hold)"),
-		fctl.WithIntFlag(c.amountFlag, 0, "Amount to confirm"),
-		fctl.WithController[*ConfirmStore](c),
-	)
-}
-
 func (c *ConfirmController) GetStore() *ConfirmStore {
 	return c.store
 }
@@ -107,4 +95,16 @@ func (c *ConfirmController) Render(cmd *cobra.Command, args []string) error {
 
 	return nil
 
+}
+
+func NewConfirmCommand() *cobra.Command {
+	c := NewConfirmController()
+	return fctl.NewCommand("confirm <hold-id>",
+		fctl.WithShortDescription("Confirm a hold"),
+		fctl.WithAliases("c", "conf"),
+		fctl.WithArgs(cobra.RangeArgs(1, 2)),
+		fctl.WithBoolFlag(c.finalFlag, false, "Is final debit (close hold)"),
+		fctl.WithIntFlag(c.amountFlag, 0, "Amount to confirm"),
+		fctl.WithController[*ConfirmStore](c),
+	)
 }

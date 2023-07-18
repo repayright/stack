@@ -28,15 +28,6 @@ func NewShowController() *ShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <user-id>",
-		fctl.WithAliases("s"),
-		fctl.WithShortDescription("Show user"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*ShowStore](NewShowController()),
-	)
-}
-
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
@@ -95,4 +86,13 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 		WithData(tableData).
 		Render()
 
+}
+
+func NewShowCommand() *cobra.Command {
+	return fctl.NewCommand("show <user-id>",
+		fctl.WithAliases("s"),
+		fctl.WithShortDescription("Show user"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*ShowStore](NewShowController()),
+	)
 }
