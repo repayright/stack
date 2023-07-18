@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/formancehq/fctl/cmd/auth"
 	"github.com/formancehq/fctl/cmd/cloud"
 	"github.com/formancehq/fctl/cmd/ledger"
 	"github.com/formancehq/fctl/cmd/login"
@@ -37,12 +38,12 @@ func NewRootCommand() *cobra.Command {
 			ui.NewCommand(),
 			version.NewCommand(),
 			login.NewCommand(),
-			// NewPromptCommand(),
+			NewPromptCommand(),
 			ledger.NewCommand(),
 			payments.NewCommand(),
 			profiles.NewCommand(),
 			stack.NewCommand(),
-			// auth.NewCommand(),
+			auth.NewCommand(),
 			cloud.NewCommand(),
 			search.NewCommand(),
 			webhooks.NewCommand(),
