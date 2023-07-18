@@ -68,17 +68,17 @@ func (c *Controller) Run() (fctl.Renderable, error) {
 	}
 	profile := fctl.GetCurrentProfile(flags, cfg)
 
-	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
 
-	token, err := profile.GetStackToken(ctx, fctl.GetHttpClient(flags, map[string][]string{}), stack)
+	token, err := profile.GetStackToken(ctx, fctl.GetHttpClient(flags, map[string][]string{}, c.config.GetOut()), stack)
 	if err != nil {
 		return nil, err
 	}

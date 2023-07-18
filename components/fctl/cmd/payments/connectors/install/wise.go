@@ -76,12 +76,12 @@ func (c *WiseController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("missing api key")
 	}
 
-	soc, err := fctl.GetStackOrganizationConfigApprobation(flags, ctx, "You are about to install connector '%s'", internal.WiseConnector)
+	soc, err := fctl.GetStackOrganizationConfigApprobation(flags, ctx, fmt.Sprintf("You are about to install connector '%s'", internal.WiseConnector), c.config.GetOut())
 	if err != nil {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	paymentsClient, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
+	paymentsClient, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}

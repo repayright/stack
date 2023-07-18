@@ -84,7 +84,7 @@ func (c *LoginController) Run() (fctl.Renderable, error) {
 		membershipUri = profile.GetMembershipURI()
 	}
 
-	relyingParty, err := fctl.GetAuthRelyingParty(fctl.GetHttpClient(flags, map[string][]string{}), membershipUri)
+	relyingParty, err := fctl.GetAuthRelyingParty(fctl.GetHttpClient(flags, map[string][]string{}, c.config.GetOut()), membershipUri)
 	if err != nil {
 		return nil, err
 	}
@@ -115,12 +115,12 @@ func (c *LoginController) Run() (fctl.Renderable, error) {
 }
 
 func (c *LoginController) Render() error {
-
-	fmt.Println("Please enter the following code on your browser:", c.store.DeviceCode)
-	fmt.Println("Link:", c.store.LoginURI)
+	out := c.config.GetOut()
+	fmt.Fprintln(out, "Please enter the following code on your browser:", c.store.DeviceCode)
+	fmt.Fprintln(out, "Link:", c.store.LoginURI)
 
 	if !c.store.Success && c.store.BrowserURL != "" {
-		fmt.Printf("Unable to find a browser, please open the following link: %s", c.store.BrowserURL)
+		fmt.Fprintf(out, "Unable to find a browser, please open the following link: %s", c.store.BrowserURL)
 		return nil
 	}
 

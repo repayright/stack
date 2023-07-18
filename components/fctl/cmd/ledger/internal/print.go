@@ -116,7 +116,7 @@ func PrintTransaction(out io.Writer, transaction Transaction) error {
 func PrintMetadata(out io.Writer, metadata Metadata) error {
 	fctl.Section.WithWriter(out).Println("Metadata")
 	if len(metadata) == 0 {
-		fmt.Println("No metadata.")
+		fmt.Fprintln(out, "No metadata.")
 		return nil
 	}
 	tableData := pterm.TableData{}

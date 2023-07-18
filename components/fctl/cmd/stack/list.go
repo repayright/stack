@@ -88,12 +88,12 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 
 	profile := fctl.GetCurrentProfile(flags, cfg)
 
-	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, errors.Wrap(err, "searching default organization")
 	}
 
-	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg)
+	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 
 func (c *ListController) Render() error {
 	if len(c.store.Stacks) == 0 {
-		fmt.Fprintln(os.Stdout, "No stacks found.")
+		fmt.Fprintln(c.config.GetOut(), "No stacks found.")
 		return nil
 	}
 

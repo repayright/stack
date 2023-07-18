@@ -71,6 +71,7 @@ func (c *MoneycorpController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()
+	out := c.config.GetOut()
 	if len(args) < 2 {
 		return nil, errors.New("missing required arguments")
 	}
@@ -80,12 +81,12 @@ func (c *MoneycorpController) Run() (fctl.Renderable, error) {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID, out)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +95,7 @@ func (c *MoneycorpController) Run() (fctl.Renderable, error) {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	paymentsClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
+	paymentsClient, err := fctl.NewStackClient(flags, ctx, cfg, stack, out)
 	if err != nil {
 		return nil, err
 	}

@@ -78,12 +78,12 @@ func (c *StackDeleteController) Run() (fctl.Renderable, error) {
 	if err != nil {
 		return nil, err
 	}
-	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, errors.Wrap(err, "searching default organization")
 	}
 
-	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg)
+	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}

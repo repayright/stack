@@ -121,7 +121,3 @@ func ConvertPFlagSetToFlagSet(pFlagSet *pflag.FlagSet) *flag.FlagSet {
 
 	return flagSet
 }
-
-func Ptr[T any](t T) *T {
-	return &t
-}

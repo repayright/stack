@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 	fctl "github.com/formancehq/fctl/pkg"
 )
 
-func waitStackReady(ctx context.Context, flags *flag.FlagSet, profile *fctl.Profile, stack *membershipclient.Stack) error {
+func waitStackReady(ctx context.Context, out io.Writer, flags *flag.FlagSet, profile *fctl.Profile, stack *membershipclient.Stack) error {
 	baseUrlStr := profile.ServicesBaseUrl(stack).String()
 	authServerUrl := fmt.Sprintf("%s/api/auth", baseUrlStr)
 	for {
@@ -20,7 +21,7 @@ func waitStackReady(ctx context.Context, flags *flag.FlagSet, profile *fctl.Prof
 		if err != nil {
 			return err
 		}
-		rsp, err := fctl.GetHttpClient(flags, map[string][]string{}).Do(req)
+		rsp, err := fctl.GetHttpClient(flags, map[string][]string{}, out).Do(req)
 		if err == nil && rsp.StatusCode == http.StatusOK {
 			break
 		}

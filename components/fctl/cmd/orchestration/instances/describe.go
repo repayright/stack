@@ -71,12 +71,12 @@ func (c *DescribeController) Run() (fctl.Renderable, error) {
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()
 
-	soc, err := fctl.GetStackOrganizationConfig(flags, ctx)
+	soc, err := fctl.GetStackOrganizationConfig(flags, ctx, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack)
+	client, err := fctl.NewStackClient(flags, ctx, soc.Config, soc.Stack, c.config.GetOut())
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}

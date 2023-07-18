@@ -5,14 +5,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/TylerBrock/colorjson"
 	"github.com/formancehq/fctl/membershipclient"
 	"github.com/pkg/errors"
 	"github.com/segmentio/analytics-go/v3"
 	"github.com/segmentio/ksuid"
 	"github.com/spf13/cobra"
+	"io"
 )
 
 const (
@@ -34,18 +33,18 @@ type StackOrganizationConfig struct {
 	Config         *Config
 }
 
-func GetStackOrganizationConfig(flags *flag.FlagSet, ctx context.Context) (*StackOrganizationConfig, error) {
+func GetStackOrganizationConfig(flags *flag.FlagSet, ctx context.Context, out io.Writer) (*StackOrganizationConfig, error) {
 	cfg, err := GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := ResolveOrganizationID(flags, ctx, cfg)
+	organizationID, err := ResolveOrganizationID(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := ResolveStack(flags, ctx, cfg, organizationID)
+	stack, err := ResolveStack(flags, ctx, cfg, organizationID, out)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +56,8 @@ func GetStackOrganizationConfig(flags *flag.FlagSet, ctx context.Context) (*Stac
 	}, nil
 }
 
-func GetStackOrganizationConfigApprobation(flags *flag.FlagSet, ctx context.Context, disclaimer string, args ...any) (*StackOrganizationConfig, error) {
-	soc, err := GetStackOrganizationConfig(flags, ctx)
+func GetStackOrganizationConfigApprobation(flags *flag.FlagSet, ctx context.Context, disclaimer string, out io.Writer, args ...any) (*StackOrganizationConfig, error) {
+	soc, err := GetStackOrganizationConfig(flags, ctx, out)
 	if err != nil {
 		return nil, err
 	}
@@ -85,12 +84,12 @@ func RetrieveOrganizationIDFromFlagOrProfile(flags *flag.FlagSet, cfg *Config) (
 	return "", ErrOrganizationNotSpecified
 }
 
-func ResolveOrganizationID(flags *flag.FlagSet, ctx context.Context, cfg *Config) (string, error) {
+func ResolveOrganizationID(flags *flag.FlagSet, ctx context.Context, cfg *Config, out io.Writer) (string, error) {
 	if id, err := RetrieveOrganizationIDFromFlagOrProfile(flags, cfg); err == nil {
 		return id, nil
 	}
 
-	client, err := NewMembershipClient(flags, ctx, cfg)
+	client, err := NewMembershipClient(flags, ctx, cfg, out)
 	if err != nil {
 		return "", err
 	}
@@ -115,8 +114,8 @@ func GetSelectedStackID(flags *flag.FlagSet) string {
 	return GetString(flags, stackFlag)
 }
 
-func ResolveStack(flags *flag.FlagSet, ctx context.Context, cfg *Config, organizationID string) (*membershipclient.Stack, error) {
-	client, err := NewMembershipClient(flags, ctx, cfg)
+func ResolveStack(flags *flag.FlagSet, ctx context.Context, cfg *Config, organizationID string, out io.Writer) (*membershipclient.Stack, error) {
+	client, err := NewMembershipClient(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
 	}
@@ -157,33 +156,9 @@ func WithGoFlagSet(flags *flag.FlagSet) CommandOptionFn {
 	}
 }
 
-func WithPersistentGoFlagSet(flags *flag.FlagSet) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.PersistentFlags().AddGoFlagSet(flags)
-	}
-}
-
 func WithPersistentStringFlag(name, defaultValue, help string) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.PersistentFlags().String(name, defaultValue, help)
-	}
-}
-
-func WithStringFlag(name, defaultValue, help string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.Flags().String(name, defaultValue, help)
-	}
-}
-
-func WithPersistentStringPFlag(name, short, defaultValue, help string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.PersistentFlags().StringP(name, short, defaultValue, help)
-	}
-}
-
-func WithBoolFlag(name string, defaultValue bool, help string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.Flags().Bool(name, defaultValue, help)
 	}
 }
 
@@ -193,30 +168,7 @@ func WithAliases(aliases ...string) CommandOptionFn {
 	}
 }
 
-func WithPersistentBoolPFlag(name, short string, defaultValue bool, help string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.PersistentFlags().BoolP(name, short, defaultValue, help)
-	}
-}
-
-func WithPersistentBoolFlag(name string, defaultValue bool, help string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.PersistentFlags().Bool(name, defaultValue, help)
-	}
-}
-
-func WithIntFlag(name string, defaultValue int, help string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.Flags().Int(name, defaultValue, help)
-	}
-}
-
-func WithStringSliceFlag(name string, defaultValue []string, help string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.Flags().StringSlice(name, defaultValue, help)
-	}
-}
-
+// To use along with hidden flags
 func WithHiddenFlag(name string) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		_ = cmd.Flags().MarkHidden(name)
@@ -235,53 +187,27 @@ func WithRunE(fn func(cmd *cobra.Command, args []string) error) CommandOptionFn 
 	}
 }
 
-func WithPreRunE(fn func(cmd *cobra.Command, args []string) error) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.PreRunE = fn
-	}
-}
-
 func WithDeprecated(message string) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.Deprecated = message
 	}
 }
 
-func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
+func configureCobraWithControllerConfig(cmd *cobra.Command, config ControllerConfig) *cobra.Command {
+	config.SetOut(cmd.OutOrStdout())
 
-	if flags == nil {
-		flags = flag.NewFlagSet("global", flag.ContinueOnError)
-	}
-
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-
-	flags.Bool(InsecureTlsFlag, false, "insecure TLS")
-	flags.Bool(TelemetryFlag, false, "enable telemetry")
-	flags.Bool(DebugFlag, false, "debug mode")
-	flags.String(ProfileFlag, "", "config profile to use")
-	flags.String(FileFlag, fmt.Sprintf("%s/.formance/fctl.config", homedir), "config file to use")
-	flags.String(outputFlag, "plain", "output format (plain, json)")
-
-	return flags
-}
-func WithControllerConfig(cmd *cobra.Command, config ControllerConfig) *cobra.Command {
 	cmd.Aliases = append(cmd.Aliases, config.GetAliases()...)
 	cmd.Use = config.GetUse()
 	cmd.Short = config.GetShortDescription()
 	cmd.Long = config.GetDescription()
-
 	cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
 	cmd.Flags().AddGoFlagSet(config.GetFlags())
-
 	return cmd
 }
 func WithController[T any](c Controller[T]) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		config := c.GetConfig()
-		cmd = WithControllerConfig(cmd, config)
+		cmd = configureCobraWithControllerConfig(cmd, config)
 
 		cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 			config := c.GetConfig()
@@ -297,7 +223,7 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 			return nil
 		}
 		cmd.RunE = func(cmd *cobra.Command, args []string) error {
-			renderable, err := c.Run()
+			renderer, err := c.Run()
 
 			// If the controller return an argument error, we want to print the usage
 			// of the command instead of the error message.
@@ -312,7 +238,7 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 
 			config := c.GetConfig()
 
-			err = WithRender(config.GetFlags(), c, renderable)
+			err = render(config.GetFlags(), c, renderer)
 
 			if err != nil {
 				return err
@@ -322,9 +248,10 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 		}
 	}
 }
-func WithRender[T any](flags *flag.FlagSet, c Controller[T], r Renderable) error {
+func render[T any](flags *flag.FlagSet, c Controller[T], r Renderable) error {
 	f := GetString(flags, OutputFlag)
-
+	getConfig := c.GetConfig()
+	outWriter := getConfig.GetOut()
 	switch f {
 	case "json":
 		// Inject into export struct
@@ -346,10 +273,16 @@ func WithRender[T any](flags *flag.FlagSet, c Controller[T], r Renderable) error
 			if err != nil {
 				panic(err)
 			}
-			fmt.Print(string(colorized))
+			_, err = fmt.Fprint(outWriter, string(colorized))
+			if err != nil {
+				return err
+			}
 			return nil
 		} else {
-			fmt.Print(out)
+			_, err := fmt.Fprint(outWriter, out)
+			if err != nil {
+				return err
+			}
 			return nil
 		}
 	default:
@@ -389,12 +322,6 @@ func WithValidArgsFunction(fn func(cmd *cobra.Command, args []string, toComplete
 	}
 }
 
-func WithDescription(v string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.Long = v
-	}
-}
-
 func WithSilenceUsage() CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.SilenceUsage = true
@@ -413,7 +340,7 @@ func NewStackCommand(use string, opts ...CommandOption) *cobra.Command {
 			WithPersistentStringFlag(stackFlag, "", "Specific stack (not required if only one stack is present)"),
 		)...,
 	)
-	cmd.RegisterFlagCompletionFunc("stack", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	err := cmd.RegisterFlagCompletionFunc("stack", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		flags := ConvertPFlagSetToFlagSet(cmd.Flags())
 
 		cfg, err := GetConfig(flags)
@@ -444,6 +371,11 @@ func NewStackCommand(use string, opts ...CommandOption) *cobra.Command {
 
 		return ret, cobra.ShellCompDirectiveDefault
 	})
+
+	if err != nil {
+		panic(errors.Wrap(err, "could not register stack flag completion"))
+	}
+
 	return cmd
 }
 
@@ -453,7 +385,7 @@ func NewMembershipCommand(use string, opts ...CommandOption) *cobra.Command {
 			WithPersistentStringFlag(organizationFlag, "", "Selected organization (not required if only one organization is present)"),
 		)...,
 	)
-	cmd.RegisterFlagCompletionFunc("organization", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	err := cmd.RegisterFlagCompletionFunc("organization", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		flags := ConvertPFlagSetToFlagSet(cmd.Flags())
 		cfg, err := GetConfig(flags)
 		if err != nil {
@@ -473,6 +405,11 @@ func NewMembershipCommand(use string, opts ...CommandOption) *cobra.Command {
 
 		return ret, cobra.ShellCompDirectiveDefault
 	})
+
+	if err != nil {
+		panic(errors.Wrap(err, "failed to register flag completion function"))
+	}
+
 	return cmd
 }
 

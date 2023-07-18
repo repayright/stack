@@ -83,23 +83,24 @@ func (c *ListController) GetConfig() fctl.ControllerConfig {
 func (c *ListController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
+	out := c.config.GetOut()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID, out)
 	if err != nil {
 		return nil, err
 	}
 
-	ledgerClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
+	ledgerClient, err := fctl.NewStackClient(flags, ctx, cfg, stack, out)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +161,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 
 func (c *ListController) Render() error {
 	if len(c.store.Transaction.Data) == 0 {
-		fctl.Println("No transactions found.")
+		fmt.Fprintln(c.config.GetOut(), "No transactions found.")
 		return nil
 	}
 

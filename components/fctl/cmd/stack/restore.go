@@ -74,18 +74,18 @@ func (c *RestoreController) GetConfig() fctl.ControllerConfig {
 func (c *RestoreController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
-
+	out := c.config.GetOut()
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "searching default organization")
 	}
 
-	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg)
+	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
@@ -103,11 +103,11 @@ func (c *RestoreController) Run() (fctl.Renderable, error) {
 
 	profile := fctl.GetCurrentProfile(flags, cfg)
 
-	if err := waitStackReady(ctx, flags, profile, response.Data); err != nil {
+	if err := waitStackReady(ctx, c.config.GetOut(), flags, profile, response.Data); err != nil {
 		return nil, err
 	}
 
-	stackClient, err := fctl.NewStackClient(flags, ctx, cfg, response.Data)
+	stackClient, err := fctl.NewStackClient(flags, ctx, cfg, response.Data, out)
 	if err != nil {
 		return nil, err
 	}

@@ -76,17 +76,17 @@ func (c *ShowController) GetConfig() fctl.ControllerConfig {
 func (c *ShowController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
-
+	out := c.config.GetOut()
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
-	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
+	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "searching default organization")
 	}
 
-	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg)
+	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 		return nil, errStackNotFound
 	}
 
-	stackClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
+	stackClient, err := fctl.NewStackClient(flags, ctx, cfg, stack, out)
 	if err != nil {
 		return nil, err
 	}
