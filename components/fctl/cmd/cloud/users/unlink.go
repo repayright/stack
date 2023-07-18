@@ -22,11 +22,11 @@ func NewUnlinkStore() *UnlinkStore {
 	return &UnlinkStore{}
 }
 func NewUnlinkConfig() *fctl.ControllerConfig {
-	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
+	flags := flag.NewFlagSet(useUnlink, flag.ExitOnError)
 	return fctl.NewControllerConfig(
-		useShow,
-		shortShow,
-		shortShow,
+		useUnlink,
+		shortUnlink,
+		shortUnlink,
 		[]string{
 			"u", "un",
 		},
