@@ -22,12 +22,12 @@ const (
 )
 
 func GetBool(flags *flag.FlagSet, flagName string) bool {
-	flag := flags.Lookup(flagName)
-	if flag == nil {
+	f := flags.Lookup(flagName)
+	if f == nil {
 		return false
 	}
 
-	value := flag.Value.String()
+	value := f.Value.String()
 	if value == "" {
 		return false
 	}
@@ -41,12 +41,12 @@ func GetBool(flags *flag.FlagSet, flagName string) bool {
 }
 
 func GetString(flagSet *flag.FlagSet, flagName string) string {
-	flag := flagSet.Lookup(flagName)
-	if flag == nil {
+	f := flagSet.Lookup(flagName)
+	if f == nil {
 		return ""
 	}
 
-	v := flag.Value.String()
+	v := f.Value.String()
 	if v == "" {
 		return os.Getenv(strcase.ToScreamingSnake(flagName))
 	}
@@ -55,12 +55,12 @@ func GetString(flagSet *flag.FlagSet, flagName string) string {
 
 func GetStringSlice(flagSet *flag.FlagSet, flagName string) []string {
 
-	flag := flagSet.Lookup(flagName)
-	if flag == nil {
+	f := flagSet.Lookup(flagName)
+	if f == nil {
 		return []string{}
 	}
 
-	value := flag.Value.String()
+	value := f.Value.String()
 	v := strings.Split(value, " ")
 	if value == "" {
 		return []string{}
@@ -78,12 +78,12 @@ func GetStringSlice(flagSet *flag.FlagSet, flagName string) []string {
 
 func GetInt(flagSet *flag.FlagSet, flagName string) int {
 
-	flag := flagSet.Lookup(flagName)
-	if flag == nil {
+	f := flagSet.Lookup(flagName)
+	if f == nil {
 		return 0
 	}
 
-	value := flag.Value.String()
+	value := f.Value.String()
 	if value == "" {
 		return 0
 	}

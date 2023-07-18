@@ -11,15 +11,15 @@ import (
 )
 
 func ParseMetadata(array []string) (metadata.Metadata, error) {
-	metadata := metadata.Metadata{}
+	md := metadata.Metadata{}
 	for _, v := range array {
 		parts := strings.SplitN(v, "=", 2)
 		if len(parts) == 1 {
 			return nil, fmt.Errorf("malformed metadata: %s", v)
 		}
-		metadata[parts[0]] = parts[1]
+		md[parts[0]] = parts[1]
 	}
-	return metadata, nil
+	return md, nil
 }
 
 func PrintMetadata(out io.Writer, metadata metadata.Metadata) error {
