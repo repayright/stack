@@ -1,42 +1,81 @@
 package profiles
 
 import (
+	"flag"
+	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"os"
+)
+
+const (
+	useShow              = "show <name>"
+	shortDescriptionShow = "Show a profile"
+	descriptionShow      = "Show a profile"
 )
 
 type ProfilesShowStore struct {
 	MembershipURI       string `json:"membershipUri"`
 	DefaultOrganization string `json:"defaultOrganization"`
 }
-type ProfilesShowController struct {
-	store *ProfilesShowStore
+
+func NewShowConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
+
+	c := fctl.NewControllerConfig(
+		useShow,
+		descriptionShow,
+		[]string{
+			"s",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(shortDescriptionShow)
+
+	return c
 }
 
-var _ fctl.Controller[*ProfilesShowStore] = (*ProfilesShowController)(nil)
-
-func NewDefaultProfilesShowStore() *ProfilesShowStore {
+func NewShowStore() *ProfilesShowStore {
 	return &ProfilesShowStore{
 		MembershipURI:       "",
 		DefaultOrganization: "",
 	}
 }
 
-func NewProfilesShowController() *ProfilesShowController {
-	return &ProfilesShowController{
-		store: NewDefaultProfilesShowStore(),
+var _ fctl.Controller[*ProfilesShowStore] = (*ShowController)(nil)
+
+type ShowController struct {
+	store  *ProfilesShowStore
+	config fctl.ControllerConfig
+}
+
+func NewShowController(config fctl.ControllerConfig) *ShowController {
+	return &ShowController{
+		store:  NewShowStore(),
+		config: config,
 	}
 }
 
-func (c *ProfilesShowController) GetStore() *ProfilesShowStore {
+func (c *ShowController) GetStore() *ProfilesShowStore {
 	return c.store
 }
 
-func (c *ProfilesShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ShowController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	config, err := fctl.GetConfig(cmd)
+func (c *ShowController) Run() (fctl.Renderable, error) {
+
+	args := c.config.GetArgs()
+	if len(args) < 1 {
+		return nil, errors.New("Profile: invalid number of arguments")
+	}
+
+	config, err := fctl.GetConfig(c.config.GetAllFLags())
 	if err != nil {
 		return nil, err
 	}
@@ -52,23 +91,24 @@ func (c *ProfilesShowController) Run(cmd *cobra.Command, args []string) (fctl.Re
 	return c, nil
 }
 
-func (c *ProfilesShowController) Render(cmd *cobra.Command, args []string) error {
+func (c *ShowController) Render() error {
 
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("Membership URI"), c.store.MembershipURI})
 	tableData = append(tableData, []string{pterm.LightCyan("Default organization"), c.store.DefaultOrganization})
 	return pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 }
 
 func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <name>",
+	config := NewShowConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases("s"),
-		fctl.WithShortDescription("Show profile"),
-		fctl.WithValidArgsFunction(ProfileNamesAutoCompletion),
-		fctl.WithController[*ProfilesShowStore](NewProfilesShowController()),
+		fctl.WithAliases(config.GetAliases()...),
+		fctl.WithShortDescription(*config.GetShortDescription()),
+		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
+		fctl.WithController[*ProfilesShowStore](NewShowController(*config)),
 	)
 }

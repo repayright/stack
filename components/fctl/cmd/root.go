@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/formancehq/fctl/cmd/profiles"
+	"github.com/formancehq/fctl/cmd/search"
 	"os"
 	"os/signal"
 	"runtime/debug"
@@ -34,15 +36,16 @@ func NewRootCommand() *cobra.Command {
 			// NewPromptCommand(),
 			// ledger.NewCommand(),
 			// payments.NewCommand(),
-			// profiles.NewCommand(),
+			profiles.NewCommand(),
 			stack.NewCommand(),
 			// auth.NewCommand(),
 			// cloud.NewCommand(),
-			// search.NewCommand(),
+			search.NewCommand(),
 			webhooks.NewCommand(),
 			wallets.NewCommand(),
 			// orchestration.NewCommand(),
 		),
+		fctl.WithGoFlagSet(fctl.GlobalFlags),
 	)
 
 	cmd.RegisterFlagCompletionFunc(fctl.ProfileFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

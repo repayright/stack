@@ -269,6 +269,7 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 }
 func WithControllerConfig(cmd *cobra.Command, config ControllerConfig) *cobra.Command {
 	cmd.Aliases = append(cmd.Aliases, config.GetAliases()...)
+
 	cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
 	cmd.Flags().AddGoFlagSet(config.GetFlags())
 
