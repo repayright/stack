@@ -2,7 +2,6 @@ package fctl
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -43,7 +42,6 @@ func GetBool(flags *flag.FlagSet, flagName string) bool {
 
 func GetString(flagSet *flag.FlagSet, flagName string) string {
 	flag := flagSet.Lookup(flagName)
-	fmt.Println(flag)
 	if flag == nil {
 		return ""
 	}

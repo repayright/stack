@@ -127,7 +127,6 @@ func NewCreateCommand() *cobra.Command {
 	c := NewCreateConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(c.GetDescription()),
-		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*CreateStore](NewCreateController(*c)),
 	)

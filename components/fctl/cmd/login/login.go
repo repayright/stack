@@ -49,7 +49,9 @@ func NewLoginControllerConfig() *fctl.ControllerConfig {
 	return fctl.NewControllerConfig(
 		useLogin,
 		descriptionLogin,
-		[]string{},
+		[]string{
+			"log",
+		},
 		os.Stdout,
 		flags,
 	)

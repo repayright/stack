@@ -136,7 +136,6 @@ func NewRestoreStackCommand() *cobra.Command {
 	return fctl.NewMembershipCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithController[*StackRestoreStore](NewStackRestoreController(*config)),
 	)
 }

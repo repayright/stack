@@ -267,13 +267,17 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 
 	return flags
 }
+func WithControllerConfig(cmd *cobra.Command, config ControllerConfig) *cobra.Command {
+	cmd.Aliases = append(cmd.Aliases, config.GetAliases()...)
+	cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
+	cmd.Flags().AddGoFlagSet(config.GetFlags())
 
+	return cmd
+}
 func WithController[T any](c Controller[T]) CommandOptionFn {
 	return func(cmd *cobra.Command) {
-		// config := c.GetConfig()
-
-		// cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
-		// cmd.Flags().AddGoFlagSet(config.GetFlags())
+		config := c.GetConfig()
+		cmd = WithControllerConfig(cmd, config)
 
 		cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 			config := c.GetConfig()
@@ -505,8 +509,6 @@ func NewCommand(use string, opts ...CommandOption) *cobra.Command {
 			}
 		},
 	}
-
-	cmd.PersistentFlags().AddGoFlagSet(WithGlobalFlags(nil))
 
 	for _, opt := range opts {
 		opt.apply(cmd)
