@@ -3,6 +3,7 @@ package clients
 import (
 	"flag"
 	"fmt"
+	"github.com/pkg/errors"
 	"os"
 
 	"github.com/formancehq/fctl/cmd/auth/clients/views"
@@ -107,7 +108,10 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 
 func (c *ShowController) Render() error {
 	out := c.config.GetOut()
-	views.PrintClient(out, c.store.Client)
+	err := views.PrintClient(out, c.store.Client)
+	if err != nil {
+		return errors.Wrap(err, "failed to print client")
+	}
 
 	if len(c.store.Client.RedirectUris) > 0 {
 		fctl.BasicTextCyan.WithWriter(out).Printfln("Redirect URIs :")
