@@ -26,16 +26,6 @@ func NewDeclineController() *DeclineController {
 	}
 }
 
-func NewDeclineCommand() *cobra.Command {
-	return fctl.NewCommand("decline <invitation-id>",
-		fctl.WithAliases("dec", "d"),
-		fctl.WithShortDescription("Decline invitation"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithConfirmFlag(),
-		fctl.WithController[*DeclineStore](NewDeclineController()),
-	)
-}
-
 func (c *DeclineController) GetStore() *DeclineStore {
 	return c.store
 }
@@ -69,4 +59,13 @@ func (c *DeclineController) Run(cmd *cobra.Command, args []string) (fctl.Rendera
 func (c *DeclineController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Invitation declined! %s", c.store.InvitationId)
 	return nil
+}
+func NewDeclineCommand() *cobra.Command {
+	return fctl.NewCommand("decline <invitation-id>",
+		fctl.WithAliases("dec", "d"),
+		fctl.WithShortDescription("Decline invitation"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithConfirmFlag(),
+		fctl.WithController[*DeclineStore](NewDeclineController()),
+	)
 }

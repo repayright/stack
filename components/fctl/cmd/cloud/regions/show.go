@@ -28,15 +28,6 @@ func NewShowController() *ShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <region-id>",
-		fctl.WithAliases("sh", "s"),
-		fctl.WithShortDescription("Show region details"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*ShowStore](NewShowController()),
-	)
-}
-
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
@@ -88,4 +79,12 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 		WithData(tableData).
 		Render()
 
+}
+func NewShowCommand() *cobra.Command {
+	return fctl.NewCommand("show <region-id>",
+		fctl.WithAliases("sh", "s"),
+		fctl.WithShortDescription("Show region details"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*ShowStore](NewShowController()),
+	)
 }

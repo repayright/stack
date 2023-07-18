@@ -38,16 +38,6 @@ func NewPaymentsConnectorsWiseController() *PaymentsConnectorsWiseController {
 	}
 }
 
-func NewWiseCommand() *cobra.Command {
-	c := NewPaymentsConnectorsWiseController()
-	return fctl.NewCommand(internal.WiseConnector+" <api-key>",
-		fctl.WithShortDescription("Install a Wise connector"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
-		fctl.WithController[*PaymentsConnectorsWiseStore](c),
-	)
-}
-
 func (c *PaymentsConnectorsWiseController) GetStore() *PaymentsConnectorsWiseStore {
 	return c.store
 }
@@ -89,4 +79,13 @@ func (c *PaymentsConnectorsWiseController) Render(cmd *cobra.Command, args []str
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Connector '%s' installed!", c.store.ConnectorName)
 
 	return nil
+}
+func NewWiseCommand() *cobra.Command {
+	c := NewPaymentsConnectorsWiseController()
+	return fctl.NewCommand(internal.WiseConnector+" <api-key>",
+		fctl.WithShortDescription("Install a Wise connector"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithStringFlag(c.pollingPeriodFlag, c.defaultpollingPeriod, "Polling duration"),
+		fctl.WithController[*PaymentsConnectorsWiseStore](c),
+	)
 }

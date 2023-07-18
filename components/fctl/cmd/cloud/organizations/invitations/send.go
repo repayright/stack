@@ -31,16 +31,6 @@ func NewSendController() *SendController {
 	}
 }
 
-func NewSendCommand() *cobra.Command {
-	return fctl.NewCommand("send <email>",
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithShortDescription("Invite a user by email"),
-		fctl.WithAliases("s"),
-		fctl.WithConfirmFlag(),
-		fctl.WithController[*SendStore](NewSendController()),
-	)
-}
-
 func (c *SendController) GetStore() *SendStore {
 	return c.store
 }
@@ -82,4 +72,14 @@ func (c *SendController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Invitation sent to %s", c.store.Invitation.Email)
 	return nil
 
+}
+
+func NewSendCommand() *cobra.Command {
+	return fctl.NewCommand("send <email>",
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithShortDescription("Invite a user by email"),
+		fctl.WithAliases("s"),
+		fctl.WithConfirmFlag(),
+		fctl.WithController[*SendStore](NewSendController()),
+	)
 }

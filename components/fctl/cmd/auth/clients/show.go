@@ -30,15 +30,6 @@ func NewShowController() *ShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <client-id>",
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases("s"),
-		fctl.WithShortDescription("Show client"),
-		fctl.WithController[*ShowStore](NewShowController()),
-	)
-}
-
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
@@ -117,4 +108,12 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 		}
 	}
 	return nil
+}
+func NewShowCommand() *cobra.Command {
+	return fctl.NewCommand("show <client-id>",
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithAliases("s"),
+		fctl.WithShortDescription("Show client"),
+		fctl.WithController[*ShowStore](NewShowController()),
+	)
 }

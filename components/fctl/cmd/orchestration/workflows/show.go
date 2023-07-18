@@ -32,15 +32,6 @@ func NewWorkflowsShowController() *WorkflowsShowController {
 	}
 }
 
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <id>",
-		fctl.WithShortDescription("Show a workflow"),
-		fctl.WithAliases("s"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*WorkflowsShowStore](NewWorkflowsShowController()),
-	)
-}
-
 func (c *WorkflowsShowController) GetStore() *WorkflowsShowStore {
 	return c.store
 }
@@ -107,4 +98,13 @@ func (c *WorkflowsShowController) Render(cmd *cobra.Command, args []string) erro
 	fmt.Fprintln(cmd.OutOrStdout(), string(configAsBytes))
 
 	return nil
+}
+
+func NewShowCommand() *cobra.Command {
+	return fctl.NewCommand("show <id>",
+		fctl.WithShortDescription("Show a workflow"),
+		fctl.WithAliases("s"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*WorkflowsShowStore](NewWorkflowsShowController()),
+	)
 }

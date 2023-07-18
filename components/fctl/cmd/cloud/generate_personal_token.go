@@ -26,15 +26,6 @@ func NewGeneratePersonalTokenController() *GeneratePersonalTokenController {
 	}
 }
 
-func NewGeneratePersonalTokenCommand() *cobra.Command {
-	return fctl.NewStackCommand("generate-personal-token",
-		fctl.WithAliases("gpt"),
-		fctl.WithShortDescription("Generate a personal bearer token"),
-		fctl.WithDescription("Generate a personal bearer token"),
-		fctl.WithController[*GeneratePersonalTokenStore](NewGeneratePersonalTokenController()),
-	)
-}
-
 func (c *GeneratePersonalTokenController) GetStore() *GeneratePersonalTokenStore {
 	return c.store
 }
@@ -71,4 +62,13 @@ func (c *GeneratePersonalTokenController) Render(cmd *cobra.Command, args []stri
 
 	fmt.Fprintln(cmd.OutOrStdout(), c.store.Token)
 	return nil
+}
+
+func NewGeneratePersonalTokenCommand() *cobra.Command {
+	return fctl.NewStackCommand("generate-personal-token",
+		fctl.WithAliases("gpt"),
+		fctl.WithShortDescription("Generate a personal bearer token"),
+		fctl.WithDescription("Generate a personal bearer token"),
+		fctl.WithController[*GeneratePersonalTokenStore](NewGeneratePersonalTokenController()),
+	)
 }

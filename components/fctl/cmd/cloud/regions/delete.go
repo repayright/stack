@@ -25,15 +25,6 @@ func NewDeleteController() *DeleteController {
 	}
 }
 
-func NewDeleteCommand() *cobra.Command {
-	return fctl.NewCommand("delete <region-id>",
-		fctl.WithAliases("del", "d"),
-		fctl.WithShortDescription("Delete a private region"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*DeleteStore](NewDeleteController()),
-	)
-}
-
 func (c *DeleteController) GetStore() *DeleteStore {
 	return c.store
 }
@@ -70,4 +61,13 @@ func (c *DeleteController) Render(cmd *cobra.Command, args []string) error {
 
 	return nil
 
+}
+
+func NewDeleteCommand() *cobra.Command {
+	return fctl.NewCommand("delete <region-id>",
+		fctl.WithAliases("del", "d"),
+		fctl.WithShortDescription("Delete a private region"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithController[*DeleteStore](NewDeleteController()),
+	)
 }

@@ -37,15 +37,6 @@ func NewWorkflowsListController() *WorkflowsListController {
 	}
 }
 
-func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithShortDescription("List all workflows"),
-		fctl.WithAliases("ls", "l"),
-		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*WorkflowsListStore](NewWorkflowsListController()),
-	)
-}
-
 func (c *WorkflowsListController) GetStore() *WorkflowsListStore {
 	return c.store
 }
@@ -118,4 +109,12 @@ func (c *WorkflowsListController) Render(cmd *cobra.Command, args []string) erro
 	}
 
 	return nil
+}
+func NewListCommand() *cobra.Command {
+	return fctl.NewCommand("list",
+		fctl.WithShortDescription("List all workflows"),
+		fctl.WithAliases("ls", "l"),
+		fctl.WithArgs(cobra.ExactArgs(0)),
+		fctl.WithController[*WorkflowsListStore](NewWorkflowsListController()),
+	)
 }

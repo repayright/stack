@@ -26,16 +26,6 @@ func NewAcceptController() *AcceptController {
 	}
 }
 
-func NewAcceptCommand() *cobra.Command {
-	return fctl.NewCommand("accept <invitation-id>",
-		fctl.WithAliases("a"),
-		fctl.WithShortDescription("Accept invitation"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithConfirmFlag(),
-		fctl.WithController[*AcceptStore](NewAcceptController()),
-	)
-}
-
 func (c *AcceptController) GetStore() *AcceptStore {
 	return c.store
 }
@@ -71,4 +61,13 @@ func (c *AcceptController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Invitation %s accepted!", c.store.InvitationId)
 	return nil
 
+}
+func NewAcceptCommand() *cobra.Command {
+	return fctl.NewCommand("accept <invitation-id>",
+		fctl.WithAliases("a"),
+		fctl.WithShortDescription("Accept invitation"),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithConfirmFlag(),
+		fctl.WithController[*AcceptStore](NewAcceptController()),
+	)
 }

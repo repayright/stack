@@ -29,17 +29,6 @@ func NewSetMetadataController() *SetMetadataController {
 	}
 }
 
-func NewSetMetadataCommand() *cobra.Command {
-	return fctl.NewCommand("set-metadata <transaction-id> [<key>=<value>...]",
-		fctl.WithShortDescription("Set metadata on transaction"),
-		fctl.WithAliases("sm", "set-meta"),
-		fctl.WithConfirmFlag(),
-		fctl.WithValidArgs("last"),
-		fctl.WithArgs(cobra.MinimumNArgs(2)),
-		fctl.WithController[*SetMetadataStore](NewSetMetadataController()),
-	)
-}
-
 func (c *SetMetadataController) GetStore() *SetMetadataStore {
 	return c.store
 }
@@ -107,4 +96,15 @@ func (c *SetMetadataController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 func (c *SetMetadataController) Render(cmd *cobra.Command, args []string) error {
 	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Metadata added!")
 	return nil
+}
+
+func NewSetMetadataCommand() *cobra.Command {
+	return fctl.NewCommand("set-metadata <transaction-id> [<key>=<value>...]",
+		fctl.WithShortDescription("Set metadata on transaction"),
+		fctl.WithAliases("sm", "set-meta"),
+		fctl.WithConfirmFlag(),
+		fctl.WithValidArgs("last"),
+		fctl.WithArgs(cobra.MinimumNArgs(2)),
+		fctl.WithController[*SetMetadataStore](NewSetMetadataController()),
+	)
 }
