@@ -173,7 +173,6 @@ func NewCreditWalletCommand() *cobra.Command {
 	c := NewCreditConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(c.GetDescription()),
-		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(2)),
 		fctl.WithController[*CreditWalletStore](NewCreditWalletController(*c)),
 	)

@@ -143,7 +143,6 @@ func NewListCommand() *cobra.Command {
 
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithController[*ListWebhookStore](NewListWebhookController(*config)),
 	)
 }

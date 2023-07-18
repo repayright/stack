@@ -146,7 +146,6 @@ func NewChangeSecretCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(*config.GetShortDescription()),
 		fctl.WithDescription(config.GetDescription()),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
 		fctl.WithController[*ChangeSecretStore](NewChangeSecretWebhookController(*config)),
 	)

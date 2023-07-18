@@ -152,7 +152,6 @@ func (c *StackShowController) Render() error {
 func NewShowCommand() *cobra.Command {
 	config := NewStackShowControllerConfig()
 	return fctl.NewMembershipCommand(config.GetUse(),
-		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
 		fctl.WithController[*StackShowStore](NewStackShowController(*config)),
