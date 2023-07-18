@@ -270,9 +270,7 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 func WithControllerConfig(cmd *cobra.Command, config ControllerConfig) *cobra.Command {
 	cmd.Aliases = append(cmd.Aliases, config.GetAliases()...)
 	cmd.Use = config.GetUse()
-	if c := config.GetShortDescription(); c != nil {
-		cmd.Short = *c
-	}
+	cmd.Short = config.GetShortDescription()
 	cmd.Long = config.GetDescription()
 
 	cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
