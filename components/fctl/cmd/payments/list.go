@@ -22,9 +22,11 @@ const (
 type ListStore struct {
 	Cursor *shared.PaymentsCursorCursor `json:"cursor"`
 }
-type ListController struct {
-	store  *ListStore
-	config fctl.ControllerConfig
+
+func NewListStore() *ListStore {
+	return &ListStore{
+		Cursor: &shared.PaymentsCursorCursor{},
+	}
 }
 
 func NewListConfig() *fctl.ControllerConfig {
@@ -46,10 +48,9 @@ func NewListConfig() *fctl.ControllerConfig {
 
 var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
-func NewListStore() *ListStore {
-	return &ListStore{
-		Cursor: &shared.PaymentsCursorCursor{},
-	}
+type ListController struct {
+	store  *ListStore
+	config fctl.ControllerConfig
 }
 
 func NewListController(config fctl.ControllerConfig) *ListController {

@@ -15,20 +15,20 @@ const (
 	descriptionUI = "Open UI in browser (if available), otherwise print the url to the console."
 )
 
-type UiStruct struct {
+type Store struct {
 	UIUrl        string `json:"stackUrl"`
 	FoundBrowser bool   `json:"browserFound"`
 }
 
-type UiController struct {
-	store  *UiStruct
+type Controller struct {
+	store  *Store
 	config fctl.ControllerConfig
 }
 
-var _ fctl.Controller[*UiStruct] = (*UiController)(nil)
+var _ fctl.Controller[*Store] = (*Controller)(nil)
 
-func NewDefaultUiStore() *UiStruct {
-	return &UiStruct{
+func NewDefaultUiStore() *Store {
+	return &Store{
 		UIUrl:        "",
 		FoundBrowser: false,
 	}
@@ -46,22 +46,22 @@ func NewUiConfig() *fctl.ControllerConfig {
 	)
 }
 
-func NewUiController(config fctl.ControllerConfig) *UiController {
-	return &UiController{
+func NewController(config fctl.ControllerConfig) *Controller {
+	return &Controller{
 		store:  NewDefaultUiStore(),
 		config: config,
 	}
 }
 
-func (c *UiController) GetStore() *UiStruct {
+func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *UiController) GetConfig() fctl.ControllerConfig {
+func (c *Controller) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *UiController) Run() (fctl.Renderable, error) {
+func (c *Controller) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -92,7 +92,7 @@ func (c *UiController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *UiController) Render() error {
+func (c *Controller) Render() error {
 
 	fmt.Println("Opening url: ", c.store.UIUrl)
 
@@ -103,6 +103,6 @@ func NewCommand() *cobra.Command {
 	config := NewUiConfig()
 	return fctl.NewStackCommand(useUI,
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*UiStruct](NewUiController(*config)),
+		fctl.WithController[*Store](NewController(*config)),
 	)
 }

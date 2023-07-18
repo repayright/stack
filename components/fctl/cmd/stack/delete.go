@@ -17,19 +17,19 @@ const (
 	shortDelete = "Delete a stack"
 )
 
-type DeletedStackStore struct {
+type DeletedStore struct {
 	Stack  *membershipclient.Stack `json:"stack"`
 	Status string                  `json:"status"`
 }
 
-func NewDefaultDeletedStackStore() *DeletedStackStore {
-	return &DeletedStackStore{
+func NewDeletedStore() *DeletedStore {
+	return &DeletedStore{
 		Stack:  &membershipclient.Stack{},
 		Status: "",
 	}
 }
 
-func NewStackDeleteControllerConfig() *fctl.ControllerConfig {
+func NewDeleteConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useDelete, flag.ExitOnError)
 	flags.String(internal.StackNameFlag, "", "Stack to remove")
 	fctl.WithConfirmFlag(flags)
@@ -48,21 +48,21 @@ func NewStackDeleteControllerConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*DeletedStackStore] = (*StackDeleteController)(nil)
+var _ fctl.Controller[*DeletedStore] = (*StackDeleteController)(nil)
 
 type StackDeleteController struct {
-	store  *DeletedStackStore
+	store  *DeletedStore
 	config fctl.ControllerConfig
 }
 
-func NewStackDeleteController(config fctl.ControllerConfig) *StackDeleteController {
+func NewDeleteController(config fctl.ControllerConfig) *StackDeleteController {
 	return &StackDeleteController{
-		store:  NewDefaultDeletedStackStore(),
+		store:  NewDeletedStore(),
 		config: config,
 	}
 }
 
-func (c *StackDeleteController) GetStore() *DeletedStackStore {
+func (c *StackDeleteController) GetStore() *DeletedStore {
 	return c.store
 }
 
@@ -138,10 +138,10 @@ func (c *StackDeleteController) Render() error {
 }
 
 func NewDeleteCommand() *cobra.Command {
-	config := NewStackDeleteControllerConfig()
+	config := NewDeleteConfig()
 	return fctl.NewMembershipCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
-		fctl.WithController[*DeletedStackStore](NewStackDeleteController(*config)),
+		fctl.WithController[*DeletedStore](NewDeleteController(*config)),
 	)
 }

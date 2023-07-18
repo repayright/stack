@@ -21,7 +21,7 @@ type UpdateStore struct {
 	Success bool `json:"success"`
 }
 
-func NewDefaultUpdateStore() *UpdateStore {
+func NewUpdateStore() *UpdateStore {
 	return &UpdateStore{
 		Success: false,
 	}
@@ -56,7 +56,7 @@ type UpdateController struct {
 
 func NewUpdateController(config fctl.ControllerConfig) *UpdateController {
 	return &UpdateController{
-		store:        NewDefaultUpdateStore(),
+		store:        NewUpdateStore(),
 		metadataFlag: "metadata",
 		config:       config,
 	}

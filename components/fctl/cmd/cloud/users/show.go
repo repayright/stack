@@ -18,7 +18,7 @@ type ShowStore struct {
 	Email string `json:"email"`
 }
 
-func NewDefaultShowStore() *ShowStore {
+func NewShowStore() *ShowStore {
 	return &ShowStore{}
 }
 
@@ -45,7 +45,7 @@ type ShowController struct {
 
 func NewShowController(config fctl.ControllerConfig) *ShowController {
 	return &ShowController{
-		store:  NewDefaultShowStore(),
+		store:  NewShowStore(),
 		config: config,
 	}
 }

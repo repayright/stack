@@ -20,7 +20,7 @@ type RevertStore struct {
 	Transaction *internal.Transaction `json:"transaction"`
 }
 
-func NewDefaultRevertStore() *RevertStore {
+func NewRevertStore() *RevertStore {
 	return &RevertStore{}
 }
 func NewRevertConfig() *fctl.ControllerConfig {
@@ -47,7 +47,7 @@ var _ fctl.Controller[*RevertStore] = (*RevertController)(nil)
 
 func NewRevertController(config fctl.ControllerConfig) *RevertController {
 	return &RevertController{
-		store:  NewDefaultRevertStore(),
+		store:  NewRevertStore(),
 		config: config,
 	}
 }

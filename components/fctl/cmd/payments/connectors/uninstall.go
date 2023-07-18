@@ -25,6 +25,12 @@ type UninstallStore struct {
 	ConnectorName string `json:"connectorName"`
 }
 
+func NewUninstallStore() *UninstallStore {
+	return &UninstallStore{
+		Success:       false,
+		ConnectorName: "",
+	}
+}
 func NewUninstallConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useUninstall, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
@@ -39,13 +45,6 @@ func NewUninstallConfig() *fctl.ControllerConfig {
 		os.Stdout,
 		flags,
 	)
-}
-
-func NewUninstallStore() *UninstallStore {
-	return &UninstallStore{
-		Success:       false,
-		ConnectorName: "",
-	}
 }
 
 var _ fctl.Controller[*UninstallStore] = (*UninstallController)(nil)

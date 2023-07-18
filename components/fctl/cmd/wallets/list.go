@@ -22,12 +22,11 @@ type ListStore struct {
 	Wallets []shared.Wallet `json:"wallets"`
 }
 type ListController struct {
-	store        *ListStore
-	metadataFlag string
-	config       fctl.ControllerConfig
+	store  *ListStore
+	config fctl.ControllerConfig
 }
 
-func NewDefaultListStore() *ListStore {
+func NewListStore() *ListStore {
 	return &ListStore{}
 }
 func NewListConfig() *fctl.ControllerConfig {
@@ -50,9 +49,8 @@ var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
 func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store:        NewDefaultListStore(),
-		metadataFlag: "metadata",
-		config:       config,
+		store:  NewListStore(),
+		config: config,
 	}
 }
 
@@ -87,7 +85,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, c.metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, metadataFlag))
 	if err != nil {
 		return nil, err
 	}

@@ -24,7 +24,7 @@ type CreateStore struct {
 	Webhook shared.WebhooksConfig `json:"webhook"`
 }
 
-func NewDefaultCreateWebhookStore() *CreateStore {
+func NewCreateStore() *CreateStore {
 	return &CreateStore{
 		Webhook: shared.WebhooksConfig{},
 	}
@@ -45,29 +45,29 @@ func NewCreateConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*CreateStore] = (*CreateWebhookController)(nil)
+var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
 
-type CreateWebhookController struct {
+type CreateController struct {
 	store  *CreateStore
 	config fctl.ControllerConfig
 }
 
-func NewCreateWebhookController(config fctl.ControllerConfig) *CreateWebhookController {
-	return &CreateWebhookController{
-		store:  NewDefaultCreateWebhookStore(),
+func NewCreateController(config fctl.ControllerConfig) *CreateController {
+	return &CreateController{
+		store:  NewCreateStore(),
 		config: config,
 	}
 }
 
-func (c *CreateWebhookController) GetStore() *CreateStore {
+func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
 
-func (c *CreateWebhookController) GetConfig() fctl.ControllerConfig {
+func (c *CreateController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *CreateWebhookController) Run() (fctl.Renderable, error) {
+func (c *CreateController) Run() (fctl.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
@@ -129,7 +129,7 @@ func (c *CreateWebhookController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *CreateWebhookController) Render() error {
+func (c *CreateController) Render() error {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Config created successfully")
 	return nil
 }
@@ -139,6 +139,6 @@ func NewCreateCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MinimumNArgs(2)),
-		fctl.WithController[*CreateStore](NewCreateWebhookController(*config)),
+		fctl.WithController[*CreateStore](NewCreateController(*config)),
 	)
 }

@@ -23,7 +23,7 @@ type ListStore struct {
 	Users []User `json:"users"`
 }
 
-func NewDefaultListStore() *ListStore {
+func NewListStore() *ListStore {
 	return &ListStore{}
 }
 
@@ -50,7 +50,7 @@ func NewListConfig() *fctl.ControllerConfig {
 
 func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store:  NewDefaultListStore(),
+		store:  NewListStore(),
 		config: config,
 	}
 }

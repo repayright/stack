@@ -24,14 +24,14 @@ type ChangeSecretStore struct {
 	ID     string `json:"id"`
 }
 
-func NewDefaultChangeSecretStore() *ChangeSecretStore {
+func NewSecretStore() *ChangeSecretStore {
 	return &ChangeSecretStore{
 		Secret: "",
 		ID:     "",
 	}
 }
 
-func NewChangeSecretControllerConfig() *fctl.ControllerConfig {
+func NewChangeSecretConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useChangeSecret, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
@@ -47,29 +47,29 @@ func NewChangeSecretControllerConfig() *fctl.ControllerConfig {
 	return c
 }
 
-var _ fctl.Controller[*ChangeSecretStore] = (*ChangeSecretWebhookController)(nil)
+var _ fctl.Controller[*ChangeSecretStore] = (*SecretController)(nil)
 
-type ChangeSecretWebhookController struct {
+type SecretController struct {
 	store  *ChangeSecretStore
 	config fctl.ControllerConfig
 }
 
-func NewChangeSecretWebhookController(config fctl.ControllerConfig) *ChangeSecretWebhookController {
-	return &ChangeSecretWebhookController{
-		store:  NewDefaultChangeSecretStore(),
+func NewSecretController(config fctl.ControllerConfig) *SecretController {
+	return &SecretController{
+		store:  NewSecretStore(),
 		config: config,
 	}
 }
 
-func (c *ChangeSecretWebhookController) GetStore() *ChangeSecretStore {
+func (c *SecretController) GetStore() *ChangeSecretStore {
 	return c.store
 }
 
-func (c *ChangeSecretWebhookController) GetConfig() fctl.ControllerConfig {
+func (c *SecretController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *ChangeSecretWebhookController) Run() (fctl.Renderable, error) {
+func (c *SecretController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -132,7 +132,7 @@ func (c *ChangeSecretWebhookController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *ChangeSecretWebhookController) Render() error {
+func (c *SecretController) Render() error {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln(
 		"Config '%s' updated successfully with new secret", c.store.ID)
 	return nil
@@ -140,10 +140,10 @@ func (c *ChangeSecretWebhookController) Render() error {
 
 func NewChangeSecretCommand() *cobra.Command {
 
-	config := NewChangeSecretControllerConfig()
+	config := NewChangeSecretConfig()
 
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
-		fctl.WithController[*ChangeSecretStore](NewChangeSecretWebhookController(*config)),
+		fctl.WithController[*ChangeSecretStore](NewSecretController(*config)),
 	)
 }

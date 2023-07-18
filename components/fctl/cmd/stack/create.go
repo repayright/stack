@@ -23,13 +23,13 @@ const (
 	shortCreate   = "Create a new stack"
 )
 
-type StackCreateStore struct {
+type CreateStore struct {
 	Stack    *membershipclient.Stack
 	Versions *shared.GetVersionsResponse
 }
 
-func NewDefaultStackCreateStore() *StackCreateStore {
-	return &StackCreateStore{
+func NewCreateStore() *CreateStore {
+	return &CreateStore{
 		Stack:    &membershipclient.Stack{},
 		Versions: &shared.GetVersionsResponse{},
 	}
@@ -54,22 +54,22 @@ func NewStackCreateControllerConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*StackCreateStore] = (*StackCreateController)(nil)
+var _ fctl.Controller[*CreateStore] = (*StackCreateController)(nil)
 
 type StackCreateController struct {
-	store   *StackCreateStore
+	store   *CreateStore
 	profile *fctl.Profile
 	config  fctl.ControllerConfig
 }
 
 func NewStackCreateController(config fctl.ControllerConfig) *StackCreateController {
 	return &StackCreateController{
-		store:  NewDefaultStackCreateStore(),
+		store:  NewCreateStore(),
 		config: config,
 	}
 }
 
-func (c *StackCreateController) GetStore() *StackCreateStore {
+func (c *StackCreateController) GetStore() *CreateStore {
 	return c.store
 }
 
@@ -204,6 +204,6 @@ func NewCreateCommand() *cobra.Command {
 	return fctl.NewMembershipCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.RangeArgs(0, 1)),
-		fctl.WithController[*StackCreateStore](NewStackCreateController(*config)),
+		fctl.WithController[*CreateStore](NewStackCreateController(*config)),
 	)
 }

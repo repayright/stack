@@ -23,7 +23,7 @@ type ListStore struct {
 	BalancesNames [][]string `json:"balancesNames"`
 }
 
-func NewDefaultListStore() *ListStore {
+func NewListStore() *ListStore {
 	return &ListStore{}
 }
 func NewListConfig() *fctl.ControllerConfig {
@@ -51,7 +51,7 @@ var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
 func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store:  NewDefaultListStore(),
+		store:  NewListStore(),
 		config: config,
 	}
 }
