@@ -1,7 +1,9 @@
 package accounts
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	internal "github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -11,22 +13,44 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useShow   = "show <address>"
+	shortShow = "Show account"
+)
+
 type ShowStore struct {
 	Account *shared.AccountWithVolumesAndBalances `json:"account"`
 }
+
+func NewShowStore() *ShowStore {
+	return &ShowStore{}
+}
+
+func NewShowConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
+	return fctl.NewControllerConfig(
+		useShow,
+		shortShow,
+		shortShow,
+		[]string{
+			"sh", "s",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
 type ShowController struct {
-	store *ShowStore
+	store  *ShowStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
 
-func NewDefaultShowStore() *ShowStore {
-	return &ShowStore{}
-}
-
-func NewShowController() *ShowController {
+func NewShowController(config fctl.ControllerConfig) *ShowController {
 	return &ShowController{
-		store: NewDefaultShowStore(),
+		store:  NewShowStore(),
+		config: config,
 	}
 }
 
@@ -34,30 +58,37 @@ func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ShowController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ShowController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	ledgerClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	ledgerClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
 
-	ledger := fctl.GetString(cmd, internal.LedgerFlag)
-	response, err := ledgerClient.Ledger.GetAccount(cmd.Context(), operations.GetAccountRequest{
+	ledger := fctl.GetString(flags, internal.LedgerFlag)
+	response, err := ledgerClient.Ledger.GetAccount(ctx, operations.GetAccountRequest{
 		Address: args[0],
 		Ledger:  ledger,
 	})
@@ -78,8 +109,11 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
-	fctl.Section.WithWriter(cmd.OutOrStdout()).Println("Information")
+func (c *ShowController) Render() error {
+
+	out := c.config.GetOut()
+
+	fctl.Section.WithWriter(out).Println("Information")
 	if c.store.Account.Volumes != nil && len(c.store.Account.Volumes) > 0 {
 		tableData := pterm.TableData{}
 		tableData = append(tableData, []string{"Asset", "Input", "Output"})
@@ -90,7 +124,7 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 		}
 		if err := pterm.DefaultTable.
 			WithHasHeader(true).
-			WithWriter(cmd.OutOrStdout()).
+			WithWriter(out).
 			WithData(tableData).
 			Render(); err != nil {
 			return err
@@ -99,16 +133,16 @@ func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
 		fctl.Println("No balances.")
 	}
 
-	fmt.Fprintln(cmd.OutOrStdout())
+	fmt.Fprintln(out)
 
-	return fctl.PrintMetadata(cmd.OutOrStdout(), c.store.Account.Metadata)
+	return fctl.PrintMetadata(out, c.store.Account.Metadata)
 }
 
 func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <address>",
-		fctl.WithShortDescription("Show account"),
+
+	config := NewShowConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases("sh", "s"),
-		fctl.WithController[*ShowStore](NewShowController()),
+		fctl.WithController[*ShowStore](NewShowController(*config)),
 	)
 }
