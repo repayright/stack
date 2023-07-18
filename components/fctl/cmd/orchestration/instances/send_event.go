@@ -72,7 +72,7 @@ func (c *SendEventController) GetConfig() fctl.ControllerConfig {
 
 func (c *SendEventController) Run() (fctl.Renderable, error) {
 
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()
 

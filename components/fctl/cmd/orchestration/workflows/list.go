@@ -75,7 +75,7 @@ func (c *ListController) GetConfig() fctl.ControllerConfig {
 
 func (c *ListController) Run() (fctl.Renderable, error) {
 
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	soc, err := fctl.GetStackOrganizationConfig(flags, ctx)
