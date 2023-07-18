@@ -204,7 +204,6 @@ func NewCreateCommand() *cobra.Command {
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithArgs(cobra.RangeArgs(0, 1)),
-		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*StackCreateStore](NewStackCreateController(*config)),
 	)
 }

@@ -270,6 +270,11 @@ func WithGlobalFlags(flags *flag.FlagSet) *flag.FlagSet {
 
 func WithController[T any](c Controller[T]) CommandOptionFn {
 	return func(cmd *cobra.Command) {
+		// config := c.GetConfig()
+
+		// cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
+		// cmd.Flags().AddGoFlagSet(config.GetFlags())
+
 		cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 			config := c.GetConfig()
 

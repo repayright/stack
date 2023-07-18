@@ -171,7 +171,6 @@ func NewListCommand() *cobra.Command {
 	return fctl.NewMembershipCommand(config.GetUse(), fctl.WithAliases(config.GetAliases()...),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*StackListStore](NewStackListController(*config)),
 	)
 }

@@ -155,7 +155,6 @@ func NewShowCommand() *cobra.Command {
 		fctl.WithAliases(config.GetAliases()...),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
-		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*StackShowStore](NewStackShowController(*config)),
 	)
 }

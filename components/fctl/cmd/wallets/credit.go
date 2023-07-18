@@ -175,7 +175,6 @@ func NewCreditWalletCommand() *cobra.Command {
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithGoFlagSet(c.GetFlags()),
 		fctl.WithController[*CreditWalletStore](NewCreditWalletController(*c)),
 	)
 }

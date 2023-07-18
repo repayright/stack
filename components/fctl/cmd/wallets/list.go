@@ -138,7 +138,6 @@ func NewListCommand() *cobra.Command {
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithGoFlagSet(c.GetFlags()),
 		fctl.WithController[*ListStore](NewListController(*c)),
 	)
 }

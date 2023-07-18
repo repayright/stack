@@ -147,8 +147,6 @@ func NewCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithGoFlagSet(config.GetFlags()),
-		fctl.WithPersistentGoFlagSet(config.GetPFlags()),
 		fctl.WithController[*LoginStore](NewLoginController(*config)),
 	)
 }

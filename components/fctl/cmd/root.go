@@ -10,6 +10,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/login"
 	"github.com/formancehq/fctl/cmd/stack"
+	"github.com/formancehq/fctl/cmd/version"
 	"github.com/formancehq/fctl/cmd/wallets"
 	"github.com/formancehq/fctl/cmd/webhooks"
 	"github.com/formancehq/fctl/membershipclient"
@@ -27,7 +28,7 @@ func NewRootCommand() *cobra.Command {
 		fctl.WithSilenceUsage(),
 		fctl.WithChildCommands(
 			// ui.NewCommand(),
-			// version.NewCommand(),
+			version.NewCommand(),
 			login.NewCommand(),
 			// NewPromptCommand(),
 			// ledger.NewCommand(),
