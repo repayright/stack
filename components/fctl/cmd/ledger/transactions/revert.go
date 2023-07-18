@@ -47,7 +47,8 @@ var _ fctl.Controller[*RevertStore] = (*RevertController)(nil)
 
 func NewRevertController(config fctl.ControllerConfig) *RevertController {
 	return &RevertController{
-		store: NewDefaultRevertStore(),
+		store:  NewDefaultRevertStore(),
+		config: config,
 	}
 }
 
