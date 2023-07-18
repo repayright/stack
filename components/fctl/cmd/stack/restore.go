@@ -1,10 +1,8 @@
 package stack
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 
@@ -33,74 +31,48 @@ func NewDefaultVersionStore() *StackRestoreStore {
 	}
 }
 
-type StackRestoreControllerConfig struct {
-	context     context.Context
-	use         string
-	description string
-	aliases     []string
-	out         io.Writer
-	flags       *flag.FlagSet
-	args        []string
-	fctlConfig  *fctl.Config
-}
-
-func NewStackRestoreControllerConfig() *StackRestoreControllerConfig {
+func NewStackRestoreControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useRestore, flag.ExitOnError)
 	flags.String(internal.StackNameFlag, "", "Stack name")
 
-	fctl.WithGlobalFlags(flags)
-
-	return &StackRestoreControllerConfig{
-		context:     nil,
-		use:         useRestore,
-		description: descriptionRestore,
-		aliases: []string{
-			"res",
-			"r",
+	return fctl.NewControllerConfig(
+		useRestore,
+		descriptionRestore,
+		[]string{
+			"restore",
+			"re",
 		},
-		out:   os.Stdout,
-		flags: flags,
-		args:  []string{},
-	}
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*StackRestoreStore] = (*StackRestoreController)(nil)
 
 type StackRestoreController struct {
-	store  *StackRestoreStore
-	config StackRestoreControllerConfig
+	store      *StackRestoreStore
+	config     fctl.ControllerConfig
+	fctlConfig *fctl.Config
 }
 
-func NewStackRestoreController(config StackRestoreControllerConfig) *StackRestoreController {
+func NewStackRestoreController(config fctl.ControllerConfig) *StackRestoreController {
 	return &StackRestoreController{
 		store:  NewDefaultVersionStore(),
 		config: config,
 	}
 }
 
-func (c *StackRestoreController) GetFlags() *flag.FlagSet {
-	return c.config.flags
-}
-
-func (c *StackRestoreController) GetContext() context.Context {
-	return c.config.context
-}
-
-func (c *StackRestoreController) SetContext(ctx context.Context) {
-	c.config.context = ctx
-}
-
 func (c *StackRestoreController) GetStore() *StackRestoreStore {
 	return c.store
 }
 
-func (c *StackRestoreController) SetArgs(args []string) {
-	c.config.args = append([]string{}, args...)
+func (c *StackRestoreController) GetConfig() fctl.ControllerConfig {
+	return c.config
 }
 
 func (c *StackRestoreController) Run() (fctl.Renderable, error) {
-	flags := c.config.flags
-	ctx := c.config.context
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
@@ -117,12 +89,12 @@ func (c *StackRestoreController) Run() (fctl.Renderable, error) {
 		return nil, err
 	}
 
-	if len(c.config.args) == 0 {
+	if len(c.config.GetArgs()) == 0 {
 		return nil, fmt.Errorf("stack id is required")
 	}
 
 	response, _, err := apiClient.DefaultApi.
-		RestoreStack(ctx, organization, c.config.args[0]).
+		RestoreStack(ctx, organization, c.config.GetArgs()[0]).
 		Execute()
 	if err != nil {
 		return nil, err
@@ -150,22 +122,22 @@ func (c *StackRestoreController) Run() (fctl.Renderable, error) {
 
 	c.store.Stack = response.Data
 	c.store.Versions = versions.GetVersionsResponse
-	c.config.fctlConfig = cfg
+	c.fctlConfig = cfg
 
 	return c, nil
 }
 
 func (c *StackRestoreController) Render() error {
-	return internal.PrintStackInformation(c.config.out, fctl.GetCurrentProfile(c.config.flags, c.config.fctlConfig), c.store.Stack, c.store.Versions)
+	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetFlags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 }
 
 func NewRestoreStackCommand() *cobra.Command {
 	config := NewStackRestoreControllerConfig()
-	return fctl.NewMembershipCommand(config.use,
-		fctl.WithShortDescription(config.description),
+	return fctl.NewMembershipCommand(config.GetUse(),
+		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithAliases(config.aliases...),
-		fctl.WithGoFlagSet(config.flags),
+		fctl.WithAliases(config.GetAliases()...),
+		fctl.WithGoFlagSet(config.GetFlags()),
 		fctl.WithController[*StackRestoreStore](NewStackRestoreController(*config)),
 	)
 }
