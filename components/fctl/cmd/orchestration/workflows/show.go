@@ -24,6 +24,9 @@ type ShowStore struct {
 	Workflow shared.Workflow `json:"workflow"`
 }
 
+func NewShowStore() *ShowStore {
+	return &ShowStore{}
+}
 func NewShowConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 
@@ -44,10 +47,6 @@ func NewShowConfig() *fctl.ControllerConfig {
 type ShowController struct {
 	store  *ShowStore
 	config fctl.ControllerConfig
-}
-
-func NewShowStore() *ShowStore {
-	return &ShowStore{}
 }
 
 var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)

@@ -16,9 +16,16 @@ const (
 	descriptionShow = "Show a profile"
 )
 
-type ProfilesShowStore struct {
+type ShowStore struct {
 	MembershipURI       string `json:"membershipUri"`
 	DefaultOrganization string `json:"defaultOrganization"`
+}
+
+func NewShowStore() *ShowStore {
+	return &ShowStore{
+		MembershipURI:       "",
+		DefaultOrganization: "",
+	}
 }
 
 func NewShowConfig() *fctl.ControllerConfig {
@@ -37,17 +44,10 @@ func NewShowConfig() *fctl.ControllerConfig {
 
 }
 
-func NewShowStore() *ProfilesShowStore {
-	return &ProfilesShowStore{
-		MembershipURI:       "",
-		DefaultOrganization: "",
-	}
-}
-
-var _ fctl.Controller[*ProfilesShowStore] = (*ShowController)(nil)
+var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
 
 type ShowController struct {
-	store  *ProfilesShowStore
+	store  *ShowStore
 	config fctl.ControllerConfig
 }
 
@@ -58,7 +58,7 @@ func NewShowController(config fctl.ControllerConfig) *ShowController {
 	}
 }
 
-func (c *ShowController) GetStore() *ProfilesShowStore {
+func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
@@ -105,6 +105,6 @@ func NewShowCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
-		fctl.WithController[*ProfilesShowStore](NewShowController(*config)),
+		fctl.WithController[*ShowStore](NewShowController(*config)),
 	)
 }

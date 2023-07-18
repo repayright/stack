@@ -21,19 +21,19 @@ const (
 
 var errStackNotFound = errors.New("stack not found")
 
-type StackShowStore struct {
+type ShowStore struct {
 	Stack    *membershipclient.Stack     `json:"stack"`
 	Versions *shared.GetVersionsResponse `json:"versions"`
 }
 
-func NewDefaultStackShowStore() *StackShowStore {
-	return &StackShowStore{
+func NewShowStore() *ShowStore {
+	return &ShowStore{
 		Stack:    &membershipclient.Stack{},
 		Versions: &shared.GetVersionsResponse{},
 	}
 }
 
-func NewStackShowControllerConfig() *fctl.ControllerConfig {
+func NewShowControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 	flags.String(internal.StackNameFlag, "", "Stack name")
 
@@ -50,30 +50,30 @@ func NewStackShowControllerConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*StackShowStore] = (*StackShowController)(nil)
+var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
 
-type StackShowController struct {
-	store      *StackShowStore
+type ShowController struct {
+	store      *ShowStore
 	config     fctl.ControllerConfig
 	fctlConfig *fctl.Config
 }
 
-func NewStackShowController(config fctl.ControllerConfig) *StackShowController {
-	return &StackShowController{
-		store:  NewDefaultStackShowStore(),
+func NewShowController(config fctl.ControllerConfig) *ShowController {
+	return &ShowController{
+		store:  NewShowStore(),
 		config: config,
 	}
 }
 
-func (c *StackShowController) GetStore() *StackShowStore {
+func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *StackShowController) GetConfig() fctl.ControllerConfig {
+func (c *ShowController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *StackShowController) Run() (fctl.Renderable, error) {
+func (c *ShowController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -146,15 +146,15 @@ func (c *StackShowController) Run() (fctl.Renderable, error) {
 
 }
 
-func (c *StackShowController) Render() error {
+func (c *ShowController) Render() error {
 	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 }
 
 func NewShowCommand() *cobra.Command {
-	config := NewStackShowControllerConfig()
+	config := NewShowControllerConfig()
 	return fctl.NewMembershipCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
-		fctl.WithController[*StackShowStore](NewStackShowController(*config)),
+		fctl.WithController[*ShowStore](NewShowController(*config)),
 	)
 }

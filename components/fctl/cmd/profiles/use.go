@@ -20,7 +20,7 @@ type UseStore struct {
 	Success bool `json:"success"`
 }
 
-func NewDefaultUseStore() *UseStore {
+func NewUseStore() *UseStore {
 	return &UseStore{
 		Success: false,
 	}
@@ -50,7 +50,7 @@ var _ fctl.Controller[*UseStore] = (*UseController)(nil)
 
 func NewUseController(config fctl.ControllerConfig) *UseController {
 	return &UseController{
-		store:  NewDefaultUseStore(),
+		store:  NewUseStore(),
 		config: config,
 	}
 }

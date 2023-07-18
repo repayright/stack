@@ -20,6 +20,12 @@ type SetOrgStore struct {
 	Success bool `json:"success"`
 }
 
+func NewSetOrgStore() *SetOrgStore {
+	return &SetOrgStore{
+		Success: false,
+	}
+}
+
 func NewSetOrgConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useSetOrg, flag.ExitOnError)
 
@@ -43,12 +49,6 @@ var _ fctl.Controller[*SetOrgStore] = (*SetOrgController)(nil)
 type SetOrgController struct {
 	store  *SetOrgStore
 	config fctl.ControllerConfig
-}
-
-func NewSetOrgStore() *SetOrgStore {
-	return &SetOrgStore{
-		Success: false,
-	}
 }
 
 func NewSetOrgController(config fctl.ControllerConfig) *SetOrgController {

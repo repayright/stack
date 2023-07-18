@@ -17,12 +17,12 @@ type Profile struct {
 	Name   string `json:"name"`
 	Active string `json:"active"`
 }
-type ProfilesListStore struct {
+type ListStore struct {
 	Profiles []*Profile `json:"profiles"`
 }
 
-func NewDefaultProfilesListStore() *ProfilesListStore {
-	return &ProfilesListStore{
+func NewListStore() *ListStore {
+	return &ListStore{
 		Profiles: []*Profile{},
 	}
 }
@@ -42,21 +42,21 @@ func NewListConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*ProfilesListStore] = (*ListController)(nil)
+var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
 type ListController struct {
-	store  *ProfilesListStore
+	store  *ListStore
 	config fctl.ControllerConfig
 }
 
 func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store:  NewDefaultProfilesListStore(),
+		store:  NewListStore(),
 		config: config,
 	}
 }
 
-func (c *ListController) GetStore() *ProfilesListStore {
+func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
@@ -114,6 +114,6 @@ func NewListCommand() *cobra.Command {
 	config := NewListConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithController[*ProfilesListStore](NewListController(*config)),
+		fctl.WithController[*ListStore](NewListController(*config)),
 	)
 }

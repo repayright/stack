@@ -31,7 +31,7 @@ type ConfirmController struct {
 
 var _ fctl.Controller[*ConfirmStore] = (*ConfirmController)(nil)
 
-func NewDefaultConfirmStore() *ConfirmStore {
+func NewConfirmStore() *ConfirmStore {
 	return &ConfirmStore{}
 }
 func NewConfirmConfig() *fctl.ControllerConfig {
@@ -54,7 +54,7 @@ func NewConfirmConfig() *fctl.ControllerConfig {
 }
 func NewConfirmController(config fctl.ControllerConfig) *ConfirmController {
 	return &ConfirmController{
-		store:  NewDefaultConfirmStore(),
+		store:  NewConfirmStore(),
 		config: config,
 	}
 }

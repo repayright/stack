@@ -20,17 +20,17 @@ const (
 	descriptionListWebhook = "List all webhooks"
 )
 
-type ListWebhookStore struct {
+type ListStore struct {
 	Webhooks []shared.WebhooksConfig `json:"webhooks"`
 }
 
-func NewDefaultListWebhookStore() *ListWebhookStore {
-	return &ListWebhookStore{
+func NewListStore() *ListStore {
+	return &ListStore{
 		Webhooks: []shared.WebhooksConfig{},
 	}
 }
 
-func NewListWebhookControllerConfig() *fctl.ControllerConfig {
+func NewListConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useListWebhook, flag.ExitOnError)
 
 	return fctl.NewControllerConfig(
@@ -46,29 +46,29 @@ func NewListWebhookControllerConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*ListWebhookStore] = (*ListWebhookController)(nil)
+var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
-type ListWebhookController struct {
-	store  *ListWebhookStore
+type ListController struct {
+	store  *ListStore
 	config fctl.ControllerConfig
 }
 
-func NewListWebhookController(config fctl.ControllerConfig) *ListWebhookController {
-	return &ListWebhookController{
-		store:  NewDefaultListWebhookStore(),
+func NewListController(config fctl.ControllerConfig) *ListController {
+	return &ListController{
+		store:  NewListStore(),
 		config: config,
 	}
 }
 
-func (c *ListWebhookController) GetStore() *ListWebhookStore {
+func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *ListWebhookController) GetConfig() fctl.ControllerConfig {
+func (c *ListController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *ListWebhookController) Run() (fctl.Renderable, error) {
+func (c *ListController) Run() (fctl.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
@@ -112,7 +112,7 @@ func (c *ListWebhookController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *ListWebhookController) Render() error {
+func (c *ListController) Render() error {
 	// TODO: WebhooksConfig is missing ?
 	if err := pterm.DefaultTable.
 		WithHasHeader(true).
@@ -140,9 +140,9 @@ func (c *ListWebhookController) Render() error {
 
 func NewListCommand() *cobra.Command {
 
-	config := NewListWebhookControllerConfig()
+	config := NewListConfig()
 
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithController[*ListWebhookStore](NewListWebhookController(*config)),
+		fctl.WithController[*ListStore](NewListController(*config)),
 	)
 }

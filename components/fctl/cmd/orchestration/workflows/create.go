@@ -22,6 +22,9 @@ type CreateStore struct {
 	WorkflowId string `json:"workflowId"`
 }
 
+func NewCreateStore() *CreateStore {
+	return &CreateStore{}
+}
 func NewCreateConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 
@@ -45,10 +48,6 @@ type CreateController struct {
 }
 
 var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
-
-func NewCreateStore() *CreateStore {
-	return &CreateStore{}
-}
 
 func NewCreateController(config fctl.ControllerConfig) *CreateController {
 	return &CreateController{

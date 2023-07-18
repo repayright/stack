@@ -18,18 +18,18 @@ const (
 	shortDescriptionDelete = "Delete a config"
 )
 
-type DeleteWebhookStore struct {
+type DeleteStore struct {
 	ErrorResponse *shared.ErrorResponse `json:"error"`
 	Success       bool                  `json:"success"`
 }
 
-func NewDefaultDeleteWebhookStore() *DeleteWebhookStore {
-	return &DeleteWebhookStore{
+func NewDeleteStore() *DeleteStore {
+	return &DeleteStore{
 		Success: true,
 	}
 }
 
-func NewDeleteWebhookControllerConfig() *fctl.ControllerConfig {
+func NewDeleteConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useDelete, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
@@ -47,30 +47,30 @@ func NewDeleteWebhookControllerConfig() *fctl.ControllerConfig {
 
 }
 
-var _ fctl.Controller[*DeleteWebhookStore] = (*DeleteWebhookController)(nil)
+var _ fctl.Controller[*DeleteStore] = (*DeleteController)(nil)
 
-type DeleteWebhookController struct {
-	store      *DeleteWebhookStore
+type DeleteController struct {
+	store      *DeleteStore
 	config     fctl.ControllerConfig
 	fctlConfig *fctl.Config
 }
 
-func NewDeleteWebhookController(config fctl.ControllerConfig) *DeleteWebhookController {
-	return &DeleteWebhookController{
-		store:  NewDefaultDeleteWebhookStore(),
+func NewDeleteController(config fctl.ControllerConfig) *DeleteController {
+	return &DeleteController{
+		store:  NewDeleteStore(),
 		config: config,
 	}
 }
 
-func (c *DeleteWebhookController) GetStore() *DeleteWebhookStore {
+func (c *DeleteController) GetStore() *DeleteStore {
 	return c.store
 }
 
-func (c *DeleteWebhookController) GetConfig() fctl.ControllerConfig {
+func (c *DeleteController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *DeleteWebhookController) Run() (fctl.Renderable, error) {
+func (c *DeleteController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -129,7 +129,7 @@ func (c *DeleteWebhookController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *DeleteWebhookController) Render() error {
+func (c *DeleteController) Render() error {
 	if !c.store.Success {
 		pterm.Warning.WithShowLineNumber(false).Printfln("Config %s not found", c.config.GetArgs()[0])
 		return nil
@@ -146,10 +146,10 @@ func (c *DeleteWebhookController) Render() error {
 }
 
 func NewDeleteCommand() *cobra.Command {
-	config := NewDeleteWebhookControllerConfig()
+	config := NewDeleteConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*DeleteWebhookStore](NewDeleteWebhookController(*config)),
+		fctl.WithController[*DeleteStore](NewDeleteController(*config)),
 	)
 }

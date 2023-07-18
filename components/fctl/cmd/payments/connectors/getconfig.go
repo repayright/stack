@@ -24,12 +24,6 @@ var (
 type GetConfigStore struct {
 	ConnectorConfig *shared.ConnectorConfigResponse `json:"connectorConfig"`
 }
-type GetConfigController struct {
-	store  *GetConfigStore
-	config fctl.ControllerConfig
-}
-
-var _ fctl.Controller[*GetConfigStore] = (*GetConfigController)(nil)
 
 func NewGetConfigStore() *GetConfigStore {
 	return &GetConfigStore{}
@@ -47,6 +41,13 @@ func NewGetConfigConfig() *fctl.ControllerConfig {
 		os.Stdout,
 		flags,
 	)
+}
+
+var _ fctl.Controller[*GetConfigStore] = (*GetConfigController)(nil)
+
+type GetConfigController struct {
+	store  *GetConfigStore
+	config fctl.ControllerConfig
 }
 
 func NewGetConfigController(config fctl.ControllerConfig) *GetConfigController {

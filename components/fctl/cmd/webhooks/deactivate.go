@@ -17,12 +17,12 @@ const (
 	shortDesactivate = "Deactivate one config"
 )
 
-type DesactivateWebhookStore struct {
+type DesactivateStore struct {
 	Success bool `json:"success"`
 }
 
-func NewDefaultDesactivateWebhookStore() *DesactivateWebhookStore {
-	return &DesactivateWebhookStore{
+func NewDesactivateStore() *DesactivateStore {
+	return &DesactivateStore{
 		Success: true,
 	}
 }
@@ -44,29 +44,29 @@ func NewDesactivateConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*DesactivateWebhookStore] = (*DesactivateWebhookController)(nil)
+var _ fctl.Controller[*DesactivateStore] = (*DesactivateController)(nil)
 
-type DesactivateWebhookController struct {
-	store  *DesactivateWebhookStore
+type DesactivateController struct {
+	store  *DesactivateStore
 	config fctl.ControllerConfig
 }
 
-func NewDesactivateWebhookController(config fctl.ControllerConfig) *DesactivateWebhookController {
-	return &DesactivateWebhookController{
-		store:  NewDefaultDesactivateWebhookStore(),
+func NewDesactivateController(config fctl.ControllerConfig) *DesactivateController {
+	return &DesactivateController{
+		store:  NewDesactivateStore(),
 		config: config,
 	}
 }
 
-func (c *DesactivateWebhookController) GetStore() *DesactivateWebhookStore {
+func (c *DesactivateController) GetStore() *DesactivateStore {
 	return c.store
 }
 
-func (c *DesactivateWebhookController) GetConfig() fctl.ControllerConfig {
+func (c *DesactivateController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *DesactivateWebhookController) Run() (fctl.Renderable, error) {
+func (c *DesactivateController) Run() (fctl.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
@@ -122,7 +122,7 @@ func (c *DesactivateWebhookController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *DesactivateWebhookController) Render() error {
+func (c *DesactivateController) Render() error {
 
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Config deactivated successfully")
 
@@ -136,6 +136,6 @@ func NewDeactivateCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*DesactivateWebhookStore](NewDesactivateWebhookController(*config)),
+		fctl.WithController[*DesactivateStore](NewDesactivateController(*config)),
 	)
 }

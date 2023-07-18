@@ -29,14 +29,14 @@ type DebitWalletStore struct {
 	HoldID  *string `json:"holdId"`
 	Success bool    `json:"success"`
 }
-type DebitWalletController struct {
+type DebitController struct {
 	store  *DebitWalletStore
 	config fctl.ControllerConfig
 }
 
-var _ fctl.Controller[*DebitWalletStore] = (*DebitWalletController)(nil)
+var _ fctl.Controller[*DebitWalletStore] = (*DebitController)(nil)
 
-func NewDefaultDebitWalletStore() *DebitWalletStore {
+func NewDebitStore() *DebitWalletStore {
 	return &DebitWalletStore{
 		HoldID:  nil,
 		Success: false,
@@ -68,22 +68,22 @@ func NewDebitConfig() *fctl.ControllerConfig {
 
 	return c
 }
-func NewDebitWalletController(config fctl.ControllerConfig) *DebitWalletController {
-	return &DebitWalletController{
-		store:  NewDefaultDebitWalletStore(),
+func NewDebitController(config fctl.ControllerConfig) *DebitController {
+	return &DebitController{
+		store:  NewDebitStore(),
 		config: config,
 	}
 }
 
-func (c *DebitWalletController) GetStore() *DebitWalletStore {
+func (c *DebitController) GetStore() *DebitWalletStore {
 	return c.store
 }
 
-func (c *DebitWalletController) GetConfig() fctl.ControllerConfig {
+func (c *DebitController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *DebitWalletController) Run() (fctl.Renderable, error) {
+func (c *DebitController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	cfg, err := fctl.GetConfig(flags)
@@ -178,7 +178,7 @@ func (c *DebitWalletController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *DebitWalletController) Render() error {
+func (c *DebitController) Render() error {
 	if c.store.HoldID != nil && *c.store.HoldID != "" {
 		pterm.Success.WithWriter(c.config.GetOut()).Printfln("Wallet debited successfully with hold id '%s'!", *c.store.HoldID)
 	} else {
@@ -193,6 +193,6 @@ func NewDebitWalletCommand() *cobra.Command {
 	c := NewDebitConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.RangeArgs(2, 3)),
-		fctl.WithController[*DebitWalletStore](NewDebitWalletController(*c)),
+		fctl.WithController[*DebitWalletStore](NewDebitController(*c)),
 	)
 }

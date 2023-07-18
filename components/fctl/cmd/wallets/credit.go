@@ -22,23 +22,23 @@ const (
 	sourceFlag  = "source"
 )
 
-type CreditWalletStore struct {
+type CreditStore struct {
 	Success bool `json:"success"`
 }
-type CreditWalletController struct {
-	store  *CreditWalletStore
+type CreditController struct {
+	store  *CreditStore
 	config fctl.ControllerConfig
 }
 
-var _ fctl.Controller[*CreditWalletStore] = (*CreditWalletController)(nil)
+var _ fctl.Controller[*CreditStore] = (*CreditController)(nil)
 
-func NewDefaultCreditWalletStore() *CreditWalletStore {
-	return &CreditWalletStore{}
+func NewCreditStore() *CreditStore {
+	return &CreditStore{}
 }
 
-func NewCreditWalletController(config fctl.ControllerConfig) *CreditWalletController {
-	return &CreditWalletController{
-		store:  NewDefaultCreditWalletStore(),
+func NewCreditController(config fctl.ControllerConfig) *CreditController {
+	return &CreditController{
+		store:  NewCreditStore(),
 		config: config,
 	}
 }
@@ -65,15 +65,15 @@ func NewCreditConfig() *fctl.ControllerConfig {
 		flags,
 	)
 }
-func (c *CreditWalletController) GetStore() *CreditWalletStore {
+func (c *CreditController) GetStore() *CreditStore {
 	return c.store
 }
 
-func (c *CreditWalletController) GetConfig() fctl.ControllerConfig {
+func (c *CreditController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *CreditWalletController) Run() (fctl.Renderable, error) {
+func (c *CreditController) Run() (fctl.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
@@ -166,7 +166,7 @@ func (c *CreditWalletController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *CreditWalletController) Render() error {
+func (c *CreditController) Render() error {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Wallet credited successfully!")
 	return nil
 }
@@ -175,6 +175,6 @@ func NewCreditWalletCommand() *cobra.Command {
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*CreditWalletStore](NewCreditWalletController(*c)),
+		fctl.WithController[*CreditStore](NewCreditController(*c)),
 	)
 }

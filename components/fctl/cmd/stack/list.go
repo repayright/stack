@@ -27,17 +27,17 @@ type Stack struct {
 	DeletedAt *string `json:"deletedAt"`
 }
 
-type StackListStore struct {
+type ListStore struct {
 	Stacks []Stack `json:"stacks"`
 }
 
-func NewDefaultStackListStore() *StackListStore {
-	return &StackListStore{
+func NewListStore() *ListStore {
+	return &ListStore{
 		Stacks: []Stack{},
 	}
 }
 
-func NewStackListControllerConfig() *fctl.ControllerConfig {
+func NewListControllerConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 	flags.Bool(deletedFlag, false, "Show deleted stacks")
 
@@ -54,30 +54,30 @@ func NewStackListControllerConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*StackListStore] = (*StackListController)(nil)
+var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
-type StackListController struct {
-	store   *StackListStore
+type ListController struct {
+	store   *ListStore
 	profile *fctl.Profile
 	config  fctl.ControllerConfig
 }
 
-func NewStackListController(config fctl.ControllerConfig) *StackListController {
-	return &StackListController{
-		store:  NewDefaultStackListStore(),
+func NewListController(config fctl.ControllerConfig) *ListController {
+	return &ListController{
+		store:  NewListStore(),
 		config: config,
 	}
 }
 
-func (c *StackListController) GetStore() *StackListStore {
+func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *StackListController) GetConfig() fctl.ControllerConfig {
+func (c *ListController) GetConfig() fctl.ControllerConfig {
 	return c.config
 }
 
-func (c *StackListController) Run() (fctl.Renderable, error) {
+func (c *ListController) Run() (fctl.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -129,7 +129,7 @@ func (c *StackListController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *StackListController) Render() error {
+func (c *ListController) Render() error {
 	if len(c.store.Stacks) == 0 {
 		fmt.Fprintln(os.Stdout, "No stacks found.")
 		return nil
@@ -167,11 +167,11 @@ func (c *StackListController) Render() error {
 }
 
 func NewListCommand() *cobra.Command {
-	config := NewStackListControllerConfig()
+	config := NewListControllerConfig()
 
 	return fctl.NewMembershipCommand(config.GetUse(), fctl.WithAliases(config.GetAliases()...),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*StackListStore](NewStackListController(*config)),
+		fctl.WithController[*ListStore](NewListController(*config)),
 	)
 }
