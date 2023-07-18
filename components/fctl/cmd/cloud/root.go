@@ -19,8 +19,8 @@ func NewCommand() *cobra.Command {
 			me.NewCommand(),
 			users.NewCommand(),
 			regions.NewCommand(),
-			NewGeneratePersonalTokenCommand(),
 			billing.NewCommand(),
+			NewGeneratePersonalTokenCommand(),
 		),
 	)
 }
