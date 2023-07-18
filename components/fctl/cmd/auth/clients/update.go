@@ -1,7 +1,10 @@
 package clients
 
 import (
+	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/cmd/auth/clients/internal"
+	"os"
 	"strings"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -15,6 +18,11 @@ import (
 // We should handle membership side the patch of the client OR
 // We should get the client before updating it to get replace informations
 
+const (
+	useUpdate   = "update <client-id>"
+	shortUpdate = "Update a client"
+)
+
 type UpdateClient struct {
 	ID                    string `json:"id"`
 	Name                  string `json:"name"`
@@ -27,31 +35,44 @@ type UpdateClient struct {
 type UpdateStore struct {
 	Client *UpdateClient `json:"client"`
 }
-type UpdateController struct {
-	store                     *UpdateStore
-	publicFlag                string
-	trustedFlag               string
-	descriptionFlag           string
-	redirectUriFlag           string
-	postLogoutRedirectUriFlag string
-}
 
-var _ fctl.Controller[*UpdateStore] = (*UpdateController)(nil)
-
-func NewDefaultUpdateStore() *UpdateStore {
+func NewUpdateStore() *UpdateStore {
 	return &UpdateStore{
 		Client: &UpdateClient{},
 	}
 }
 
-func NewUpdateController() *UpdateController {
+func NewUpdateConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useUpdate, flag.ExitOnError)
+	fctl.WithConfirmFlag(flags)
+	flags.Bool(internal.PublicFlag, false, "Is client public")
+	flags.Bool(internal.TrustedFlag, false, "Is the client trusted")
+	flags.String(internal.DescriptionFlag, "", "Client description")
+	flags.String(internal.RedirectUriFlag, "", "Redirect URIS")
+	flags.String(internal.PostLogoutRedirectUriFlag, "", "Post logout redirect uris")
+	return fctl.NewControllerConfig(
+		useUpdate,
+		shortUpdate,
+		shortUpdate,
+		[]string{
+			"u", "upd",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
+var _ fctl.Controller[*UpdateStore] = (*UpdateController)(nil)
+
+type UpdateController struct {
+	store  *UpdateStore
+	config fctl.ControllerConfig
+}
+
+func NewUpdateController(config fctl.ControllerConfig) *UpdateController {
 	return &UpdateController{
-		store:                     NewDefaultUpdateStore(),
-		publicFlag:                "public",
-		trustedFlag:               "trusted",
-		descriptionFlag:           "description",
-		redirectUriFlag:           "redirect-uri",
-		postLogoutRedirectUriFlag: "post-logout-redirect-uri",
+		store:  NewUpdateStore(),
+		config: config,
 	}
 }
 
@@ -59,48 +80,55 @@ func (c *UpdateController) GetStore() *UpdateStore {
 	return c.store
 }
 
-func (c *UpdateController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *UpdateController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *UpdateController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to delete an OAuth2 client") {
+	if !fctl.CheckStackApprobation(flags, stack, "You are about to delete an OAuth2 client") {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	authClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	authClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
 
-	public := fctl.GetBool(cmd, c.publicFlag)
-	trusted := fctl.GetBool(cmd, c.trustedFlag)
-	description := fctl.GetString(cmd, c.descriptionFlag)
+	public := fctl.GetBool(flags, internal.PublicFlag)
+	trusted := fctl.GetBool(flags, internal.TrustedFlag)
+	description := fctl.GetString(flags, internal.DescriptionFlag)
 
 	request := operations.UpdateClientRequest{
 		ClientID: args[0],
 		UpdateClientRequest: &shared.UpdateClientRequest{
 			Public:                 &public,
-			RedirectUris:           fctl.GetStringSlice(cmd, c.redirectUriFlag),
+			RedirectUris:           fctl.GetStringSlice(flags, internal.RedirectUriFlag),
 			Description:            &description,
 			Name:                   args[0],
 			Trusted:                &trusted,
-			PostLogoutRedirectUris: fctl.GetStringSlice(cmd, c.postLogoutRedirectUriFlag),
+			PostLogoutRedirectUris: fctl.GetStringSlice(flags, internal.PostLogoutRedirectUriFlag),
 		},
 	}
-	response, err := authClient.Auth.UpdateClient(cmd.Context(), request)
+	response, err := authClient.Auth.UpdateClient(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +147,7 @@ func (c *UpdateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *UpdateController) Render(cmd *cobra.Command, args []string) error {
+func (c *UpdateController) Render() error {
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("ID"), c.store.Client.ID})
 	tableData = append(tableData, []string{pterm.LightCyan("Name"), c.store.Client.Name})
@@ -128,24 +156,16 @@ func (c *UpdateController) Render(cmd *cobra.Command, args []string) error {
 	tableData = append(tableData, []string{pterm.LightCyan("Redirect URIs"), c.store.Client.RedirectUri})
 	tableData = append(tableData, []string{pterm.LightCyan("Post logout redirect URIs"), c.store.Client.PostLogoutRedirectUri})
 	return pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 
 }
 
 func NewUpdateCommand() *cobra.Command {
-	c := NewUpdateController()
-	return fctl.NewCommand("update <client-id>",
+	config := NewUpdateConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithShortDescription("Update client"),
-		fctl.WithAliases("u", "upd"),
-		fctl.WithConfirmFlag(),
-		fctl.WithBoolFlag(c.publicFlag, false, "Is client public"),
-		fctl.WithBoolFlag(c.trustedFlag, false, "Is the client trusted"),
-		fctl.WithStringFlag(c.descriptionFlag, "", "Client description"),
-		fctl.WithStringSliceFlag(c.redirectUriFlag, []string{}, "Redirect URIS"),
-		fctl.WithStringSliceFlag(c.postLogoutRedirectUriFlag, []string{}, "Post logout redirect uris"),
-		fctl.WithController[*UpdateStore](c),
+		fctl.WithController[*UpdateStore](NewUpdateController(*config)),
 	)
 }

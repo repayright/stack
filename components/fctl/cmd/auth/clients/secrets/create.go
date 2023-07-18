@@ -1,7 +1,9 @@
 package secrets
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -10,24 +12,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useCreate         = "create <client-id> <secret-name>"
+	descriptionCreate = "Create a new secret for a client. You can list all clients with `fctl auth clients list`"
+	shortCreate       = "Create a new secret for a client"
+)
+
 type CreateStore struct {
 	SecretId string `json:"secretId"`
 	Name     string `json:"name"`
 	Clear    string `json:"clear"`
 }
-type CreateController struct {
-	store *CreateStore
+
+func NewCreateStore() *CreateStore {
+	return &CreateStore{}
+}
+func NewSetupConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
+	fctl.WithConfirmFlag(flags)
+
+	return fctl.NewControllerConfig(
+		useCreate,
+		descriptionCreate,
+		shortCreate,
+		[]string{
+			"c",
+		},
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
 
-func NewDefaultCreateStore() *CreateStore {
-	return &CreateStore{}
+type CreateController struct {
+	store  *CreateStore
+	config fctl.ControllerConfig
 }
 
-func NewCreateController() *CreateController {
+func NewCreateController(config fctl.ControllerConfig) *CreateController {
 	return &CreateController{
-		store: NewDefaultCreateStore(),
+		store:  NewCreateStore(),
+		config: config,
 	}
 }
 
@@ -35,28 +61,35 @@ func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
 
-func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *CreateController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *CreateController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to create a new client secret") {
+	if !fctl.CheckStackApprobation(flags, stack, "You are about to create a new client secret") {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	authClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	authClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +101,7 @@ func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 			Metadata: nil,
 		},
 	}
-	response, err := authClient.Auth.CreateSecret(cmd.Context(), request)
+	response, err := authClient.Auth.CreateSecret(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -84,24 +117,22 @@ func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
+func (c *CreateController) Render() error {
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("ID"), c.store.SecretId})
 	tableData = append(tableData, []string{pterm.LightCyan("Name"), c.store.Name})
 	tableData = append(tableData, []string{pterm.LightCyan("Clear"), c.store.Clear})
 	return pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 
 }
 
 func NewCreateCommand() *cobra.Command {
-	return fctl.NewCommand("create <client-id> <secret-name>",
-		fctl.WithAliases("c"),
+	config := NewSetupConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithShortDescription("Create secret"),
-		fctl.WithConfirmFlag(),
-		fctl.WithController[*CreateStore](NewCreateController()),
+		fctl.WithController[*CreateStore](NewCreateController(*config)),
 	)
 }
