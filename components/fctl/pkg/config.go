@@ -112,7 +112,7 @@ func GetConfig(flagSet *flag.FlagSet) (*Config, error) {
 }
 
 func GetConfigManager(flagSet *flag.FlagSet) *ConfigManager {
-	return NewConfigManager(GetString(flagSet, FileFlag))
+	return NewConfigManager(GetString(flagSet, ConfigFlag))
 }
 
 func GetCurrentProfileName(flags *flag.FlagSet, config *Config) string {

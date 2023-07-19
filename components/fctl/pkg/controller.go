@@ -3,7 +3,6 @@ package fctl
 import (
 	"context"
 	"flag"
-	"fmt"
 	"io"
 	"os"
 )
@@ -36,24 +35,6 @@ type ControllerConfig struct {
 	args             []string
 }
 
-var GlobalFlags *flag.FlagSet = func() *flag.FlagSet {
-	flags := flag.NewFlagSet("global", flag.ContinueOnError)
-
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-
-	flags.Bool(InsecureTlsFlag, false, "insecure TLS")
-	flags.Bool(TelemetryFlag, false, "enable telemetry")
-	flags.Bool(DebugFlag, false, "debug mode")
-	flags.String(ProfileFlag, "", "config profile to use")
-	flags.String(FileFlag, fmt.Sprintf("%s/.formance/fctl.config", homedir), "config file to use")
-	flags.String(outputFlag, "plain", "output format (plain, json)")
-
-	return flags
-}()
-
 func generateScopesEnum(s ...flag.Flag) *flag.FlagSet {
 	fs := flag.NewFlagSet("scopes", flag.ExitOnError)
 
@@ -61,7 +42,7 @@ func generateScopesEnum(s ...flag.Flag) *flag.FlagSet {
 		return fs
 	}
 	for _, f := range s {
-		fs.StringVar(f.Value.(*fValue).Get(), f.Name, f.DefValue, f.Usage)
+		fs.StringVar(f.Value.(*fValue[string]).Get(), f.Name, f.DefValue, f.Usage)
 	}
 	return fs
 }
