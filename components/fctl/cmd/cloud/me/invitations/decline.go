@@ -5,7 +5,6 @@ import (
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -33,7 +32,6 @@ func NewDeclineConfig() *fctl.ControllerConfig {
 		[]string{
 			"dec", "d",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

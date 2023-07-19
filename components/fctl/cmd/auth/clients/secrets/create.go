@@ -3,8 +3,6 @@ package secrets
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -38,7 +36,7 @@ func NewSetupConfig() *fctl.ControllerConfig {
 		[]string{
 			"c",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

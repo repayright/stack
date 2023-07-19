@@ -5,7 +5,6 @@ import (
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -35,7 +34,6 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 		[]string{
 			"del",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

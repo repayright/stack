@@ -3,8 +3,6 @@ package ui
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/spf13/cobra"
 )
@@ -41,7 +39,7 @@ func NewUiConfig() *fctl.ControllerConfig {
 		descriptionUI,
 		shortUI,
 		[]string{},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

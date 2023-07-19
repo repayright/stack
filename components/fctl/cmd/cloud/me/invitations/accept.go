@@ -5,7 +5,6 @@ import (
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -32,7 +31,7 @@ func NewAcceptConfig() *fctl.ControllerConfig {
 		[]string{
 			"a",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)
