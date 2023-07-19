@@ -19,7 +19,6 @@ const (
 	useDebit        = "debit <amount> <asset>"
 	shortDebit      = "Debit a wallet"
 	pendingFlag     = "pending"
-	metadataFlag    = "metadata"
 	descriptionFlag = "description"
 	balanceFlag     = "balance"
 	destinationFlag = "destination"
