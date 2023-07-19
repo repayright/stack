@@ -18,6 +18,7 @@ const (
 	DebugFlag         string = "debug"
 	InsecureTlsFlag   string = "insecure-tls"
 	TelemetryFlag     string = "telemetry"
+	MetadataFlag      string = "metadata"
 )
 
 func GetBool(flags *flag.FlagSet, flagName string) bool {
@@ -107,6 +108,10 @@ func WithConfirmFlag(flagSet *flag.FlagSet) *bool {
 	return flagSet.Bool("confirm", false, "Confirm the action")
 }
 
+func WithMetadataFlag(flag *flag.FlagSet) *flag.FlagSet {
+	flag.String(MetadataFlag, "", "Metadata to use")
+	return flag
+}
 func ConvertPFlagSetToFlagSet(pFlagSet *pflag.FlagSet) *flag.FlagSet {
 
 	flagSet := flag.NewFlagSet("fctl", flag.ExitOnError)

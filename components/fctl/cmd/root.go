@@ -10,6 +10,7 @@ import (
 
 	"github.com/formancehq/fctl/cmd/login"
 	"github.com/formancehq/fctl/cmd/stack"
+	"github.com/formancehq/fctl/cmd/wallets"
 	"github.com/formancehq/fctl/cmd/webhooks"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -37,7 +38,7 @@ func NewRootCommand() *cobra.Command {
 			// cloud.NewCommand(),
 			// search.NewCommand(),
 			webhooks.NewCommand(),
-			// wallets.NewCommand(),
+			wallets.NewCommand(),
 			// orchestration.NewCommand(),
 		),
 	)
@@ -68,10 +69,7 @@ func Execute() {
 
 	ctx, _ := signal.NotifyContext(context.TODO(), os.Interrupt)
 
-	rootCmd := NewRootCommand()
-	rootCmd.Flags().AddGoFlagSet(fctl.WithGlobalFlags(nil))
-
-	err := rootCmd.ExecuteContext(ctx)
+	err := NewRootCommand().ExecuteContext(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, fctl.ErrMissingApproval):

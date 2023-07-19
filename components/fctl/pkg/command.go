@@ -20,6 +20,7 @@ const (
 	organizationFlag       = "organization"
 	DefaultSegmentWriteKey = ""
 	outputFlag             = "output"
+	metadataFlag           = "metadata"
 )
 
 var (
@@ -494,7 +495,7 @@ func NewCommand(use string, opts ...CommandOption) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().AddGoFlagSet(WithGlobalFlags(nil))
+	cmd.PersistentFlags().AddGoFlagSet(WithGlobalFlags(nil))
 
 	for _, opt := range opts {
 		opt.apply(cmd)
