@@ -36,9 +36,9 @@ var (
 	outputFlagV       = &fValue[string]{value: "plain"}
 	scopeFlags        = func() *flag.FlagSet {
 		flags := flag.NewFlagSet("scopes", flag.ContinueOnError)
-		flags.StringVar(stackFlagV.Get(), stackFlag, "", "stack id to use")
-		flags.StringVar(organizationFlagV.Get(), organizationFlag, "", "organization id to use")
-		flags.StringVar(ledgerFlagV.Get(), "ledger", "", "ledger name to use")
+		flags.StringVar(stackFlagV.Get(), stackFlag, "", "Specific stack id (not required if only one stack is present)")
+		flags.StringVar(organizationFlagV.Get(), organizationFlag, "", "Selected organization (not required if only one organization is present)")
+		flags.StringVar(ledgerFlagV.Get(), "ledger", "", "Specific ledger name")
 
 		return flags
 	}()
