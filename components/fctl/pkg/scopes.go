@@ -25,36 +25,29 @@ func (f *fValue[T]) Get() *T {
 }
 
 var (
-	stackFlagV        *fValue[string] = &fValue[string]{value: ""}
-	organizationFlagV *fValue[string] = &fValue[string]{value: ""}
-	ledgerFlagV       *fValue[string] = &fValue[string]{value: ""}
-	insecureTlsV      *fValue[bool]   = &fValue[bool]{value: false}
-	telemetryFlagV    *fValue[bool]   = &fValue[bool]{value: false}
-	debugFlagV        *fValue[bool]   = &fValue[bool]{value: false}
-	profileFlagV      *fValue[string] = &fValue[string]{value: ""}
-	configFlagV       *fValue[string] = &fValue[string]{value: fmt.Sprintf("%s/.formance/fctl.config", getHomeDir())}
-	outputFlagV       *fValue[string] = &fValue[string]{value: "plain"}
-	Stack             flag.Flag       = flag.Flag{
-		Name:     "stack",
-		Usage:    "Specific stack (not required if only one stack is present)",
-		DefValue: "",
-		Value:    stackFlagV,
-	}
-	Organization flag.Flag = flag.Flag{
-		Name:     "organization",
-		Usage:    "Selected organization (not required if only one organization is present)",
-		DefValue: "",
-		Value:    organizationFlagV,
-	}
-	Ledger flag.Flag = flag.Flag{
-		Name:     "ledger",
-		Usage:    "Specific ledger name",
-		DefValue: "default",
-		Value:    ledgerFlagV,
-	}
+	stackFlagV        = &fValue[string]{value: ""}
+	organizationFlagV = &fValue[string]{value: ""}
+	ledgerFlagV       = &fValue[string]{value: ""}
+	insecureTlsV      = &fValue[bool]{value: false}
+	telemetryFlagV    = &fValue[bool]{value: false}
+	debugFlagV        = &fValue[bool]{value: false}
+	profileFlagV      = &fValue[string]{value: ""}
+	configFlagV       = &fValue[string]{value: fmt.Sprintf("%s/.formance/fctl.config", getHomeDir())}
+	outputFlagV       = &fValue[string]{value: "plain"}
+	scopeFlags        = func() *flag.FlagSet {
+		flags := flag.NewFlagSet("scopes", flag.ContinueOnError)
+		flags.StringVar(stackFlagV.Get(), stackFlag, "", "stack id to use")
+		flags.StringVar(organizationFlagV.Get(), organizationFlag, "", "organization id to use")
+		flags.StringVar(ledgerFlagV.Get(), "ledger", "", "ledger name to use")
+
+		return flags
+	}()
+	Stack        = getScopeFlags(stackFlag)
+	Ledger       = getScopeFlags("ledger")
+	Organization = getScopeFlags(organizationFlag)
 )
 
-var GlobalFlags *flag.FlagSet = func() *flag.FlagSet {
+var GlobalFlags = func() *flag.FlagSet {
 	flags := flag.NewFlagSet("global", flag.ContinueOnError)
 	flags.BoolVar(insecureTlsV.Get(), InsecureTlsFlag, false, "insecure TLS")
 	flags.BoolVar(telemetryFlagV.Get(), TelemetryFlag, false, "enable telemetry")
@@ -65,6 +58,10 @@ var GlobalFlags *flag.FlagSet = func() *flag.FlagSet {
 
 	return flags
 }()
+
+func getScopeFlags(name string) *flag.Flag {
+	return scopeFlags.Lookup(name)
+}
 
 func getHomeDir() string {
 	homedir, err := os.UserHomeDir()

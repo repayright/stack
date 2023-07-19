@@ -211,7 +211,7 @@ func (c *Controller) Render() error {
 
 func NewCommand() *cobra.Command {
 	config := NewSearchConfig()
-	return fctl.NewStackCommand(config.GetUse(),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MinimumNArgs(1)),
 		fctl.WithValidArgs(append(targets, defaultTarget)...),
 		fctl.WithController[*Store](NewController(config)),

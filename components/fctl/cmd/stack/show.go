@@ -154,7 +154,7 @@ func (c *ShowController) Render() error {
 
 func NewShowCommand() *cobra.Command {
 	config := NewShowControllerConfig()
-	return fctl.NewMembershipCommand(config.GetUse(),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
 		fctl.WithController[*ShowStore](NewShowController(config)),
 	)

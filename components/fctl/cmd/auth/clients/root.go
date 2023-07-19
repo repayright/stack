@@ -18,6 +18,6 @@ func NewCommand() *cobra.Command {
 			NewShowCommand(),
 			secrets.NewCommand(),
 		),
-		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
+		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }

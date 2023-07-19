@@ -140,7 +140,7 @@ func (c *StackDeleteController) Render() error {
 
 func NewDeleteCommand() *cobra.Command {
 	config := NewDeleteConfig()
-	return fctl.NewMembershipCommand(config.GetUse(),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
 		fctl.WithController[*DeletedStore](NewDeleteController(config)),
 	)

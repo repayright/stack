@@ -16,6 +16,6 @@ func NewConnectorsCommand() *cobra.Command {
 			NewListCommand(),
 			install.NewInstallCommand(),
 		),
-		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
+		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }

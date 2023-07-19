@@ -156,7 +156,7 @@ func (fn CommandOptionFn) apply(cmd *cobra.Command) {
 func WithScopesFlags(flags ...*flag.Flag) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		for _, f := range flags {
-			cmd.PersistentFlags().StringVar(f.Value.(*fValue[string]).Get(), f.Name, f.DefValue, f.Usage)
+			cmd.PersistentFlags().AddGoFlag(f)
 		}
 	}
 }
@@ -217,6 +217,77 @@ func WithDeprecated(message string) CommandOptionFn {
 	}
 }
 
+func withOrganizationCompletion() CommandOptionFn {
+	return func(cmd *cobra.Command) {
+		err := cmd.RegisterFlagCompletionFunc(organizationFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			flags := ConvertPFlagSetToFlagSet(cmd.PersistentFlags())
+			cfg, err := GetConfig(flags)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+			profile := GetCurrentProfile(flags, cfg)
+
+			claims, err := profile.GetUserInfo()
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+
+			ret := make([]string, 0)
+			for _, org := range claims.Org {
+				ret = append(ret, fmt.Sprintf("%s\t%s", org.ID, org.DisplayName))
+			}
+
+			return ret, cobra.ShellCompDirectiveDefault
+		})
+		if err != nil {
+			panic(errors.Wrap(err, "failed to register flag completion function"))
+		}
+
+	}
+}
+
+func withStackCompletion() CommandOptionFn {
+	return func(cmd *cobra.Command) {
+		err := cmd.RegisterFlagCompletionFunc("stack", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			flags := ConvertPFlagSetToFlagSet(cmd.Flags())
+
+			cfg, err := GetConfig(flags)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+			profile := GetCurrentProfile(flags, cfg)
+
+			claims, err := profile.GetUserInfo()
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+
+			selectedOrganization := GetSelectedOrganization(flags)
+			if selectedOrganization == "" {
+				selectedOrganization = profile.defaultOrganization
+			}
+
+			ret := make([]string, 0)
+			for _, org := range claims.Org {
+				if selectedOrganization != "" && selectedOrganization != org.ID {
+					continue
+				}
+				for _, stack := range org.Stacks {
+					ret = append(ret, fmt.Sprintf("%s\t%s", stack.ID, stack.DisplayName))
+				}
+			}
+
+			return ret, cobra.ShellCompDirectiveDefault
+		})
+
+		if err != nil {
+			panic(errors.Wrap(err, "could not register stack flag completion"))
+		}
+
+	}
+}
+
+// We dont want to add again the pFlagSet, because it is already added by the root command
 func configureCobraWithControllerConfig(cmd *cobra.Command, config *ControllerConfig) *cobra.Command {
 	config.SetOut(cmd.OutOrStdout())
 	cmd.Aliases = append(cmd.Aliases, config.GetAliases()...)
@@ -224,13 +295,28 @@ func configureCobraWithControllerConfig(cmd *cobra.Command, config *ControllerCo
 	cmd.Short = config.GetShortDescription()
 	cmd.Long = config.GetDescription()
 
-	// Add the scopes as persistent flags
+	//Adding flags
 	scopes := config.GetScopes()
-	scopes.VisitAll(func(f *flag.Flag) {
-		cmd.InheritedFlags().AddGoFlag(f)
-	})
-
+	cmd.Flags().AddGoFlagSet(scopes)
 	cmd.Flags().AddGoFlagSet(config.GetFlags())
+
+	//Adding completion flags
+	if cmd.Flags().Lookup(stackFlag) != nil {
+		withStackCompletion()(cmd)
+	}
+
+	if cmd.Flags().Lookup(organizationFlag) != nil {
+		withOrganizationCompletion()(cmd)
+	}
+
+	//Hide Specific flags
+	if cmd.Flags().Lookup("metadata") != nil {
+		err := cmd.Flags().MarkHidden("metadata")
+		if err != nil {
+			panic(errors.Wrap(err, "failed to hide metadata flag"))
+		}
+	}
+
 	return cmd
 }
 func WithController[T any](c Controller[T]) CommandOptionFn {
@@ -351,77 +437,6 @@ func WithSilenceError() CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.SilenceErrors = true
 	}
-}
-
-func NewStackCommand(use string, opts ...CommandOption) *cobra.Command {
-	cmd := NewMembershipCommand(use, opts...)
-	//err := cmd.RegisterFlagCompletionFunc("stack", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	//	flags := ConvertPFlagSetToFlagSet(cmd.Flags())
-	//
-	//	cfg, err := GetConfig(flags)
-	//	if err != nil {
-	//		return nil, cobra.ShellCompDirectiveError
-	//	}
-	//	profile := GetCurrentProfile(flags, cfg)
-	//
-	//	claims, err := profile.GetUserInfo()
-	//	if err != nil {
-	//		return nil, cobra.ShellCompDirectiveError
-	//	}
-	//
-	//	selectedOrganization := GetSelectedOrganization(flags)
-	//	if selectedOrganization == "" {
-	//		selectedOrganization = profile.defaultOrganization
-	//	}
-	//
-	//	ret := make([]string, 0)
-	//	for _, org := range claims.Org {
-	//		if selectedOrganization != "" && selectedOrganization != org.ID {
-	//			continue
-	//		}
-	//		for _, stack := range org.Stacks {
-	//			ret = append(ret, fmt.Sprintf("%s\t%s", stack.ID, stack.DisplayName))
-	//		}
-	//	}
-	//
-	//	return ret, cobra.ShellCompDirectiveDefault
-	//})
-	//
-	//if err != nil {
-	//	panic(errors.Wrap(err, "could not register stack flag completion"))
-	//}
-
-	return cmd
-}
-
-func NewMembershipCommand(use string, opts ...CommandOption) *cobra.Command {
-	cmd := NewCommand(use, opts...)
-	//err := cmd.RegisterFlagCompletionFunc("organization", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	//	flags := ConvertPFlagSetToFlagSet(cmd.Flags())
-	//	cfg, err := GetConfig(flags)
-	//	if err != nil {
-	//		return nil, cobra.ShellCompDirectiveError
-	//	}
-	//	profile := GetCurrentProfile(flags, cfg)
-	//
-	//	claims, err := profile.GetUserInfo()
-	//	if err != nil {
-	//		return nil, cobra.ShellCompDirectiveError
-	//	}
-	//
-	//	ret := make([]string, 0)
-	//	for _, org := range claims.Org {
-	//		ret = append(ret, fmt.Sprintf("%s\t%s", org.ID, org.DisplayName))
-	//	}
-	//
-	//	return ret, cobra.ShellCompDirectiveDefault
-	//})
-	//
-	//if err != nil {
-	//	panic(errors.Wrap(err, "failed to register flag completion function"))
-	//}
-
-	return cmd
 }
 
 func NewCommand(use string, opts ...CommandOption) *cobra.Command {

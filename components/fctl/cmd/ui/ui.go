@@ -102,7 +102,7 @@ func (c *Controller) Render() error {
 
 func NewCommand() *cobra.Command {
 	config := NewUiConfig()
-	return fctl.NewStackCommand(useUI,
+	return fctl.NewCommand(useUI,
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithController[*Store](NewController(config)),
 	)

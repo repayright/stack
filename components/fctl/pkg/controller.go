@@ -35,19 +35,19 @@ type ControllerConfig struct {
 	args             []string
 }
 
-func generateScopesEnum(s ...flag.Flag) *flag.FlagSet {
+func generateScopesEnum(s ...*flag.Flag) *flag.FlagSet {
 	fs := flag.NewFlagSet("scopes", flag.ExitOnError)
 
 	if len(s) == 0 {
 		return fs
 	}
 	for _, f := range s {
-		fs.StringVar(f.Value.(*fValue[string]).Get(), f.Name, f.DefValue, f.Usage)
+		fs.Var(f.Value, f.Name, f.Usage)
 	}
 	return fs
 }
 
-func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet, s ...flag.Flag) *ControllerConfig {
+func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet, s ...*flag.Flag) *ControllerConfig {
 	return &ControllerConfig{
 		use:              use,
 		description:      description,

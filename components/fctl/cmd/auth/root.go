@@ -8,12 +8,12 @@ import (
 )
 
 func NewCommand() *cobra.Command {
-	return fctl.NewStackCommand("auth",
+	return fctl.NewCommand("auth",
 		fctl.WithShortDescription("Auth server management"),
 		fctl.WithChildCommands(
 			clients.NewCommand(),
 			users.NewCommand(),
 		),
-		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
+		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }
