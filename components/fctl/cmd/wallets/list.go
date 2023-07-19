@@ -1,7 +1,9 @@
 package wallets
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -11,24 +13,45 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useListWallets         = "list"
+	descriptionListWallets = "List all wallets"
+)
+
 type ListStore struct {
 	Wallets []shared.Wallet `json:"wallets"`
 }
 type ListController struct {
 	store        *ListStore
 	metadataFlag string
+	config       fctl.ControllerConfig
 }
-
-var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
 func NewDefaultListStore() *ListStore {
 	return &ListStore{}
 }
+func NewListConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useListWallets, flag.ExitOnError)
+	fctl.WithMetadataFlag(flags)
+	return fctl.NewControllerConfig(
+		useListWallets,
+		descriptionListWallets,
+		[]string{
+			"list",
+			"ls",
+		},
+		os.Stdout,
+		flags,
+	)
+}
 
-func NewListController() *ListController {
+var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+
+func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
 		store:        NewDefaultListStore(),
 		metadataFlag: "metadata",
+		config:       config,
 	}
 }
 
@@ -36,34 +59,39 @@ func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ListController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ListController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetFlags()
+	ctx := c.config.GetContext()
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "retrieving config")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(cmd, c.metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, c.metadataFlag))
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.Wallets.ListWallets(cmd.Context(), operations.ListWalletsRequest{
+	response, err := client.Wallets.ListWallets(ctx, operations.ListWalletsRequest{
 		Metadata: metadata,
 	})
 	if err != nil {
@@ -79,7 +107,7 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render() error {
 	if len(c.store.Wallets) == 0 {
 		fctl.Println("No wallets found.")
 		return nil
@@ -87,7 +115,7 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 
 	if err := pterm.DefaultTable.
 		WithHasHeader(true).
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(
 			fctl.Prepend(
 				fctl.Map(c.store.Wallets,
@@ -105,12 +133,12 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	return nil
 }
 func NewListCommand() *cobra.Command {
-	c := NewListController()
-	return fctl.NewCommand("list",
-		fctl.WithShortDescription("List all wallets"),
-		fctl.WithAliases("ls", "l"),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{""}, "Metadata to use"),
+	c := NewListConfig()
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithShortDescription(c.GetDescription()),
+		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ListStore](c),
+		fctl.WithGoFlagSet(c.GetFlags()),
+		fctl.WithController[*ListStore](NewListController(*c)),
 	)
 }
