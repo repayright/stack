@@ -172,6 +172,8 @@ func WithGoPersistentFlagSet(flags *flag.FlagSet) CommandOptionFn {
 				cmd.PersistentFlags().StringVarP(&configFlagV.value, f.Name, "c", f.DefValue, f.Usage)
 			case "profile":
 				cmd.PersistentFlags().StringVarP(&profileFlagV.value, f.Name, "p", f.DefValue, f.Usage)
+			case "output":
+				cmd.PersistentFlags().StringVarP(&outputFlagV.value, f.Name, "o", f.DefValue, f.Usage)
 			case "debug":
 				defaultV, err := strconv.ParseBool(f.DefValue)
 				if err != nil {
@@ -336,7 +338,7 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 				return err
 			}
 
-			err = render(config.GetFlags(), c, renderer)
+			err = render(config.GetPFlags(), c, renderer)
 
 			if err != nil {
 				return err
