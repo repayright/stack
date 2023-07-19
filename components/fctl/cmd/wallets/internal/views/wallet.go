@@ -24,7 +24,7 @@ func PrintWallet(out io.Writer, wallet shared.WalletWithBalances) error {
 
 	fctl.Section.WithWriter(out).Println("Balances")
 	if len(wallet.Balances.Main.Assets) == 0 {
-		fmt.Fprintln(out, "No balances found.\n")
+		fmt.Fprintln(out, "No balances found.")
 		return nil
 	}
 	tableData = pterm.TableData{}
