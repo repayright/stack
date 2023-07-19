@@ -23,43 +23,6 @@ type ExportedData struct {
 	Data interface{} `json:"data"`
 }
 
-type FValue struct {
-	name string
-}
-
-func (f *FValue) String() string {
-	return f.name
-}
-
-func (f *FValue) Set(string) error {
-	f.name = f.name
-	return nil
-}
-
-var (
-	stackFlagV        *FValue   = &FValue{name: ""}
-	organizationFlagV *FValue   = &FValue{name: ""}
-	ledgerFlagV       *FValue   = &FValue{name: ""}
-	Stack             flag.Flag = flag.Flag{
-		Name:     "stack",
-		Usage:    "stack name",
-		DefValue: "",
-		Value:    stackFlagV,
-	}
-	Organization flag.Flag = flag.Flag{
-		Name:     "organization",
-		Usage:    "organization name",
-		DefValue: "",
-		Value:    organizationFlagV,
-	}
-	Ledger flag.Flag = flag.Flag{
-		Name:     "ledger",
-		Usage:    "Specific ledger",
-		DefValue: "default",
-		Value:    ledgerFlagV,
-	}
-)
-
 type ControllerConfig struct {
 	context          context.Context
 	use              string
@@ -69,7 +32,7 @@ type ControllerConfig struct {
 	out              io.Writer
 	flags            *flag.FlagSet
 	pflags           *flag.FlagSet
-	scope            *flag.FlagSet
+	scopes           *flag.FlagSet
 	args             []string
 }
 
@@ -98,7 +61,7 @@ func generateScopesEnum(s ...flag.Flag) *flag.FlagSet {
 		return fs
 	}
 	for _, f := range s {
-		fs.Var(f.Value, f.Name, f.Usage)
+		fs.StringVar(f.Value.(*fValue).Get(), f.Name, f.DefValue, f.Usage)
 	}
 	return fs
 }
@@ -111,14 +74,14 @@ func NewControllerConfig(use string, description string, shortDescription string
 		aliases:          aliases,
 		out:              out,
 		flags:            flags,
-		scope:            generateScopesEnum(s...),
+		scopes:           generateScopesEnum(s...),
 		pflags:           GlobalFlags,
 	}
 
 }
 
 func (c *ControllerConfig) GetScopes() *flag.FlagSet {
-	return c.scope
+	return c.scopes
 }
 
 func (c *ControllerConfig) GetUse() string {
@@ -173,16 +136,23 @@ func (c *ControllerConfig) GetAllFLags() *flag.FlagSet {
 	// Create a new FlagSet
 	flags := flag.NewFlagSet(c.use, flag.ExitOnError)
 
-	// Regroup pflag in 1 flagset
+	// Regroup pflag // GLOBAL
 	if c.pflags != nil {
 		c.pflags.VisitAll(func(f *flag.Flag) {
 			flags.Var(f.Value, f.Name, f.Usage)
 		})
 	}
 
-	// Regroup flags in 1 flagset
+	// Regroup flags
 	if c.flags != nil {
 		c.flags.VisitAll(func(f *flag.Flag) {
+			flags.Var(f.Value, f.Name, f.Usage)
+		})
+	}
+
+	// Regroup scopes
+	if c.scopes != nil {
+		c.scopes.VisitAll(func(f *flag.Flag) {
 			flags.Var(f.Value, f.Name, f.Usage)
 		})
 	}
