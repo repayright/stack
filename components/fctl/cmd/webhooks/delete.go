@@ -148,7 +148,6 @@ func (c *DeleteController) Render() error {
 func NewDeleteCommand() *cobra.Command {
 	config := NewDeleteConfig()
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*DeleteStore](NewDeleteController(config)),
 	)

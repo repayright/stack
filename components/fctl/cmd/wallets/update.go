@@ -98,7 +98,7 @@ func (c *UpdateController) Run() (fctl.Renderable, error) {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, c.metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,6 @@ func (c *UpdateController) Render() error {
 func NewUpdateCommand() *cobra.Command {
 	c := NewUpdateConfig()
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*UpdateStore](NewUpdateController(c)),
 	)

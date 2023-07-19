@@ -114,7 +114,7 @@ func (c *DebitController) Run() (fctl.Renderable, error) {
 
 	pending := fctl.GetBool(flags, pendingFlag)
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}

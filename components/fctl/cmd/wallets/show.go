@@ -128,7 +128,6 @@ func (c *ShowController) Render() error {
 func NewShowCommand() *cobra.Command {
 	c := NewShowConfig()
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithController[*ShowStore](NewShowController(c)),
 	)

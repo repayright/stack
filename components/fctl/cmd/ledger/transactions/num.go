@@ -165,7 +165,7 @@ func (c *NumController) Run() (fctl.Renderable, error) {
 
 	reference := fctl.GetString(flags, internal.ReferenceFlag)
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, internal.MetadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}

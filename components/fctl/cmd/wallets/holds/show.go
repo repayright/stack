@@ -122,7 +122,6 @@ func NewShowCommand() *cobra.Command {
 	c := NewShowConfig()
 
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*ShowStore](NewShowController(c)),
 	)

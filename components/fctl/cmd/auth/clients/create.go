@@ -49,7 +49,7 @@ func NewCreateConfig() *fctl.ControllerConfig {
 		descriptionCreate,
 		shortCreate,
 		[]string{
-			"setup", "set",
+			"c",
 		},
 		os.Stdout,
 		flags,
@@ -159,10 +159,8 @@ func (c *CreateController) Render() error {
 
 func NewCreateCommand() *cobra.Command {
 	config := NewCreateConfig()
-	return fctl.NewCommand("create <name>",
-		fctl.WithAliases("c"),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithShortDescription("Create client"),
 		fctl.WithController[*CreateStore](NewCreateController(config)),
 	)
 }
