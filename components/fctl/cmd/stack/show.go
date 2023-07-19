@@ -107,7 +107,6 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 		}
 		stack = stackResponse.Data
 	} else {
-		fmt.Println(fctl.GetString(flags, internal.StackNameFlag))
 		if fctl.GetString(flags, internal.StackNameFlag) == "" {
 			return nil, errors.New("need either an id of a name specified using --name flag")
 		}
