@@ -3,6 +3,7 @@ package wallets
 import (
 	"flag"
 	"fmt"
+
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	"github.com/formancehq/fctl/cmd/wallets/internal/views"
 	fctl "github.com/formancehq/fctl/pkg"

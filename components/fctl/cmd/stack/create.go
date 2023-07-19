@@ -3,6 +3,8 @@ package stack
 import (
 	"flag"
 	"fmt"
+	"net/http"
+
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -10,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 const (

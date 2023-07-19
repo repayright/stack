@@ -2,6 +2,7 @@ package profiles
 
 import (
 	"flag"
+
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pkg/errors"

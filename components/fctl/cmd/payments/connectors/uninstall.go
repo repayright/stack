@@ -3,6 +3,7 @@ package connectors
 import (
 	"flag"
 	"fmt"
+
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"

@@ -2,6 +2,7 @@ package regions
 
 import (
 	"flag"
+
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"

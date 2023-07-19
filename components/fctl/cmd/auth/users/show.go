@@ -3,6 +3,7 @@ package users
 import (
 	"flag"
 	"fmt"
+
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pterm/pterm"

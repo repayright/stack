@@ -3,6 +3,7 @@ package login
 import (
 	"flag"
 	"fmt"
+
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"

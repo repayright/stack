@@ -3,6 +3,7 @@ package instances
 import (
 	"flag"
 	"fmt"
+
 	"github.com/formancehq/fctl/cmd/orchestration/instances/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go"

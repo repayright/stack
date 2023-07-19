@@ -2,6 +2,7 @@ package internal
 
 import (
 	"flag"
+
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/spf13/cobra"
 )
