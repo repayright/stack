@@ -71,18 +71,16 @@ func GetStringSlice(flagSet *flag.FlagSet, flagName string) []string {
 
 	envVar := os.Getenv(strcase.ToScreamingSnake(flagName))
 
-	if envVar != "" {
+	if len(envVar) > 0 {
 		return strings.Split(envVar, " ")
 	}
 
 	value := f.Value.String()
-	v := strings.Split(value, " ")
-	if len(v) == 0 {
-		return []string{}
+	if len(value) > 0 {
+		return strings.Split(value, " ")
 	}
 
-	return v
-
+	return []string{}
 }
 
 func GetInt(flagSet *flag.FlagSet, flagName string) int {
