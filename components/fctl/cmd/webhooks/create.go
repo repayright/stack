@@ -3,12 +3,13 @@ package webhooks
 import (
 	"flag"
 	"fmt"
+	"net/url"
+
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"net/url"
 )
 
 const (

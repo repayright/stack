@@ -3,7 +3,6 @@ package instances
 import (
 	"flag"
 	"fmt"
-	"os"
 
 	"github.com/formancehq/fctl/cmd/orchestration/instances/internal"
 	fctl "github.com/formancehq/fctl/pkg"

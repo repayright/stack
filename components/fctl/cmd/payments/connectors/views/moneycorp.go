@@ -2,9 +2,10 @@ package views
 
 import (
 	"errors"
+	"io"
+
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
-	"io"
 )
 
 func DisplayMoneycorpConfig(out io.Writer, connectorConfig *shared.ConnectorConfigResponse) error {

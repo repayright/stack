@@ -3,6 +3,7 @@ package wallets
 import (
 	"flag"
 	"fmt"
+
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"

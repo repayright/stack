@@ -3,13 +3,14 @@ package stack
 import (
 	"flag"
 	"fmt"
+	"net/http"
+
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 const (

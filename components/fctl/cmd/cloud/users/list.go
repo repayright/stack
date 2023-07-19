@@ -2,6 +2,7 @@ package users
 
 import (
 	"flag"
+
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"

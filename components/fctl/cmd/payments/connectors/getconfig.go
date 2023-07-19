@@ -3,6 +3,7 @@ package connectors
 import (
 	"flag"
 	"fmt"
+
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	"github.com/formancehq/fctl/cmd/payments/connectors/views"
 	fctl "github.com/formancehq/fctl/pkg"

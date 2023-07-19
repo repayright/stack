@@ -3,6 +3,7 @@ package ui
 import (
 	"flag"
 	"fmt"
+
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/spf13/cobra"
 )

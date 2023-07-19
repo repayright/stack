@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"flag"
-	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
