@@ -13,5 +13,6 @@ func NewCommand() *cobra.Command {
 			connectors.NewConnectorsCommand(),
 			NewListPaymentsCommand(),
 		),
+		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
 	)
 }

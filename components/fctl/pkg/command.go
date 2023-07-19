@@ -156,6 +156,23 @@ func WithGoFlagSet(flags *flag.FlagSet) CommandOptionFn {
 	}
 }
 
+// WithScopesFlags adds flags to the command that will be used to
+// set the scopes only cobra side for display purpose.
+// The function is used to display the scopes in the help
+func WithScopesFlags(flags ...*flag.Flag) CommandOptionFn {
+	return func(cmd *cobra.Command) {
+		for _, f := range flags {
+			cmd.PersistentFlags().StringVar(f.Value.(*fValue).Get(), f.Name, f.DefValue, f.Usage)
+		}
+	}
+}
+
+func WithGoPersistentFlagSet(flags *flag.FlagSet) CommandOptionFn {
+	return func(cmd *cobra.Command) {
+		cmd.PersistentFlags().AddGoFlagSet(flags)
+	}
+}
+
 func WithAliases(aliases ...string) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.Aliases = aliases

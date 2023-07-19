@@ -16,5 +16,6 @@ func NewCommand() *cobra.Command {
 			NewDeleteCommand(),
 			invitations.NewCommand(),
 		),
+		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
 	)
 }
