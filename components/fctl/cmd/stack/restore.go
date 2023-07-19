@@ -71,7 +71,7 @@ func (c *StackRestoreController) GetConfig() fctl.ControllerConfig {
 }
 
 func (c *StackRestoreController) Run() (fctl.Renderable, error) {
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
@@ -128,7 +128,7 @@ func (c *StackRestoreController) Run() (fctl.Renderable, error) {
 }
 
 func (c *StackRestoreController) Render() error {
-	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetFlags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 }
 
 func NewRestoreStackCommand() *cobra.Command {
@@ -137,7 +137,7 @@ func NewRestoreStackCommand() *cobra.Command {
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithAliases(config.GetAliases()...),
-		fctl.WithGoFlagSet(config.GetFlags()),
+		fctl.WithGoFlagSet(config.GetAllFLags()),
 		fctl.WithController[*StackRestoreStore](NewStackRestoreController(*config)),
 	)
 }

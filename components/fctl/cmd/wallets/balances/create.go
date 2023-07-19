@@ -1,7 +1,9 @@
 package balances
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -12,11 +14,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useCreate         = "create <balance-name>"
+	descriptionCreate = "Create a balance"
+)
+
 type CreateStore struct {
 	BalanceName string `json:"balanceName"`
 }
 type CreateController struct {
-	store *CreateStore
+	store  *CreateStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
@@ -24,10 +32,32 @@ var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
 func NewDefaultCreateStore() *CreateStore {
 	return &CreateStore{}
 }
+func NewCreateConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 
-func NewCreateController() *CreateController {
+	fctl.WithConfirmFlag(flags)
+
+	internal.WithTargetingWalletByName(flags)
+	internal.WithTargetingWalletByID(flags)
+
+	c := fctl.NewControllerConfig(
+		useCreate,
+		descriptionCreate,
+		[]string{
+			"c", "cr",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	c.SetShortDescription(descriptionCreate)
+
+	return c
+}
+func NewCreateController(config fctl.ControllerConfig) *CreateController {
 	return &CreateController{
-		store: NewDefaultCreateStore(),
+		store:  NewDefaultCreateStore(),
+		config: config,
 	}
 }
 
@@ -35,28 +65,41 @@ func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
 
-func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	cfg, err := fctl.GetConfig(cmd)
+func (c *CreateController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *CreateController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
+
+	if len(args) != 1 {
+		return nil, fmt.Errorf("expected 1 argument, got %d", len(args))
+	}
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "retrieving config")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	walletID, err := internal.RequireWalletID(cmd, client)
+	walletID, err := internal.RequireWalletID(flags, ctx, client)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +110,7 @@ func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 			Name: args[0],
 		},
 	}
-	response, err := client.Wallets.CreateBalance(cmd.Context(), request)
+	response, err := client.Wallets.CreateBalance(ctx, request)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating balance")
 	}
@@ -84,20 +127,19 @@ func (c *CreateController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 	return c, nil
 }
 
-func (c *CreateController) Render(cmd *cobra.Command, args []string) error {
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln(
+func (c *CreateController) Render() error {
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln(
 		"Balance created successfully with name: %s", c.store.BalanceName)
 	return nil
 
 }
 func NewCreateCommand() *cobra.Command {
-	return fctl.NewCommand("create <balance-name>",
-		fctl.WithShortDescription("Create a new balance"),
-		fctl.WithAliases("c", "cr"),
-		fctl.WithConfirmFlag(),
+	c := NewCreateConfig()
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithShortDescription(c.GetDescription()),
+		fctl.WithAliases(c.GetAliases()...),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		internal.WithTargetingWalletByID(),
-		internal.WithTargetingWalletByName(),
-		fctl.WithController[*CreateStore](NewCreateController()),
+		fctl.WithGoFlagSet(c.GetFlags()),
+		fctl.WithController[*CreateStore](NewCreateController(*c)),
 	)
 }

@@ -1,7 +1,9 @@
 package transactions
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
@@ -13,11 +15,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useListTransactions         = "list"
+	descriptionListTransactions = "List all transactions"
+)
+
 type ListStore struct {
 	Transactions []shared.WalletsTransaction `json:"transactions"`
 }
 type ListController struct {
-	store *ListStore
+	store  *ListStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ListStore] = (*ListController)(nil)
@@ -25,10 +33,28 @@ var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 func NewDefaultListStore() *ListStore {
 	return &ListStore{}
 }
+func NewListConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useListTransactions, flag.ExitOnError)
+	internal.WithTargetingWalletByName(flags)
+	internal.WithTargetingWalletByID(flags)
 
-func NewListController() *ListController {
+	c := fctl.NewControllerConfig(
+		useListTransactions,
+		descriptionListTransactions,
+		[]string{
+			"ls",
+			"l",
+		},
+		os.Stdout,
+		flags,
+	)
+
+	return c
+}
+func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store: NewDefaultListStore(),
+		store:  NewDefaultListStore(),
+		config: config,
 	}
 }
 
@@ -36,37 +62,44 @@ func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ListController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ListController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
-		return nil, errors.Wrap(err, "retriecing config")
+		return nil, errors.Wrap(err, "retrieving config")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "retrieving organization ID in transaction list")
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "resolving stack in transaction list")
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
-		return nil, errors.Wrap(err, "creating stack client")
+		return nil, errors.Wrap(err, "creating stack client in transaction list")
 	}
 
-	walletID, err := internal.RetrieveWalletID(cmd, client)
+	walletID, err := internal.RetrieveWalletID(flags, ctx, client)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "retrieve wallet ID in transaction list")
 	}
 
 	request := operations.GetTransactionsRequest{
 		WalletID: &walletID,
 	}
-	response, err := client.Wallets.GetTransactions(cmd.Context(), request)
+	response, err := client.Wallets.GetTransactions(ctx, request)
 	if err != nil {
 		return nil, errors.Wrap(err, "listing transactions")
 	}
@@ -84,7 +117,7 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render() error {
 	if len(c.store.Transactions) == 0 {
 		fctl.Println("No transactions found.")
 		return nil
@@ -100,17 +133,18 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	tableData = fctl.Prepend(tableData, []string{"ID", "Date", "Metadata"})
 	return pterm.DefaultTable.
 		WithHasHeader().
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 
 }
 
 func NewListCommand() *cobra.Command {
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List transactions"),
+	c := NewListConfig()
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithAliases(c.GetAliases()...),
+		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ListStore](NewListController()),
+		fctl.WithController[*ListStore](NewListController(*c)),
 	)
 }

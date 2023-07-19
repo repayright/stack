@@ -1,7 +1,9 @@
 package balances
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	"github.com/formancehq/fctl/cmd/wallets/internal/views"
@@ -12,11 +14,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useShow         = "show <balance-name>"
+	descriptionShow = "Show a balance"
+)
+
 type ShowStore struct {
 	Balance shared.BalanceWithAssets `json:"balance"`
 }
 type ShowController struct {
-	store *ShowStore
+	store  *ShowStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
@@ -24,60 +32,78 @@ var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
 func NewDefaultShowStore() *ShowStore {
 	return &ShowStore{}
 }
-
-func NewShowController() *ShowController {
-	return &ShowController{
-		store: NewDefaultShowStore(),
-	}
-}
-
-func NewShowCommand() *cobra.Command {
-	return fctl.NewCommand("show <balance-name>",
-		fctl.WithShortDescription("Show a balance"),
-		fctl.WithAliases("sh"),
-		fctl.WithArgs(cobra.ExactArgs(1)),
-		internal.WithTargetingWalletByID(),
-		internal.WithTargetingWalletByName(),
-		fctl.WithController[*ShowStore](NewShowController()),
+func NewShowConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
+	internal.WithTargetingWalletByID(flags)
+	internal.WithTargetingWalletByName(flags)
+	c := fctl.NewControllerConfig(
+		useShow,
+		descriptionShow,
+		[]string{
+			"sh",
+		},
+		os.Stdout,
+		flags,
 	)
+
+	c.SetShortDescription(descriptionShow)
+
+	return c
+}
+func NewShowController(config fctl.ControllerConfig) *ShowController {
+	return &ShowController{
+		store:  NewDefaultShowStore(),
+		config: config,
+	}
 }
 
 func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ShowController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ShowController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, errors.Wrap(err, "retrieving config")
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := fctl.NewStackClient(cmd, cfg, stack)
+	client, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	walletID, err := internal.RequireWalletID(cmd, client)
+	walletID, err := internal.RequireWalletID(flags, ctx, client)
 	if err != nil {
 		return nil, err
 	}
 
+	if len(c.config.GetArgs()) != 1 {
+		return nil, fmt.Errorf("invalid number of arguments")
+	}
+
 	request := operations.GetBalanceRequest{
 		ID:          walletID,
-		BalanceName: args[0],
+		BalanceName: c.config.GetArgs()[0],
 	}
-	response, err := client.Wallets.GetBalance(cmd.Context(), request)
+	response, err := client.Wallets.GetBalance(ctx, request)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting balance")
 	}
@@ -95,6 +121,17 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ShowController) Render(cmd *cobra.Command, args []string) error {
-	return views.PrintBalance(cmd.OutOrStdout(), c.store.Balance)
+func (c *ShowController) Render() error {
+	return views.PrintBalance(c.config.GetOut(), c.store.Balance)
+}
+
+func NewShowCommand() *cobra.Command {
+	c := NewShowConfig()
+	return fctl.NewCommand(c.GetUse(),
+		fctl.WithShortDescription(c.GetDescription()),
+		fctl.WithAliases(c.GetAliases()...),
+		fctl.WithArgs(cobra.ExactArgs(1)),
+		fctl.WithGoFlagSet(c.GetFlags()),
+		fctl.WithController[*ShowStore](NewShowController(*c)),
+	)
 }

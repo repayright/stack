@@ -77,7 +77,7 @@ func (c *StackListController) GetConfig() fctl.ControllerConfig {
 }
 
 func (c *StackListController) Run() (fctl.Renderable, error) {
-	flags := c.config.GetFlags()
+	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
 	cfg, err := fctl.GetConfig(flags)
@@ -141,7 +141,7 @@ func (c *StackListController) Render() error {
 			stack.Dashboard,
 			stack.RegionID,
 		}
-		if fctl.GetBool(c.config.GetFlags(), deletedFlag) {
+		if fctl.GetBool(c.config.GetAllFLags(), deletedFlag) {
 			if stack.DeletedAt != nil {
 				data = append(data, *stack.DeletedAt)
 			} else {
@@ -152,7 +152,7 @@ func (c *StackListController) Render() error {
 	})
 
 	headers := []string{"ID", "Name", "Dashboard", "Region"}
-	if fctl.GetBool(c.config.GetFlags(), deletedFlag) {
+	if fctl.GetBool(c.config.GetAllFLags(), deletedFlag) {
 		headers = append(headers, "Deleted at")
 	}
 
