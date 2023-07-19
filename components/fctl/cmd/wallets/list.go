@@ -87,7 +87,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}
