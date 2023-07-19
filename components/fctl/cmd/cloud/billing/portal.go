@@ -5,7 +5,6 @@ import (
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -34,7 +33,7 @@ func NewPortalConfig() *fctl.ControllerConfig {
 		[]string{
 			"p",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

@@ -3,8 +3,6 @@ package users
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pterm/pterm"
@@ -33,7 +31,7 @@ func NewShowConfig() *fctl.ControllerConfig {
 		[]string{
 			"sh",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

@@ -3,7 +3,6 @@ package clients
 import (
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -41,7 +40,7 @@ func NewListConfig() *fctl.ControllerConfig {
 		[]string{
 			"ls", "l",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization,
 		fctl.Stack,

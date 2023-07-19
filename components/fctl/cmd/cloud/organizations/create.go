@@ -6,7 +6,6 @@ import (
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -34,7 +33,6 @@ func NewCreateConfig() *fctl.ControllerConfig {
 		[]string{
 			"cr", "c",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

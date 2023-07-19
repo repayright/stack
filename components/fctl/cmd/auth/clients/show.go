@@ -3,13 +3,11 @@ package clients
 import (
 	"flag"
 	"fmt"
-	"github.com/pkg/errors"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/auth/clients/views"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
+	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +34,7 @@ func NewShowConfig() *fctl.ControllerConfig {
 		[]string{
 			"sh",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

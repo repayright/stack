@@ -3,8 +3,6 @@ package me
 import (
 	"errors"
 	"flag"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -33,7 +31,7 @@ func NewInfoConfig() *fctl.ControllerConfig {
 		[]string{
 			"i", "in",
 		},
-		os.Stdout,
+		nil,
 		flags,
 	)
 }

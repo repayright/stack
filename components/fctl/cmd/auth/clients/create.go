@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/formancehq/fctl/cmd/auth/clients/internal"
-	"os"
 	"strings"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -51,7 +50,7 @@ func NewCreateConfig() *fctl.ControllerConfig {
 		[]string{
 			"c",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

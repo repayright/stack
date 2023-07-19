@@ -3,8 +3,6 @@ package clients
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pterm/pterm"
@@ -35,7 +33,6 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 		[]string{
 			"del", "d",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

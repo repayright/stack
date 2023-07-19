@@ -3,8 +3,6 @@ package accounts
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -37,7 +35,6 @@ func NewSetMetadataConfig() *fctl.ControllerConfig {
 		[]string{
 			"sm", "set-meta",
 		},
-		os.Stdout,
 		flags, fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
 }

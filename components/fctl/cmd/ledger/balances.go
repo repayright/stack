@@ -3,8 +3,6 @@ package ledger
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -37,7 +35,7 @@ func NewBalancesConfig() *fctl.ControllerConfig {
 		[]string{
 			"balance", "bal", "b",
 		},
-		os.Stdout,
+		nil,
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
