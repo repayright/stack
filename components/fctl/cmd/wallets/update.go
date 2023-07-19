@@ -28,7 +28,7 @@ func NewUpdateStore() *UpdateStore {
 }
 func NewUpdateConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useUpdate, flag.ExitOnError)
-	flags.String("metadata", "", "Metadata to use")
+	fctl.WithMetadataFlag(flags)
 	fctl.WithConfirmFlag(flags)
 
 	c := fctl.NewControllerConfig(
@@ -43,7 +43,6 @@ func NewUpdateConfig() *fctl.ControllerConfig {
 		fctl.Organization, fctl.Stack,
 	)
 
-	c.SetShortDescription(shortUpdate)
 	return c
 }
 

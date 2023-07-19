@@ -150,12 +150,6 @@ func (fn CommandOptionFn) apply(cmd *cobra.Command) {
 	fn(cmd)
 }
 
-func WithGoFlagSet(flags *flag.FlagSet) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		cmd.Flags().AddGoFlagSet(flags)
-	}
-}
-
 // WithScopesFlags adds flags to the command that will be used to
 // set the scopes only cobra side for display purpose.
 // The function is used to display the scopes in the help
@@ -211,13 +205,10 @@ func configureCobraWithControllerConfig(cmd *cobra.Command, config *ControllerCo
 	cmd.Short = config.GetShortDescription()
 	cmd.Long = config.GetDescription()
 
-	// Add the pflags as persistent flags
-	cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
-
 	// Add the scopes as persistent flags
 	scopes := config.GetScopes()
 	scopes.VisitAll(func(f *flag.Flag) {
-		cmd.PersistentFlags().AddGoFlag(f)
+		cmd.InheritedFlags().AddGoFlag(f)
 	})
 
 	cmd.Flags().AddGoFlagSet(config.GetFlags())

@@ -50,9 +50,12 @@ func NewRootCommand() *cobra.Command {
 			wallets.NewCommand(),
 			orchestration.NewCommand(),
 		),
-		fctl.WithGoFlagSet(fctl.GlobalFlags),
+		fctl.WithGoPersistentFlagSet(fctl.GlobalFlags),
 	)
 
+	// Register flag completion functions
+	// Already registered with fctl.WithGoFlagSet(fctl.GlobalFlags)
+	// And in ControllerConfig who is assigned by each WithController call
 	err := cmd.RegisterFlagCompletionFunc(fctl.ProfileFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		flags := fctl.ConvertPFlagSetToFlagSet(cmd.Flags())
 
