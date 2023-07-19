@@ -41,10 +41,10 @@ var _ fctl.Controller[*AcceptStore] = (*AcceptController)(nil)
 
 type AcceptController struct {
 	store  *AcceptStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewAcceptController(config fctl.ControllerConfig) *AcceptController {
+func NewAcceptController(config *fctl.ControllerConfig) *AcceptController {
 	return &AcceptController{
 		store:  NewAcceptStore(),
 		config: config,
@@ -55,7 +55,7 @@ func (c *AcceptController) GetStore() *AcceptStore {
 	return c.store
 }
 
-func (c *AcceptController) GetConfig() fctl.ControllerConfig {
+func (c *AcceptController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -98,6 +98,6 @@ func NewAcceptCommand() *cobra.Command {
 	config := NewAcceptConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*AcceptStore](NewAcceptController(*config)),
+		fctl.WithController[*AcceptStore](NewAcceptController(config)),
 	)
 }

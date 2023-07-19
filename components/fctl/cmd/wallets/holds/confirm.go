@@ -27,7 +27,7 @@ type ConfirmStore struct {
 }
 type ConfirmController struct {
 	store  *ConfirmStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ConfirmStore] = (*ConfirmController)(nil)
@@ -49,11 +49,12 @@ func NewConfirmConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 	return c
 }
-func NewConfirmController(config fctl.ControllerConfig) *ConfirmController {
+func NewConfirmController(config *fctl.ControllerConfig) *ConfirmController {
 	return &ConfirmController{
 		store:  NewConfirmStore(),
 		config: config,
@@ -64,7 +65,7 @@ func (c *ConfirmController) GetStore() *ConfirmStore {
 	return c.store
 }
 
-func (c *ConfirmController) GetConfig() fctl.ControllerConfig {
+func (c *ConfirmController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -131,6 +132,6 @@ func NewConfirmCommand() *cobra.Command {
 	c := NewConfirmConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
-		fctl.WithController[*ConfirmStore](NewConfirmController(*c)),
+		fctl.WithController[*ConfirmStore](NewConfirmController(c)),
 	)
 }

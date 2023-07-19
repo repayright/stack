@@ -40,6 +40,7 @@ func NewGetConfigConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
@@ -47,10 +48,10 @@ var _ fctl.Controller[*GetConfigStore] = (*GetConfigController)(nil)
 
 type GetConfigController struct {
 	store  *GetConfigStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewGetConfigController(config fctl.ControllerConfig) *GetConfigController {
+func NewGetConfigController(config *fctl.ControllerConfig) *GetConfigController {
 	return &GetConfigController{
 		store:  NewGetConfigStore(),
 		config: config,
@@ -61,7 +62,7 @@ func (c *GetConfigController) GetStore() *GetConfigStore {
 	return c.store
 }
 
-func (c *GetConfigController) GetConfig() fctl.ControllerConfig {
+func (c *GetConfigController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -141,6 +142,6 @@ func NewGetConfigCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgs(connectorsAvailable...),
-		fctl.WithController[*GetConfigStore](NewGetConfigController(*config)),
+		fctl.WithController[*GetConfigStore](NewGetConfigController(config)),
 	)
 }

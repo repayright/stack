@@ -43,6 +43,7 @@ func NewServerInfoConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
 }
 
@@ -50,10 +51,10 @@ var _ fctl.Controller[*ServerInfoStore] = (*ServerInfoController)(nil)
 
 type ServerInfoController struct {
 	store  *ServerInfoStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewServerInfoController(config fctl.ControllerConfig) *ServerInfoController {
+func NewServerInfoController(config *fctl.ControllerConfig) *ServerInfoController {
 	return &ServerInfoController{
 		store:  NewServerInfoStore(),
 		config: config,
@@ -64,7 +65,7 @@ func (c *ServerInfoController) GetStore() *ServerInfoStore {
 	return c.store
 }
 
-func (c *ServerInfoController) GetConfig() fctl.ControllerConfig {
+func (c *ServerInfoController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -151,6 +152,6 @@ func NewServerInfoCommand() *cobra.Command {
 	config := NewServerInfoConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ServerInfoStore](NewServerInfoController(*config)),
+		fctl.WithController[*ServerInfoStore](NewServerInfoController(config)),
 	)
 }

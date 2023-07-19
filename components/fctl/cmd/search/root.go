@@ -40,6 +40,7 @@ func NewSearchConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
@@ -59,10 +60,10 @@ var _ fctl.Controller[*Store] = (*Controller)(nil)
 type Controller struct {
 	store  *Store
 	target string
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewController(config fctl.ControllerConfig) *Controller {
+func NewController(config *fctl.ControllerConfig) *Controller {
 	return &Controller{
 		store:  NewStore(),
 		config: config,
@@ -73,7 +74,7 @@ func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *Controller) GetConfig() fctl.ControllerConfig {
+func (c *Controller) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -213,6 +214,6 @@ func NewCommand() *cobra.Command {
 	return fctl.NewStackCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MinimumNArgs(1)),
 		fctl.WithValidArgs(append(targets, defaultTarget)...),
-		fctl.WithController[*Store](NewController(*config)),
+		fctl.WithController[*Store](NewController(config)),
 	)
 }

@@ -33,6 +33,8 @@ func NewConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Stack,
+		fctl.Organization,
 	)
 }
 
@@ -40,10 +42,10 @@ var _ fctl.Controller[*Store] = (*Controller)(nil)
 
 type Controller struct {
 	store  *Store
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewController(config fctl.ControllerConfig) *Controller {
+func NewController(config *fctl.ControllerConfig) *Controller {
 	return &Controller{
 		store:  NewStore(),
 		config: config,
@@ -54,7 +56,7 @@ func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *Controller) GetConfig() fctl.ControllerConfig {
+func (c *Controller) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -97,6 +99,6 @@ func (c *Controller) Render() error {
 func NewGeneratePersonalTokenCommand() *cobra.Command {
 	config := NewConfig()
 	return fctl.NewStackCommand(config.GetUse(),
-		fctl.WithController[*Store](NewController(*config)),
+		fctl.WithController[*Store](NewController(config)),
 	)
 }

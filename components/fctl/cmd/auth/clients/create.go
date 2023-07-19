@@ -53,6 +53,7 @@ func NewCreateConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
@@ -60,10 +61,10 @@ var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
 
 type CreateController struct {
 	store  *CreateStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewCreateController(config fctl.ControllerConfig) *CreateController {
+func NewCreateController(config *fctl.ControllerConfig) *CreateController {
 	return &CreateController{
 		store:  NewCreateStore(),
 		config: config,
@@ -74,7 +75,7 @@ func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
 
-func (c *CreateController) GetConfig() fctl.ControllerConfig {
+func (c *CreateController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -162,6 +163,6 @@ func NewCreateCommand() *cobra.Command {
 		fctl.WithAliases("c"),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithShortDescription("Create client"),
-		fctl.WithController[*CreateStore](NewCreateController(*config)),
+		fctl.WithController[*CreateStore](NewCreateController(config)),
 	)
 }

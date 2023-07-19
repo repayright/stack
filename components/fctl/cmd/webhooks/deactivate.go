@@ -48,10 +48,10 @@ var _ fctl.Controller[*DesactivateStore] = (*DesactivateController)(nil)
 
 type DesactivateController struct {
 	store  *DesactivateStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewDesactivateController(config fctl.ControllerConfig) *DesactivateController {
+func NewDesactivateController(config *fctl.ControllerConfig) *DesactivateController {
 	return &DesactivateController{
 		store:  NewDesactivateStore(),
 		config: config,
@@ -62,7 +62,7 @@ func (c *DesactivateController) GetStore() *DesactivateStore {
 	return c.store
 }
 
-func (c *DesactivateController) GetConfig() fctl.ControllerConfig {
+func (c *DesactivateController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -136,6 +136,6 @@ func NewDeactivateCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*DesactivateStore](NewDesactivateController(*config)),
+		fctl.WithController[*DesactivateStore](NewDesactivateController(config)),
 	)
 }

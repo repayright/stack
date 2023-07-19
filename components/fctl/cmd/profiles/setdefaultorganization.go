@@ -48,10 +48,10 @@ var _ fctl.Controller[*SetOrgStore] = (*SetOrgController)(nil)
 
 type SetOrgController struct {
 	store  *SetOrgStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewSetOrgController(config fctl.ControllerConfig) *SetOrgController {
+func NewSetOrgController(config *fctl.ControllerConfig) *SetOrgController {
 	return &SetOrgController{
 		store:  NewSetOrgStore(),
 		config: config,
@@ -62,7 +62,7 @@ func (c *SetOrgController) GetStore() *SetOrgStore {
 	return c.store
 }
 
-func (c *SetOrgController) GetConfig() fctl.ControllerConfig {
+func (c *SetOrgController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -101,6 +101,6 @@ func NewSetDefaultOrganizationCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
-		fctl.WithController[*SetOrgStore](NewSetOrgController(*config)),
+		fctl.WithController[*SetOrgStore](NewSetOrgController(config)),
 	)
 }

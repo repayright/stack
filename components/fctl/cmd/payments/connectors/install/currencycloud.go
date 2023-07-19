@@ -43,17 +43,18 @@ func NewCurrencyCloudConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
 type CurrencyCloudController struct {
 	store  *CurrencyCloudStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*CurrencyCloudStore] = (*CurrencyCloudController)(nil)
 
-func NewCurrencyCloudController(config fctl.ControllerConfig) *CurrencyCloudController {
+func NewCurrencyCloudController(config *fctl.ControllerConfig) *CurrencyCloudController {
 	return &CurrencyCloudController{
 		store:  NewCurrencyCloudStore(),
 		config: config,
@@ -64,7 +65,7 @@ func (c *CurrencyCloudController) GetStore() *CurrencyCloudStore {
 	return c.store
 }
 
-func (c *CurrencyCloudController) GetConfig() fctl.ControllerConfig {
+func (c *CurrencyCloudController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -123,6 +124,6 @@ func NewCurrencyCloudCommand() *cobra.Command {
 	c := NewCurrencyCloudConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*CurrencyCloudStore](NewCurrencyCloudController(*c)),
+		fctl.WithController[*CurrencyCloudStore](NewCurrencyCloudController(c)),
 	)
 }

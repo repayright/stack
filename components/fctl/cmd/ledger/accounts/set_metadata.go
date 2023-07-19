@@ -38,7 +38,7 @@ func NewSetMetadataConfig() *fctl.ControllerConfig {
 			"sm", "set-meta",
 		},
 		os.Stdout,
-		flags,
+		flags, fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
 }
 
@@ -46,10 +46,10 @@ var _ fctl.Controller[*SetMetadataStore] = (*SetMetadataController)(nil)
 
 type SetMetadataController struct {
 	store  *SetMetadataStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewSetMetadataController(config fctl.ControllerConfig) *SetMetadataController {
+func NewSetMetadataController(config *fctl.ControllerConfig) *SetMetadataController {
 	return &SetMetadataController{
 		store:  NewSetMetadataStore(),
 		config: config,
@@ -60,7 +60,7 @@ func (c *SetMetadataController) GetStore() *SetMetadataStore {
 	return c.store
 }
 
-func (c *SetMetadataController) GetConfig() fctl.ControllerConfig {
+func (c *SetMetadataController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -135,6 +135,6 @@ func NewSetMetadataCommand() *cobra.Command {
 	config := NewSetMetadataConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MinimumNArgs(2)),
-		fctl.WithController[*SetMetadataStore](NewSetMetadataController(*config)),
+		fctl.WithController[*SetMetadataStore](NewSetMetadataController(config)),
 	)
 }

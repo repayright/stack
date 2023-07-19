@@ -32,6 +32,7 @@ func NewUnlinkConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization,
 	)
 }
 
@@ -39,10 +40,10 @@ var _ fctl.Controller[*UnlinkStore] = (*UnlinkController)(nil)
 
 type UnlinkController struct {
 	store  *UnlinkStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewUnlinkController(config fctl.ControllerConfig) *UnlinkController {
+func NewUnlinkController(config *fctl.ControllerConfig) *UnlinkController {
 	return &UnlinkController{
 		store:  NewUnlinkStore(),
 		config: config,
@@ -53,7 +54,7 @@ func (c *UnlinkController) GetStore() *UnlinkStore {
 	return c.store
 }
 
-func (c *UnlinkController) GetConfig() fctl.ControllerConfig {
+func (c *UnlinkController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -99,6 +100,6 @@ func NewUnlinkCommand() *cobra.Command {
 	config := NewUnlinkConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*UnlinkStore](NewUnlinkController(*config)),
+		fctl.WithController[*UnlinkStore](NewUnlinkController(config)),
 	)
 }

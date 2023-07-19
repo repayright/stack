@@ -41,18 +41,19 @@ func NewModulrConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 }
 
 type ModulrController struct {
 	store  *ModulrStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ModulrStore] = (*ModulrController)(nil)
 
-func NewModulrController(config fctl.ControllerConfig) *ModulrController {
+func NewModulrController(config *fctl.ControllerConfig) *ModulrController {
 	return &ModulrController{
 		store:  NewDefaultModulrStore(),
 		config: config,
@@ -63,7 +64,7 @@ func (c *ModulrController) GetStore() *ModulrStore {
 	return c.store
 }
 
-func (c *ModulrController) GetConfig() fctl.ControllerConfig {
+func (c *ModulrController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -121,6 +122,6 @@ func NewModulrCommand() *cobra.Command {
 	config := NewModulrConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*ModulrStore](NewModulrController(*config)),
+		fctl.WithController[*ModulrStore](NewModulrController(config)),
 	)
 }

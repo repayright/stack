@@ -40,6 +40,7 @@ func NewUpdateConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 	c.SetShortDescription(shortUpdate)
@@ -51,10 +52,10 @@ var _ fctl.Controller[*UpdateStore] = (*UpdateController)(nil)
 type UpdateController struct {
 	store        *UpdateStore
 	metadataFlag string
-	config       fctl.ControllerConfig
+	config       *fctl.ControllerConfig
 }
 
-func NewUpdateController(config fctl.ControllerConfig) *UpdateController {
+func NewUpdateController(config *fctl.ControllerConfig) *UpdateController {
 	return &UpdateController{
 		store:        NewUpdateStore(),
 		metadataFlag: "metadata",
@@ -66,7 +67,7 @@ func (c *UpdateController) GetStore() *UpdateStore {
 	return c.store
 }
 
-func (c *UpdateController) GetConfig() fctl.ControllerConfig {
+func (c *UpdateController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -138,6 +139,6 @@ func NewUpdateCommand() *cobra.Command {
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*UpdateStore](NewUpdateController(*c)),
+		fctl.WithController[*UpdateStore](NewUpdateController(c)),
 	)
 }

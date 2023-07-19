@@ -36,6 +36,7 @@ func NewSetupConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
@@ -43,10 +44,10 @@ var _ fctl.Controller[*SetupStore] = (*SetupController)(nil)
 
 type SetupController struct {
 	store  *SetupStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewSetupController(config fctl.ControllerConfig) *SetupController {
+func NewSetupController(config *fctl.ControllerConfig) *SetupController {
 	return &SetupController{
 		store:  NewSetupStore(),
 		config: config,
@@ -57,7 +58,7 @@ func (c *SetupController) GetStore() *SetupStore {
 	return c.store
 }
 
-func (c *SetupController) GetConfig() fctl.ControllerConfig {
+func (c *SetupController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -120,6 +121,6 @@ func NewSetupCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithDeprecated("Please contact Formances Sales Team."),
-		fctl.WithController[*SetupStore](NewSetupController(*config)),
+		fctl.WithController[*SetupStore](NewSetupController(config)),
 	)
 }

@@ -45,17 +45,18 @@ func NewBankingCircleConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
 type BankingCircleController struct {
 	store  *BankingCircleStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*BankingCircleStore] = (*BankingCircleController)(nil)
 
-func NewBankingCircleController(config fctl.ControllerConfig) *BankingCircleController {
+func NewBankingCircleController(config *fctl.ControllerConfig) *BankingCircleController {
 	return &BankingCircleController{
 		store:  NewBankingCircleStore(),
 		config: config,
@@ -66,7 +67,7 @@ func (c *BankingCircleController) GetStore() *BankingCircleStore {
 	return c.store
 }
 
-func (c *BankingCircleController) GetConfig() fctl.ControllerConfig {
+func (c *BankingCircleController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -121,6 +122,6 @@ func NewBankingCircleCommand() *cobra.Command {
 	c := NewBankingCircleConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*BankingCircleStore](NewBankingCircleController(*c)),
+		fctl.WithController[*BankingCircleStore](NewBankingCircleController(c)),
 	)
 }

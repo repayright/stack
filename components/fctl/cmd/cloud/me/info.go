@@ -42,10 +42,10 @@ var _ fctl.Controller[*InfoStore] = (*InfoController)(nil)
 
 type InfoController struct {
 	store  *InfoStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewInfoController(config fctl.ControllerConfig) *InfoController {
+func NewInfoController(config *fctl.ControllerConfig) *InfoController {
 	return &InfoController{
 		store:  NewInfoStore(),
 		config: config,
@@ -56,7 +56,7 @@ func (c *InfoController) GetStore() *InfoStore {
 	return c.store
 }
 
-func (c *InfoController) GetConfig() fctl.ControllerConfig {
+func (c *InfoController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -101,6 +101,6 @@ func NewInfoCommand() *cobra.Command {
 	config := NewInfoConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*InfoStore](NewInfoController(*config)),
+		fctl.WithController[*InfoStore](NewInfoController(config)),
 	)
 }

@@ -23,7 +23,7 @@ type VoidStore struct {
 }
 type VoidController struct {
 	store  *VoidStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*VoidStore] = (*VoidController)(nil)
@@ -44,11 +44,12 @@ func NewVoidConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 }
 
-func NewVoidController(config fctl.ControllerConfig) *VoidController {
+func NewVoidController(config *fctl.ControllerConfig) *VoidController {
 	return &VoidController{
 		store:  NewVoidStore(),
 		config: config,
@@ -59,7 +60,7 @@ func (c *VoidController) GetStore() *VoidStore {
 	return c.store
 }
 
-func (c *VoidController) GetConfig() fctl.ControllerConfig {
+func (c *VoidController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -128,6 +129,6 @@ func NewVoidCommand() *cobra.Command {
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*VoidStore](NewVoidController(*c)),
+		fctl.WithController[*VoidStore](NewVoidController(c)),
 	)
 }
