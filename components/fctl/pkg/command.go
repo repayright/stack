@@ -12,6 +12,7 @@ import (
 	"github.com/segmentio/ksuid"
 	"github.com/spf13/cobra"
 	"io"
+	"strconv"
 )
 
 const (
@@ -19,7 +20,6 @@ const (
 	organizationFlag       = "organization"
 	DefaultSegmentWriteKey = ""
 	outputFlag             = "output"
-	metadataFlag           = "metadata"
 )
 
 var (
@@ -156,14 +156,33 @@ func (fn CommandOptionFn) apply(cmd *cobra.Command) {
 func WithScopesFlags(flags ...*flag.Flag) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		for _, f := range flags {
-			cmd.PersistentFlags().StringVar(f.Value.(*fValue).Get(), f.Name, f.DefValue, f.Usage)
+			cmd.PersistentFlags().StringVar(f.Value.(*fValue[string]).Get(), f.Name, f.DefValue, f.Usage)
 		}
 	}
 }
 
+// WithGoPersistentFlagSet is intended to be used only with fValue[T] flags who are defined in pkg/scopes.go
+// AND WithGoPersistentFlagSet is used to define short flag for scpecific flag only
 func WithGoPersistentFlagSet(flags *flag.FlagSet) CommandOptionFn {
 	return func(cmd *cobra.Command) {
-		cmd.PersistentFlags().AddGoFlagSet(flags)
+		flags.VisitAll(func(f *flag.Flag) {
+
+			switch f.Name {
+			case "config":
+				cmd.PersistentFlags().StringVarP(&configFlagV.value, f.Name, "c", f.DefValue, f.Usage)
+			case "profile":
+				cmd.PersistentFlags().StringVarP(&profileFlagV.value, f.Name, "p", f.DefValue, f.Usage)
+			case "debug":
+				defaultV, err := strconv.ParseBool(f.DefValue)
+				if err != nil {
+					panic(err)
+				}
+				cmd.PersistentFlags().BoolVarP(&debugFlagV.value, f.Name, "d", defaultV, f.Usage)
+			}
+			cmd.PersistentFlags().AddGoFlag(f)
+
+		})
+
 	}
 }
 

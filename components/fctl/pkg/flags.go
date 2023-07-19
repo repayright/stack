@@ -12,7 +12,7 @@ import (
 
 const (
 	MembershipURIFlag string = "membership-uri"
-	FileFlag          string = "config"
+	ConfigFlag        string = "config"
 	ProfileFlag       string = "profile"
 	OutputFlag        string = "output"
 	DebugFlag         string = "debug"
@@ -21,10 +21,6 @@ const (
 	MetadataFlag      string = "metadata"
 )
 
-func WithStackPersistentFlag(flag *flag.FlagSet, name, defaultValue, help string) *flag.FlagSet {
-	flag.String(stackFlag, "", "Specific stack (not required if only one stack is present)")
-	return flag
-}
 func GetBool(flags *flag.FlagSet, flagName string) bool {
 	f := flags.Lookup(flagName)
 	if f == nil {
