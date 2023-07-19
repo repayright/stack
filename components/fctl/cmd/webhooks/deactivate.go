@@ -3,8 +3,6 @@ package webhooks
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
@@ -39,7 +37,6 @@ func NewDesactivateConfig() *fctl.ControllerConfig {
 			"deactivate",
 			"des",
 		},
-		os.Stdout,
 		flags,
 	)
 }

@@ -2,8 +2,6 @@ package version
 
 import (
 	"flag"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -40,7 +38,6 @@ func NewVersionConfig() *fctl.ControllerConfig {
 		shortVersion,
 		shortVersion,
 		[]string{"v"},
-		os.Stdout,
 		flags,
 	)
 }

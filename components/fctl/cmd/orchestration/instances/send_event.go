@@ -3,8 +3,6 @@ package instances
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
@@ -33,7 +31,6 @@ func NewSendEventConfig() *fctl.ControllerConfig {
 		[]string{
 			"se",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

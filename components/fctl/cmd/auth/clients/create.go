@@ -50,7 +50,6 @@ func NewCreateConfig() *fctl.ControllerConfig {
 		[]string{
 			"c",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

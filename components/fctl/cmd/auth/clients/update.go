@@ -56,7 +56,6 @@ func NewUpdateConfig() *fctl.ControllerConfig {
 		[]string{
 			"u", "upd",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

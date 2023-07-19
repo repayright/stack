@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/formancehq/fctl/cmd/search/views"
@@ -38,7 +37,6 @@ func NewSearchConfig() *fctl.ControllerConfig {
 		[]string{
 			"se",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

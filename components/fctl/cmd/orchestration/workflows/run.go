@@ -3,7 +3,6 @@ package workflows
 import (
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/formancehq/fctl/cmd/orchestration/internal"
@@ -43,7 +42,6 @@ func NewRunConfig() *fctl.ControllerConfig {
 		[]string{
 			"r",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

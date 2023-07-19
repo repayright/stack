@@ -3,8 +3,6 @@ package connectors
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pterm/pterm"
@@ -38,7 +36,6 @@ func NewListConfig() *fctl.ControllerConfig {
 			"list",
 			"ls",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

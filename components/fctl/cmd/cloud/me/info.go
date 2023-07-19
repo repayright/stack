@@ -31,7 +31,6 @@ func NewInfoConfig() *fctl.ControllerConfig {
 		[]string{
 			"i", "in",
 		},
-		nil,
 		flags,
 	)
 }

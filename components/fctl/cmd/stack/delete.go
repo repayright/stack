@@ -2,8 +2,6 @@ package stack
 
 import (
 	"flag"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -43,7 +41,6 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 			"del",
 			"rm",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization,
 	)

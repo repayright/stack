@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"io"
-	"os"
 )
 
 type Renderable interface {
@@ -47,13 +46,12 @@ func generateScopesEnum(s ...*flag.Flag) *flag.FlagSet {
 	return fs
 }
 
-func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet, s ...*flag.Flag) *ControllerConfig {
+func NewControllerConfig(use string, description string, shortDescription string, aliases []string, flags *flag.FlagSet, s ...*flag.Flag) *ControllerConfig {
 	return &ControllerConfig{
 		use:              use,
 		description:      description,
 		shortDescription: shortDescription,
 		aliases:          aliases,
-		out:              out,
 		flags:            flags,
 		scopes:           generateScopesEnum(s...),
 		pflags:           GlobalFlags,
@@ -86,10 +84,6 @@ func (c *ControllerConfig) GetAliases() []string {
 }
 
 func (c *ControllerConfig) GetOut() io.Writer {
-	if c.out == nil {
-		return os.Stdout
-	}
-
 	return c.out
 }
 func (c *ControllerConfig) SetOut(out io.Writer) {

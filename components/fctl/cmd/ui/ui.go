@@ -39,7 +39,6 @@ func NewUiConfig() *fctl.ControllerConfig {
 		descriptionUI,
 		shortUI,
 		[]string{},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

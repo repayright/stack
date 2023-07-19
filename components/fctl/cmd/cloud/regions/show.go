@@ -2,7 +2,6 @@ package regions
 
 import (
 	"flag"
-	"os"
 	"time"
 
 	"github.com/formancehq/fctl/membershipclient"
@@ -33,7 +32,6 @@ func NewShowConfig() *fctl.ControllerConfig {
 		[]string{
 			"sh", "s",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization,
 	)

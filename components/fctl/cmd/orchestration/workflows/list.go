@@ -3,7 +3,6 @@ package workflows
 import (
 	"flag"
 	"fmt"
-	"os"
 	"time"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -44,7 +43,6 @@ func NewListConfig() *fctl.ControllerConfig {
 			"list",
 			"ls",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

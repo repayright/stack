@@ -3,14 +3,12 @@ package workflows
 import (
 	"flag"
 	"fmt"
-	"gopkg.in/yaml.v3"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -35,7 +33,6 @@ func NewCreateConfig() *fctl.ControllerConfig {
 		[]string{
 			"cr", "c",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

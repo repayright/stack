@@ -3,9 +3,6 @@ package wallets
 import (
 	"flag"
 	"fmt"
-	"math/big"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -13,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"math/big"
 )
 
 const (
@@ -61,7 +59,6 @@ func NewDebitConfig() *fctl.ControllerConfig {
 		[]string{
 			"deb",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

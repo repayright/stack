@@ -3,8 +3,6 @@ package wallets
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
@@ -38,7 +36,6 @@ func NewUpdateConfig() *fctl.ControllerConfig {
 		[]string{
 			"up",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

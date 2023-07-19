@@ -3,8 +3,6 @@ package instances
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
@@ -30,7 +28,6 @@ func NewStopConfig() *fctl.ControllerConfig {
 		shortStop,
 		shortStop,
 		[]string{},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

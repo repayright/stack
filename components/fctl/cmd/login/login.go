@@ -3,8 +3,6 @@ package login
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -42,7 +40,6 @@ func NewConfig() *fctl.ControllerConfig {
 		[]string{
 			"log",
 		},
-		os.Stdout,
 		flags,
 	)
 }

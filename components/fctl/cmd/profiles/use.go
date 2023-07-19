@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -36,7 +35,6 @@ func NewUseConfig() *fctl.ControllerConfig {
 		[]string{
 			"u",
 		},
-		os.Stdout,
 		flags,
 	)
 }

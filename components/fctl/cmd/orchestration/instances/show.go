@@ -3,7 +3,6 @@ package instances
 import (
 	"flag"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/formancehq/fctl/cmd/orchestration/internal"
@@ -38,7 +37,6 @@ func NewShowConfig() *fctl.ControllerConfig {
 		[]string{
 			"sh",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

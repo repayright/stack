@@ -3,7 +3,6 @@ package webhooks
 import (
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -41,7 +40,6 @@ func NewListConfig() *fctl.ControllerConfig {
 			"list",
 			"ls",
 		},
-		os.Stdout,
 		flags,
 	)
 }

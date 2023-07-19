@@ -3,14 +3,12 @@ package webhooks
 import (
 	"flag"
 	"fmt"
-	"net/url"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"net/url"
 )
 
 const (
@@ -40,7 +38,6 @@ func NewCreateConfig() *fctl.ControllerConfig {
 		descriptionCreate,
 		shortCreate,
 		[]string{"cr"},
-		os.Stdout,
 		flags,
 	)
 }

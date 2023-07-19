@@ -3,8 +3,6 @@ package webhooks
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
@@ -36,7 +34,6 @@ func NewActivateConfig() *fctl.ControllerConfig {
 		descriptionActivate,
 		shortActivate,
 		[]string{"ac"},
-		os.Stdout,
 		flags,
 	)
 }

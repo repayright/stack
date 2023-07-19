@@ -36,7 +36,6 @@ func NewDescribeConfig() *fctl.ControllerConfig {
 		[]string{
 			"des",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

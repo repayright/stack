@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -37,7 +36,6 @@ func NewSetOrgConfig() *fctl.ControllerConfig {
 			"set-org",
 			"sdo",
 		},
-		os.Stdout,
 		flags,
 	)
 

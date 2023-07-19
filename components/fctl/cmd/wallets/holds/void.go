@@ -3,8 +3,6 @@ package holds
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/pkg/errors"
@@ -42,7 +40,6 @@ func NewVoidConfig() *fctl.ControllerConfig {
 		[]string{
 			"deb",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

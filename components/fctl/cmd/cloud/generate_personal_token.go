@@ -29,7 +29,6 @@ func NewConfig() *fctl.ControllerConfig {
 		[]string{
 			"gpt",
 		},
-		nil,
 		flags,
 		fctl.Stack,
 		fctl.Organization,

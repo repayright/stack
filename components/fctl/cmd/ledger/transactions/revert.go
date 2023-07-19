@@ -3,8 +3,6 @@ package transactions
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -33,7 +31,6 @@ func NewRevertConfig() *fctl.ControllerConfig {
 		[]string{
 			"rev",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
