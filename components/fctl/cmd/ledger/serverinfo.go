@@ -1,11 +1,18 @@
 package ledger
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+)
+
+const (
+	useServerInfo   = "server-infos"
+	shortServerInfo = "Read server info"
 )
 
 type ServerInfoStore struct {
@@ -14,13 +21,8 @@ type ServerInfoStore struct {
 	StorageDriver string   `json:"storageDriver"`
 	Ledgers       []string `json:"ledgers"`
 }
-type ServerInfoController struct {
-	store *ServerInfoStore
-}
 
-var _ fctl.Controller[*ServerInfoStore] = (*ServerInfoController)(nil)
-
-func NewDefaultServerInfoStore() *ServerInfoStore {
+func NewServerInfoStore() *ServerInfoStore {
 	return &ServerInfoStore{
 		Server:        "unknown",
 		Version:       "unknown",
@@ -29,9 +31,32 @@ func NewDefaultServerInfoStore() *ServerInfoStore {
 	}
 }
 
-func NewServerInfoController() *ServerInfoController {
+func NewServerInfoConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useServerInfo, flag.ExitOnError)
+
+	return fctl.NewControllerConfig(
+		useServerInfo,
+		shortServerInfo,
+		shortServerInfo,
+		[]string{
+			"si",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
+var _ fctl.Controller[*ServerInfoStore] = (*ServerInfoController)(nil)
+
+type ServerInfoController struct {
+	store  *ServerInfoStore
+	config fctl.ControllerConfig
+}
+
+func NewServerInfoController(config fctl.ControllerConfig) *ServerInfoController {
 	return &ServerInfoController{
-		store: NewDefaultServerInfoStore(),
+		store:  NewServerInfoStore(),
+		config: config,
 	}
 }
 
@@ -39,28 +64,35 @@ func (c *ServerInfoController) GetStore() *ServerInfoStore {
 	return c.store
 }
 
-func (c *ServerInfoController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ServerInfoController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *ServerInfoController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	ledgerClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	ledgerClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := ledgerClient.Ledger.GetInfo(cmd.Context())
+	response, err := ledgerClient.Ledger.GetInfo(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -81,22 +113,24 @@ func (c *ServerInfoController) Run(cmd *cobra.Command, args []string) (fctl.Rend
 	return c, nil
 }
 
-func (c *ServerInfoController) Render(cmd *cobra.Command, args []string) error {
+func (c *ServerInfoController) Render() error {
+	out := c.config.GetOut()
+
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("Server"), fmt.Sprint(c.store.Server)})
 	tableData = append(tableData, []string{pterm.LightCyan("Version"), fmt.Sprint(c.store.Version)})
 	tableData = append(tableData, []string{pterm.LightCyan("Storage driver"), fmt.Sprint(c.store.StorageDriver)})
 
 	if err := pterm.DefaultTable.
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(out).
 		WithData(tableData).
 		Render(); err != nil {
 		return err
 	}
 
-	fctl.BasicTextCyan.WithWriter(cmd.OutOrStdout()).Printfln("Ledgers :")
+	fctl.BasicTextCyan.WithWriter(out).Printfln("Ledgers :")
 	if err := pterm.DefaultBulletList.
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(out).
 		WithItems(fctl.Map(c.store.Ledgers, func(ledger string) pterm.BulletListItem {
 			return pterm.BulletListItem{
 				Text:        ledger,
@@ -112,10 +146,10 @@ func (c *ServerInfoController) Render(cmd *cobra.Command, args []string) error {
 }
 
 func NewServerInfoCommand() *cobra.Command {
-	return fctl.NewCommand("server-infos",
+
+	config := NewServerInfoConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithAliases("si"),
-		fctl.WithShortDescription("Read server info"),
-		fctl.WithController[*ServerInfoStore](NewServerInfoController()),
+		fctl.WithController[*ServerInfoStore](NewServerInfoController(*config)),
 	)
 }
