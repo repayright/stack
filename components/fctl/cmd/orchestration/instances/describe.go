@@ -37,6 +37,7 @@ func NewDescribeConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 	return c
@@ -45,12 +46,12 @@ func NewDescribeConfig() *fctl.ControllerConfig {
 type DescribeController struct {
 	store  *DescribeStore
 	client *formance.Formance
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*DescribeStore] = (*DescribeController)(nil)
 
-func NewDescribeController(config fctl.ControllerConfig) *DescribeController {
+func NewDescribeController(config *fctl.ControllerConfig) *DescribeController {
 	return &DescribeController{
 		store:  NewDescribeStore(),
 		config: config,
@@ -61,7 +62,7 @@ func (c *DescribeController) GetStore() *DescribeStore {
 	return c.store
 }
 
-func (c *DescribeController) GetConfig() fctl.ControllerConfig {
+func (c *DescribeController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -113,6 +114,6 @@ func NewDescribeCommand() *cobra.Command {
 	config := NewDescribeConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*DescribeStore](NewDescribeController(*config)),
+		fctl.WithController[*DescribeStore](NewDescribeController(config)),
 	)
 }

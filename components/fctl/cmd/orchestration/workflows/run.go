@@ -45,6 +45,7 @@ func NewRunConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 	return c
@@ -53,12 +54,12 @@ func NewRunConfig() *fctl.ControllerConfig {
 type RunController struct {
 	store  *RunStore
 	client *formance.Formance
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*RunStore] = (*RunController)(nil)
 
-func NewRunController(config fctl.ControllerConfig) *RunController {
+func NewRunController(config *fctl.ControllerConfig) *RunController {
 	return &RunController{
 		store:  NewRunStore(),
 		config: config,
@@ -69,7 +70,7 @@ func (c *RunController) GetStore() *RunStore {
 	return c.store
 }
 
-func (c *RunController) GetConfig() fctl.ControllerConfig {
+func (c *RunController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -145,6 +146,6 @@ func NewRunCommand() *cobra.Command {
 	c := NewRunConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*RunStore](NewRunController(*c)),
+		fctl.WithController[*RunStore](NewRunController(c)),
 	)
 }

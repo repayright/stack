@@ -24,7 +24,7 @@ type Store struct {
 }
 type Controller struct {
 	store  *Store
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*Store] = (*Controller)(nil)
@@ -47,7 +47,7 @@ func NewVersionConfig() *fctl.ControllerConfig {
 		flags,
 	)
 }
-func NewController(config fctl.ControllerConfig) *Controller {
+func NewController(config *fctl.ControllerConfig) *Controller {
 	return &Controller{
 		store:  NewDefaultStore(),
 		config: config,
@@ -58,7 +58,7 @@ func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *Controller) GetConfig() fctl.ControllerConfig {
+func (c *Controller) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -80,6 +80,6 @@ func NewCommand() *cobra.Command {
 	c := NewVersionConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*Store](NewController(*c)),
+		fctl.WithController[*Store](NewController(c)),
 	)
 }

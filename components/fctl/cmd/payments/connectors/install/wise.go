@@ -40,6 +40,7 @@ func NewWiseConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 }
@@ -48,10 +49,10 @@ var _ fctl.Controller[*WiseStore] = (*WiseController)(nil)
 
 type WiseController struct {
 	store  *WiseStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewWiseController(config fctl.ControllerConfig) *WiseController {
+func NewWiseController(config *fctl.ControllerConfig) *WiseController {
 	return &WiseController{
 		store:  NewWiseStore(),
 		config: config,
@@ -62,7 +63,7 @@ func (c *WiseController) GetStore() *WiseStore {
 	return c.store
 }
 
-func (c *WiseController) GetConfig() fctl.ControllerConfig {
+func (c *WiseController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -115,7 +116,7 @@ func (c *WiseController) Render() error {
 }
 func NewWiseCommand() *cobra.Command {
 	config := NewWiseConfig()
-	c := NewWiseController(*config)
+	c := NewWiseController(config)
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*WiseStore](c),

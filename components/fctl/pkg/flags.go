@@ -21,10 +21,19 @@ const (
 	MetadataFlag      string = "metadata"
 )
 
+func WithStackPersistentFlag(flag *flag.FlagSet, name, defaultValue, help string) *flag.FlagSet {
+	flag.String(stackFlag, "", "Specific stack (not required if only one stack is present)")
+	return flag
+}
 func GetBool(flags *flag.FlagSet, flagName string) bool {
 	f := flags.Lookup(flagName)
 	if f == nil {
 		return false
+	}
+
+	fromEnv := strings.ToLower(os.Getenv(strcase.ToScreamingSnake(flagName)))
+	if fromEnv != "" {
+		return fromEnv == "true" || fromEnv == "1"
 	}
 
 	value := f.Value.String()
@@ -32,10 +41,8 @@ func GetBool(flags *flag.FlagSet, flagName string) bool {
 		return false
 	}
 	v, err := strconv.ParseBool(value)
-
 	if err != nil {
-		fromEnv := strings.ToLower(os.Getenv(strcase.ToScreamingSnake(flagName)))
-		return fromEnv == "true" || fromEnv == "1"
+		return false
 	}
 	return v
 }
@@ -46,34 +53,36 @@ func GetString(flagSet *flag.FlagSet, flagName string) string {
 		return ""
 	}
 
-	v := f.Value.String()
-	if v == "" {
-		return os.Getenv(strcase.ToScreamingSnake(flagName))
+	envVar := os.Getenv(strcase.ToScreamingSnake(flagName))
+	if envVar != "" {
+		return envVar
 	}
-	return v
+
+	return f.Value.String()
 }
 
 func GetStringSlice(flagSet *flag.FlagSet, flagName string) []string {
 
 	f := flagSet.Lookup(flagName)
+
 	if f == nil {
 		return []string{}
 	}
 
+	envVar := os.Getenv(strcase.ToScreamingSnake(flagName))
+
+	if envVar != "" {
+		return strings.Split(envVar, " ")
+	}
+
 	value := f.Value.String()
 	v := strings.Split(value, " ")
-	if value == "" {
+	if len(v) == 0 {
 		return []string{}
 	}
 
-	if len(v) == 0 {
-		envVar := os.Getenv(strcase.ToScreamingSnake(flagName))
-		if envVar == "" {
-			return []string{}
-		}
-		return strings.Split(envVar, " ")
-	}
 	return v
+
 }
 
 func GetInt(flagSet *flag.FlagSet, flagName string) int {
@@ -83,24 +92,25 @@ func GetInt(flagSet *flag.FlagSet, flagName string) int {
 		return 0
 	}
 
+	v := os.Getenv(strcase.ToScreamingSnake(flagName))
+	if v != "" {
+		v, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return 0
+		}
+		return int(v)
+	}
+
 	value := f.Value.String()
 	if value == "" {
 		return 0
 	}
 
-	v, err := strconv.ParseInt(value, 10, 64)
-	if err != nil {
-		v := os.Getenv(strcase.ToScreamingSnake(flagName))
-		if v != "" {
-			v, err := strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return 0
-			}
-			return int(v)
-		}
+	i, err := strconv.ParseInt(value, 10, 64)
+	if err == nil {
 		return 0
 	}
-	return int(v)
+	return int(i)
 }
 
 func WithConfirmFlag(flagSet *flag.FlagSet) *bool {

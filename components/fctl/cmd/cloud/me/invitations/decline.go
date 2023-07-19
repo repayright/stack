@@ -40,12 +40,12 @@ func NewDeclineConfig() *fctl.ControllerConfig {
 
 type DeclineController struct {
 	store  *DeclineStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*DeclineStore] = (*DeclineController)(nil)
 
-func NewDeclineController(config fctl.ControllerConfig) *DeclineController {
+func NewDeclineController(config *fctl.ControllerConfig) *DeclineController {
 	return &DeclineController{
 		store:  NewDeclineStore(),
 		config: config,
@@ -56,7 +56,7 @@ func (c *DeclineController) GetStore() *DeclineStore {
 	return c.store
 }
 
-func (c *DeclineController) GetConfig() fctl.ControllerConfig {
+func (c *DeclineController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -99,6 +99,6 @@ func NewDeclineCommand() *cobra.Command {
 	config := NewDeclineConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*DeclineStore](NewDeclineController(*config)),
+		fctl.WithController[*DeclineStore](NewDeclineController(config)),
 	)
 }

@@ -32,6 +32,7 @@ func NewStopConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 	return c
@@ -39,7 +40,7 @@ func NewStopConfig() *fctl.ControllerConfig {
 
 type StopController struct {
 	store  *StopStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*StopStore] = (*StopController)(nil)
@@ -48,7 +49,7 @@ func NewStopStore() *StopStore {
 	return &StopStore{}
 }
 
-func NewStopController(config fctl.ControllerConfig) *StopController {
+func NewStopController(config *fctl.ControllerConfig) *StopController {
 	return &StopController{
 		store:  NewStopStore(),
 		config: config,
@@ -59,7 +60,7 @@ func (c *StopController) GetStore() *StopStore {
 	return c.store
 }
 
-func (c *StopController) GetConfig() fctl.ControllerConfig {
+func (c *StopController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -111,6 +112,6 @@ func NewStopCommand() *cobra.Command {
 	config := NewStopConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*StopStore](NewStopController(*config)),
+		fctl.WithController[*StopStore](NewStopController(config)),
 	)
 }

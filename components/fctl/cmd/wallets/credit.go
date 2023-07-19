@@ -27,7 +27,7 @@ type CreditStore struct {
 }
 type CreditController struct {
 	store  *CreditStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*CreditStore] = (*CreditController)(nil)
@@ -36,7 +36,7 @@ func NewCreditStore() *CreditStore {
 	return &CreditStore{}
 }
 
-func NewCreditController(config fctl.ControllerConfig) *CreditController {
+func NewCreditController(config *fctl.ControllerConfig) *CreditController {
 	return &CreditController{
 		store:  NewCreditStore(),
 		config: config,
@@ -63,13 +63,14 @@ func NewCreditConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 func (c *CreditController) GetStore() *CreditStore {
 	return c.store
 }
 
-func (c *CreditController) GetConfig() fctl.ControllerConfig {
+func (c *CreditController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -175,6 +176,6 @@ func NewCreditWalletCommand() *cobra.Command {
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*CreditStore](NewCreditController(*c)),
+		fctl.WithController[*CreditStore](NewCreditController(c)),
 	)
 }

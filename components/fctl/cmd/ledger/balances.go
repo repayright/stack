@@ -40,17 +40,18 @@ func NewBalancesConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
 }
 
 type BalancesController struct {
 	store  *BalancesStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*BalancesStore] = (*BalancesController)(nil)
 
-func NewBalancesController(config fctl.ControllerConfig) *BalancesController {
+func NewBalancesController(config *fctl.ControllerConfig) *BalancesController {
 	return &BalancesController{
 		store:  NewBalancesStore(),
 		config: config,
@@ -61,7 +62,7 @@ func (c *BalancesController) GetStore() *BalancesStore {
 	return c.store
 }
 
-func (c *BalancesController) GetConfig() fctl.ControllerConfig {
+func (c *BalancesController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -139,6 +140,6 @@ func NewBalancesCommand() *cobra.Command {
 	c := NewBalancesConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*BalancesStore](NewBalancesController(*c)),
+		fctl.WithController[*BalancesStore](NewBalancesController(c)),
 	)
 }

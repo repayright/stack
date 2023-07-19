@@ -41,10 +41,10 @@ var _ fctl.Controller[*RenameStore] = (*RenameController)(nil)
 
 type RenameController struct {
 	store  *RenameStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewRenameController(config fctl.ControllerConfig) *RenameController {
+func NewRenameController(config *fctl.ControllerConfig) *RenameController {
 	return &RenameController{
 		store:  NewRenameStore(),
 		config: config,
@@ -55,7 +55,7 @@ func (c *RenameController) GetStore() *RenameStore {
 	return c.store
 }
 
-func (c *RenameController) GetConfig() fctl.ControllerConfig {
+func (c *RenameController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -103,6 +103,6 @@ func NewRenameCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
-		fctl.WithController[*RenameStore](NewRenameController(*config)),
+		fctl.WithController[*RenameStore](NewRenameController(config)),
 	)
 }

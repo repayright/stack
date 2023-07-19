@@ -31,7 +31,7 @@ type DebitWalletStore struct {
 }
 type DebitController struct {
 	store  *DebitWalletStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*DebitWalletStore] = (*DebitController)(nil)
@@ -64,11 +64,12 @@ func NewDebitConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 	return c
 }
-func NewDebitController(config fctl.ControllerConfig) *DebitController {
+func NewDebitController(config *fctl.ControllerConfig) *DebitController {
 	return &DebitController{
 		store:  NewDebitStore(),
 		config: config,
@@ -79,7 +80,7 @@ func (c *DebitController) GetStore() *DebitWalletStore {
 	return c.store
 }
 
-func (c *DebitController) GetConfig() fctl.ControllerConfig {
+func (c *DebitController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -194,6 +195,6 @@ func NewDebitWalletCommand() *cobra.Command {
 	c := NewDebitConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.RangeArgs(2, 3)),
-		fctl.WithController[*DebitWalletStore](NewDebitController(*c)),
+		fctl.WithController[*DebitWalletStore](NewDebitController(c)),
 	)
 }

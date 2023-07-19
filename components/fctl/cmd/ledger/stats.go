@@ -38,6 +38,7 @@ func NewStatsConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
 }
 
@@ -45,10 +46,10 @@ var _ fctl.Controller[*StatsStore] = (*StatsController)(nil)
 
 type StatsController struct {
 	store  *StatsStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewStatsController(config fctl.ControllerConfig) *StatsController {
+func NewStatsController(config *fctl.ControllerConfig) *StatsController {
 	return &StatsController{
 		store:  NewStatsStore(),
 		config: config,
@@ -59,7 +60,7 @@ func (c *StatsController) GetStore() *StatsStore {
 	return c.store
 }
 
-func (c *StatsController) GetConfig() fctl.ControllerConfig {
+func (c *StatsController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -125,6 +126,6 @@ func NewStatsCommand() *cobra.Command {
 	config := NewStatsConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*StatsStore](NewStatsController(*config)),
+		fctl.WithController[*StatsStore](NewStatsController(config)),
 	)
 }

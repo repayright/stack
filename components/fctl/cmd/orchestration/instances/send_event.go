@@ -35,6 +35,7 @@ func NewSendEventConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 	return c
@@ -42,7 +43,7 @@ func NewSendEventConfig() *fctl.ControllerConfig {
 
 type SendEventController struct {
 	store  *SendEventStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*SendEventStore] = (*SendEventController)(nil)
@@ -55,7 +56,7 @@ func NewSendEventStore() *SendEventStore {
 	}
 }
 
-func NewSendEventController(config fctl.ControllerConfig) *SendEventController {
+func NewSendEventController(config *fctl.ControllerConfig) *SendEventController {
 	return &SendEventController{
 		store:  NewSendEventStore(),
 		config: config,
@@ -66,7 +67,7 @@ func (c *SendEventController) GetStore() *SendEventStore {
 	return c.store
 }
 
-func (c *SendEventController) GetConfig() fctl.ControllerConfig {
+func (c *SendEventController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -120,6 +121,6 @@ func NewSendEventCommand() *cobra.Command {
 	config := NewSendEventConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*SendEventStore](NewSendEventController(*config)),
+		fctl.WithController[*SendEventStore](NewSendEventController(config)),
 	)
 }

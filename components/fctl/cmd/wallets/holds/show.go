@@ -23,7 +23,7 @@ type ShowStore struct {
 }
 type ShowController struct {
 	store  *ShowStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
@@ -43,10 +43,11 @@ func NewShowConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 }
-func NewShowController(config fctl.ControllerConfig) *ShowController {
+func NewShowController(config *fctl.ControllerConfig) *ShowController {
 	return &ShowController{
 		store:  NewShowStore(),
 		config: config,
@@ -57,7 +58,7 @@ func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *ShowController) GetConfig() fctl.ControllerConfig {
+func (c *ShowController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -123,6 +124,6 @@ func NewShowCommand() *cobra.Command {
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*ShowStore](NewShowController(*c)),
+		fctl.WithController[*ShowStore](NewShowController(c)),
 	)
 }

@@ -43,16 +43,17 @@ func NewMoneycorpConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 }
 
 type MoneycorpController struct {
 	store  *MoneycorpStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewMoneycorpController(config fctl.ControllerConfig) *MoneycorpController {
+func NewMoneycorpController(config *fctl.ControllerConfig) *MoneycorpController {
 	return &MoneycorpController{
 		store:  NewMoneycorpStore(),
 		config: config,
@@ -62,7 +63,7 @@ func NewMoneycorpController(config fctl.ControllerConfig) *MoneycorpController {
 func (c *MoneycorpController) GetStore() *MoneycorpStore {
 	return c.store
 }
-func (c *MoneycorpController) GetConfig() fctl.ControllerConfig {
+func (c *MoneycorpController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -134,7 +135,7 @@ func (c *MoneycorpController) Render() error {
 
 func NewMoneycorpCommand() *cobra.Command {
 	config := NewMoneycorpConfig()
-	c := NewMoneycorpController(*config)
+	c := NewMoneycorpController(config)
 
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),

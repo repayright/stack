@@ -42,15 +42,16 @@ func NewMangoPayConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
 type MangoPayController struct {
 	store  *MangoPayStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewMangoPayController(config fctl.ControllerConfig) *MangoPayController {
+func NewMangoPayController(config *fctl.ControllerConfig) *MangoPayController {
 	return &MangoPayController{
 		store:  NewMangoPayStore(),
 		config: config,
@@ -61,7 +62,7 @@ func (c *MangoPayController) GetStore() *MangoPayStore {
 	return c.store
 }
 
-func (c *MangoPayController) GetConfig() fctl.ControllerConfig {
+func (c *MangoPayController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -128,6 +129,6 @@ func NewMangoPayCommand() *cobra.Command {
 	c := NewMangoPayConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*MangoPayStore](NewMangoPayController(*c)),
+		fctl.WithController[*MangoPayStore](NewMangoPayController(c)),
 	)
 }

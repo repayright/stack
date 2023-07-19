@@ -35,17 +35,18 @@ func NewRevertConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
 }
 
 type RevertController struct {
 	store  *RevertStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*RevertStore] = (*RevertController)(nil)
 
-func NewRevertController(config fctl.ControllerConfig) *RevertController {
+func NewRevertController(config *fctl.ControllerConfig) *RevertController {
 	return &RevertController{
 		store:  NewRevertStore(),
 		config: config,
@@ -56,7 +57,7 @@ func (c *RevertController) GetStore() *RevertStore {
 	return c.store
 }
 
-func (c *RevertController) GetConfig() fctl.ControllerConfig {
+func (c *RevertController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -137,6 +138,6 @@ func NewRevertCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgs("last"),
-		fctl.WithController[*RevertStore](NewRevertController(*config)),
+		fctl.WithController[*RevertStore](NewRevertController(config)),
 	)
 }

@@ -45,6 +45,7 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization,
 	)
 }
 
@@ -52,10 +53,10 @@ var _ fctl.Controller[*DeletedStore] = (*StackDeleteController)(nil)
 
 type StackDeleteController struct {
 	store  *DeletedStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewDeleteController(config fctl.ControllerConfig) *StackDeleteController {
+func NewDeleteController(config *fctl.ControllerConfig) *StackDeleteController {
 	return &StackDeleteController{
 		store:  NewDeletedStore(),
 		config: config,
@@ -66,7 +67,7 @@ func (c *StackDeleteController) GetStore() *DeletedStore {
 	return c.store
 }
 
-func (c *StackDeleteController) GetConfig() fctl.ControllerConfig {
+func (c *StackDeleteController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -142,6 +143,6 @@ func NewDeleteCommand() *cobra.Command {
 	return fctl.NewMembershipCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
-		fctl.WithController[*DeletedStore](NewDeleteController(*config)),
+		fctl.WithController[*DeletedStore](NewDeleteController(config)),
 	)
 }

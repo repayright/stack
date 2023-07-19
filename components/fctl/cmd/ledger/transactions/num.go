@@ -53,6 +53,7 @@ func NewNumConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
 }
 
@@ -60,10 +61,10 @@ var _ fctl.Controller[*NumStore] = (*NumController)(nil)
 
 type NumController struct {
 	store  *NumStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewNumController(config fctl.ControllerConfig) *NumController {
+func NewNumController(config *fctl.ControllerConfig) *NumController {
 	return &NumController{
 		store:  NewNumStore(),
 		config: config,
@@ -74,7 +75,7 @@ func (c *NumController) GetStore() *NumStore {
 	return c.store
 }
 
-func (c *NumController) GetConfig() fctl.ControllerConfig {
+func (c *NumController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -206,6 +207,6 @@ func NewNumCommand() *cobra.Command {
 	c := NewNumConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*NumStore](NewNumController(*c)),
+		fctl.WithController[*NumStore](NewNumController(c)),
 	)
 }

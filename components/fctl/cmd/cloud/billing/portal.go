@@ -36,6 +36,7 @@ func NewPortalConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
@@ -43,10 +44,10 @@ var _ fctl.Controller[*PortalStore] = (*PortalController)(nil)
 
 type PortalController struct {
 	store  *PortalStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewPortalController(config fctl.ControllerConfig) *PortalController {
+func NewPortalController(config *fctl.ControllerConfig) *PortalController {
 	return &PortalController{
 		store:  NewPortalStore(),
 		config: config,
@@ -57,7 +58,7 @@ func (c *PortalController) GetStore() *PortalStore {
 	return c.store
 }
 
-func (c *PortalController) GetConfig() fctl.ControllerConfig {
+func (c *PortalController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -121,6 +122,6 @@ func NewPortalCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithDeprecated("Please contact Formances Sales Team."),
-		fctl.WithController[*PortalStore](NewPortalController(*config)),
+		fctl.WithController[*PortalStore](NewPortalController(config)),
 	)
 }

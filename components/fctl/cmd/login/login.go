@@ -51,10 +51,10 @@ var _ fctl.Controller[*Store] = (*LoginController)(nil)
 
 type LoginController struct {
 	store  *Store
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewController(config fctl.ControllerConfig) *LoginController {
+func NewController(config *fctl.ControllerConfig) *LoginController {
 	return &LoginController{
 		store:  NewStore(),
 		config: config,
@@ -65,7 +65,7 @@ func (c *LoginController) GetStore() *Store {
 	return c.store
 }
 
-func (c *LoginController) GetConfig() fctl.ControllerConfig {
+func (c *LoginController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -136,6 +136,6 @@ func NewCommand() *cobra.Command {
 	config := NewConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*Store](NewController(*config)),
+		fctl.WithController[*Store](NewController(config)),
 	)
 }

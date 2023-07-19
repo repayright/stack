@@ -51,10 +51,10 @@ var _ fctl.Controller[*ChangeSecretStore] = (*SecretController)(nil)
 
 type SecretController struct {
 	store  *ChangeSecretStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewSecretController(config fctl.ControllerConfig) *SecretController {
+func NewSecretController(config *fctl.ControllerConfig) *SecretController {
 	return &SecretController{
 		store:  NewSecretStore(),
 		config: config,
@@ -65,7 +65,7 @@ func (c *SecretController) GetStore() *ChangeSecretStore {
 	return c.store
 }
 
-func (c *SecretController) GetConfig() fctl.ControllerConfig {
+func (c *SecretController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -144,6 +144,6 @@ func NewChangeSecretCommand() *cobra.Command {
 
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.RangeArgs(1, 2)),
-		fctl.WithController[*ChangeSecretStore](NewSecretController(*config)),
+		fctl.WithController[*ChangeSecretStore](NewSecretController(config)),
 	)
 }

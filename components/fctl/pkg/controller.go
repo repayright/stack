@@ -15,13 +15,50 @@ type Renderable interface {
 type Controller[T any] interface {
 	GetStore() T
 
-	GetConfig() ControllerConfig
+	GetConfig() *ControllerConfig
 
 	Run() (Renderable, error)
 }
 type ExportedData struct {
 	Data interface{} `json:"data"`
 }
+
+type FValue struct {
+	name string
+}
+
+func (f *FValue) String() string {
+	return f.name
+}
+
+func (f *FValue) Set(string) error {
+	f.name = f.name
+	return nil
+}
+
+var (
+	stackFlagV        *FValue   = &FValue{name: ""}
+	organizationFlagV *FValue   = &FValue{name: ""}
+	ledgerFlagV       *FValue   = &FValue{name: ""}
+	Stack             flag.Flag = flag.Flag{
+		Name:     "stack",
+		Usage:    "stack name",
+		DefValue: "",
+		Value:    stackFlagV,
+	}
+	Organization flag.Flag = flag.Flag{
+		Name:     "organization",
+		Usage:    "organization name",
+		DefValue: "",
+		Value:    organizationFlagV,
+	}
+	Ledger flag.Flag = flag.Flag{
+		Name:     "ledger",
+		Usage:    "Specific ledger",
+		DefValue: "default",
+		Value:    ledgerFlagV,
+	}
+)
 
 type ControllerConfig struct {
 	context          context.Context
@@ -32,6 +69,7 @@ type ControllerConfig struct {
 	out              io.Writer
 	flags            *flag.FlagSet
 	pflags           *flag.FlagSet
+	scope            *flag.FlagSet
 	args             []string
 }
 
@@ -53,7 +91,21 @@ var GlobalFlags *flag.FlagSet = func() *flag.FlagSet {
 	return flags
 }()
 
-func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet) *ControllerConfig {
+func generateScopesEnum(s ...flag.Flag) *flag.FlagSet {
+	fs := flag.NewFlagSet("scopes", flag.ExitOnError)
+
+	if len(s) == 0 {
+		return fs
+	}
+	for _, f := range s {
+		fmt.Println(f.Value)
+		fs.Var(f.Value, f.Name, f.Usage)
+	}
+	return fs
+}
+
+func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet, s ...flag.Flag) *ControllerConfig {
+
 	return &ControllerConfig{
 		use:              use,
 		description:      description,
@@ -61,10 +113,16 @@ func NewControllerConfig(use string, description string, shortDescription string
 		aliases:          aliases,
 		out:              out,
 		flags:            flags,
+		scope:            generateScopesEnum(s...),
 		pflags:           GlobalFlags,
 	}
 
 }
+
+func (c *ControllerConfig) GetScopes() *flag.FlagSet {
+	return c.scope
+}
+
 func (c *ControllerConfig) GetUse() string {
 	return c.use
 }
@@ -101,7 +159,7 @@ func (c *ControllerConfig) GetArgs() []string {
 }
 
 func (c *ControllerConfig) SetArgs(args []string) {
-	c.args = append([]string{}, args...)
+	c.args = args
 }
 
 func (c *ControllerConfig) GetFlags() *flag.FlagSet {

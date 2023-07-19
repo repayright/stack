@@ -31,6 +31,9 @@ func NewUninstallStore() *UninstallStore {
 		ConnectorName: "",
 	}
 }
+func (c *UninstallController) GetStore() *UninstallStore {
+	return c.store
+}
 func NewUninstallConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useUninstall, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
@@ -44,6 +47,7 @@ func NewUninstallConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
@@ -51,21 +55,17 @@ var _ fctl.Controller[*UninstallStore] = (*UninstallController)(nil)
 
 type UninstallController struct {
 	store  *UninstallStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewUninstallController(config fctl.ControllerConfig) *UninstallController {
+func NewUninstallController(config *fctl.ControllerConfig) *UninstallController {
 	return &UninstallController{
 		store:  NewUninstallStore(),
 		config: config,
 	}
 }
 
-func (c *UninstallController) GetStore() *UninstallStore {
-	return c.store
-}
-
-func (c *UninstallController) GetConfig() fctl.ControllerConfig {
+func (c *UninstallController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -127,6 +127,6 @@ func NewUninstallCommand() *cobra.Command {
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgs(internal.AllConnectors...),
-		fctl.WithController[*UninstallStore](NewUninstallController(*c)),
+		fctl.WithController[*UninstallStore](NewUninstallController(c)),
 	)
 }

@@ -26,7 +26,7 @@ type StripeStore struct {
 }
 type StripeController struct {
 	store  *StripeStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
 func NewStripeConfig() *fctl.ControllerConfig {
@@ -40,6 +40,7 @@ func NewStripeConfig() *fctl.ControllerConfig {
 		[]string{},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 
 }
@@ -52,7 +53,7 @@ func NewDefaultStripeStore() *StripeStore {
 	}
 }
 
-func NewStripeController(config fctl.ControllerConfig) *StripeController {
+func NewStripeController(config *fctl.ControllerConfig) *StripeController {
 	return &StripeController{
 		store:  NewDefaultStripeStore(),
 		config: config,
@@ -63,7 +64,7 @@ func (c *StripeController) GetStore() *StripeStore {
 	return c.store
 }
 
-func (c *StripeController) GetConfig() fctl.ControllerConfig {
+func (c *StripeController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -113,6 +114,6 @@ func NewStripeCommand() *cobra.Command {
 	config := NewStripeConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*StripeStore](NewStripeController(*config)),
+		fctl.WithController[*StripeStore](NewStripeController(config)),
 	)
 }

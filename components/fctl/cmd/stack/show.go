@@ -47,6 +47,7 @@ func NewShowControllerConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization,
 	)
 }
 
@@ -54,11 +55,11 @@ var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
 
 type ShowController struct {
 	store      *ShowStore
-	config     fctl.ControllerConfig
+	config     *fctl.ControllerConfig
 	fctlConfig *fctl.Config
 }
 
-func NewShowController(config fctl.ControllerConfig) *ShowController {
+func NewShowController(config *fctl.ControllerConfig) *ShowController {
 	return &ShowController{
 		store:  NewShowStore(),
 		config: config,
@@ -69,7 +70,7 @@ func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *ShowController) GetConfig() fctl.ControllerConfig {
+func (c *ShowController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -78,6 +79,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()
 	cfg, err := fctl.GetConfig(flags)
+
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +88,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 		return nil, errors.Wrap(err, "searching default organization")
 	}
 
-	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg, c.config.GetOut())
+	apiClient, err := fctl.NewMembershipClient(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
 	}
@@ -105,6 +107,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 		}
 		stack = stackResponse.Data
 	} else {
+		fmt.Println(fctl.GetString(flags, internal.StackNameFlag))
 		if fctl.GetString(flags, internal.StackNameFlag) == "" {
 			return nil, errors.New("need either an id of a name specified using --name flag")
 		}
@@ -153,8 +156,7 @@ func (c *ShowController) Render() error {
 func NewShowCommand() *cobra.Command {
 	config := NewShowControllerConfig()
 	return fctl.NewMembershipCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
-		fctl.WithController[*ShowStore](NewShowController(*config)),
+		fctl.WithController[*ShowStore](NewShowController(config)),
 	)
 }

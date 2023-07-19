@@ -51,6 +51,7 @@ func NewListControllerConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization,
 	)
 }
 
@@ -59,10 +60,10 @@ var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 type ListController struct {
 	store   *ListStore
 	profile *fctl.Profile
-	config  fctl.ControllerConfig
+	config  *fctl.ControllerConfig
 }
 
-func NewListController(config fctl.ControllerConfig) *ListController {
+func NewListController(config *fctl.ControllerConfig) *ListController {
 	return &ListController{
 		store:  NewListStore(),
 		config: config,
@@ -73,7 +74,7 @@ func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *ListController) GetConfig() fctl.ControllerConfig {
+func (c *ListController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -172,6 +173,6 @@ func NewListCommand() *cobra.Command {
 	return fctl.NewMembershipCommand(config.GetUse(), fctl.WithAliases(config.GetAliases()...),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ListStore](NewListController(*config)),
+		fctl.WithController[*ListStore](NewListController(config)),
 	)
 }

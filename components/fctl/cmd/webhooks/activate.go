@@ -45,10 +45,10 @@ var _ fctl.Controller[*ActivateStore] = (*Activate)(nil)
 
 type Activate struct {
 	store  *ActivateStore
-	config fctl.ControllerConfig
+	config *fctl.ControllerConfig
 }
 
-func NewActivateController(config fctl.ControllerConfig) *Activate {
+func NewActivateController(config *fctl.ControllerConfig) *Activate {
 	return &Activate{
 		store:  NewActivateStore(),
 		config: config,
@@ -59,7 +59,7 @@ func (c *Activate) GetStore() *ActivateStore {
 	return c.store
 }
 
-func (c *Activate) GetConfig() fctl.ControllerConfig {
+func (c *Activate) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -126,6 +126,6 @@ func NewActivateCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*ActivateStore](NewActivateController(*config)),
+		fctl.WithController[*ActivateStore](NewActivateController(config)),
 	)
 }

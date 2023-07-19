@@ -45,6 +45,7 @@ func NewRestoreConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization,
 	)
 }
 
@@ -52,11 +53,11 @@ var _ fctl.Controller[*RestoreStore] = (*RestoreController)(nil)
 
 type RestoreController struct {
 	store      *RestoreStore
-	config     fctl.ControllerConfig
+	config     *fctl.ControllerConfig
 	fctlConfig *fctl.Config
 }
 
-func NewRestoreController(config fctl.ControllerConfig) *RestoreController {
+func NewRestoreController(config *fctl.ControllerConfig) *RestoreController {
 	return &RestoreController{
 		store:  NewRestoreStore(),
 		config: config,
@@ -67,7 +68,7 @@ func (c *RestoreController) GetStore() *RestoreStore {
 	return c.store
 }
 
-func (c *RestoreController) GetConfig() fctl.ControllerConfig {
+func (c *RestoreController) GetConfig() *fctl.ControllerConfig {
 	return c.config
 }
 
@@ -137,6 +138,6 @@ func NewRestoreStackCommand() *cobra.Command {
 	return fctl.NewMembershipCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*RestoreStore](NewRestoreController(*config)),
+		fctl.WithController[*RestoreStore](NewRestoreController(config)),
 	)
 }
