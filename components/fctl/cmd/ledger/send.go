@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	metadataFlag  = "metadata"
 	referenceFlag = "reference"
 	useSend       = "send [<source>] <destination> <amount> <asset>"
 	shortSend     = "Send from one account to another"
