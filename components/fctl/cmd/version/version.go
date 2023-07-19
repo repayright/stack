@@ -12,9 +12,6 @@ import (
 var (
 	useVersion   = "version"
 	shortVersion = "Get version"
-	Version      = "develop"
-	Commit       = "-"
-	BuildDate    = "-"
 )
 
 type Store struct {
@@ -29,11 +26,11 @@ type Controller struct {
 
 var _ fctl.Controller[*Store] = (*Controller)(nil)
 
-func NewDefaultStore() *Store {
+func NewStore() *Store {
 	return &Store{
-		Version:   Version,
-		BuildDate: BuildDate,
-		Commit:    Commit,
+		Version:   fctl.Version,
+		BuildDate: fctl.BuildDate,
+		Commit:    fctl.Commit,
 	}
 }
 func NewVersionConfig() *fctl.ControllerConfig {
@@ -49,7 +46,7 @@ func NewVersionConfig() *fctl.ControllerConfig {
 }
 func NewController(config *fctl.ControllerConfig) *Controller {
 	return &Controller{
-		store:  NewDefaultStore(),
+		store:  NewStore(),
 		config: config,
 	}
 }

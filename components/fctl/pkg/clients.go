@@ -10,10 +10,6 @@ import (
 	"github.com/formancehq/formance-sdk-go"
 )
 
-func getVersion() string {
-	return Version
-}
-
 func NewMembershipClient(flags *flag.FlagSet, ctx context.Context, cfg *Config, out io.Writer) (*membershipclient.APIClient, error) {
 	profile := GetCurrentProfile(flags, cfg)
 
@@ -28,7 +24,7 @@ func NewMembershipClient(flags *flag.FlagSet, ctx context.Context, cfg *Config, 
 
 	configuration.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
 	configuration.HTTPClient = httpClient
-	configuration.UserAgent = "fctl/" + getVersion()
+	configuration.UserAgent = "fctl/" + Version
 	configuration.Servers[0].URL = profile.GetMembershipURI()
 
 	return membershipclient.NewAPIClient(configuration), nil
@@ -48,7 +44,7 @@ func NewStackClient(flags *flag.FlagSet, ctx context.Context, cfg *Config, stack
 		formance.WithClient(
 			GetHttpClient(flags, map[string][]string{
 				"Authorization": {fmt.Sprintf("Bearer %s", token)},
-				"User-Agent":    {"fctl/" + getVersion()},
+				"User-Agent":    {"fctl/" + Version},
 			},
 				out,
 			),
