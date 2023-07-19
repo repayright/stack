@@ -16,5 +16,6 @@ func NewCommand() *cobra.Command {
 			instances.NewCommand(),
 			workflows.NewCommand(),
 		),
+		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
 	)
 }

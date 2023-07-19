@@ -13,5 +13,6 @@ func NewCommand() *cobra.Command {
 			NewCreateCommand(),
 			NewDeleteCommand(),
 		),
+		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
 	)
 }

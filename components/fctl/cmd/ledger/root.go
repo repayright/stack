@@ -20,5 +20,6 @@ func NewCommand() *cobra.Command {
 			transactions.NewCommand(),
 			accounts.NewCommand(),
 		),
+		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack, &fctl.Ledger),
 	)
 }

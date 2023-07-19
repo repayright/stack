@@ -18,5 +18,6 @@ func NewInstallCommand() *cobra.Command {
 			NewMangoPayCommand(),
 			NewMoneycorpCommand(),
 		),
+		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
 	)
 }
