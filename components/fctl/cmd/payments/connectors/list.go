@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	PaymentsConnectorsList = "develop"
-	useList                = "list"
-	descriptionList        = "List all enabled connectors"
+	useList         = "list"
+	descriptionList = "List all enabled connectors"
 )
 
 type ListStore struct {
