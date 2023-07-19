@@ -193,8 +193,11 @@ func configureCobraWithControllerConfig(cmd *cobra.Command, config *ControllerCo
 	cmd.Use = config.GetUse()
 	cmd.Short = config.GetShortDescription()
 	cmd.Long = config.GetDescription()
+
+	// Add the pflags as persistent flags
 	cmd.PersistentFlags().AddGoFlagSet(config.GetPFlags())
 
+	// Add the scopes as persistent flags
 	scopes := config.GetScopes()
 	scopes.VisitAll(func(f *flag.Flag) {
 		cmd.PersistentFlags().AddGoFlag(f)
@@ -208,8 +211,6 @@ func WithController[T any](c Controller[T]) CommandOptionFn {
 		config := c.GetConfig()
 		cmd = configureCobraWithControllerConfig(cmd, config)
 		cmd.RunE = func(cmd *cobra.Command, args []string) error {
-			config := c.GetConfig()
-
 			if config.GetContext() == nil {
 				config.SetContext(cmd.Context())
 			}
@@ -264,13 +265,13 @@ func render[T any](flags *flag.FlagSet, c Controller[T], r Renderable) error {
 			if err != nil {
 				panic(err)
 			}
-			_, err = fmt.Fprint(outWriter, string(colorized))
+			_, err = fmt.Fprintln(outWriter, string(colorized))
 			if err != nil {
 				return err
 			}
 			return nil
 		} else {
-			_, err := fmt.Fprint(outWriter, out)
+			_, err := fmt.Fprintln(outWriter, out)
 			if err != nil {
 				return err
 			}

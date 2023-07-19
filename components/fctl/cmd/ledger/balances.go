@@ -30,7 +30,6 @@ func NewBalancesStore() *BalancesStore {
 func NewBalancesConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useBalances, flag.ExitOnError)
 	flags.String(addressFlag, "", "Filter on specific address")
-
 	return fctl.NewControllerConfig(
 		useBalances,
 		shortBalances,
