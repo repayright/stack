@@ -37,7 +37,6 @@ func NewListStore() *ListStore {
 func NewListConfig() *fctl.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 	flags.String(statusFlag, "", "Filter invitations by status")
-	flags.String(organizationFlag, "", "Filter invitations by organization")
 	return fctl.NewControllerConfig(
 		useList,
 		shortList,
@@ -47,6 +46,7 @@ func NewListConfig() *fctl.ControllerConfig {
 		},
 		os.Stdout,
 		flags,
+		fctl.Organization, fctl.Stack,
 	)
 }
 
