@@ -127,7 +127,6 @@ func NewVoidCommand() *cobra.Command {
 	c := NewVoidConfig()
 
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*VoidStore](NewVoidController(c)),
 	)

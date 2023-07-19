@@ -137,7 +137,6 @@ func (c *CreateController) Render() error {
 func NewCreateCommand() *cobra.Command {
 	config := NewCreateConfig()
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.MinimumNArgs(2)),
 		fctl.WithController[*CreateStore](NewCreateController(config)),
 	)

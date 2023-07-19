@@ -192,13 +192,6 @@ func WithAliases(aliases ...string) CommandOptionFn {
 	}
 }
 
-// To use along with hidden flags
-func WithHiddenFlag(name string) CommandOptionFn {
-	return func(cmd *cobra.Command) {
-		_ = cmd.Flags().MarkHidden(name)
-	}
-}
-
 func WithHidden() CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		cmd.Hidden = true

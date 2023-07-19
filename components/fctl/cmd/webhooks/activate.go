@@ -124,7 +124,6 @@ func (c *Activate) Render() error {
 func NewActivateCommand() *cobra.Command {
 	config := NewActivateConfig()
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*ActivateStore](NewActivateController(config)),
 	)

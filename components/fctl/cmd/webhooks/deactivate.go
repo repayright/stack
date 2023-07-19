@@ -134,7 +134,6 @@ func NewDeactivateCommand() *cobra.Command {
 	config := NewDesactivateConfig()
 
 	return fctl.NewCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*DesactivateStore](NewDesactivateController(config)),
 	)

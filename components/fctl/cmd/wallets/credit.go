@@ -123,7 +123,7 @@ func (c *CreditController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("unable to parse '%s' as big int", amountStr)
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,6 @@ func (c *CreditController) Render() error {
 func NewCreditWalletCommand() *cobra.Command {
 	c := NewCreditConfig()
 	return fctl.NewCommand(c.GetUse(),
-		fctl.WithShortDescription(c.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(2)),
 		fctl.WithController[*CreditStore](NewCreditController(c)),
 	)

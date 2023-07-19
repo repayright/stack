@@ -117,7 +117,7 @@ func (c *SendController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("unable to parse '%s' as big int", amountStr)
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}
