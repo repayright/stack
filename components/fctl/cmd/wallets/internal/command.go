@@ -26,7 +26,7 @@ func WithTargetingWalletByName(flag *flag.FlagSet) *flag.FlagSet {
 }
 
 func WithTargetingWalletByID(flag *flag.FlagSet) *flag.FlagSet {
-	fctl.WithStringFlag(walletIDFlag, "", "Wallet ID to use")
+	flag.String(walletIDFlag, "", "Wallet ID to use")
 	return flag
 }
 
