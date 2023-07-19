@@ -98,14 +98,12 @@ func generateScopesEnum(s ...flag.Flag) *flag.FlagSet {
 		return fs
 	}
 	for _, f := range s {
-		fmt.Println(f.Value)
 		fs.Var(f.Value, f.Name, f.Usage)
 	}
 	return fs
 }
 
 func NewControllerConfig(use string, description string, shortDescription string, aliases []string, out io.Writer, flags *flag.FlagSet, s ...flag.Flag) *ControllerConfig {
-
 	return &ControllerConfig{
 		use:              use,
 		description:      description,

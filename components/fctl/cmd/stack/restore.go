@@ -136,7 +136,6 @@ func (c *RestoreController) Render() error {
 func NewRestoreStackCommand() *cobra.Command {
 	config := NewRestoreConfig()
 	return fctl.NewMembershipCommand(config.GetUse(),
-		fctl.WithShortDescription(config.GetDescription()),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithController[*RestoreStore](NewRestoreController(config)),
 	)
