@@ -10,7 +10,6 @@ import (
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -35,7 +34,6 @@ func NewDescribeConfig() *fctl.ControllerConfig {
 		[]string{
 			"des",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

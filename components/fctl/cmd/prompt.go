@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"runtime/debug"
 	"sort"
@@ -178,7 +179,7 @@ func (p *prompt) refreshUserEmail(flags *flag.FlagSet, cfg *fctl.Config) error {
 	return nil
 }
 
-func (p *prompt) displayHeader(flags *flag.FlagSet, cfg *fctl.Config) error {
+func (p *prompt) displayHeader(flags *flag.FlagSet, cfg *fctl.Config, out io.Writer) error {
 	header := fctl.GetCurrentProfileName(flags, cfg)
 	if p.userEmail != "" {
 		header += " / " + p.userEmail
@@ -187,7 +188,7 @@ func (p *prompt) displayHeader(flags *flag.FlagSet, cfg *fctl.Config) error {
 		}
 	}
 	header += " #"
-	fctl.BasicTextCyan.WithWriter(os.Stdout).Printfln(header)
+	fctl.BasicTextCyan.WithWriter(out).Printfln(header)
 	return nil
 }
 
@@ -207,7 +208,7 @@ func (p *prompt) nextCommand(cmd *cobra.Command) error {
 		p.actualProfile = currentProfileName
 	}
 
-	if err := p.displayHeader(flags, cfg); err != nil {
+	if err := p.displayHeader(flags, cfg, cmd.OutOrStdout()); err != nil {
 		return err
 	}
 

@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (
@@ -32,7 +31,6 @@ func NewRenameConfig() *fctl.ControllerConfig {
 		shortRename,
 		shortRename,
 		[]string{},
-		os.Stdout,
 		flags,
 	)
 }

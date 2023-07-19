@@ -3,7 +3,6 @@ package transactions
 import (
 	"flag"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
@@ -46,7 +45,6 @@ func NewListConfig() *fctl.ControllerConfig {
 			"ls",
 			"l",
 		},
-		os.Stdout,
 		flags,
 	)
 

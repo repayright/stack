@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"math/big"
-	"os"
 	"strings"
 	"time"
 
@@ -51,7 +50,6 @@ func NewNumConfig() *fctl.ControllerConfig {
 		[]string{
 			"l", "ls",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)

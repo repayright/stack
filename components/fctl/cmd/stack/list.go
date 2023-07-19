@@ -3,7 +3,6 @@ package stack
 import (
 	"flag"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/formancehq/fctl/membershipclient"
@@ -49,7 +48,6 @@ func NewListControllerConfig() *fctl.ControllerConfig {
 			"list",
 			"ls",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization,
 	)
@@ -162,7 +160,7 @@ func (c *ListController) Render() error {
 
 	return pterm.DefaultTable.
 		WithHasHeader().
-		WithWriter(os.Stdout).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 }

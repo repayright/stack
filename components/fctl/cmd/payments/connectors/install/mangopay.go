@@ -3,8 +3,6 @@ package install
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -40,7 +38,6 @@ func NewMangoPayConfig() *fctl.ControllerConfig {
 		shortMangoPay,
 		shortMangoPay,
 		[]string{},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

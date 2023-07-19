@@ -3,15 +3,13 @@ package holds
 import (
 	"flag"
 	"fmt"
-	"math/big"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"math/big"
 )
 
 const (
@@ -47,7 +45,6 @@ func NewConfirmConfig() *fctl.ControllerConfig {
 		[]string{
 			"c", "conf",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

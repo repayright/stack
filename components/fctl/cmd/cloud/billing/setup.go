@@ -33,7 +33,6 @@ func NewSetupConfig() *fctl.ControllerConfig {
 		[]string{
 			"setup", "set",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

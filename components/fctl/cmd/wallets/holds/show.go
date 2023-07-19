@@ -3,8 +3,6 @@ package holds
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/wallets/internal/views"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -41,7 +39,6 @@ func NewShowConfig() *fctl.ControllerConfig {
 		[]string{
 			"sh",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

@@ -40,7 +40,6 @@ func NewListConfig() *fctl.ControllerConfig {
 		[]string{
 			"ls", "l",
 		},
-		nil,
 		flags,
 		fctl.Organization,
 		fctl.Stack,

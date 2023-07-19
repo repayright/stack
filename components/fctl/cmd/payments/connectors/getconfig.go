@@ -3,8 +3,6 @@ package connectors
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	"github.com/formancehq/fctl/cmd/payments/connectors/views"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -38,7 +36,6 @@ func NewGetConfigConfig() *fctl.ControllerConfig {
 		[]string{
 			"getconfig", "getconf", "gc", "get", "g",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

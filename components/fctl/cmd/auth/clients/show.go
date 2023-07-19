@@ -34,7 +34,6 @@ func NewShowConfig() *fctl.ControllerConfig {
 		[]string{
 			"sh",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

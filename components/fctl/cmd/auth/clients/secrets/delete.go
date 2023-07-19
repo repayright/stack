@@ -33,7 +33,6 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 		[]string{
 			"d",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

@@ -31,7 +31,6 @@ func NewAcceptConfig() *fctl.ControllerConfig {
 		[]string{
 			"a",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

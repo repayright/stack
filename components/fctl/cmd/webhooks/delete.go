@@ -3,8 +3,6 @@ package webhooks
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -41,7 +39,6 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 			"delete",
 			"del",
 		},
-		os.Stdout,
 		flags,
 	)
 

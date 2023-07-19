@@ -33,7 +33,6 @@ func NewPortalConfig() *fctl.ControllerConfig {
 		[]string{
 			"p",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)

@@ -3,14 +3,12 @@ package ledger
 import (
 	"flag"
 	"fmt"
-	"math/big"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/spf13/cobra"
+	"math/big"
 )
 
 const (
@@ -40,7 +38,6 @@ func NewSendConfig() *fctl.ControllerConfig {
 		[]string{
 			"s", "se",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)

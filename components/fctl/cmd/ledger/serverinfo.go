@@ -3,8 +3,6 @@ package ledger
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -41,7 +39,6 @@ func NewServerInfoConfig() *fctl.ControllerConfig {
 		[]string{
 			"si",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)

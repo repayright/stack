@@ -35,7 +35,6 @@ func NewBalancesConfig() *fctl.ControllerConfig {
 		[]string{
 			"balance", "bal", "b",
 		},
-		nil,
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)

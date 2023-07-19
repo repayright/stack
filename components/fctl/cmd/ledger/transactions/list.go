@@ -3,7 +3,6 @@ package transactions
 import (
 	"flag"
 	"fmt"
-	"os"
 	"time"
 
 	internal "github.com/formancehq/fctl/cmd/ledger/internal"
@@ -53,7 +52,6 @@ func NewListConfig() *fctl.ControllerConfig {
 		[]string{
 			"l", "ls",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)

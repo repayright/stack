@@ -3,9 +3,6 @@ package wallets
 import (
 	"flag"
 	"fmt"
-	"math/big"
-	"os"
-
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go"
@@ -14,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pterm/pterm"
 	cobra "github.com/spf13/cobra"
+	"math/big"
 )
 
 const (
@@ -61,7 +59,6 @@ func NewCreditConfig() *fctl.ControllerConfig {
 			"list",
 			"ls",
 		},
-		os.Stdout,
 		flags,
 		fctl.Organization, fctl.Stack,
 	)
