@@ -8,7 +8,7 @@ import (
 )
 
 func NewCommand() *cobra.Command {
-	return fctl.NewStackCommand("ledger",
+	return fctl.NewCommand("ledger",
 		fctl.WithAliases("l"),
 		fctl.WithShortDescription("Ledger management"),
 		fctl.WithChildCommands(
@@ -20,6 +20,6 @@ func NewCommand() *cobra.Command {
 			transactions.NewCommand(),
 			accounts.NewCommand(),
 		),
-		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack, &fctl.Ledger),
+		fctl.WithScopesFlags(fctl.Organization, fctl.Stack, fctl.Ledger),
 	)
 }

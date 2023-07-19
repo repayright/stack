@@ -98,7 +98,7 @@ func (c *Controller) Render() error {
 
 func NewGeneratePersonalTokenCommand() *cobra.Command {
 	config := NewConfig()
-	return fctl.NewStackCommand(config.GetUse(),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithController[*Store](NewController(config)),
 	)
 }

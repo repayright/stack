@@ -7,12 +7,12 @@ import (
 )
 
 func NewCommand() *cobra.Command {
-	return fctl.NewStackCommand("payments",
+	return fctl.NewCommand("payments",
 		fctl.WithShortDescription("Payments management"),
 		fctl.WithChildCommands(
 			connectors.NewConnectorsCommand(),
 			NewListPaymentsCommand(),
 		),
-		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
+		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }

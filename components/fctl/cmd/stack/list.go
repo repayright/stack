@@ -170,7 +170,7 @@ func (c *ListController) Render() error {
 func NewListCommand() *cobra.Command {
 	config := NewListControllerConfig()
 
-	return fctl.NewMembershipCommand(config.GetUse(),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
 		fctl.WithController[*ListStore](NewListController(config)),
 	)

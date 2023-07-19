@@ -202,7 +202,7 @@ func NewCreateCommand() *cobra.Command {
 
 	config := NewStackConfig()
 
-	return fctl.NewMembershipCommand(config.GetUse(),
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.RangeArgs(0, 1)),
 		fctl.WithController[*CreateStore](NewStackController(config)),
 	)

@@ -6,13 +6,13 @@ import (
 )
 
 func NewCommand() *cobra.Command {
-	return fctl.NewStackCommand("billing",
+	return fctl.NewCommand("billing",
 		fctl.WithAliases("bil", "b"),
 		fctl.WithShortDescription("Billing management"),
 		fctl.WithChildCommands(
 			NewPortalCommand(),
 			NewSetupCommand(),
 		),
-		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
+		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }

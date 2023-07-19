@@ -6,7 +6,7 @@ import (
 )
 
 func NewCommand() *cobra.Command {
-	return fctl.NewStackCommand("workflows",
+	return fctl.NewCommand("workflows",
 		fctl.WithAliases("w", "work"),
 		fctl.WithShortDescription("Workflows management"),
 		fctl.WithChildCommands(
@@ -16,6 +16,6 @@ func NewCommand() *cobra.Command {
 			NewShowCommand(),
 			NewDeleteCommand(),
 		),
-		fctl.WithScopesFlags(&fctl.Organization, &fctl.Stack),
+		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }
