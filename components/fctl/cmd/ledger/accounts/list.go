@@ -1,7 +1,9 @@
 package accounts
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	internal "github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -11,24 +13,47 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	metadataFlag    = "metadata"
+	useList         = "list"
+	shortList       = "List accounts"
+	descriptionList = "List all accounts"
+)
+
 type ListStore struct {
 	Accounts []shared.Account `json:"accounts"`
 }
+
+func NewListStore() *ListStore {
+	return &ListStore{}
+}
+func NewListConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useList, flag.ExitOnError)
+	flags.String(metadataFlag, "", "Filter accounts with metadata")
+
+	return fctl.NewControllerConfig(
+		useList,
+		descriptionList,
+		shortList,
+		[]string{
+			"l", "ls",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
 type ListController struct {
-	store        *ListStore
-	metadataFlag string
+	store  *ListStore
+	config fctl.ControllerConfig
 }
 
 var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
-func NewDefaultListStore() *ListStore {
-	return &ListStore{}
-}
-
-func NewListController() *ListController {
+func NewListController(config fctl.ControllerConfig) *ListController {
 	return &ListController{
-		store:        NewDefaultListStore(),
-		metadataFlag: "metadata",
+		store:  NewListStore(),
+		config: config,
 	}
 }
 
@@ -36,38 +61,44 @@ func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *ListController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
 
-	cfg, err := fctl.GetConfig(cmd)
+func (c *ListController) Run() (fctl.Renderable, error) {
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	ledgerClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	ledgerClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(cmd, c.metadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, metadataFlag))
 	if err != nil {
 		return nil, err
 	}
 
 	request := operations.ListAccountsRequest{
-		Ledger:   fctl.GetString(cmd, internal.LedgerFlag),
+		Ledger:   fctl.GetString(flags, internal.LedgerFlag),
 		Metadata: metadata,
 	}
-	rsp, err := ledgerClient.Ledger.ListAccounts(cmd.Context(), request)
+	rsp, err := ledgerClient.Ledger.ListAccounts(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +116,7 @@ func (c *ListController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 	return c, nil
 }
 
-func (c *ListController) Render(cmd *cobra.Command, args []string) error {
+func (c *ListController) Render() error {
 
 	tableData := fctl.Map(c.store.Accounts, func(account shared.Account) []string {
 		return []string{
@@ -96,18 +127,15 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 	tableData = fctl.Prepend(tableData, []string{"Address", "Metadata"})
 	return pterm.DefaultTable.
 		WithHasHeader().
-		WithWriter(cmd.OutOrStdout()).
+		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
 }
 
 func NewListCommand() *cobra.Command {
-	c := NewListController()
-	return fctl.NewCommand("list",
-		fctl.WithAliases("ls", "l"),
-		fctl.WithShortDescription("List accounts"),
+	c := NewListConfig()
+	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithStringSliceFlag(c.metadataFlag, []string{}, "Filter accounts with metadata"),
-		fctl.WithController[*ListStore](c),
+		fctl.WithController[*ListStore](NewListController(*c)),
 	)
 }

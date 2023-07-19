@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewLedgerTransactionsCommand() *cobra.Command {
+func NewCommand() *cobra.Command {
 	return fctl.NewCommand("transactions",
 		fctl.WithAliases("t", "txs", "tx"),
 		fctl.WithShortDescription("Transactions management"),

@@ -1,7 +1,9 @@
 package transactions
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -10,22 +12,45 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useSetMetadata   = "set-metadata <transaction-id> [<key>=<value>...]"
+	shortSetMetadata = "Set metadata on transaction"
+)
+
 type SetMetadataStore struct {
 	Success bool `json:"success"`
 }
-type SetMetadataController struct {
-	store *SetMetadataStore
+
+func NewSetMetadataStore() *SetMetadataStore {
+	return &SetMetadataStore{}
+}
+func NewSetMetadataConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useSetMetadata, flag.ExitOnError)
+	fctl.WithConfirmFlag(flags)
+
+	return fctl.NewControllerConfig(
+		useSetMetadata,
+		shortSetMetadata,
+		shortSetMetadata,
+		[]string{
+			"sm", "set-meta",
+		},
+		os.Stdout,
+		flags,
+	)
 }
 
 var _ fctl.Controller[*SetMetadataStore] = (*SetMetadataController)(nil)
 
-func NewDefaultSetMetadataStore() *SetMetadataStore {
-	return &SetMetadataStore{}
+type SetMetadataController struct {
+	store  *SetMetadataStore
+	config fctl.ControllerConfig
 }
 
-func NewSetMetadataController() *SetMetadataController {
+func NewSetMetadataController(config fctl.ControllerConfig) *SetMetadataController {
 	return &SetMetadataController{
-		store: NewDefaultSetMetadataStore(),
+		store:  NewSetMetadataStore(),
+		config: config,
 	}
 }
 
@@ -33,49 +58,57 @@ func (c *SetMetadataController) GetStore() *SetMetadataStore {
 	return c.store
 }
 
-func (c *SetMetadataController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *SetMetadataController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *SetMetadataController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
 
 	metadata, err := fctl.ParseMetadata(args[1:])
 	if err != nil {
 		return nil, err
 	}
 
-	cfg, err := fctl.GetConfig(cmd)
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
-	ledgerClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	ledgerClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
 
-	transactionID, err := internal.TransactionIDOrLastN(cmd.Context(), ledgerClient,
-		fctl.GetString(cmd, internal.LedgerFlag), args[0])
+	transactionID, err := internal.TransactionIDOrLastN(ctx, ledgerClient,
+		fctl.GetString(flags, internal.LedgerFlag), args[0])
 	if err != nil {
 		return nil, err
 	}
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to set a metadata on transaction %d", transactionID) {
+	if !fctl.CheckStackApprobation(flags, stack, "You are about to set a metadata on transaction %d", transactionID) {
 		return nil, fctl.ErrMissingApproval
 	}
 
 	request := operations.AddMetadataOnTransactionRequest{
-		Ledger:      fctl.GetString(cmd, internal.LedgerFlag),
+		Ledger:      fctl.GetString(flags, internal.LedgerFlag),
 		Txid:        transactionID,
 		RequestBody: metadata,
 	}
-	response, err := ledgerClient.Ledger.AddMetadataOnTransaction(cmd.Context(), request)
+	response, err := ledgerClient.Ledger.AddMetadataOnTransaction(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -92,19 +125,17 @@ func (c *SetMetadataController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-// TODO: This need to use the ui.NewListModel
-func (c *SetMetadataController) Render(cmd *cobra.Command, args []string) error {
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Metadata added!")
+func (c *SetMetadataController) Render() error {
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Metadata added!")
 	return nil
 }
 
 func NewSetMetadataCommand() *cobra.Command {
-	return fctl.NewCommand("set-metadata <transaction-id> [<key>=<value>...]",
-		fctl.WithShortDescription("Set metadata on transaction"),
-		fctl.WithAliases("sm", "set-meta"),
-		fctl.WithConfirmFlag(),
+
+	config := NewSetMetadataConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithValidArgs("last"),
 		fctl.WithArgs(cobra.MinimumNArgs(2)),
-		fctl.WithController[*SetMetadataStore](NewSetMetadataController()),
+		fctl.WithController[*SetMetadataStore](NewSetMetadataController(*config)),
 	)
 }

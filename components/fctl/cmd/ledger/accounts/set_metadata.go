@@ -1,7 +1,9 @@
 package accounts
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -10,24 +12,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	useSetMetadata   = "set-metadata <address> [<key>=<value>...]"
+	shortSetMetadata = "Set metadata on address"
+)
+
+func NewSetMetadataConfig() *fctl.ControllerConfig {
+	flags := flag.NewFlagSet(useSetMetadata, flag.ExitOnError)
+	fctl.WithConfirmFlag(flags)
+
+	return fctl.NewControllerConfig(
+		useSetMetadata,
+		shortSetMetadata,
+		shortSetMetadata,
+		[]string{
+			"sm", "set-meta",
+		},
+		os.Stdout,
+		flags,
+	)
+}
+
 type SetMetadataStore struct {
 	Success bool `json:"success"`
 }
-type SetMetadataController struct {
-	store *SetMetadataStore
-}
 
-var _ fctl.Controller[*SetMetadataStore] = (*SetMetadataController)(nil)
-
-func NewDefaultSetMetadataStore() *SetMetadataStore {
+func NewSetMetadataStore() *SetMetadataStore {
 	return &SetMetadataStore{
 		Success: false,
 	}
 }
 
-func NewSetMetadataController() *SetMetadataController {
+var _ fctl.Controller[*SetMetadataStore] = (*SetMetadataController)(nil)
+
+type SetMetadataController struct {
+	store  *SetMetadataStore
+	config fctl.ControllerConfig
+}
+
+func NewSetMetadataController(config fctl.ControllerConfig) *SetMetadataController {
 	return &SetMetadataController{
-		store: NewDefaultSetMetadataStore(),
+		store:  NewSetMetadataStore(),
+		config: config,
 	}
 }
 
@@ -35,45 +61,53 @@ func (c *SetMetadataController) GetStore() *SetMetadataStore {
 	return c.store
 }
 
-func (c *SetMetadataController) Run(cmd *cobra.Command, args []string) (fctl.Renderable, error) {
+func (c *SetMetadataController) GetConfig() fctl.ControllerConfig {
+	return c.config
+}
+
+func (c *SetMetadataController) Run() (fctl.Renderable, error) {
+
+	flags := c.config.GetAllFLags()
+	ctx := c.config.GetContext()
+	args := c.config.GetArgs()
 
 	metadata, err := fctl.ParseMetadata(args[1:])
 	if err != nil {
 		return nil, err
 	}
 
-	cfg, err := fctl.GetConfig(cmd)
+	cfg, err := fctl.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	organizationID, err := fctl.ResolveOrganizationID(cmd, cfg)
+	organizationID, err := fctl.ResolveOrganizationID(flags, ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stack, err := fctl.ResolveStack(cmd, cfg, organizationID)
+	stack, err := fctl.ResolveStack(flags, ctx, cfg, organizationID)
 	if err != nil {
 		return nil, err
 	}
 
 	address := args[0]
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to set a metadata on address '%s'", address) {
+	if !fctl.CheckStackApprobation(flags, stack, "You are about to set a metadata on address '%s'", address) {
 		return nil, fctl.ErrMissingApproval
 	}
 
-	ledgerClient, err := fctl.NewStackClient(cmd, cfg, stack)
+	ledgerClient, err := fctl.NewStackClient(flags, ctx, cfg, stack)
 	if err != nil {
 		return nil, err
 	}
 
 	request := operations.AddMetadataToAccountRequest{
-		Ledger:      fctl.GetString(cmd, internal.LedgerFlag),
+		Ledger:      fctl.GetString(flags, internal.LedgerFlag),
 		Address:     address,
 		RequestBody: metadata,
 	}
-	response, err := ledgerClient.Ledger.AddMetadataToAccount(cmd.Context(), request)
+	response, err := ledgerClient.Ledger.AddMetadataToAccount(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -91,17 +125,16 @@ func (c *SetMetadataController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 	return c, nil
 }
 
-func (c *SetMetadataController) Render(cmd *cobra.Command, args []string) error {
-	pterm.Success.WithWriter(cmd.OutOrStdout()).Printfln("Metadata added!")
+func (c *SetMetadataController) Render() error {
+	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Metadata added!")
 	return nil
 }
 
 func NewSetMetadataCommand() *cobra.Command {
-	return fctl.NewCommand("set-metadata <address> [<key>=<value>...]",
-		fctl.WithConfirmFlag(),
-		fctl.WithShortDescription("Set metadata on address"),
-		fctl.WithAliases("sm", "set-meta"),
+
+	config := NewSetMetadataConfig()
+	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MinimumNArgs(2)),
-		fctl.WithController[*SetMetadataStore](NewSetMetadataController()),
+		fctl.WithController[*SetMetadataStore](NewSetMetadataController(*config)),
 	)
 }
