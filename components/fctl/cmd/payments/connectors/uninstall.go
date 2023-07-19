@@ -12,10 +12,9 @@ import (
 )
 
 var (
-	PaymentsConnectorsUninstall = "develop"
-	useUninstall                = "uninstall <connector-name>"
-	descriptionUninstall        = "Uninstall a connector"
-	shortUninstall              = "Uninstall a connector"
+	useUninstall         = "uninstall <connector-name>"
+	descriptionUninstall = "Uninstall a connector"
+	shortUninstall       = "Uninstall a connector"
 )
 
 type UninstallStore struct {
