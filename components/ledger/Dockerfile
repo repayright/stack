@@ -1,32 +1,19 @@
-FROM --platform=$BUILDPLATFORM golang:1.20 AS builder
-RUN apt-get update && \
-    apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu && \
-    ln -s /usr/bin/aarch64-linux-gnu-gcc /usr/bin/arm64-linux-gnu-gcc  && \
-    ln -s /usr/bin/x86_64-linux-gnu-gcc /usr/bin/amd64-linux-gnu-gcc
-# 1. Precompile the entire go standard library into the first Docker cache layer: useful for other projects too!
-RUN CGO_ENABLED=1 GOOS=linux go install -v -installsuffix cgo -a std
-ARG TARGETARCH
+FROM golang:1.19-alpine AS builder
+WORKDIR /src
+COPY components/ledger components/ledger
+COPY libs libs
+WORKDIR /src/components/ledger
+ARG CGO_ENABLED=0
 ARG APP_SHA
 ARG VERSION
-ARG SEGMENT_WRITE_KEY
-WORKDIR /src
-COPY . .
-WORKDIR /src/components/ledger
-RUN --mount=type=cache,mode=0755,target=/go/pkg/mod go mod download
-RUN --mount=type=cache,id=gomod,target=/go/pkg/mod \
-    --mount=type=cache,id=gobuild,target=/root/.cache/go-build \
-    CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH \
-    CC=$TARGETARCH-linux-gnu-gcc \
-    go build -o ledger -tags json1,netgo \
-    -ldflags="-X github.com/ledger/ledger/cmd.Version=${VERSION} \
-    -X github.com/ledger/ledger/cmd.BuildDate=$(date +%s) \
-    -X github.com/ledger/ledger/cmd.Commit=${APP_SHA} \
-    -X github.com/ledger/ledger/cmd.DefaultSegmentWriteKey=${SEGMENT_WRITE_KEY}" ./
+RUN --mount=type=cache,id=gobuild,target=/root/.cache/go-build --mount=type=cache,id=gomodcache,target=/go/pkg/mod go build -o ledger \
+    -ldflags="-X $(cat go.mod |head -1|cut -d \  -f2)/cmd.Version=${VERSION} \
+    -X $(cat go.mod |head -1|cut -d \  -f2)/cmd.BuildDate=$(date +%s) \
+    -X $(cat go.mod |head -1|cut -d \  -f2)/cmd.Commit=${APP_SHA}" ./
 
-FROM ubuntu:22.04 as app
-RUN apt update && apt install -y ca-certificates wget && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /src/components/ledger/ledger /usr/local/bin/ledger
-EXPOSE 3068
-ENTRYPOINT ["ledger"]
+FROM alpine:3.16
+RUN apk update && apk add ca-certificates curl
+COPY --from=builder /src/components/ledger/ledger /main
 ENV OTEL_SERVICE_NAME ledger
+ENTRYPOINT ["/main"]
 CMD ["serve"]
