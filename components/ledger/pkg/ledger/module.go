@@ -1,6 +1,8 @@
 package ledger
 
 import (
+	"context"
+
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/formancehq/ledger/pkg/ledger/command"
 	"github.com/formancehq/ledger/pkg/ledger/query"
@@ -38,5 +40,13 @@ func Module(configuration Configuration) fx.Option {
 		}),
 		fx.Provide(fx.Annotate(query.NewNoOpMonitor, fx.As(new(query.Monitor)))),
 		fx.Provide(fx.Annotate(metrics.NewNoOpRegistry, fx.As(new(metrics.GlobalRegistry)))),
+		//TODO(gfyrag): Move in pkg/ledger package
+		fx.Invoke(func(lc fx.Lifecycle, resolver *Resolver) {
+			lc.Append(fx.Hook{
+				OnStop: func(ctx context.Context) error {
+					return resolver.CloseLedgers(ctx)
+				},
+			})
+		}),
 	)
 }

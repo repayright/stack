@@ -52,6 +52,7 @@ func LedgerMiddleware(
 			} else {
 				loggerFields["trace-id"] = randomTraceID(10)
 			}
+
 			r = r.WithContext(logging.ContextWithFields(r.Context(), loggerFields))
 
 			l, err := resolver.GetLedger(r.Context(), name)

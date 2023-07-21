@@ -28,20 +28,17 @@ func NewServe() *cobra.Command {
 				ballast.Module(viper.GetUint(ballastSizeInBytesFlag)),
 				fx.Invoke(func(lc fx.Lifecycle, h chi.Router, logger logging.Logger) {
 
-					if viper.GetBool(app.DebugFlag) {
-						wrappedRouter := chi.NewRouter()
-						wrappedRouter.Use(func(handler http.Handler) http.Handler {
-							return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-								r = r.WithContext(logging.ContextWithLogger(r.Context(), logger))
-								handler.ServeHTTP(w, r)
-							})
+					wrappedRouter := chi.NewRouter()
+					wrappedRouter.Use(func(handler http.Handler) http.Handler {
+						return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							r = r.WithContext(logging.ContextWithLogger(r.Context(), logger))
+							handler.ServeHTTP(w, r)
 						})
-						wrappedRouter.Use(middlewares.Log())
-						wrappedRouter.Mount("/", h)
-						h = wrappedRouter
-					}
+					})
+					wrappedRouter.Use(middlewares.Log())
+					wrappedRouter.Mount("/", h)
 
-					lc.Append(httpserver.NewHook(viper.GetString(bindFlag), h))
+					lc.Append(httpserver.NewHook(viper.GetString(bindFlag), wrappedRouter))
 				}),
 			)...).Run(cmd.Context())
 		},

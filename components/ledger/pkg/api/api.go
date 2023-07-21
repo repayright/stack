@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	_ "embed"
 
 	"github.com/formancehq/ledger/pkg/api/controllers"
@@ -23,14 +22,6 @@ func Module(cfg Config) fx.Option {
 		fx.Provide(routes.NewRouter),
 		fx.Provide(func(storageDriver *driver.Driver, resolver *ledger.Resolver) controllers.Backend {
 			return controllers.NewDefaultBackend(storageDriver, cfg.Version, resolver)
-		}),
-		//TODO(gfyrag): Move in pkg/ledger package
-		fx.Invoke(func(lc fx.Lifecycle, backend controllers.Backend) {
-			lc.Append(fx.Hook{
-				OnStop: func(ctx context.Context) error {
-					return backend.CloseLedgers(ctx)
-				},
-			})
 		}),
 		fx.Provide(fx.Annotate(metric.NewNoopMeterProvider, fx.As(new(metric.MeterProvider)))),
 		fx.Decorate(fx.Annotate(func(meterProvider metric.MeterProvider) (metrics.GlobalRegistry, error) {
