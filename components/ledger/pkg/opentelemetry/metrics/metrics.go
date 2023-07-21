@@ -69,38 +69,29 @@ func (gm *globalRegistry) ActiveLedgers() instrument.Int64UpDownCounter {
 }
 
 type PerLedgerRegistry interface {
-	CacheMisses() instrument.Int64Counter
 	CacheNumberEntries() instrument.Int64UpDownCounter
 
 	QueryLatencies() instrument.Int64Histogram
 	QueryInboundLogs() instrument.Int64Counter
 	QueryPendingMessages() instrument.Int64Counter
 	QueryProcessedLogs() instrument.Int64Counter
+	LockWaitingTime() instrument.Int64Histogram
 }
 
 type perLedgerRegistry struct {
-	cacheMisses        instrument.Int64Counter
 	cacheNumberEntries instrument.Int64UpDownCounter
 
 	queryLatencies       instrument.Int64Histogram
 	queryInboundLogs     instrument.Int64Counter
 	queryPendingMessages instrument.Int64Counter
 	queryProcessedLogs   instrument.Int64Counter
+	lockWaitingTime      instrument.Int64Histogram
 }
 
 func RegisterPerLedgerMetricsRegistry(ledger string) (PerLedgerRegistry, error) {
 	// we can now use the global meter provider to create a meter
 	// since it was created by the fx
 	meter := global.MeterProvider().Meter(ledger)
-
-	cacheMisses, err := meter.Int64Counter(
-		"ledger.cache.misses",
-		instrument.WithUnit("1"),
-		instrument.WithDescription("Cache misses"),
-	)
-	if err != nil {
-		return nil, err
-	}
 
 	cacheNumberEntries, err := meter.Int64UpDownCounter(
 		"ledger.cache.pending_entries",
@@ -147,18 +138,27 @@ func RegisterPerLedgerMetricsRegistry(ledger string) (PerLedgerRegistry, error) 
 		return nil, err
 	}
 
+	lockWaitingTime, err := meter.Int64Histogram(
+		"ledger.lock.waiting_time",
+		instrument.WithUnit("ms"),
+		instrument.WithDescription("Latency of lock"),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &perLedgerRegistry{
-		cacheMisses:          cacheMisses,
 		cacheNumberEntries:   cacheNumberEntries,
 		queryLatencies:       queryLatencies,
 		queryInboundLogs:     queryInboundLogs,
 		queryPendingMessages: queryPendingMessages,
 		queryProcessedLogs:   queryProcessedLogs,
+		lockWaitingTime:      lockWaitingTime,
 	}, nil
 }
 
-func (pm *perLedgerRegistry) CacheMisses() instrument.Int64Counter {
-	return pm.cacheMisses
+func (pm *perLedgerRegistry) LockWaitingTime() instrument.Int64Histogram {
+	return pm.lockWaitingTime
 }
 
 func (pm *perLedgerRegistry) CacheNumberEntries() instrument.Int64UpDownCounter {
@@ -185,6 +185,11 @@ type noOpRegistry struct{}
 
 func NewNoOpRegistry() *noOpRegistry {
 	return &noOpRegistry{}
+}
+
+func (nm *noOpRegistry) LockWaitingTime() instrument.Int64Histogram {
+	histogram, _ := metric.NewNoopMeter().Int64Histogram("waiting_time")
+	return histogram
 }
 
 func (nm *noOpRegistry) CacheMisses() instrument.Int64Counter {

@@ -52,7 +52,7 @@ func New(
 	return &Ledger{
 		commander: command.New(
 			store,
-			command.NewDefaultLocker(),
+			command.NewDefaultLocker(metricsRegistry),
 			compiler,
 			command.NewReferencer(),
 			metricsRegistry,
