@@ -120,7 +120,7 @@ func (p *Projector) syncLogs(ctx context.Context) error {
 		panic(err)
 	}
 
-	logging.FromContext(ctx).Infof("Project logs since id: %d", lastReadLogID)
+	logging.FromContext(ctx).Infof("Project logs since id: %d", *lastReadLogID)
 
 	if lastReadLogID == nil {
 		return nil
