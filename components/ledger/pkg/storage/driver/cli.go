@@ -7,6 +7,7 @@ import (
 
 	"github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/health"
+	"github.com/formancehq/stack/libs/go-libs/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/uptrace/bun"
@@ -52,10 +53,12 @@ func CLIModule(v *viper.Viper, output io.Writer, debug bool) fx.Option {
 
 	options = append(options, fx.Invoke(func(db *bun.DB, driver *Driver, lifecycle fx.Lifecycle) error {
 		lifecycle.Append(fx.Hook{
-			OnStart: driver.Initialize,
-		})
-		lifecycle.Append(fx.Hook{
+			OnStart: func(ctx context.Context) error {
+				logging.FromContext(ctx).Infof("Initializing database...")
+				return driver.Initialize(ctx)
+			},
 			OnStop: func(ctx context.Context) error {
+				logging.FromContext(ctx).Infof("Closing database...")
 				return db.Close()
 			},
 		})

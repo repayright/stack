@@ -19,7 +19,7 @@ func Log() func(h http.Handler) http.Handler {
 				"path":       r.URL.Path,
 				"latency":    latency,
 				"user_agent": r.UserAgent(),
-			}).Info("Request")
+			}).Debug("Request")
 		})
 	}
 }

@@ -36,7 +36,6 @@ type Ledger interface {
 type Backend interface {
 	GetLedger(ctx context.Context, name string) (Ledger, error)
 	ListLedgers(ctx context.Context) ([]string, error)
-	CloseLedgers(ctx context.Context) error
 	GetVersion() string
 }
 
@@ -52,10 +51,6 @@ func (d DefaultBackend) GetLedger(ctx context.Context, name string) (Ledger, err
 
 func (d DefaultBackend) ListLedgers(ctx context.Context) ([]string, error) {
 	return d.storageDriver.GetSystemStore().ListLedgers(ctx)
-}
-
-func (d DefaultBackend) CloseLedgers(ctx context.Context) error {
-	return d.resolver.CloseLedgers(ctx)
 }
 
 func (d DefaultBackend) GetVersion() string {
