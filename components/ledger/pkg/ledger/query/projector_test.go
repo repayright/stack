@@ -73,7 +73,7 @@ func TestProjector(t *testing.T) {
 	require.Eventually(t, func() bool {
 		nextLogID, err := ledgerStore.GetNextLogID(context.Background())
 		require.NoError(t, err)
-		return nextLogID == uint64(len(logs))
+		return *nextLogID == uint64(len(logs))
 	}, time.Second, 100*time.Millisecond)
 
 	require.EqualValues(t, 2, len(ledgerStore.Transactions))

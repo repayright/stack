@@ -8,7 +8,7 @@ import (
 
 type Store interface {
 	IsInitialized() bool
-	GetNextLogID(ctx context.Context) (uint64, error)
+	GetNextLogID(ctx context.Context) (*uint64, error)
 	ReadLogsRange(ctx context.Context, idMin, idMax uint64) ([]core.ChainedLog, error)
 	GetAccountWithVolumes(ctx context.Context, address string) (*core.AccountWithVolumes, error)
 	GetTransaction(ctx context.Context, id uint64) (*core.ExpandedTransaction, error)

@@ -157,15 +157,16 @@ func (m *InMemoryStore) IsInitialized() bool {
 	return true
 }
 
-func (m *InMemoryStore) GetNextLogID(ctx context.Context) (uint64, error) {
+func (m *InMemoryStore) GetNextLogID(ctx context.Context) (*uint64, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	for _, log := range m.Logs {
 		if !log.Projected {
-			return log.ID, nil
+			return &log.ID, nil
 		}
 	}
-	return uint64(len(m.Logs)), nil
+	v := uint64(len(m.Logs))
+	return &v, nil
 }
 
 func (m *InMemoryStore) ReadLogsRange(ctx context.Context, idMin, idMax uint64) ([]core.ChainedLog, error) {

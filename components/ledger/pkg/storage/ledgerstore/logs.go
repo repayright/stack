@@ -210,8 +210,8 @@ func (s *Store) buildLogsQuery(q LogsQueryFilters, models *[]LogsV2) *bun.Select
 	return sb
 }
 
-func (s *Store) GetNextLogID(ctx context.Context) (uint64, error) {
-	var logID uint64
+func (s *Store) GetNextLogID(ctx context.Context) (*uint64, error) {
+	var logID []uint64
 	err := s.schema.
 		NewSelect(LogTableName).
 		ColumnExpr("min(id)").
@@ -219,9 +219,12 @@ func (s *Store) GetNextLogID(ctx context.Context) (uint64, error) {
 		Limit(1).
 		Scan(ctx, &logID)
 	if err != nil {
-		return 0, storageerrors.PostgresError(err)
+		return nil, storageerrors.PostgresError(err)
 	}
-	return logID, nil
+	if len(logID) == 0 {
+		return nil, nil
+	}
+	return &logID[0], nil
 }
 
 func (s *Store) ReadLogsRange(ctx context.Context, idMin, idMax uint64) ([]core.ChainedLog, error) {

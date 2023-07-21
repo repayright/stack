@@ -11,6 +11,7 @@ import (
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/collectionutils"
 	"github.com/formancehq/stack/libs/go-libs/logging"
+	"github.com/formancehq/stack/libs/go-libs/pointer"
 )
 
 type logPersistenceParts struct {
@@ -121,8 +122,12 @@ func (p *Projector) syncLogs(ctx context.Context) error {
 
 	logging.FromContext(ctx).Infof("Project logs since id: %d", lastReadLogID)
 
+	if lastReadLogID == nil {
+		return nil
+	}
+
 	for {
-		logs, err := p.store.ReadLogsRange(ctx, lastReadLogID, lastReadLogID+uint64(p.limitReadLogs))
+		logs, err := p.store.ReadLogsRange(ctx, *lastReadLogID, *lastReadLogID+uint64(p.limitReadLogs))
 		if err != nil {
 			panic(err)
 		}
@@ -136,7 +141,7 @@ func (p *Projector) syncLogs(ctx context.Context) error {
 			return core.NewActiveLog(&from)
 		}))
 
-		lastReadLogID = logs[len(logs)-1].ID + 1
+		lastReadLogID = pointer.For(logs[len(logs)-1].ID + 1)
 
 		if len(logs) < p.limitReadLogs {
 			// Nothing to do anymore, no need to read more logs
