@@ -38,7 +38,7 @@ var (
 		flags := flag.NewFlagSet("scopes", flag.ContinueOnError)
 		flags.StringVar(stackFlagV.Get(), stackFlag, "", "Specific stack id (not required if only one stack is present)")
 		flags.StringVar(organizationFlagV.Get(), organizationFlag, "", "Selected organization (not required if only one organization is present)")
-		flags.StringVar(ledgerFlagV.Get(), "ledger", "", "Specific ledger name")
+		flags.StringVar(ledgerFlagV.Get(), "ledger", "default", "Specific ledger name")
 
 		return flags
 	}()
