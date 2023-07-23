@@ -83,7 +83,7 @@ func (c *LoginController) Run() (config.Renderer, error) {
 	}
 
 	profile := fctl.GetCurrentProfile(flags, cfg)
-	membershipUri := fctl.GetString(flags, config.MembershipURIFlag)
+	membershipUri := config.GetString(flags, config.MembershipURIFlag)
 	if membershipUri == "" {
 		membershipUri = profile.GetMembershipURI()
 	}
