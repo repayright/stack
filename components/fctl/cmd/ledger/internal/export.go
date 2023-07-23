@@ -1,13 +1,14 @@
 package internal
 
 import (
-	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"math/big"
 	"time"
+
+	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 )
 
 type Info struct {
-	ID        int64     `json:"transactionId"`
+	ID        int64     `json:"id"`
 	Reference string    `json:"reference"`
 	Date      time.Time `json:"date"`
 }
@@ -29,8 +30,8 @@ type Summary struct {
 type ExportTransaction struct {
 	Info     Info                   `json:"info"`
 	Postings []*Posting             `json:"postings"`
-	Summary  []*Summary             `json:"summary"`
-	Metadata map[string]interface{} `json:"metadata"`
+	Summary  []*Summary             `json:"summaries,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 func WithPosting(posting []*shared.Posting) []*Posting {
