@@ -195,7 +195,6 @@ func (c *NumController) Run() (fctl.Renderable, error) {
 }
 
 func (c *NumController) Render() error {
-
 	return internal.PrintTransaction(c.config.GetOut(), c.store.Transaction)
 }
 
