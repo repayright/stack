@@ -5,7 +5,6 @@ import (
 	"math"
 	"strings"
 
-	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/ui/list"
@@ -16,24 +15,23 @@ import (
 type Header struct {
 	logo        *Logo
 	fctlContext *Context
-	modelAction []list.PointList
+	modelAction []*list.PointList
 	rendered    string
 }
 
 func NewHeader() *Header {
 	return &Header{
-		modelAction: make([]list.PointList, 0),
+		modelAction: make([]*list.PointList, 0),
 		logo:        NewLogo(),
 		fctlContext: NewContext(),
 	}
 }
 
 func (h *Header) AddModel(model *list.PointList) *Header {
-	h.modelAction = append(h.modelAction, *model)
+	h.modelAction = append(h.modelAction, model)
 	return h
 }
 
-// Depends on the FCTL version components
 func (h *Header) GetMaxPossibleHeight() int {
 	return h.logo.GetMaxPossibleHeight()
 }
@@ -45,12 +43,20 @@ func (h *Header) Init() tea.Cmd {
 func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		logoView := h.logo.View()
-		var m []string = []string{}
+		headerStyle := lipgloss.NewStyle().Margin(1, 1, 1, 1)
+		middleDivSize := msg.Width - h.logo.GetMaxPossibleWidth() - h.fctlContext.GetMaxPossibleWidth() - 2
+		rightDiv := lipgloss.Place(h.logo.GetMaxPossibleWidth(), h.logo.GetMaxPossibleHeight(), lipgloss.Top, lipgloss.Top, h.logo.View())
+		leftDiv := lipgloss.Place(h.fctlContext.GetMaxPossibleWidth(), h.fctlContext.GetMaxPossibleHeight(), lipgloss.Top, lipgloss.Top, h.fctlContext.View())
+
+		if len(h.modelAction) == 0 {
+			h.rendered = headerStyle.Render(lipgloss.JoinHorizontal(lipgloss.Top, leftDiv, strings.Repeat(" ", middleDivSize), rightDiv))
+			return h, nil
+		}
+
+		var m = make([]string, 0)
 		for i, model := range h.modelAction {
 			tmp := model.View()
 			split := strings.Split(tmp, "\n")
-
 			// First add padding right
 			if i == 0 {
 				for k, line := range split {
@@ -59,7 +65,7 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 
 			}
 			// Last add padding left
-			if i == len(h.modelAction)-1 && i != 0 {
+			if i == len(h.modelAction)-1 && i > 0 {
 				for k, line := range split {
 					split[k] = lipgloss.NewStyle().PaddingLeft(1).Render(line)
 				}
@@ -69,18 +75,11 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 			m = append(m, out)
 		}
 
-		t := lipgloss.NewStyle().Render(lipgloss.JoinHorizontal(lipgloss.Top, m...))
+		text := lipgloss.NewStyle().Render(lipgloss.JoinHorizontal(lipgloss.Top, m...))
+		middleDiv := lipgloss.Place(middleDivSize, h.GetMaxPossibleHeight(), lipgloss.Center, lipgloss.Top, text)
+		h.rendered = headerStyle.Render(lipgloss.JoinHorizontal(lipgloss.Top, leftDiv, middleDiv, rightDiv))
 
-		terminalW := msg.Width - h.logo.GetMaxPossibleWidth() - h.fctlContext.GetMaxPossibleWidth()
-
-		leftDiv := h.fctlContext.View()
-
-		style := lipgloss.NewStyle().PaddingTop(1)
-
-		rightDiv := lipgloss.Place(h.logo.GetMaxPossibleWidth(), h.logo.GetMaxPossibleHeight(), lipgloss.Top, lipgloss.Top, style.Render(logoView))
-		middleDiv := lipgloss.Place(terminalW, h.GetMaxPossibleHeight(), lipgloss.Center, lipgloss.Top, t)
-
-		h.rendered = lipgloss.JoinHorizontal(lipgloss.Top, leftDiv, middleDiv, rightDiv)
+		return h, nil
 	}
 
 	return h, nil
@@ -90,7 +89,15 @@ func (h *Header) View() string {
 	return h.rendered
 }
 
-func (h *Header) AddKeyBinding(keys ...*config.KeyMapHandler) *Header {
+func (h *Header) GetListKeyMapHandler() *config.KeyMapHandler {
+	return nil
+}
+func (h *Header) ResetBinding() *Header {
+	h.modelAction = make([]*list.PointList, 0)
+	return h
+}
+
+func (h *Header) SetKeyBinding(keys ...*config.KeyMapHandler) *Header {
 	var maxHeigth int = h.GetMaxPossibleHeight()
 	var maxWidth int
 	var buffer []string = []string{}
@@ -104,7 +111,7 @@ func (h *Header) AddKeyBinding(keys ...*config.KeyMapHandler) *Header {
 	// Get the number of list to create
 	n := math.Ceil(float64(len((buffer))) / float64(maxHeigth))
 	i := int(n)
-	var out [][]blist.Item
+	var out = make([][]*list.HorizontalItem, 0)
 	for c := 0; c < i; c++ {
 
 		min := c * maxHeigth
@@ -116,8 +123,7 @@ func (h *Header) AddKeyBinding(keys ...*config.KeyMapHandler) *Header {
 
 		bloc := buffer[min:max]
 		maxWidth = modelutils.GetMaxCharPosXinCharList(bloc, ":") + 1
-		items := []blist.Item{}
-
+		var items = make([]*list.HorizontalItem, 0)
 		for _, v := range bloc {
 
 			split := strings.Split(v, ":")
@@ -126,20 +132,17 @@ func (h *Header) AddKeyBinding(keys ...*config.KeyMapHandler) *Header {
 			l := list.NewHorizontalItem(part0, strings.TrimPrefix(split[1], " "))
 			items = append(items, l)
 		}
+
 		if len(items) > 0 {
 			out = append(out, items)
 		}
 
 	}
 
-	h.modelAction = make([]list.PointList, 0)
-	for _, o := range out {
-		pl := list.NewPointList(o,
-			list.NewHorizontalItemDelegate(),
-			50,
-			maxHeigth+1,
-		)
+	h.modelAction = make([]*list.PointList, 0)
 
+	for _, o := range out {
+		pl := list.NewPointList(o...)
 		h.AddModel(pl)
 	}
 

@@ -3,13 +3,12 @@ package stack
 import (
 	"context"
 	"flag"
-	"fmt"
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
 	"os"
 	"time"
 
-	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -211,43 +210,42 @@ func (c *ListController) Render() (tea.Model, error) {
 
 func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 	k := config.NewKeyMapHandler()
-	//k.AddNewKeyBinding(
-	//	key.NewBinding(
-	//		key.WithKeys("q", "esc", "ctrl+c"),
-	//		key.WithHelp("q", "Quit the application"),
-	//	),
-	//	func(m modelutils.Model) config.Controller {
-	//
-	//		return nil
-	//	},
-	//)
-	//k.AddNewKeyBinding(
-	//	key.NewBinding(
-	//		key.WithKeys("up", "k"),
-	//		key.WithHelp("up/k", "move up"),
-	//	),
-	//	func(m modelutils.Model) config.Controller {
-	//		return nil
-	//	},
-	//)
-	//k.AddNewKeyBinding(
-	//	key.NewBinding(
-	//		key.WithKeys("down", "j"),
-	//		key.WithHelp("down/j", "move down"),
-	//	),
-	//	func(m modelutils.Model) config.Controller {
-	//		return nil
-	//	},
-	//)
-	//k.AddNewKeyBinding(
-	//	key.NewBinding(
-	//		key.WithKeys("?"),
-	//		key.WithHelp("? ", "Toggle help"),
-	//	),
-	//	func(m modelutils.Model) config.Controller {
-	//		return nil
-	//	},
-	//)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("q", "esc", "ctrl+c"),
+			key.WithHelp("q", "Quit the application"),
+		),
+		func(m tea.Model) config.Controller {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("up", "k"),
+			key.WithHelp("up/k", "move up"),
+		),
+		func(m tea.Model) config.Controller {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("down", "j"),
+			key.WithHelp("down/j", "move down"),
+		),
+		func(m tea.Model) config.Controller {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("?"),
+			key.WithHelp("? ", "Toggle help"),
+		),
+		func(m tea.Model) config.Controller {
+			return nil
+		},
+	)
 	k.AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
@@ -268,8 +266,6 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 
 			id := selectedRow[1]
 
-			fmt.Println("Selected Stack: ", id)
-
 			c := NewShowControllerConfig()
 			controller := NewShowController(c)
 			c.SetOut(os.Stdout)
@@ -279,15 +275,14 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 			return controller
 		},
 	)
-
+	//fmt.Println(k)
 	return k
 }
 
 func NewListCommand() *cobra.Command {
-	config := NewListControllerConfig()
-
-	return fctl.NewCommand(config.GetUse(),
+	c := NewListControllerConfig()
+	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController(NewListController(config)),
+		fctl.WithController(NewListController(c)),
 	)
 }

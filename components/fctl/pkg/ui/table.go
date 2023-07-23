@@ -1,11 +1,11 @@
 package ui
 
 import (
+	"github.com/charmbracelet/lipgloss"
 	"os"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 	"github.com/formancehq/fctl/pkg/utils"
 	"golang.org/x/crypto/ssh/terminal"
@@ -30,7 +30,8 @@ func (t TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		t.table.SetColumns(WithFullScreenTable(t.columns))
-		t.table.SetHeight(msg.Height)
+		//fmt.Println("Window size changed", msg)
+		t.table.SetHeight(msg.Height - 2)
 		return t, nil
 	}
 
@@ -39,21 +40,22 @@ func (t TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (t TableModel) View() string {
-	return theme.BaseStyle.Render(t.table.View()) + "\n"
+	return theme.BaseStyle.Render(t.table.View())
 }
 
 func (t *TableModel) WithDefaultStyle() *TableModel {
 	//Default styles
 	s := table.DefaultStyles()
+	//s.Header = lipgloss.NewStyle().Bold(true).Padding(0, 0, 0, 0).Margin(0, 0, 0, 0)
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(theme.TabBorderColor).
 		BorderBottom(true).
-		Bold(false)
+		Bold(false).PaddingTop(0).MarginTop(0)
 	s.Selected = s.Selected.
 		Foreground(theme.SelectedColorForeground).
 		Background(theme.SelectedColorForegroundBackground).
-		Bold(false)
+		Bold(false).PaddingTop(0).MarginTop(0)
 
 	t.table.SetStyles(s)
 
@@ -76,9 +78,9 @@ func WithFullScreenTable(ac ArrayColumn) ArrayColumn {
 	if err != nil {
 		panic(err)
 	}
-	margins := -15
+	//margins := -10
 
-	columnWidths := CalculateColumnWidths(columnOrderedWidths, terminalWidth+margins)
+	columnWidths := CalculateColumnWidths(columnOrderedWidths, terminalWidth-len(ac)*2-2) //2 char padding for each column and 2 char for the table border
 	for i := range ac {
 		ac[i].Width = columnWidths[i]
 	}
@@ -126,11 +128,10 @@ func CalculateColumnWidths(buffer []int, tabWidth int) []int {
 	minWidthBuffer := minWidthIntList(buffer)
 	Tofill := tabWidth - minWidthBuffer
 	each := Tofill / len(buffer)
-
 	for i := range buffer {
 		buffer[i] = buffer[i] + each
 	}
-
+	
 	return buffer
 }
 

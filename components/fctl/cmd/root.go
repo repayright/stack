@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/formancehq/fctl/cmd/login"
 	"github.com/formancehq/fctl/pkg/config"
 	"os"
 	"os/signal"
@@ -26,7 +27,7 @@ func NewRootCommand() *cobra.Command {
 		fctl.WithChildCommands(
 			//ui.NewCommand(),
 			//version.NewCommand(),
-			//login.NewCommand(),
+			login.NewCommand(),
 			//NewPromptCommand(),
 			//ledger.NewCommand(),
 			//payments.NewCommand(),

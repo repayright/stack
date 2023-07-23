@@ -1,7 +1,6 @@
 package ui
 
 import (
-	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
 
@@ -47,14 +46,9 @@ func (c *Context) GeneratePointList() *list.PointList {
 	FctlVersion = modelutils.FillCharBeforeChar(FctlVersion, " ", ":", maxWidth)
 
 	return list.NewPointList(
-		[]blist.Item{
-			list.NewHorizontalItem(Regions, c.regions),
-			list.NewHorizontalItem(Org, c.org),
-			list.NewHorizontalItem(FctlVersion, c.fctlversion),
-		},
-		list.NewHorizontalItemDelegate(),
-		maxWidth,
-		4,
+		list.NewHorizontalItem(Regions, c.regions),
+		list.NewHorizontalItem(Org, c.org),
+		list.NewHorizontalItem(FctlVersion, c.fctlversion),
 	)
 }
 

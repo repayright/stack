@@ -8,7 +8,7 @@ import (
 
 var (
 	ViewWidth  = 300 //Number of characters
-	ViewHeight = 120 // Number of lines
+	ViewHeight = 200 // Number of lines
 )
 var (
 	//RED Logo
@@ -34,7 +34,7 @@ var (
 	// Viewport
 	HighlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	ImportantColor = pterm.Yellow
-	WindowStyle    = lipgloss.NewStyle().BorderForeground(lipgloss.NewStyle().GetBackground()).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240"))
+	WindowStyle    = lipgloss.NewStyle().BorderForeground(lipgloss.NewStyle().GetBackground()).BorderStyle(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("240"))
 
 	// List
 	TitleStyle        = lipgloss.NewStyle().PaddingLeft(2)

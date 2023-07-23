@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"github.com/formancehq/fctl/pkg/config"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,10 +22,6 @@ func NewLogo() *Logo {
 	return &Logo{
 		content: GetDefaultFCTLASCII(),
 	}
-}
-
-func GetListKeyMapHandler() *config.KeyMapHandler {
-	return nil
 }
 
 func (f Logo) GetMaxPossibleHeight() int {
@@ -51,7 +46,7 @@ func (f Logo) Update(msg tea.Msg) (Logo, tea.Cmd) {
 }
 
 // Export Style as a function argument, then export the function in utils
-func LogoToStyle(header string) string {
+func Style(header string) string {
 	lines := strings.Split(header, "\n")
 	style := lipgloss.NewStyle().Foreground(theme.LogoColor)
 
@@ -59,9 +54,11 @@ func LogoToStyle(header string) string {
 		lines[i] = style.Render(lines[i])
 	}
 
+	//padding := lipgloss.NewStyle().PaddingTop(1)
+
 	return strings.Join(lines, "\n")
 }
 
 func (f Logo) View() string {
-	return lipgloss.Place(f.GetMaxPossibleWidth(), f.GetMaxPossibleHeight(), lipgloss.Left, lipgloss.Top, LogoToStyle(f.content))
+	return lipgloss.Place(f.GetMaxPossibleWidth(), f.GetMaxPossibleHeight(), lipgloss.Left, lipgloss.Top, Style(f.content))
 }

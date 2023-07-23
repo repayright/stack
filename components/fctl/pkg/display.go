@@ -1,12 +1,12 @@
 package fctl
 
 import (
-	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
 type Display struct {
@@ -51,9 +51,11 @@ func (d *Display) Init() tea.Cmd {
 
 	var keys = d.GetKeyMapAction()
 	if keys != nil {
-		d.header = d.header.AddKeyBinding(keys)
+		d.header = d.header.SetKeyBinding(keys)
+
 	}
 
+	cmd = d.header.Init()
 	if d.controller != nil {
 
 		renderer, err := d.controller.Run()
@@ -78,53 +80,73 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 
-	m, cmd := d.header.Update(msg)
-	if cmd != nil {
-		cmds = append(cmds, cmd)
-	}
-
-	d.header = m
-
 	if d.controller != nil {
 		switch msg := msg.(type) {
 		case tea.WindowSizeMsg:
-			msg.Height -= 15
-
-			m, cmd := d.renderer.Update(msg)
+			w, h, err := modelutils.GetTerminalSize()
+			if err != nil {
+				return d, tea.Quit
+			}
+			newMsg := tea.WindowSizeMsg{
+				Width:  w,
+				Height: h - d.header.GetMaxPossibleHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
+			}
+			//fmt.Println("window size msg", msg.Height)
+			m, cmd := d.renderer.Update(newMsg)
 			if cmd != nil {
 				cmds = append(cmds, cmd)
 			}
-
 			d.renderer = m
 		case tea.KeyMsg:
-			//fmt.Println("key msg", tea.Key(msg))
 			if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
-				//fmt.Println("key map handler")
-
 				action := keyMapHandler.GetAction(tea.Key(msg))
+				//fmt.Println("action", tea.Key(msg))
 				if action != nil {
 					controller := action(d.renderer)
-					//
 					if controller == nil {
-						fmt.Println("controller is nil")
-						return d, tea.Quit
+						return d, nil
 					}
-
 					d.controller = controller
 
 					renderer, err := d.controller.Run()
 					if err != nil {
-						fmt.Println("error", err)
+						//fmt.Println("error", err)
 						return d, tea.Quit
 					}
 
 					model, err := renderer.Render()
 					if err != nil {
-						fmt.Println("error", err)
+						//fmt.Println("error", err)
 						return d, tea.Quit
 					}
 
+					if model == nil {
+						return d, nil
+					}
+
 					d.renderer = model
+					w, h, err := modelutils.GetTerminalSize()
+					if err != nil {
+						return d, tea.Quit
+					}
+
+					newMsg := tea.WindowSizeMsg{
+						Width:  w,
+						Height: h - d.header.GetMaxPossibleHeight() - 4,
+					}
+					m, cmd := d.renderer.Update(newMsg)
+					if cmd != nil {
+						cmds = append(cmds, cmd)
+					}
+					d.renderer = m
+
+					// Update headers actions
+					d.ResetKeyMapAction()
+					header, cmd := d.header.Update(newMsg)
+					if cmd != nil {
+						cmds = append(cmds, cmd)
+					}
+					d.header = header
 				}
 			}
 
@@ -136,8 +158,24 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	}
+	m, cmd := d.header.Update(msg)
+	if cmd != nil {
+		cmds = append(cmds, cmd)
+	}
 
+	d.header = m
 	return d, tea.Batch(cmds...)
+}
+
+func (d *Display) ResetKeyMapAction() *Display {
+	if d.controller != nil {
+		if handler := d.controller.GetKeyMapAction(); handler != nil {
+			d.header.SetKeyBinding(handler)
+			return d
+		}
+		d.header.ResetBinding()
+	}
+	return d
 }
 
 func (d *Display) View() string {

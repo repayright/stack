@@ -3,9 +3,8 @@ package login
 import (
 	"flag"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -48,11 +47,15 @@ func NewConfig() *config.ControllerConfig {
 	)
 }
 
-var _ config.Controller[*Store] = (*LoginController)(nil)
+var _ config.Controller = (*LoginController)(nil)
 
 type LoginController struct {
 	store  *Store
 	config *config.ControllerConfig
+}
+
+func (c *LoginController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
 }
 
 func NewController(config *config.ControllerConfig) *LoginController {
@@ -62,7 +65,7 @@ func NewController(config *config.ControllerConfig) *LoginController {
 	}
 }
 
-func (c *LoginController) GetStore() *Store {
+func (c *LoginController) GetStore() any {
 	return c.store
 }
 
@@ -70,7 +73,7 @@ func (c *LoginController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *LoginController) Run() (modelutils.Renderable, error) {
+func (c *LoginController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -115,21 +118,21 @@ func (c *LoginController) Run() (modelutils.Renderable, error) {
 	return c, cfg.Persist()
 }
 
-func (c *LoginController) Render() error {
+func (c *LoginController) Render() (tea.Model, error) {
 	out := c.config.GetOut()
 	fmt.Fprintln(out, "Please enter the following code on your browser:", c.store.DeviceCode)
 	fmt.Fprintln(out, "Link:", c.store.LoginURI)
 
 	if !c.store.Success && c.store.BrowserURL != "" {
 		fmt.Fprintf(out, "Unable to find a browser, please open the following link: %s", c.store.BrowserURL)
-		return nil
+		return nil, nil
 	}
 
 	if c.store.Success {
 		pterm.Success.WithWriter(c.config.GetOut()).Printfln("Logged!")
 	}
 
-	return nil
+	return nil, nil
 
 }
 
@@ -137,6 +140,6 @@ func NewCommand() *cobra.Command {
 	config := NewConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*Store](NewController(config)),
+		fctl.WithController(NewController(config)),
 	)
 }

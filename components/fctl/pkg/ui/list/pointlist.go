@@ -1,24 +1,19 @@
 package list
 
 import (
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
+	"strings"
 )
 
 type PointList struct {
-	list list.Model
+	list []*HorizontalItem
 }
 
-func NewPointList(items []list.Item, delegate list.ItemDelegate, width int, height int) *PointList {
-	l := list.New(items, delegate, width, height)
-	l.SetShowTitle(false)
-	l.SetShowPagination(false)
-	l.SetShowHelp(false)
-	l.SetShowStatusBar(false)
-
+func NewPointList(list ...*HorizontalItem) *PointList {
 	return &PointList{
-		list: l,
+		list: list,
 	}
 }
 func (pl *PointList) GetListKeyMapHandler() *config.KeyMapHandler {
@@ -28,19 +23,12 @@ func (pl *PointList) Init() tea.Cmd {
 	return nil
 }
 func (pl *PointList) Update(msg tea.Msg) (*PointList, tea.Cmd) {
-	var cmd tea.Cmd
-	pl.list, cmd = pl.list.Update(msg)
-	return pl, cmd
+	return pl, nil
 }
 
 func (pl *PointList) GetMaxPossibleWidth() int {
 	max := 0
-	for _, i := range pl.list.Items() {
-
-		item, ok := i.(*HorizontalItem)
-		if !ok {
-			return 0
-		}
+	for _, item := range pl.list {
 		if item.GetWidth() >= max {
 			max = item.GetWidth()
 		}
@@ -49,5 +37,16 @@ func (pl *PointList) GetMaxPossibleWidth() int {
 }
 
 func (pl *PointList) View() string {
-	return pl.list.View()
+	var section = make([]string, 0)
+	style := lipgloss.Color("#fff788")
+	title := lipgloss.NewStyle().Foreground(style).Bold(true)
+
+	valueStyle := lipgloss.Color("#b3cedc")
+	desc := lipgloss.NewStyle().Foreground(valueStyle).Bold(false)
+	for _, item := range pl.list {
+
+		str := title.Render(item.title+" ") + desc.Render(item.desc)
+		section = append(section, str)
+	}
+	return strings.Join(section, "\n")
 }

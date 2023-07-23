@@ -11,16 +11,16 @@ import (
 )
 
 // https://github.com/charmbracelet/bubbletea/blob/master/examples/pager/main.go#L92
-type modelManager struct {
+type ModelManager struct {
 	vp      viewport.Model
 	ready   bool
 	content string
 }
 
-func (m modelManager) Init() tea.Cmd {
+func (m ModelManager) Init() tea.Cmd {
 	return nil
 }
-func (m modelManager) GetListKeyMapHandler() *config.KeyMapHandler {
+func (m ModelManager) GetListKeyMapHandler() *config.KeyMapHandler {
 	k := config.NewKeyMapHandler()
 	//k.AddNewBinding(
 	//	key.NewBinding(
@@ -99,18 +99,19 @@ func (m modelManager) GetListKeyMapHandler() *config.KeyMapHandler {
 
 	return k
 }
-func NewViewPortManager(content string, out io.Writer) (*modelManager, error) {
+func NewViewPortManager(content string, out io.Writer) (*ModelManager, error) {
 	width := theme.ViewWidth
 	vp := viewport.New(width, theme.ViewHeight)
 
-	// This paramaeter is working well
+	// This parameter is working well
 	// It makes the terminal much smoother with a higher framerate
 	// But it breaks bubbletea output
 	// vp.HighPerformanceRendering = true
+
 	vp.Style = theme.WindowStyle
 
 	renderer, err := glamour.NewTermRenderer(
-		glamour.WithAutoStyle(),
+		//glamour.WithAutoStyle(),
 		glamour.WithWordWrap(width),
 	)
 
@@ -124,26 +125,21 @@ func NewViewPortManager(content string, out io.Writer) (*modelManager, error) {
 	}
 	vp.SetContent(str)
 
-	return &modelManager{
+	return &ModelManager{
 		vp:      vp,
 		content: content,
 	}, nil
 
 }
 
-func (m modelManager) View() string {
+func (m ModelManager) View() string {
 	return m.vp.View()
 }
 
-func (m modelManager) GetHelpViewHeight() int {
-	h := NewHeader()
-	return h.GetMaxPossibleHeight()
-}
-
-func (m modelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var (
-		cmd  tea.Cmd
+		//cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
 
@@ -158,30 +154,32 @@ func (m modelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 	case tea.WindowSizeMsg:
-		if !m.ready {
-			w, h := theme.DocStyle.GetFrameSize()
+		//if !m.ready {
+		//	//w, h := theme.DocStyle.GetFrameSize()
+		//fmt.Println("Window size changed", msg)
+		//
+		m.vp.Width = msg.Width
+		m.vp.Height = msg.Height + 1
 
-			m.vp.SetContent(m.content)
-			viewport.Sync(m.vp)
-			m.vp.Width = msg.Width - w
-			m.vp.Height = msg.Height - h - m.GetHelpViewHeight()
-			m.ready = true
-		} else {
-			// width, height, err := terminal.GetSize(0)
-			// fmt.Println(width, height, err)
-			w, h := theme.DocStyle.GetFrameSize()
-
-			m.vp.SetContent(m.content)
-			viewport.Sync(m.vp)
-			m.vp.YPosition = m.GetHelpViewHeight() + 2
-			m.vp.Width = msg.Width - w
-			m.vp.Height = msg.Height - h - m.GetHelpViewHeight()
+		renderer, err := glamour.NewTermRenderer(
+			glamour.WithAutoStyle(),
+			glamour.WithWordWrap(msg.Width),
+		)
+		if err != nil {
+			return nil, tea.Quit
 		}
+
+		str, err := renderer.Render(m.content)
+		if err != nil {
+			return nil, tea.Quit
+		}
+		m.vp.SetContent(str)
+
 	}
 
-	m.vp, cmd = m.vp.Update(msg)
-
-	cmds = append(cmds, cmd)
+	//m.vp, cmd = m.vp.Update(msg)
+	//
+	//cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
