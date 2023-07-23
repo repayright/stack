@@ -3,6 +3,7 @@ package transactions
 import (
 	"flag"
 	"fmt"
+	"strconv"
 	"time"
 
 	internal "github.com/formancehq/fctl/cmd/ledger/internal"
@@ -27,8 +28,15 @@ const (
 	shortList = "List transactions"
 )
 
+type Row struct {
+	TransactionID int64   `json:"transactionId"`
+	Reference     *string `json:"reference"`
+	Date          string  `json:"date"`
+	Metadata      string  `json:"metadata"`
+}
+
 type ListStore struct {
-	Transaction shared.TransactionsCursorResponseCursor `json:"transactionCursor"`
+	Transaction []Row `json:"transactionCursor"`
 }
 
 func NewListStore() *ListStore {
@@ -153,30 +161,33 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	c.store.Transaction = response.TransactionsCursorResponse.Cursor
+	c.store.Transaction = fctl.Map(response.TransactionsCursorResponse.Cursor.Data, func(tx shared.ExpandedTransaction) Row {
+		return Row{
+			TransactionID: tx.Txid,
+			Reference:     tx.Reference,
+			Date:          tx.Timestamp.Format(time.RFC3339),
+			Metadata:      fctl.MetadataAsShortString(tx.Metadata),
+		}
+	})
 
 	return c, nil
 }
 
 func (c *ListController) Render() error {
-	if len(c.store.Transaction.Data) == 0 {
+	if len(c.store.Transaction) == 0 {
 		fmt.Fprintln(c.config.GetOut(), "No transactions found.")
 		return nil
 	}
 
-	tableData := fctl.Map(c.store.Transaction.Data, func(tx shared.ExpandedTransaction) []string {
+	tableData := fctl.Map(c.store.Transaction, func(row Row) []string {
 		return []string{
-			fmt.Sprintf("%d", tx.Txid),
-			func() string {
-				if tx.Reference == nil {
-					return ""
-				}
-				return *tx.Reference
-			}(),
-			tx.Timestamp.Format(time.RFC3339),
-			fctl.MetadataAsShortString(tx.Metadata),
+			strconv.FormatInt(row.TransactionID, 10),
+			fctl.StringPointerToString(row.Reference),
+			row.Date,
+			row.Metadata,
 		}
 	})
+
 	tableData = fctl.Prepend(tableData, []string{"ID", "Reference", "Date", "Metadata"})
 
 	return pterm.DefaultTable.

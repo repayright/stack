@@ -16,7 +16,7 @@ const (
 )
 
 type ShowStore struct {
-	Transaction internal.ExpandedTransaction `json:"transaction"`
+	Transaction *internal.ExportTransaction `json:"transaction"`
 }
 
 func NewShowStore() *ShowStore {
@@ -116,7 +116,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	c.store.Transaction = response.GetTransactionResponse.Data
+	c.store.Transaction = internal.NewExportExpandedTransaction(&response.GetTransactionResponse.Data)
 
 	return c, nil
 }
