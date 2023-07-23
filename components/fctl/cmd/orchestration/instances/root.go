@@ -16,6 +16,6 @@ func NewCommand() *cobra.Command {
 			NewSendEventCommand(),
 			NewStopCommand(),
 		),
-		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }

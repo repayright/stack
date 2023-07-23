@@ -22,6 +22,6 @@ func NewCommand() *cobra.Command {
 			billing.NewCommand(),
 			NewGeneratePersonalTokenCommand(),
 		),
-		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }
