@@ -1,17 +1,19 @@
 package stack
 
 import (
+	"context"
 	"flag"
+	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
+	"os"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/formancehq/fctl/pkg/ui"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
-
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -152,7 +154,7 @@ func (c *ListController) Run() (config.Renderer, error) {
 	return c, nil
 }
 
-func (c *ListController) Render() (modelutils.Model, error) {
+func (c *ListController) Render() (tea.Model, error) {
 
 	flags := c.config.GetAllFLags()
 
@@ -209,58 +211,72 @@ func (c *ListController) Render() (modelutils.Model, error) {
 
 func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 	k := config.NewKeyMapHandler()
-	k.AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("q", "esc", "ctrl+c"),
-			key.WithHelp("q", "Quit the application"),
-		),
-		func() config.Controller {
-
-			return nil
-		},
-	)
-	k.AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("up", "k"),
-			key.WithHelp("up/k", "move up"),
-		),
-		func() config.Controller {
-			return nil
-		},
-	)
-	k.AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("down", "j"),
-			key.WithHelp("down/j", "move down"),
-		),
-		func() config.Controller {
-			return nil
-		},
-	)
-	k.AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("?"),
-			key.WithHelp("? ", "Toggle help"),
-		),
-		func() config.Controller {
-			return nil
-		},
-	)
+	//k.AddNewKeyBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("q", "esc", "ctrl+c"),
+	//		key.WithHelp("q", "Quit the application"),
+	//	),
+	//	func(m modelutils.Model) config.Controller {
+	//
+	//		return nil
+	//	},
+	//)
+	//k.AddNewKeyBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("up", "k"),
+	//		key.WithHelp("up/k", "move up"),
+	//	),
+	//	func(m modelutils.Model) config.Controller {
+	//		return nil
+	//	},
+	//)
+	//k.AddNewKeyBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("down", "j"),
+	//		key.WithHelp("down/j", "move down"),
+	//	),
+	//	func(m modelutils.Model) config.Controller {
+	//		return nil
+	//	},
+	//)
+	//k.AddNewKeyBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("?"),
+	//		key.WithHelp("? ", "Toggle help"),
+	//	),
+	//	func(m modelutils.Model) config.Controller {
+	//		return nil
+	//	},
+	//)
 	k.AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "show selected item"),
 		),
-		func() config.Controller {
+		func(m tea.Model) config.Controller {
+			//Cast model to table.Model
+			t, ok := m.(ui.TableModel)
+			if !ok {
+				panic("invalid model type")
+				return nil
+			}
 
-			//config := NewShowControllerConfig()
-			//controller := NewShowController(config)
-			//config.SetOut(os.Stdout)
-			//config.SetContext(context.TODO())
+			selectedRow := t.SelectedRow()
+			if selectedRow == nil || selectedRow[1] == "" {
+				return nil
+			}
 
-			//Retrieve the selected item
+			id := selectedRow[1]
 
-			return nil
+			fmt.Println("Selected Stack: ", id)
+
+			c := NewShowControllerConfig()
+			controller := NewShowController(c)
+			c.SetOut(os.Stdout)
+			c.SetContext(context.TODO())
+			c.SetArgs([]string{id})
+
+			return controller
 		},
 	)
 

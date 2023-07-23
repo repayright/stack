@@ -3,10 +3,9 @@ package stack
 import (
 	"flag"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
 	"net/http"
-
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
@@ -201,14 +200,18 @@ func (c *CreateController) Run() (config.Renderer, error) {
 	return c, nil
 }
 
-func (c *CreateController) Render() (modelutils.Model, error) {
+func (c *CreateController) Render() (tea.Model, error) {
 
 	if config.GetString(c.config.GetAllFLags(), config.OutputFlag) == "plain" {
 		fctl.BasicTextCyan.WithWriter(c.config.GetOut()).Printfln("Your dashboard will be reachable on: %s",
 			c.profile.ServicesBaseUrl(c.store.Stack).String())
 	}
 
-	return nil, internal.PrintStackInformation(c.config.GetOut(), c.profile, c.store.Stack, c.store.Versions)
+	model, err := internal.PrintStackInformation(c.config.GetOut(), c.config.GetAllFLags(), c.profile, c.store.Stack, c.store.Versions)
+	if err != nil {
+		return nil, err
+	}
+	return model, nil
 }
 
 func NewCreateCommand() *cobra.Command {

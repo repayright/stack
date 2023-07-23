@@ -1,82 +1,105 @@
 package internal
 
 import (
+	"flag"
 	"fmt"
-	"io"
-	"net/url"
-
+	blist "github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/iancoleman/strcase"
 	"github.com/pterm/pterm"
+	"io"
 )
 
-func PrintStackInformation(out io.Writer, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) error {
-	baseUrlStr := profile.ServicesBaseUrl(stack)
-
-	err := printInformation(out, stack)
-
+func getContent(out io.Writer, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (string, error) {
+	uiInfo, err := printInformation(out, stack)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	err = printVersion(out, baseUrlStr, versions, stack)
-
+	uiVersion, err := printVersion(out, versions, stack)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	err = printMetadata(out, stack)
+	uiMetadata, err := printMetadata(out, stack)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return uiInfo.View() + uiVersion.View() + uiMetadata.View(), nil
 }
 
-func printInformation(out io.Writer, stack *membershipclient.Stack) error {
+func PrintStackInformation(out io.Writer, flags *flag.FlagSet, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (tea.Model, error) {
+	content, err := getContent(out, stack, versions)
+	if err != nil {
+		return nil, err
+	}
 
-	fctl.Section.WithWriter(out).Println("Information")
-	tableData := pterm.TableData{}
-	tableData = append(tableData, []string{pterm.LightCyan("ID"), stack.Id, ""})
-	tableData = append(tableData, []string{pterm.LightCyan("Name"), stack.Name, ""})
-	tableData = append(tableData, []string{pterm.LightCyan("Region"), stack.RegionID, ""})
-	return pterm.DefaultTable.
-		WithWriter(out).
-		WithData(tableData).
-		Render()
+	// Plain
+	if flag := config.GetString(flags, config.OutputFlag); flag == "plain" {
+		return ui.NewPlainOutput(content), nil
+	}
+
+	// Dynamic
+	model, err := ui.NewViewPortManager(content, out)
+	if err != nil {
+		return nil, err
+	}
+	return model, nil
+
 }
 
-func printVersion(out io.Writer, url *url.URL, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) error {
-	fmt.Fprintln(out)
-	fctl.Section.WithWriter(out).Println("Versions")
+func printInformation(out io.Writer, stack *membershipclient.Stack) (*list.Model, error) {
 
-	tableData := pterm.TableData{}
+	items := []blist.Item{}
+
+	items = append(items, list.NewItem(pterm.LightCyan("ID"), stack.Id))
+	items = append(items, list.NewItem(pterm.LightCyan("Name"), stack.Name))
+	items = append(items, list.NewItem(pterm.LightCyan("Region"), stack.RegionID))
+
+	if ui, err := list.NewDefaultListModel(items); err != nil {
+		return nil, err
+	} else {
+		return ui.WithTitle("Information"), nil
+	}
+}
+
+func printVersion(out io.Writer, versions *shared.GetVersionsResponse, stack *membershipclient.Stack) (*list.Model, error) {
+	items := []blist.Item{}
 
 	for _, service := range versions.Versions {
-		tableData = append(tableData, []string{pterm.LightCyan(strcase.ToCamel(service.Name)), service.Version,
-			fmt.Sprintf("%s/api/%s", url.String(), service.Name)})
+		items = append(items, list.NewItem(
+			pterm.LightCyan(fmt.Sprintf("%s (%s)", strcase.ToCamel(service.Name), pterm.Yellow(service.Version))),
+			"",
+		))
 	}
 
-	return pterm.DefaultTable.
-		WithWriter(out).
-		WithData(tableData).
-		Render()
+	if ui, err := list.NewDefaultListModel(items); err != nil {
+		return nil, nil
+	} else {
+		return ui.WithTitle("Version"), nil
+	}
 }
 
-func printMetadata(out io.Writer, stack *membershipclient.Stack) error {
-
-	fctl.Section.WithWriter(out).Println("Metadata")
-
-	tableData := pterm.TableData{}
+func printMetadata(out io.Writer, stack *membershipclient.Stack) (*list.Model, error) {
+	items := []blist.Item{}
 
 	for k, v := range stack.Metadata {
-		tableData = append(tableData, []string{pterm.LightCyan(k), v})
-	}
+		items = append(items, list.NewItem(
+			pterm.LightCyan(k),
+			v,
+		))
 
-	return pterm.DefaultTable.
-		WithWriter(out).
-		WithData(tableData).
-		Render()
+	}
+	if ui, err := list.NewDefaultListModel(items); err != nil {
+		return nil, nil
+	} else {
+		return ui.WithTitle("Metadata"), nil
+	}
 }

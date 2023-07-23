@@ -3,10 +3,9 @@ package stack
 import (
 	"flag"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
 	"net/http"
-
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
@@ -134,8 +133,13 @@ func (c *RestoreController) Run() (config.Renderer, error) {
 	return c, nil
 }
 
-func (c *RestoreController) Render() (modelutils.Model, error) {
-	return nil, internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+func (c *RestoreController) Render() (tea.Model, error) {
+	model, err := internal.PrintStackInformation(c.config.GetOut(), c.config.GetAllFLags(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
 }
 
 func NewRestoreStackCommand() *cobra.Command {

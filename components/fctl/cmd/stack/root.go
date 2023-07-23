@@ -14,7 +14,7 @@ func NewCommand() *cobra.Command {
 			//NewCreateCommand(),
 			NewListCommand(),
 			//NewDeleteCommand(),
-			//NewShowCommand(),
+			NewShowCommand(),
 			//NewRestoreStackCommand(),
 		),
 		fctl.WithCommandScopesFlags(config.Organization),

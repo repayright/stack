@@ -1,6 +1,7 @@
 package fctl
 
 import (
+	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
@@ -96,6 +97,37 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			d.renderer = m
 		case tea.KeyMsg:
+			//fmt.Println("key msg", tea.Key(msg))
+			if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
+				//fmt.Println("key map handler")
+
+				action := keyMapHandler.GetAction(tea.Key(msg))
+				if action != nil {
+					controller := action(d.renderer)
+					//
+					if controller == nil {
+						fmt.Println("controller is nil")
+						return d, tea.Quit
+					}
+
+					d.controller = controller
+
+					renderer, err := d.controller.Run()
+					if err != nil {
+						fmt.Println("error", err)
+						return d, tea.Quit
+					}
+
+					model, err := renderer.Render()
+					if err != nil {
+						fmt.Println("error", err)
+						return d, tea.Quit
+					}
+
+					d.renderer = model
+				}
+			}
+
 			m, cmd := d.renderer.Update(msg)
 			if cmd != nil {
 				cmds = append(cmds, cmd)

@@ -3,7 +3,6 @@ package ui
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 )
 
 type PlainOutput struct {
@@ -24,7 +23,7 @@ func (po *PlainOutput) Init() tea.Cmd {
 	return nil
 }
 
-func (po *PlainOutput) Update(msg tea.Msg) (modelutils.Model, tea.Cmd) {
+func (po *PlainOutput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return nil, nil
 }
 

@@ -3,13 +3,12 @@ package config
 import (
 	"context"
 	"flag"
+	tea "github.com/charmbracelet/bubbletea"
 	"io"
-
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 )
 
 type Renderer interface {
-	Render() (modelutils.Model, error)
+	Render() (tea.Model, error)
 }
 
 type Controller interface {

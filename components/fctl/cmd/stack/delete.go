@@ -2,9 +2,8 @@ package stack
 
 import (
 	"flag"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
@@ -138,7 +137,7 @@ func (c *StackDeleteController) Run() (config.Renderer, error) {
 	return c, nil
 }
 
-func (c *StackDeleteController) Render() (modelutils.Model, error) {
+func (c *StackDeleteController) Render() (tea.Model, error) {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Stack deleted.")
 	return nil, nil
 }

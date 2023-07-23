@@ -4,8 +4,6 @@ import (
 	"github.com/formancehq/fctl/pkg/config"
 	"io"
 
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
-
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -142,7 +140,7 @@ func (m modelManager) GetHelpViewHeight() int {
 	return h.GetMaxPossibleHeight()
 }
 
-func (m modelManager) Update(msg tea.Msg) (modelutils.Model, tea.Cmd) {
+func (m modelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var (
 		cmd  tea.Cmd

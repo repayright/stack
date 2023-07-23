@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 	"github.com/formancehq/fctl/pkg/utils"
 	"golang.org/x/crypto/ssh/terminal"
@@ -21,7 +20,7 @@ func (t TableModel) Init() tea.Cmd {
 	return nil
 }
 
-func (t TableModel) Update(msg tea.Msg) (modelutils.Model, tea.Cmd) {
+func (t TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -59,6 +58,10 @@ func (t *TableModel) WithDefaultStyle() *TableModel {
 	t.table.SetStyles(s)
 
 	return t
+}
+
+func (t *TableModel) SelectedRow() table.Row {
+	return t.table.SelectedRow()
 }
 
 func WithFullScreenTable(ac ArrayColumn) ArrayColumn {
