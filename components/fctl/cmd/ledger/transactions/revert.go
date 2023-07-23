@@ -16,7 +16,7 @@ const (
 )
 
 type RevertStore struct {
-	Transaction *internal.Transaction `json:"transaction"`
+	Transaction *internal.ExportTransaction `json:"transaction"`
 }
 
 func NewRevertStore() *RevertStore {
@@ -122,13 +122,12 @@ func (c *RevertController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	c.store.Transaction = &response.RevertTransactionResponse.Data
-
+	c.store.Transaction = internal.NewExportTransaction(&response.RevertTransactionResponse.Data)
 	return c, nil
 }
 
 func (c *RevertController) Render() error {
-	return internal.PrintTransaction(c.config.GetOut(), *c.store.Transaction)
+	return internal.PrintTransaction(c.config.GetOut(), c.store.Transaction)
 }
 func NewRevertCommand() *cobra.Command {
 

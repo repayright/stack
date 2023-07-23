@@ -20,7 +20,7 @@ const (
 )
 
 type SendStore struct {
-	Transaction *internal.Transaction `json:"transaction"`
+	Transaction *internal.ExportTransaction `json:"transaction"`
 }
 
 func NewSendStore() *SendStore {
@@ -139,12 +139,12 @@ func (c *SendController) Run() (fctl.Renderable, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.store.Transaction = tx
+	c.store.Transaction = internal.NewExportTransaction(tx)
 	return c, nil
 }
 
 func (c *SendController) Render() error {
-	return internal.PrintTransaction(c.config.GetOut(), *c.store.Transaction)
+	return internal.PrintTransaction(c.config.GetOut(), c.store.Transaction)
 }
 
 func NewSendCommand() *cobra.Command {

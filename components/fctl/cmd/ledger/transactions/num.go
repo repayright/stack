@@ -28,7 +28,7 @@ const (
 )
 
 type NumStore struct {
-	Transaction *internal.Transaction `json:"transaction"`
+	Transaction *internal.ExportTransaction `json:"transaction"`
 }
 
 func NewNumStore() *NumStore {
@@ -47,9 +47,7 @@ func NewNumConfig() *fctl.ControllerConfig {
 		useNum,
 		descriptionNum,
 		shortNum,
-		[]string{
-			"l", "ls",
-		},
+		[]string{},
 		flags,
 		fctl.Organization, fctl.Stack, fctl.Ledger,
 	)
@@ -191,14 +189,14 @@ func (c *NumController) Run() (fctl.Renderable, error) {
 		return nil, err
 	}
 
-	c.store.Transaction = tx
+	c.store.Transaction = internal.NewExportTransaction(tx)
 
 	return c, nil
 }
 
 func (c *NumController) Render() error {
 
-	return internal.PrintTransaction(c.config.GetOut(), *c.store.Transaction)
+	return internal.PrintTransaction(c.config.GetOut(), c.store.Transaction)
 }
 
 func NewNumCommand() *cobra.Command {

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	useSetMetadata   = "set-metadata <address> [<key>=<value>...]"
+	useSetMetadata   = "set-metadata <address> \"<key>=<value> <key2>=<value2>...\""
 	shortSetMetadata = "Set metadata on address"
 )
 
