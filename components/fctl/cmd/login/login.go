@@ -137,9 +137,9 @@ func (c *LoginController) Render() (tea.Model, error) {
 }
 
 func NewCommand() *cobra.Command {
-	config := NewConfig()
-	return fctl.NewCommand(config.GetUse(),
+	c := NewConfig()
+	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController(NewController(config)),
+		fctl.WithController(NewController(c)),
 	)
 }
