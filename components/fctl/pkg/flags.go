@@ -2,6 +2,7 @@ package fctl
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -19,6 +20,16 @@ const (
 	InsecureTlsFlag   string = "insecure-tls"
 	TelemetryFlag     string = "telemetry"
 	MetadataFlag      string = "metadata"
+)
+
+var (
+	insecureTlsV   = &fValue[bool]{value: false}
+	telemetryFlagV = &fValue[bool]{value: false}
+	debugFlagV     = &fValue[bool]{value: false}
+	profileFlagV   = &fValue[string]{value: ""}
+	configFlagV    = &fValue[string]{value: fmt.Sprintf("%s/.formance/fctl.config", getHomeDir())}
+	outputFlagV    = &fValue[string]{value: "plain"}
+	GlobalFlags    = withGlobalFlags(flag.NewFlagSet("global", flag.ContinueOnError))
 )
 
 func GetBool(flags *flag.FlagSet, flagName string) bool {
@@ -109,6 +120,24 @@ func GetInt(flagSet *flag.FlagSet, flagName string) int {
 
 func WithConfirmFlag(flagSet *flag.FlagSet) *bool {
 	return flagSet.Bool("confirm", false, "Confirm the action")
+}
+
+func WithScopesFlags(flagSet *flag.FlagSet, scopes ...*flag.Flag) *flag.FlagSet {
+	for _, f := range scopes {
+		flagSet.Var(f.Value, f.Name, f.Usage)
+	}
+
+	return flagSet
+}
+
+func withGlobalFlags(flagSet *flag.FlagSet) *flag.FlagSet {
+	flagSet.BoolVar(insecureTlsV.Get(), InsecureTlsFlag, false, "insecure TLS")
+	flagSet.BoolVar(telemetryFlagV.Get(), TelemetryFlag, false, "enable telemetry")
+	flagSet.BoolVar(debugFlagV.Get(), DebugFlag, false, "debug mode")
+	flagSet.StringVar(profileFlagV.Get(), ProfileFlag, "", "config profile to use")
+	flagSet.StringVar(configFlagV.Get(), ConfigFlag, fmt.Sprintf("%s/.formance/fctl.config", getHomeDir()), "config file to use")
+	flagSet.StringVar(outputFlagV.Get(), outputFlag, "plain", "output format (plain, json)")
+	return flagSet
 }
 
 func WithMetadataFlag(flag *flag.FlagSet) *flag.FlagSet {

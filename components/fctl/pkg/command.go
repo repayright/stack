@@ -151,10 +151,10 @@ func (fn CommandOptionFn) apply(cmd *cobra.Command) {
 	fn(cmd)
 }
 
-// WithScopesFlags adds flags to the command that will be used to
+// WithCommandScopesFlags adds flags to the command that will be used to
 // set the scopes only cobra side for display purpose.
 // The function is used to display the scopes in the help
-func WithScopesFlags(flags ...*flag.Flag) CommandOptionFn {
+func WithCommandScopesFlags(flags ...*flag.Flag) CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		for _, f := range flags {
 			cmd.PersistentFlags().AddGoFlag(f)
