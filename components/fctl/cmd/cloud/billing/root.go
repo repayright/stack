@@ -13,6 +13,6 @@ func NewCommand() *cobra.Command {
 			NewPortalCommand(),
 			NewSetupCommand(),
 		),
-		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }

@@ -14,6 +14,6 @@ func NewCommand() *cobra.Command {
 			clients.NewCommand(),
 			users.NewCommand(),
 		),
-		fctl.WithScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
 	)
 }
