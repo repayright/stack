@@ -53,7 +53,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -119,7 +119,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -187,7 +187,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -255,7 +255,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -325,7 +325,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -389,7 +389,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -459,7 +459,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -529,7 +529,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -664,7 +664,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -730,7 +730,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -799,7 +799,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -868,7 +868,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -937,7 +937,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1006,7 +1006,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1077,7 +1077,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1136,7 +1136,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1202,7 +1202,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1272,7 +1272,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1331,7 +1331,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1390,7 +1390,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1458,7 +1458,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1528,7 +1528,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1596,7 +1596,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1655,7 +1655,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1723,7 +1723,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1794,7 +1794,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1865,7 +1865,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -1938,7 +1938,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -2007,7 +2007,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {
@@ -2071,7 +2071,7 @@ import (
     "context"
     "fmt"
     "os"
-    openapiclient "github.com/formancehq/fctl/membershipclient"
+    openapiclient "github.com/formancehq/fctl"
 )
 
 func main() {

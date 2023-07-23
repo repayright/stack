@@ -2,16 +2,26 @@ package stack
 
 import (
 	"flag"
-	"fmt"
+	"github.com/charmbracelet/bubbles/table"
+	"github.com/formancehq/fctl/pkg/ui"
 	"time"
 
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pkg/errors"
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
+// This defines the minimum length of the columns in the table
+const (
+	minLengthOrganizationId = 15
+	minLengthStackId        = 8
+	minLengthStackName      = 10
+	minLengthApiUrl         = 48
+	minLengthStackRegion    = 30
+	minLengthStackCreatedAt = 20
+	minLengthStackDeletedAt = 20
+)
 const (
 	deletedFlag = "deleted"
 	useList     = "list"
@@ -24,6 +34,7 @@ type Stack struct {
 	Dashboard string  `json:"dashboard"`
 	RegionID  string  `json:"region"`
 	DeletedAt *string `json:"deletedAt"`
+	CreatedAt *string `json:"createdAt"`
 }
 
 type ListStore struct {
@@ -56,9 +67,10 @@ func NewListControllerConfig() *fctl.ControllerConfig {
 var _ fctl.Controller[*ListStore] = (*ListController)(nil)
 
 type ListController struct {
-	store   *ListStore
-	profile *fctl.Profile
-	config  *fctl.ControllerConfig
+	store        *ListStore
+	profile      *fctl.Profile
+	config       *fctl.ControllerConfig
+	organization string
 }
 
 func NewListController(config *fctl.ControllerConfig) *ListController {
@@ -109,12 +121,20 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 		return c, nil
 	}
 
+	c.organization = organization
 	c.store.Stacks = fctl.Map(rsp.Data, func(stack membershipclient.Stack) Stack {
 		return Stack{
 			Id:        stack.Id,
 			Name:      stack.Name,
 			Dashboard: c.profile.ServicesBaseUrl(&stack).String(),
 			RegionID:  stack.RegionID,
+			CreatedAt: func() *string {
+				if stack.CreatedAt != nil {
+					t := stack.CreatedAt.Format(time.RFC3339)
+					return &t
+				}
+				return nil
+			}(),
 			DeletedAt: func() *string {
 				if stack.DeletedAt != nil {
 					t := stack.DeletedAt.Format(time.RFC3339)
@@ -128,41 +148,59 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *ListController) Render() error {
-	if len(c.store.Stacks) == 0 {
-		fmt.Fprintln(c.config.GetOut(), "No stacks found.")
-		return nil
-	}
+func (c *ListController) Render() (ui.Model, error) {
 
-	tableData := fctl.Map(c.store.Stacks, func(stack Stack) []string {
+	flags := c.config.GetAllFLags()
+
+	// Create table rows
+	tableData := fctl.Map(c.store.Stacks, func(stack Stack) table.Row {
 		data := []string{
+			c.organization,
 			stack.Id,
 			stack.Name,
 			stack.Dashboard,
 			stack.RegionID,
+			*stack.CreatedAt,
 		}
-		if fctl.GetBool(c.config.GetAllFLags(), deletedFlag) {
+
+		if fctl.GetBool(flags, deletedFlag) {
 			if stack.DeletedAt != nil {
 				data = append(data, *stack.DeletedAt)
 			} else {
 				data = append(data, "")
 			}
 		}
+
 		return data
 	})
 
-	headers := []string{"ID", "Name", "Dashboard", "Region"}
-	if fctl.GetBool(c.config.GetAllFLags(), deletedFlag) {
-		headers = append(headers, "Deleted at")
+	var columns ui.ArrayColumn
+
+	// Add plain table option if --plain flag is set
+	isPlain := fctl.GetString(flags, fctl.OutputFlag) == "plain"
+	// Default Columns
+	columns = ui.NewArrayColumn(
+		ui.NewColumn("Organization Id", minLengthOrganizationId),
+		ui.NewColumn("Stack Id", minLengthStackId),
+		ui.NewColumn("Name", minLengthStackName),
+		ui.NewColumn("API URL", minLengthApiUrl),
+		ui.NewColumn("Region", minLengthStackRegion),
+		ui.NewColumn("Created At", minLengthStackCreatedAt),
+	)
+	if fctl.GetBool(flags, deletedFlag) {
+		columns = columns.AddColumn("Deleted At", minLengthStackDeletedAt)
+	}
+	// Default table options
+	opts := ui.NewTableOptions(columns, tableData)
+	if isPlain {
+		opt := ui.WithHeight(len(tableData))
+		// Add Deleted At column if --deleted flag is set
+		return ui.NewTableModel(columns, append(opts, opt)...), nil
 	}
 
-	tableData = fctl.Prepend(tableData, headers)
+	opts = ui.NewTableOptions(ui.WithFullScreenTable(columns), tableData)
 
-	return pterm.DefaultTable.
-		WithHasHeader().
-		WithWriter(c.config.GetOut()).
-		WithData(tableData).
-		Render()
+	return ui.NewTableModel(columns, opts...), nil
 }
 
 func NewListCommand() *cobra.Command {

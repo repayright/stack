@@ -3,6 +3,7 @@ package stack
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/ui"
 	"net/http"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
@@ -146,8 +147,8 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 
 }
 
-func (c *ShowController) Render() error {
-	return internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+func (c *ShowController) Render() (ui.Model, error) {
+	return nil, internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 }
 
 func NewShowCommand() *cobra.Command {

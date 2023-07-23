@@ -5,8 +5,8 @@ info:
   version: "0.1.0"
 
 servers:
-- url: http://localhost:8080
-  description: Local server
+  - url: http://localhost:8080
+    description: Local server
 
 paths:
   /_info:
@@ -62,11 +62,11 @@ paths:
       summary: Read organization
       operationId: readOrganization
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         200:
           description: OK
@@ -78,11 +78,11 @@ paths:
       summary: Delete organization
       operationId: deleteOrganization
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         204:
           description: Organization deleted
@@ -91,11 +91,11 @@ paths:
       summary: List users
       operationId: listUsers
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         200:
           description: List of users
@@ -105,16 +105,16 @@ paths:
                 $ref: '#/components/schemas/ListUsersResponse'
   /organizations/{organizationId}/users/{userId}:
     parameters:
-    - name: organizationId
-      in: path
-      schema:
-        type: string
-      required: true
-    - name: userId
-      in: path
-      schema:
-        type: string
-      required: true
+      - name: organizationId
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: userId
+        in: path
+        schema:
+          type: string
+        required: true
 
     get:
       summary: Read user
@@ -158,11 +158,11 @@ paths:
       summary: Access to the billing portal
       operationId: billingPortal
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         200:
           description: Access to the billing portal
@@ -175,11 +175,11 @@ paths:
       summary: Create a billing setup
       operationId: billingSetup
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         200:
           description: Create a billing setup
@@ -192,17 +192,17 @@ paths:
       summary: List stacks
       operationId: listStacks
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
-      - name: deleted
-        in: query
-        description: Include deleted stacks
-        schema:
-          type: boolean
-        required: false
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deleted
+          in: query
+          description: Include deleted stacks
+          schema:
+            type: boolean
+          required: false
       responses:
         200:
           description: List of stacks
@@ -214,11 +214,11 @@ paths:
       summary: Create stack
       operationId: createStack
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
       requestBody:
         content:
           application/json:
@@ -242,16 +242,16 @@ paths:
       summary: Read stack
       operationId: readStack
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
-      - name: stackId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: stackId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         200:
           description: OK
@@ -263,16 +263,16 @@ paths:
       summary: Delete stack
       operationId: deleteStack
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
-      - name: stackId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: stackId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         204:
           description: Stack deleted
@@ -282,16 +282,16 @@ paths:
       summary: Restore stack
       operationId: restoreStack
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
-      - name: stackId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: stackId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         200:
           description: OK
@@ -302,16 +302,16 @@ paths:
 
   /organizations/{organizationId}/stacks/{stackId}/stargate/enable:
     parameters:
-    - name: organizationId
-      in: path
-      schema:
-        type: string
-      required: true
-    - name: stackId
-      in: path
-      schema:
-        type: string
-      required: true
+      - name: organizationId
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: stackId
+        in: path
+        schema:
+          type: string
+        required: true
     put:
       summary: Enable stargate on a stack
       operationId: enableStargate
@@ -321,16 +321,16 @@ paths:
 
   /organizations/{organizationId}/stacks/{stackId}/stargate/disable:
     parameters:
-    - name: organizationId
-      in: path
-      schema:
-        type: string
-      required: true
-    - name: stackId
-      in: path
-      schema:
-        type: string
-      required: true
+      - name: organizationId
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: stackId
+        in: path
+        schema:
+          type: string
+        required: true
     put:
       summary: Disable stargate on a stack
       operationId: disableStargate
@@ -343,18 +343,18 @@ paths:
       summary: List invitations of the user
       operationId: listInvitations
       parameters:
-      - in: query
-        name: status
-        required: false
-        description: Status of organizations
-        schema:
-          type: string
-      - in: query
-        name: organization
-        required: false
-        description: Status of organizations
-        schema:
-          type: string
+        - in: query
+          name: status
+          required: false
+          description: Status of organizations
+          schema:
+            type: string
+        - in: query
+          name: organization
+          required: false
+          description: Status of organizations
+          schema:
+            type: string
       responses:
         200:
           description: List of the invitations for the connected user
@@ -367,11 +367,11 @@ paths:
       summary: Accept invitation
       operationId: acceptInvitation
       parameters:
-      - name: invitationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: invitationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         204:
           description: Invitation accepted
@@ -380,11 +380,11 @@ paths:
       summary: Decline invitation
       operationId: declineInvitation
       parameters:
-      - name: invitationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: invitationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         204:
           description: Invitation declined
@@ -393,17 +393,17 @@ paths:
       summary: List invitations of the organization
       operationId: listOrganizationInvitations
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
-      - in: query
-        name: status
-        required: false
-        description: Status of organizations
-        schema:
-          type: string
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: status
+          required: false
+          description: Status of organizations
+          schema:
+            type: string
       responses:
         200:
           description: List of the invitations for the organization
@@ -415,16 +415,16 @@ paths:
       summary: Create invitation
       operationId: createInvitation
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
-      - name: email
-        in: query
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: email
+          in: query
+          schema:
+            type: string
+          required: true
       responses:
         201:
           description: Invitation created
@@ -437,27 +437,27 @@ paths:
       summary: Delete invitation
       operationId: deleteInvitation
       parameters:
-      - name: organizationId
-        in: path
-        schema:
-          type: string
-        required: true
-      - name: invitationId
-        in: path
-        schema:
-          type: string
-        required: true
+        - name: organizationId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: invitationId
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         204:
           description: Invitation deleted
 
   /organizations/{organizationId}/regions:
     parameters:
-    - name: organizationId
-      in: path
-      schema:
-        type: string
-      required: true
+      - name: organizationId
+        in: path
+        schema:
+          type: string
+        required: true
 
     get:
       summary: List regions
@@ -486,16 +486,16 @@ paths:
                 $ref: '#/components/schemas/CreatedPrivateRegionResponse'
   /organizations/{organizationId}/regions/{regionId}:
     parameters:
-    - name: organizationId
-      in: path
-      schema:
-        type: string
-      required: true
-    - name: regionId
-      in: path
-      schema:
-        type: string
-      required: true
+      - name: organizationId
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: regionId
+        in: path
+        schema:
+          type: string
+        required: true
     get:
       summary: Get region
       operationId: getRegion
@@ -539,7 +539,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UpdateUserResponse'
 security:
-- oauth2: []
+  - oauth2: []
 
 components:
   securitySchemes:
@@ -559,90 +559,90 @@ components:
         name:
           type: string
       required:
-      - name
+        - name
     CreatedPrivateRegionResponse:
       properties:
         data:
           $ref: '#/components/schemas/PrivateRegion'
       required:
-      - data
+        - data
     PrivateRegion:
       allOf:
-      - $ref: '#/components/schemas/Region'
-      - type: object
-        properties:
-          clientID:
-            type: string
-          organizationID:
-            type: string
-          creatorID:
-            type: string
-          secret:
-            type: object
-            properties:
-              lastDigits:
-                type: string
-              clear:
-                type: string
-            required:
-            - lastDigits
-        required:
-        - clientID
-        - organizationID
-        - creatorID
+        - $ref: '#/components/schemas/Region'
+        - type: object
+          properties:
+            clientID:
+              type: string
+            organizationID:
+              type: string
+            creatorID:
+              type: string
+            secret:
+              type: object
+              properties:
+                lastDigits:
+                  type: string
+                clear:
+                  type: string
+              required:
+                - lastDigits
+          required:
+            - clientID
+            - organizationID
+            - creatorID
     PublicRegion:
       allOf:
-      - $ref: '#/components/schemas/Region'
-      - type: object
-        properties:
-          production:
-            type: boolean
-        required:
-        - production
+        - $ref: '#/components/schemas/Region'
+        - type: object
+          properties:
+            production:
+              type: boolean
+          required:
+            - production
     AnyRegion:
       allOf:
-      - $ref: '#/components/schemas/Region'
-      - type: object
-        properties:
-          clientID:
-            type: string
-          organizationID:
-            type: string
-          creator:
-            $ref: '#/components/schemas/User'
-          production:
-            type: boolean
-          public:
-            type: boolean
-        required:
-        - public
+        - $ref: '#/components/schemas/Region'
+        - type: object
+          properties:
+            clientID:
+              type: string
+            organizationID:
+              type: string
+            creator:
+              $ref: '#/components/schemas/User'
+            production:
+              type: boolean
+            public:
+              type: boolean
+          required:
+            - public
     OrganizationData:
       type: object
       required:
-      - name
+        - name
       properties:
         name:
           type: string
           description: Organization name
     Organization:
       allOf:
-      - $ref: '#/components/schemas/OrganizationData'
-      - type: object
-        required:
-        - id
-        - ownerId
-        properties:
-          id:
-            type: string
-            description: Organization ID
-          ownerId:
-            type: string
-            description: Owner ID
+        - $ref: '#/components/schemas/OrganizationData'
+        - type: object
+          required:
+            - id
+            - ownerId
+          properties:
+            id:
+              type: string
+              description: Organization ID
+            ownerId:
+              type: string
+              description: Owner ID
     StackData:
       type: object
       required:
-      - name
-      - metadata
+        - name
+        - metadata
       properties:
         name:
           type: string
@@ -654,7 +654,7 @@ components:
     BillingPortal:
       type: object
       required:
-      - url
+        - url
       properties:
         url:
           type: string
@@ -662,39 +662,49 @@ components:
     BillingSetup:
       type: object
       required:
-      - url
+        - url
       properties:
         url:
           type: string
           description: Billing portal URL
     Stack:
       allOf:
-      - $ref: '#/components/schemas/StackData'
-      - type: object
-        required:
-        - id
-        - organizationId
-        - uri
-        - regionID
-        - stargateEnabled
-        properties:
-          id:
-            type: string
-            description: Stack ID
-          organizationId:
-            type: string
-            description: Organization ID
-          uri:
-            type: string
-            description: Base stack uri
-          regionID:
-            type: string
-            description: The region where the stack is installed
-          stargateEnabled:
-            type: boolean
-          deletedAt:
-            type: string
-            format: date-time
+        - $ref: '#/components/schemas/StackData'
+        - type: object
+          required:
+            - id
+            - organizationId
+            - uri
+            - regionID
+            - stargateEnabled
+            - status
+          properties:
+            id:
+              type: string
+              description: Stack ID
+            organizationId:
+              type: string
+              description: Organization ID
+            uri:
+              type: string
+              description: Base stack uri
+            regionID:
+              type: string
+              description: The region where the stack is installed
+            stargateEnabled:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            deletedAt:
+              type: string
+              format: date-time
+            status:
+              type: string
+              enum:
+                - UNKNOWN
+                - PROGRESSING
+                - READY
     UpdatableUserData:
       type: object
       properties:
@@ -704,26 +714,26 @@ components:
             type: string
     UserData:
       allOf:
-      - type: object
-        properties:
-          email:
-            type: string
-          metadata:
-            type: object
-            additionalProperties: true
-        required:
-        - email
-      - $ref: '#/components/schemas/UpdatableUserData'
+        - type: object
+          properties:
+            email:
+              type: string
+            metadata:
+              type: object
+              additionalProperties: true
+          required:
+            - email
+        - $ref: '#/components/schemas/UpdatableUserData'
     User:
       allOf:
-      - $ref: '#/components/schemas/UserData'
-      - type: object
-        required:
-        - id
-        properties:
-          id:
-            type: string
-            description: User ID
+        - $ref: '#/components/schemas/UserData'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              description: User ID
     OrganizationArray:
       type: array
       items:
@@ -772,13 +782,13 @@ components:
           $ref: '#/components/schemas/UserArray'
     CreateStackRequest:
       allOf:
-      - $ref: '#/components/schemas/StackData'
-      - type: object
-        properties:
-          regionID:
-            type: string
-        required:
-        - regionID
+        - $ref: '#/components/schemas/StackData'
+        - type: object
+          properties:
+            regionID:
+              type: string
+          required:
+            - regionID
     CreateStackResponse:
       type: object
       properties:
@@ -813,7 +823,7 @@ components:
         error_message:
           type: string
       required:
-      - error_code
+        - error_code
     Invitation:
       type: object
       properties:
@@ -826,9 +836,9 @@ components:
         status:
           type: string
           enum:
-          - pending
-          - accepted
-          - rejected
+            - pending
+            - accepted
+            - rejected
         creationDate:
           type: string
           format: date-time
@@ -836,19 +846,19 @@ components:
           type: string
           format: date-time
       required:
-      - creationDate
-      - status
-      - userEmail
-      - organizationId
-      - id
+        - creationDate
+        - status
+        - userEmail
+        - organizationId
+        - id
     Region:
       type: object
       required:
-      - id
-      - baseUrl
-      - active
-      - createdAt
-      - name
+        - id
+        - baseUrl
+        - active
+        - createdAt
+        - name
       properties:
         id:
           type: string
@@ -871,15 +881,15 @@ components:
           type: array
           items:
             allOf:
-            - $ref: '#/components/schemas/Organization'
-            - type: object
-              properties:
-                totalStacks:
-                  type: integer
-                totalUsers:
-                  type: integer
-                owner:
-                  $ref: '#/components/schemas/User'
+              - $ref: '#/components/schemas/Organization'
+              - type: object
+                properties:
+                  totalStacks:
+                    type: integer
+                  totalUsers:
+                    type: integer
+                  owner:
+                    $ref: '#/components/schemas/User'
     ListRegionsResponse:
       type: object
       properties:
@@ -888,18 +898,18 @@ components:
           items:
             $ref: '#/components/schemas/AnyRegion'
       required:
-      - data
+        - data
     GetRegionResponse:
       type: object
       properties:
         data:
           $ref: '#/components/schemas/AnyRegion'
       required:
-      - data
+        - data
     ServerInfo:
       type: object
       required:
-      - version
+        - version
       properties:
         version:
           type: string
@@ -911,4 +921,4 @@ components:
         data:
           $ref: '#/components/schemas/User'
       required:
-      - data
+        - data

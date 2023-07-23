@@ -3,11 +3,12 @@ package fctl
 import (
 	"context"
 	"flag"
+	"github.com/formancehq/fctl/pkg/ui"
 	"io"
 )
 
 type Renderable interface {
-	Render() error
+	Render() (ui.Model, error)
 }
 
 type Controller[T any] interface {

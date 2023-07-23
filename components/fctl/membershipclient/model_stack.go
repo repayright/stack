@@ -21,7 +21,7 @@ var _ MappedNullable = &Stack{}
 // Stack struct for Stack
 type Stack struct {
 	// Stack name
-	Name string `json:"name"`
+	Name     string            `json:"name"`
 	Metadata map[string]string `json:"metadata"`
 	// Stack ID
 	Id string `json:"id"`
@@ -30,9 +30,10 @@ type Stack struct {
 	// Base stack uri
 	Uri string `json:"uri"`
 	// The region where the stack is installed
-	RegionID string `json:"regionID"`
-	StargateEnabled bool `json:"stargateEnabled"`
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+	RegionID        string     `json:"regionID"`
+	StargateEnabled bool       `json:"stargateEnabled"`
+	CreatedAt       *time.Time `json:"createdAt,omitempty"`
+	DeletedAt       *time.Time `json:"deletedAt,omitempty"`
 }
 
 // NewStack instantiates a new Stack object
@@ -227,6 +228,38 @@ func (o *Stack) SetStargateEnabled(v bool) {
 	o.StargateEnabled = v
 }
 
+// GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
+func (o *Stack) GetCreatedAt() time.Time {
+	if o == nil || IsNil(o.CreatedAt) {
+		var ret time.Time
+		return ret
+	}
+	return *o.CreatedAt
+}
+
+// GetCreatedAtOk returns a tuple with the CreatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Stack) GetCreatedAtOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.CreatedAt) {
+		return nil, false
+	}
+	return o.CreatedAt, true
+}
+
+// HasCreatedAt returns a boolean if a field has been set.
+func (o *Stack) HasCreatedAt() bool {
+	if o != nil && !IsNil(o.CreatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedAt gets a reference to the given time.Time and assigns it to the CreatedAt field.
+func (o *Stack) SetCreatedAt(v time.Time) {
+	o.CreatedAt = &v
+}
+
 // GetDeletedAt returns the DeletedAt field value if set, zero value otherwise.
 func (o *Stack) GetDeletedAt() time.Time {
 	if o == nil || IsNil(o.DeletedAt) {
@@ -260,7 +293,7 @@ func (o *Stack) SetDeletedAt(v time.Time) {
 }
 
 func (o Stack) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -276,6 +309,9 @@ func (o Stack) ToMap() (map[string]interface{}, error) {
 	toSerialize["uri"] = o.Uri
 	toSerialize["regionID"] = o.RegionID
 	toSerialize["stargateEnabled"] = o.StargateEnabled
+	if !IsNil(o.CreatedAt) {
+		toSerialize["createdAt"] = o.CreatedAt
+	}
 	if !IsNil(o.DeletedAt) {
 		toSerialize["deletedAt"] = o.DeletedAt
 	}
@@ -317,5 +353,3 @@ func (v *NullableStack) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

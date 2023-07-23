@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/ui"
 	"io"
 	"strconv"
 
@@ -386,8 +388,40 @@ func render[T any](flags *flag.FlagSet, c Controller[T], r Renderable) error {
 			}
 			return nil
 		}
+	case "dynamic":
+
+		d := ui.NewDisplay()
+		header := ui.NewHeader()
+
+		m, err := r.Render()
+		if err != nil {
+			return err
+		}
+
+		if m == nil { // If the renderer returns nil, we don't want to render anything
+			return nil
+		}
+
+		d.SetCurrentModel(&m).SetHeader(header)
+		d.Init()
+
+		if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
+			return err
+		}
+
+		return nil
 	default:
-		return r.Render()
+		m, err := r.Render()
+
+		if err != nil {
+			return err
+		}
+
+		if m != nil { // If the renderer returns nil, we don't want to render anything
+			fmt.Println(m.View())
+		}
+		return nil
+
 	}
 }
 

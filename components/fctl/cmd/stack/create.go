@@ -3,6 +3,7 @@ package stack
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/ui"
 	"net/http"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
@@ -194,10 +195,10 @@ func (c *CreateController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *CreateController) Render() error {
+func (c *CreateController) Render() (ui.Model, error) {
 	fctl.BasicTextCyan.WithWriter(c.config.GetOut()).Printfln("Your dashboard will be reachable on: %s",
 		c.profile.ServicesBaseUrl(c.store.Stack).String())
-	return internal.PrintStackInformation(c.config.GetOut(), c.profile, c.store.Stack, c.store.Versions)
+	return nil, internal.PrintStackInformation(c.config.GetOut(), c.profile, c.store.Stack, c.store.Versions)
 }
 
 func NewCreateCommand() *cobra.Command {
