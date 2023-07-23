@@ -2,6 +2,9 @@ package users
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -21,9 +24,9 @@ type UnlinkStore struct {
 func NewUnlinkStore() *UnlinkStore {
 	return &UnlinkStore{}
 }
-func NewUnlinkConfig() *fctl.ControllerConfig {
+func NewUnlinkConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useUnlink, flag.ExitOnError)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useUnlink,
 		shortUnlink,
 		shortUnlink,
@@ -31,18 +34,18 @@ func NewUnlinkConfig() *fctl.ControllerConfig {
 			"u", "un",
 		},
 		flags,
-		fctl.Organization,
+		config.Organization,
 	)
 }
 
-var _ fctl.Controller[*UnlinkStore] = (*UnlinkController)(nil)
+var _ config.Controller[*UnlinkStore] = (*UnlinkController)(nil)
 
 type UnlinkController struct {
 	store  *UnlinkStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewUnlinkController(config *fctl.ControllerConfig) *UnlinkController {
+func NewUnlinkController(config *config.ControllerConfig) *UnlinkController {
 	return &UnlinkController{
 		store:  NewUnlinkStore(),
 		config: config,
@@ -53,11 +56,11 @@ func (c *UnlinkController) GetStore() *UnlinkStore {
 	return c.store
 }
 
-func (c *UnlinkController) GetConfig() *fctl.ControllerConfig {
+func (c *UnlinkController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *UnlinkController) Run() (fctl.Renderable, error) {
+func (c *UnlinkController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()

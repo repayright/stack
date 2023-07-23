@@ -3,6 +3,7 @@ package payments
 import (
 	"github.com/formancehq/fctl/cmd/payments/connectors"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +14,6 @@ func NewCommand() *cobra.Command {
 			connectors.NewConnectorsCommand(),
 			NewListPaymentsCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

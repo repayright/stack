@@ -2,6 +2,9 @@ package profiles
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -26,10 +29,10 @@ func NewUseStore() *UseStore {
 	}
 }
 
-func NewUseConfig() *fctl.ControllerConfig {
+func NewUseConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useProfile, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useProfile,
 		descriptionProfile,
 		shortProfile,
@@ -42,12 +45,12 @@ func NewUseConfig() *fctl.ControllerConfig {
 
 type UseController struct {
 	store  *UseStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*UseStore] = (*UseController)(nil)
+var _ config.Controller[*UseStore] = (*UseController)(nil)
 
-func NewUseController(config *fctl.ControllerConfig) *UseController {
+func NewUseController(config *config.ControllerConfig) *UseController {
 	return &UseController{
 		store:  NewUseStore(),
 		config: config,
@@ -58,11 +61,11 @@ func (c *UseController) GetStore() *UseStore {
 	return c.store
 }
 
-func (c *UseController) GetConfig() *fctl.ControllerConfig {
+func (c *UseController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *UseController) Run() (fctl.Renderable, error) {
+func (c *UseController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	args := c.config.GetArgs()
 

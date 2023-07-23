@@ -3,7 +3,10 @@ package holds
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"math/big"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -26,20 +29,20 @@ type ConfirmStore struct {
 }
 type ConfirmController struct {
 	store  *ConfirmStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*ConfirmStore] = (*ConfirmController)(nil)
+var _ config.Controller[*ConfirmStore] = (*ConfirmController)(nil)
 
 func NewConfirmStore() *ConfirmStore {
 	return &ConfirmStore{}
 }
-func NewConfirmConfig() *fctl.ControllerConfig {
+func NewConfirmConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useConfirm, flag.ExitOnError)
 	flags.Bool(finalFlag, false, "Is final debit (close hold)")
 	flags.Int(amountFlag, 0, "Amount to confirm")
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useConfirm,
 		shortConfirm,
 		shortConfirm,
@@ -47,12 +50,12 @@ func NewConfirmConfig() *fctl.ControllerConfig {
 			"c", "conf",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
 }
-func NewConfirmController(config *fctl.ControllerConfig) *ConfirmController {
+func NewConfirmController(config *config.ControllerConfig) *ConfirmController {
 	return &ConfirmController{
 		store:  NewConfirmStore(),
 		config: config,
@@ -63,11 +66,11 @@ func (c *ConfirmController) GetStore() *ConfirmStore {
 	return c.store
 }
 
-func (c *ConfirmController) GetConfig() *fctl.ControllerConfig {
+func (c *ConfirmController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ConfirmController) Run() (fctl.Renderable, error) {
+func (c *ConfirmController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

@@ -3,6 +3,9 @@ package install
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -30,26 +33,26 @@ func NewMangoPayStore() *MangoPayStore {
 		ConnectorName: internal.MangoPayConnector,
 	}
 }
-func NewMangoPayConfig() *fctl.ControllerConfig {
+func NewMangoPayConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useMangoPay, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointMangoPay, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useMangoPay,
 		shortMangoPay,
 		shortMangoPay,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
 type MangoPayController struct {
 	store  *MangoPayStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewMangoPayController(config *fctl.ControllerConfig) *MangoPayController {
+func NewMangoPayController(config *config.ControllerConfig) *MangoPayController {
 	return &MangoPayController{
 		store:  NewMangoPayStore(),
 		config: config,
@@ -60,11 +63,11 @@ func (c *MangoPayController) GetStore() *MangoPayStore {
 	return c.store
 }
 
-func (c *MangoPayController) GetConfig() *fctl.ControllerConfig {
+func (c *MangoPayController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *MangoPayController) Run() (fctl.Renderable, error) {
+func (c *MangoPayController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

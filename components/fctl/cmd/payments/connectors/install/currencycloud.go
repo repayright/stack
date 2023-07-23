@@ -3,6 +3,9 @@ package install
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -30,29 +33,29 @@ func NewCurrencyCloudStore() *CurrencyCloudStore {
 		Success: false,
 	}
 }
-func NewCurrencyCloudConfig() *fctl.ControllerConfig {
+func NewCurrencyCloudConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useCurrencyCloud, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointCurrencyCloud, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useCurrencyCloud,
 		descriptionCurrencyCloud,
 		shortCurrencyCloud,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
 type CurrencyCloudController struct {
 	store  *CurrencyCloudStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*CurrencyCloudStore] = (*CurrencyCloudController)(nil)
+var _ config.Controller[*CurrencyCloudStore] = (*CurrencyCloudController)(nil)
 
-func NewCurrencyCloudController(config *fctl.ControllerConfig) *CurrencyCloudController {
+func NewCurrencyCloudController(config *config.ControllerConfig) *CurrencyCloudController {
 	return &CurrencyCloudController{
 		store:  NewCurrencyCloudStore(),
 		config: config,
@@ -63,11 +66,11 @@ func (c *CurrencyCloudController) GetStore() *CurrencyCloudStore {
 	return c.store
 }
 
-func (c *CurrencyCloudController) GetConfig() *fctl.ControllerConfig {
+func (c *CurrencyCloudController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *CurrencyCloudController) Run() (fctl.Renderable, error) {
+func (c *CurrencyCloudController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

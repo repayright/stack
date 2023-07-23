@@ -3,7 +3,6 @@ package ui
 import (
 	"os"
 
-	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -18,48 +17,11 @@ type TableModel struct {
 	table   table.Model
 }
 
-// This model implement the table.Model interface from Bubble Tea Framework
 func (t TableModel) Init() tea.Cmd {
 	return nil
 }
 
-func (t TableModel) GetListKeyMapHandler() *modelutils.KeyMapHandler {
-	k := modelutils.NewKeyMapHandler()
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("q", "esc", "ctrl+c"),
-			key.WithHelp("q", "Quit the application"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("up", "k"),
-			key.WithHelp("up/k", "move up"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("down", "j"),
-			key.WithHelp("down/j", "move down"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("?"),
-			key.WithHelp("? ", "Toggle help"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-
-	return k
-}
-
-func (t TableModel) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (t TableModel) Update(msg tea.Msg) (modelutils.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -158,20 +120,20 @@ func NewColumn(name string, width int) table.Column {
 
 func CalculateColumnWidths(buffer []int, tabWidth int) []int {
 
-	minWidthBuffer := minWidthBuffer(buffer)
+	minWidthBuffer := minWidthIntList(buffer)
 	Tofill := tabWidth - minWidthBuffer
 	each := Tofill / len(buffer)
 
-	for i, _ := range buffer {
+	for i := range buffer {
 		buffer[i] = buffer[i] + each
 	}
 
 	return buffer
 }
 
-func minWidthBuffer(buffer []int) int {
+func minWidthIntList(list []int) int {
 	count := 0
-	for _, str := range buffer {
+	for _, str := range list {
 		count += str
 	}
 	return count

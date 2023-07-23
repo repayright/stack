@@ -3,6 +3,9 @@ package ledger
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -30,10 +33,10 @@ func NewServerInfoStore() *ServerInfoStore {
 	}
 }
 
-func NewServerInfoConfig() *fctl.ControllerConfig {
+func NewServerInfoConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useServerInfo, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useServerInfo,
 		shortServerInfo,
 		shortServerInfo,
@@ -41,18 +44,18 @@ func NewServerInfoConfig() *fctl.ControllerConfig {
 			"si",
 		},
 		flags,
-		fctl.Organization, fctl.Stack, fctl.Ledger,
+		config.Organization, config.Stack, config.Ledger,
 	)
 }
 
-var _ fctl.Controller[*ServerInfoStore] = (*ServerInfoController)(nil)
+var _ config.Controller[*ServerInfoStore] = (*ServerInfoController)(nil)
 
 type ServerInfoController struct {
 	store  *ServerInfoStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewServerInfoController(config *fctl.ControllerConfig) *ServerInfoController {
+func NewServerInfoController(config *config.ControllerConfig) *ServerInfoController {
 	return &ServerInfoController{
 		store:  NewServerInfoStore(),
 		config: config,
@@ -63,11 +66,11 @@ func (c *ServerInfoController) GetStore() *ServerInfoStore {
 	return c.store
 }
 
-func (c *ServerInfoController) GetConfig() *fctl.ControllerConfig {
+func (c *ServerInfoController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ServerInfoController) Run() (fctl.Renderable, error) {
+func (c *ServerInfoController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()

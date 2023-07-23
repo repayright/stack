@@ -3,12 +3,13 @@ package stack
 import (
 	"flag"
 	"fmt"
-	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/config"
 	"net/http"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -33,11 +34,11 @@ func NewShowStore() *ShowStore {
 	}
 }
 
-func NewShowControllerConfig() *fctl.ControllerConfig {
+func NewShowControllerConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 	flags.String(internal.StackNameFlag, "", "Stack name")
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useShow,
 		shortShow,
 		shortShow,
@@ -46,34 +47,37 @@ func NewShowControllerConfig() *fctl.ControllerConfig {
 			"sh",
 		},
 		flags,
-		fctl.Organization,
+		config.Organization,
 	)
 }
 
-var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
+//var _ config.Controller[*ShowStore] = (*ShowController)(nil)
 
 type ShowController struct {
 	store      *ShowStore
-	config     *fctl.ControllerConfig
+	config     *config.ControllerConfig
 	fctlConfig *fctl.Config
 }
 
-func NewShowController(config *fctl.ControllerConfig) *ShowController {
+func NewShowController(config *config.ControllerConfig) *ShowController {
 	return &ShowController{
 		store:  NewShowStore(),
 		config: config,
 	}
 }
 
-func (c *ShowController) GetStore() *ShowStore {
+func (c *ShowController) GetStore() any {
 	return c.store
 }
 
-func (c *ShowController) GetConfig() *fctl.ControllerConfig {
+func (c *ShowController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
+func (c *ShowController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ShowController) Run() (fctl.Renderable, error) {
+func (c *ShowController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()
@@ -94,7 +98,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 
 	var stack *membershipclient.Stack
 	if len(c.config.GetArgs()) == 1 {
-		if fctl.GetString(flags, internal.StackNameFlag) != "" {
+		if config.GetString(flags, internal.StackNameFlag) != "" {
 			return nil, errors.New("need either an id of a name specified using --name flag")
 		}
 		stackResponse, httpResponse, err := apiClient.DefaultApi.ReadStack(ctx, organization, c.config.GetArgs()[0]).Execute()
@@ -106,7 +110,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 		}
 		stack = stackResponse.Data
 	} else {
-		if fctl.GetString(flags, internal.StackNameFlag) == "" {
+		if config.GetString(flags, internal.StackNameFlag) == "" {
 			return nil, errors.New("need either an id of a name specified using --name flag")
 		}
 		stacksResponse, _, err := apiClient.DefaultApi.ListStacks(ctx, organization).Execute()
@@ -114,7 +118,7 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 			return nil, errors.Wrap(err, "listing stacks")
 		}
 		for _, s := range stacksResponse.Data {
-			if s.Name == fctl.GetString(flags, internal.StackNameFlag) {
+			if s.Name == config.GetString(flags, internal.StackNameFlag) {
 				stack = &s
 				break
 			}
@@ -147,14 +151,15 @@ func (c *ShowController) Run() (fctl.Renderable, error) {
 
 }
 
-func (c *ShowController) Render() (ui.Model, error) {
-	return nil, internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+func (c *ShowController) Render() (modelutils.Model, error) {
+	//return nil, internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+	return nil, nil
 }
 
 func NewShowCommand() *cobra.Command {
 	config := NewShowControllerConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.MaximumNArgs(1)),
-		fctl.WithController[*ShowStore](NewShowController(config)),
+		fctl.WithController(NewShowController(config)),
 	)
 }

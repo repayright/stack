@@ -5,6 +5,7 @@ import (
 	"github.com/formancehq/fctl/cmd/wallets/holds"
 	"github.com/formancehq/fctl/cmd/wallets/transactions"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -23,6 +24,6 @@ func NewCommand() *cobra.Command {
 			holds.NewCommand(),
 			balances.NewCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

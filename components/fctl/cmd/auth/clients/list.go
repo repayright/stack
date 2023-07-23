@@ -3,6 +3,7 @@ package clients
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"strings"
 
 	fctl "github.com/formancehq/fctl/pkg"
@@ -31,9 +32,9 @@ type ListStore struct {
 func NewListStore() *ListStore {
 	return &ListStore{}
 }
-func NewListConfig() *fctl.ControllerConfig {
+func NewListConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useList,
 		shortList,
 		shortList,
@@ -41,34 +42,34 @@ func NewListConfig() *fctl.ControllerConfig {
 			"ls", "l",
 		},
 		flags,
-		fctl.Organization,
-		fctl.Stack,
+		config.Organization,
+		config.Stack,
 	)
 }
 
-var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+var _ config.Controller[*ListStore] = (*ListController)(nil)
 
 type ListController struct {
 	store  *ListStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewListController(config *fctl.ControllerConfig) *ListController {
+func NewListController(config *config.ControllerConfig) *ListController {
 	return &ListController{
 		store:  NewListStore(),
 		config: config,
 	}
 }
 
-func (c *ListController) GetStore() *ListStore {
+func (c *ListController) GetStore() any {
 	return c.store
 }
 
-func (c *ListController) GetConfig() *fctl.ControllerConfig {
+func (c *ListController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ListController) Run() (fctl.Renderable, error) {
+func (c *ListController) Run() (config.Renderer, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

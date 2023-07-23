@@ -2,6 +2,7 @@ package accounts
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,6 @@ func NewCommand() *cobra.Command {
 			NewShowCommand(),
 			NewSetMetadataCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack, fctl.Ledger),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack, config.Ledger),
 	)
 }

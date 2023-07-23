@@ -2,6 +2,9 @@ package billing
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -25,9 +28,9 @@ func NewSetupStore() *SetupStore {
 	}
 }
 
-func NewSetupConfig() *fctl.ControllerConfig {
+func NewSetupConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useSetup, flag.ExitOnError)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useSetup,
 		shortSetup,
 		shortSetup,
@@ -35,18 +38,18 @@ func NewSetupConfig() *fctl.ControllerConfig {
 			"setup", "set",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-var _ fctl.Controller[*SetupStore] = (*SetupController)(nil)
+var _ config.Controller[*SetupStore] = (*SetupController)(nil)
 
 type SetupController struct {
 	store  *SetupStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewSetupController(config *fctl.ControllerConfig) *SetupController {
+func NewSetupController(config *config.ControllerConfig) *SetupController {
 	return &SetupController{
 		store:  NewSetupStore(),
 		config: config,
@@ -57,11 +60,11 @@ func (c *SetupController) GetStore() *SetupStore {
 	return c.store
 }
 
-func (c *SetupController) GetConfig() *fctl.ControllerConfig {
+func (c *SetupController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *SetupController) Run() (fctl.Renderable, error) {
+func (c *SetupController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 

@@ -2,6 +2,9 @@ package invitations
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -22,11 +25,11 @@ func NewDeclineStore() *DeclineStore {
 	return &DeclineStore{}
 }
 
-func NewDeclineConfig() *fctl.ControllerConfig {
+func NewDeclineConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useDecline, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useDecline,
 		shortDecline,
 		shortDecline,
@@ -34,18 +37,18 @@ func NewDeclineConfig() *fctl.ControllerConfig {
 			"dec", "d",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
 type DeclineController struct {
 	store  *DeclineStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*DeclineStore] = (*DeclineController)(nil)
+var _ config.Controller[*DeclineStore] = (*DeclineController)(nil)
 
-func NewDeclineController(config *fctl.ControllerConfig) *DeclineController {
+func NewDeclineController(config *config.ControllerConfig) *DeclineController {
 	return &DeclineController{
 		store:  NewDeclineStore(),
 		config: config,
@@ -56,11 +59,11 @@ func (c *DeclineController) GetStore() *DeclineStore {
 	return c.store
 }
 
-func (c *DeclineController) GetConfig() *fctl.ControllerConfig {
+func (c *DeclineController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *DeclineController) Run() (fctl.Renderable, error) {
+func (c *DeclineController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

@@ -3,6 +3,9 @@ package connectors
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	"github.com/formancehq/fctl/cmd/payments/connectors/views"
@@ -27,10 +30,10 @@ type GetConfigStore struct {
 func NewGetConfigStore() *GetConfigStore {
 	return &GetConfigStore{}
 }
-func NewGetConfigConfig() *fctl.ControllerConfig {
+func NewGetConfigConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useGetConfig, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useGetConfig,
 		descriptionGetConfig,
 		shortGetConfig,
@@ -38,18 +41,18 @@ func NewGetConfigConfig() *fctl.ControllerConfig {
 			"getconfig", "getconf", "gc", "get", "g",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-var _ fctl.Controller[*GetConfigStore] = (*GetConfigController)(nil)
+var _ config.Controller[*GetConfigStore] = (*GetConfigController)(nil)
 
 type GetConfigController struct {
 	store  *GetConfigStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewGetConfigController(config *fctl.ControllerConfig) *GetConfigController {
+func NewGetConfigController(config *config.ControllerConfig) *GetConfigController {
 	return &GetConfigController{
 		store:  NewGetConfigStore(),
 		config: config,
@@ -60,11 +63,11 @@ func (c *GetConfigController) GetStore() *GetConfigStore {
 	return c.store
 }
 
-func (c *GetConfigController) GetConfig() *fctl.ControllerConfig {
+func (c *GetConfigController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *GetConfigController) Run() (fctl.Renderable, error) {
+func (c *GetConfigController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

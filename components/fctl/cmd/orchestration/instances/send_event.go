@@ -3,6 +3,9 @@ package instances
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -22,10 +25,10 @@ type SendEventStore struct {
 	Event      string `json:"event"`
 }
 
-func NewSendEventConfig() *fctl.ControllerConfig {
+func NewSendEventConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useSendEvent, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useSendEvent,
 		shortSendEvent,
 		shortSendEvent,
@@ -33,7 +36,7 @@ func NewSendEventConfig() *fctl.ControllerConfig {
 			"se",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
@@ -41,10 +44,10 @@ func NewSendEventConfig() *fctl.ControllerConfig {
 
 type SendEventController struct {
 	store  *SendEventStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*SendEventStore] = (*SendEventController)(nil)
+var _ config.Controller[*SendEventStore] = (*SendEventController)(nil)
 
 func NewSendEventStore() *SendEventStore {
 	return &SendEventStore{
@@ -54,7 +57,7 @@ func NewSendEventStore() *SendEventStore {
 	}
 }
 
-func NewSendEventController(config *fctl.ControllerConfig) *SendEventController {
+func NewSendEventController(config *config.ControllerConfig) *SendEventController {
 	return &SendEventController{
 		store:  NewSendEventStore(),
 		config: config,
@@ -65,11 +68,11 @@ func (c *SendEventController) GetStore() *SendEventStore {
 	return c.store
 }
 
-func (c *SendEventController) GetConfig() *fctl.ControllerConfig {
+func (c *SendEventController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *SendEventController) Run() (fctl.Renderable, error) {
+func (c *SendEventController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

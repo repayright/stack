@@ -3,6 +3,7 @@ package wallets
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -25,12 +26,12 @@ func NewUpdateStore() *UpdateStore {
 		Success: false,
 	}
 }
-func NewUpdateConfig() *fctl.ControllerConfig {
+func NewUpdateConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useUpdate, flag.ExitOnError)
-	fctl.WithMetadataFlag(flags)
-	fctl.WithConfirmFlag(flags)
+	config.WithMetadataFlag(flags)
+	config.WithConfirmFlag(flags)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useUpdate,
 		shortUpdate,
 		shortUpdate,
@@ -38,25 +39,23 @@ func NewUpdateConfig() *fctl.ControllerConfig {
 			"up",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
 }
 
-var _ fctl.Controller[*UpdateStore] = (*UpdateController)(nil)
+var _ config.Controller[*UpdateStore] = (*UpdateController)(nil)
 
 type UpdateController struct {
-	store        *UpdateStore
-	metadataFlag string
-	config       *fctl.ControllerConfig
+	store  *UpdateStore
+	config *config.ControllerConfig
 }
 
-func NewUpdateController(config *fctl.ControllerConfig) *UpdateController {
+func NewUpdateController(config *config.ControllerConfig) *UpdateController {
 	return &UpdateController{
-		store:        NewUpdateStore(),
-		metadataFlag: "metadata",
-		config:       config,
+		store:  NewUpdateStore(),
+		config: config,
 	}
 }
 
@@ -64,11 +63,11 @@ func (c *UpdateController) GetStore() *UpdateStore {
 	return c.store
 }
 
-func (c *UpdateController) GetConfig() *fctl.ControllerConfig {
+func (c *UpdateController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *UpdateController) Run() (fctl.Renderable, error) {
+func (c *UpdateController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()
@@ -96,7 +95,7 @@ func (c *UpdateController) Run() (fctl.Renderable, error) {
 		return nil, errors.Wrap(err, "creating stack client")
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
+	metadata, err := fctl.ParseMetadata(config.GetStringSlice(flags, config.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +134,6 @@ func NewUpdateCommand() *cobra.Command {
 	c := NewUpdateConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*UpdateStore](NewUpdateController(c)),
+		fctl.WithController(NewUpdateController(c)),
 	)
 }

@@ -3,6 +3,7 @@ package fctl
 import (
 	"encoding/json"
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/pkg/errors"
 )
@@ -112,14 +113,14 @@ func GetConfig(flagSet *flag.FlagSet) (*Config, error) {
 }
 
 func GetConfigManager(flagSet *flag.FlagSet) *ConfigManager {
-	return NewConfigManager(GetString(flagSet, ConfigFlag))
+	return NewConfigManager(config.GetString(flagSet, config.ConfigFlag))
 }
 
-func GetCurrentProfileName(flags *flag.FlagSet, config *Config) string {
-	if profile := GetString(flags, ProfileFlag); profile != "" {
+func GetCurrentProfileName(flags *flag.FlagSet, controllerConfig *Config) string {
+	if profile := config.GetString(flags, config.ProfileFlag); profile != "" {
 		return profile
 	}
-	currentProfileName := config.GetCurrentProfileName()
+	currentProfileName := controllerConfig.GetCurrentProfileName()
 	if currentProfileName == "" {
 		currentProfileName = "default"
 	}

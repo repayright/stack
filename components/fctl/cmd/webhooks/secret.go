@@ -3,6 +3,9 @@ package webhooks
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -30,11 +33,11 @@ func NewSecretStore() *ChangeSecretStore {
 	}
 }
 
-func NewChangeSecretConfig() *fctl.ControllerConfig {
+func NewChangeSecretConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useChangeSecret, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useChangeSecret,
 		descriptionChangeSecret,
 		shortDescriptionChangeSecret,
@@ -45,14 +48,14 @@ func NewChangeSecretConfig() *fctl.ControllerConfig {
 	return c
 }
 
-var _ fctl.Controller[*ChangeSecretStore] = (*SecretController)(nil)
+var _ config.Controller[*ChangeSecretStore] = (*SecretController)(nil)
 
 type SecretController struct {
 	store  *ChangeSecretStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewSecretController(config *fctl.ControllerConfig) *SecretController {
+func NewSecretController(config *config.ControllerConfig) *SecretController {
 	return &SecretController{
 		store:  NewSecretStore(),
 		config: config,
@@ -63,11 +66,11 @@ func (c *SecretController) GetStore() *ChangeSecretStore {
 	return c.store
 }
 
-func (c *SecretController) GetConfig() *fctl.ControllerConfig {
+func (c *SecretController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *SecretController) Run() (fctl.Renderable, error) {
+func (c *SecretController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()

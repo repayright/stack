@@ -3,6 +3,7 @@ package wallets
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"math/big"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
@@ -26,25 +27,25 @@ type CreditStore struct {
 }
 type CreditController struct {
 	store  *CreditStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*CreditStore] = (*CreditController)(nil)
+var _ config.Controller[*CreditStore] = (*CreditController)(nil)
 
 func NewCreditStore() *CreditStore {
 	return &CreditStore{}
 }
 
-func NewCreditController(config *fctl.ControllerConfig) *CreditController {
+func NewCreditController(config *config.ControllerConfig) *CreditController {
 	return &CreditController{
 		store:  NewCreditStore(),
 		config: config,
 	}
 }
-func NewCreditConfig() *fctl.ControllerConfig {
+func NewCreditConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useCredit, flag.ExitOnError)
-	fctl.WithMetadataFlag(flags)
-	fctl.WithConfirmFlag(flags)
+	config.WithMetadataFlag(flags)
+	config.WithConfirmFlag(flags)
 
 	flags.String(balanceFlag, "", "Balance to credit")
 	flags.String(sourceFlag, "", `Use --source account=<account> | --source wallet=id:<wallet-id>[/<balance>] | --source wallet=name:<wallet-name>[/<balance>]`)
@@ -52,7 +53,7 @@ func NewCreditConfig() *fctl.ControllerConfig {
 	internal.WithTargetingWalletByName(flags)
 	internal.WithTargetingWalletByID(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useCredit,
 		shortCredit,
 		shortCredit,
@@ -61,18 +62,18 @@ func NewCreditConfig() *fctl.ControllerConfig {
 			"ls",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 func (c *CreditController) GetStore() *CreditStore {
 	return c.store
 }
 
-func (c *CreditController) GetConfig() *fctl.ControllerConfig {
+func (c *CreditController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *CreditController) Run() (fctl.Renderable, error) {
+func (c *CreditController) Run() (config.Renderer, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
@@ -121,13 +122,13 @@ func (c *CreditController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("unable to parse '%s' as big int", amountStr)
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
+	metadata, err := fctl.ParseMetadata(config.GetStringSlice(flags, config.M))
 	if err != nil {
 		return nil, err
 	}
 
 	sources := make([]shared.Subject, 0)
-	for _, sourceStr := range fctl.GetStringSlice(flags, sourceFlag) {
+	for _, sourceStr := range config.GetStringSlice(flags, sourceFlag) {
 		source, err := internal.ParseSubject(sourceStr, flags, ctx, client)
 		if err != nil {
 			return nil, err
@@ -144,7 +145,7 @@ func (c *CreditController) Run() (fctl.Renderable, error) {
 			},
 			Metadata: metadata,
 			Sources:  sources,
-			Balance:  formance.String(fctl.GetString(flags, balanceFlag)),
+			Balance:  formance.String(config.GetString(flags, balanceFlag)),
 		},
 	}
 	response, err := client.Wallets.CreditWallet(ctx, request)
@@ -173,6 +174,6 @@ func NewCreditWalletCommand() *cobra.Command {
 	c := NewCreditConfig()
 	return fctl.NewCommand(c.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
-		fctl.WithController[*CreditStore](NewCreditController(c)),
+		fctl.WithController(NewCreditController(c)),
 	)
 }

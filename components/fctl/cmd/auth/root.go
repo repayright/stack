@@ -4,6 +4,7 @@ import (
 	"github.com/formancehq/fctl/cmd/auth/clients"
 	"github.com/formancehq/fctl/cmd/auth/users"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,6 @@ func NewCommand() *cobra.Command {
 			clients.NewCommand(),
 			users.NewCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

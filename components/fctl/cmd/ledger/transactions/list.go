@@ -3,6 +3,8 @@ package transactions
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"strconv"
 	"time"
 
@@ -42,7 +44,7 @@ type ListStore struct {
 func NewListStore() *ListStore {
 	return &ListStore{}
 }
-func NewListConfig() *fctl.ControllerConfig {
+func NewListConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 	flags.String(accountFlag, "", "Filter on account")
 	flags.String(destinationFlag, "", "Filter on destination account")
@@ -50,10 +52,10 @@ func NewListConfig() *fctl.ControllerConfig {
 	flags.String(startTimeFlag, "", "Consider transactions after date")
 	flags.String(sourceFlag, "", "Filter on source account")
 	flags.String(internal.ReferenceFlag, "", "Filter on reference")
-	flags.String(internal.MetadataFlag, "", "Filter transactions with metadata") //fctl.WithHiddenFlag(metadataFlag)
+	flags.String(config.MetadataFlag, "", "Filter transactions with metadata") //fctl.WithHiddenFlag(metadataFlag)
 	flags.Int(pageSizeFlag, 5, "Page size")
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useList,
 		shortList,
 		shortList,
@@ -61,33 +63,37 @@ func NewListConfig() *fctl.ControllerConfig {
 			"l", "ls",
 		},
 		flags,
-		fctl.Organization, fctl.Stack, fctl.Ledger,
+		config.Organization, config.Stack, config.Ledger,
 	)
 }
 
-var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+var _ config.Controller = (*ListController)(nil)
 
 type ListController struct {
 	store  *ListStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewListController(config *fctl.ControllerConfig) *ListController {
+func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
+
+func NewListController(config *config.ControllerConfig) *ListController {
 	return &ListController{
 		store:  NewListStore(),
 		config: config,
 	}
 }
 
-func (c *ListController) GetStore() *ListStore {
+func (c *ListController) GetStore() any {
 	return c.store
 }
 
-func (c *ListController) GetConfig() *fctl.ControllerConfig {
+func (c *ListController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ListController) Run() (fctl.Renderable, error) {
+func (c *ListController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()
@@ -112,7 +118,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 		return nil, err
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
+	metadata, err := fctl.ParseMetadata(config.GetStringSlice(flags, config.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}
@@ -121,31 +127,31 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 		endTime   time.Time
 		startTime time.Time
 	)
-	if startTimeStr := fctl.GetString(flags, startTimeFlag); startTimeStr != "" {
+	if startTimeStr := config.GetString(flags, startTimeFlag); startTimeStr != "" {
 		startTime, err = time.Parse(time.RFC3339Nano, startTimeStr)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if endTimeStr := fctl.GetString(flags, endTimeFlag); endTimeStr != "" {
+	if endTimeStr := config.GetString(flags, endTimeFlag); endTimeStr != "" {
 		endTime, err = time.Parse(time.RFC3339Nano, endTimeStr)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	ledger := fctl.GetString(flags, internal.LedgerFlag)
+	ledger := config.GetString(flags, internal.LedgerFlag)
 	response, err := ledgerClient.Ledger.ListTransactions(
 		ctx,
 		operations.ListTransactionsRequest{
-			Account:     fctl.Ptr(fctl.GetString(flags, accountFlag)),
-			Destination: fctl.Ptr(fctl.GetString(flags, destinationFlag)),
+			Account:     fctl.Ptr(config.GetString(flags, accountFlag)),
+			Destination: fctl.Ptr(config.GetString(flags, destinationFlag)),
 			EndTime:     &endTime,
 			Ledger:      ledger,
 			Metadata:    metadata,
-			PageSize:    fctl.Ptr(int64(fctl.GetInt(flags, pageSizeFlag))),
-			Reference:   fctl.Ptr(fctl.GetString(flags, internal.ReferenceFlag)),
-			Source:      fctl.Ptr(fctl.GetString(flags, sourceFlag)),
+			PageSize:    fctl.Ptr(int64(config.GetInt(flags, pageSizeFlag))),
+			Reference:   fctl.Ptr(config.GetString(flags, internal.ReferenceFlag)),
+			Source:      fctl.Ptr(config.GetString(flags, sourceFlag)),
 			StartTime:   &startTime,
 		},
 	)
@@ -173,10 +179,10 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *ListController) Render() error {
+func (c *ListController) Render() (modelutils.Model, error) {
 	if len(c.store.Transaction) == 0 {
 		fmt.Fprintln(c.config.GetOut(), "No transactions found.")
-		return nil
+		return nil, nil
 	}
 
 	tableData := fctl.Map(c.store.Transaction, func(row Row) []string {
@@ -190,7 +196,7 @@ func (c *ListController) Render() error {
 
 	tableData = fctl.Prepend(tableData, []string{"ID", "Reference", "Date", "Metadata"})
 
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithHasHeader().
 		WithWriter(c.config.GetOut()).
 		WithData(tableData).

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/formancehq/fctl/pkg/config"
 	"math"
 	"strings"
 
@@ -40,9 +41,7 @@ func (h *Header) GetMaxPossibleHeight() int {
 func (h *Header) Init() tea.Cmd {
 	return h.logo.Init()
 }
-func (h *Header) GetListKeyMapHandler() *modelutils.KeyMapHandler {
-	return nil
-}
+
 func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -91,7 +90,7 @@ func (h *Header) View() string {
 	return h.rendered
 }
 
-func (h *Header) AddKeyBinding(keys ...*modelutils.KeyMapHandler) *Header {
+func (h *Header) AddKeyBinding(keys ...*config.KeyMapHandler) *Header {
 	var maxHeigth int = h.GetMaxPossibleHeight()
 	var maxWidth int
 	var buffer []string = []string{}

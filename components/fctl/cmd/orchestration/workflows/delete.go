@@ -3,6 +3,9 @@ package workflows
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -25,10 +28,10 @@ func NewDeleteStore() *DeleteStore {
 	return &DeleteStore{}
 }
 
-func NewDeleteConfig() *fctl.ControllerConfig {
+func NewDeleteConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useDelete, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useDelete,
 		shortDelete,
 		shortDelete,
@@ -36,7 +39,7 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 			"del", "d",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
@@ -44,12 +47,12 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 
 type DeleteController struct {
 	store  *DeleteStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*DeleteStore] = (*DeleteController)(nil)
+var _ config.Controller[*DeleteStore] = (*DeleteController)(nil)
 
-func NewDeleteController(config *fctl.ControllerConfig) *DeleteController {
+func NewDeleteController(config *config.ControllerConfig) *DeleteController {
 	return &DeleteController{
 		store:  NewDeleteStore(),
 		config: config,
@@ -60,11 +63,11 @@ func (c *DeleteController) GetStore() *DeleteStore {
 	return c.store
 }
 
-func (c *DeleteController) GetConfig() *fctl.ControllerConfig {
+func (c *DeleteController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *DeleteController) Run() (fctl.Renderable, error) {
+func (c *DeleteController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

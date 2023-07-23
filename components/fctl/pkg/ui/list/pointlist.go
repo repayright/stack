@@ -3,7 +3,7 @@ package list
 import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/config"
 )
 
 type PointList struct {
@@ -21,7 +21,7 @@ func NewPointList(items []list.Item, delegate list.ItemDelegate, width int, heig
 		list: l,
 	}
 }
-func (pl *PointList) GetListKeyMapHandler() *modelutils.KeyMapHandler {
+func (pl *PointList) GetListKeyMapHandler() *config.KeyMapHandler {
 	return nil
 }
 func (pl *PointList) Init() tea.Cmd {

@@ -3,6 +3,9 @@ package connectors
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -32,11 +35,11 @@ func NewUninstallStore() *UninstallStore {
 func (c *UninstallController) GetStore() *UninstallStore {
 	return c.store
 }
-func NewUninstallConfig() *fctl.ControllerConfig {
+func NewUninstallConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useUninstall, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useUninstall,
 		descriptionUninstall,
 		shortUninstall,
@@ -44,29 +47,29 @@ func NewUninstallConfig() *fctl.ControllerConfig {
 			"uninstall", "u", "un",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-var _ fctl.Controller[*UninstallStore] = (*UninstallController)(nil)
+var _ config.Controller[*UninstallStore] = (*UninstallController)(nil)
 
 type UninstallController struct {
 	store  *UninstallStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewUninstallController(config *fctl.ControllerConfig) *UninstallController {
+func NewUninstallController(config *config.ControllerConfig) *UninstallController {
 	return &UninstallController{
 		store:  NewUninstallStore(),
 		config: config,
 	}
 }
 
-func (c *UninstallController) GetConfig() *fctl.ControllerConfig {
+func (c *UninstallController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *UninstallController) Run() (fctl.Renderable, error) {
+func (c *UninstallController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

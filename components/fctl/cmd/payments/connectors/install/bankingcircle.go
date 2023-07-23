@@ -3,6 +3,9 @@ package install
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -32,29 +35,29 @@ func NewBankingCircleStore() *BankingCircleStore {
 	}
 }
 
-func NewBankingCircleConfig() *fctl.ControllerConfig {
+func NewBankingCircleConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useBankingCircle, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointBankingCircle, "API endpoint")
 	flags.String(authorizationEndpointFlag, defaultAuthorizationEndpoint, "Authorization endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useBankingCircle,
 		descriptionBankingCircle,
 		descriptionBankingCircle,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
 type BankingCircleController struct {
 	store  *BankingCircleStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*BankingCircleStore] = (*BankingCircleController)(nil)
+var _ config.Controller[*BankingCircleStore] = (*BankingCircleController)(nil)
 
-func NewBankingCircleController(config *fctl.ControllerConfig) *BankingCircleController {
+func NewBankingCircleController(config *config.ControllerConfig) *BankingCircleController {
 	return &BankingCircleController{
 		store:  NewBankingCircleStore(),
 		config: config,
@@ -65,11 +68,11 @@ func (c *BankingCircleController) GetStore() *BankingCircleStore {
 	return c.store
 }
 
-func (c *BankingCircleController) GetConfig() *fctl.ControllerConfig {
+func (c *BankingCircleController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *BankingCircleController) Run() (fctl.Renderable, error) {
+func (c *BankingCircleController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

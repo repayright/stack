@@ -3,6 +3,9 @@ package wallets
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	"github.com/formancehq/fctl/cmd/wallets/internal/views"
@@ -23,10 +26,10 @@ type ShowStore struct {
 }
 type ShowController struct {
 	store  *ShowStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
+var _ config.Controller[*ShowStore] = (*ShowController)(nil)
 
 func NewShowStore() *ShowStore {
 	return &ShowStore{
@@ -34,12 +37,12 @@ func NewShowStore() *ShowStore {
 	}
 }
 
-func NewShowConfig() *fctl.ControllerConfig {
+func NewShowConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 	internal.WithTargetingWalletByID(flags)
 	internal.WithTargetingWalletByName(flags)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useShow,
 		shortShow,
 		shortShow,
@@ -47,11 +50,11 @@ func NewShowConfig() *fctl.ControllerConfig {
 			"sh",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-func NewShowController(config *fctl.ControllerConfig) *ShowController {
+func NewShowController(config *config.ControllerConfig) *ShowController {
 	return &ShowController{
 		store:  NewShowStore(),
 		config: config,
@@ -62,11 +65,11 @@ func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *ShowController) GetConfig() *fctl.ControllerConfig {
+func (c *ShowController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ShowController) Run() (fctl.Renderable, error) {
+func (c *ShowController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

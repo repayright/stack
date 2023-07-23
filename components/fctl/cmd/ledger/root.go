@@ -4,6 +4,7 @@ import (
 	"github.com/formancehq/fctl/cmd/ledger/accounts"
 	"github.com/formancehq/fctl/cmd/ledger/transactions"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -20,6 +21,6 @@ func NewCommand() *cobra.Command {
 			transactions.NewCommand(),
 			accounts.NewCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack, fctl.Ledger),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack, config.Ledger),
 	)
 }

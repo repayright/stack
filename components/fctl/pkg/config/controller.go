@@ -1,22 +1,25 @@
-package fctl
+package config
 
 import (
 	"context"
 	"flag"
-	"github.com/formancehq/fctl/pkg/ui"
 	"io"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 )
 
-type Renderable interface {
-	Render() (ui.Model, error)
+type Renderer interface {
+	Render() (modelutils.Model, error)
 }
 
-type Controller[T any] interface {
-	GetStore() T
+type Controller interface {
+	GetStore() any
 
 	GetConfig() *ControllerConfig
 
-	Run() (Renderable, error)
+	GetKeyMapAction() *KeyMapHandler
+
+	Run() (Renderer, error)
 }
 type ExportedData struct {
 	Data interface{} `json:"data"`

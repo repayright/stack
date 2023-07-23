@@ -2,6 +2,9 @@ package organizations
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -23,11 +26,11 @@ func NewCreateStore() *CreateStore {
 	return &CreateStore{}
 }
 
-func NewCreateConfig() *fctl.ControllerConfig {
+func NewCreateConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useCreate,
 		shortCreate,
 		shortCreate,
@@ -35,18 +38,18 @@ func NewCreateConfig() *fctl.ControllerConfig {
 			"cr", "c",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
+var _ config.Controller[*CreateStore] = (*CreateController)(nil)
 
 type CreateController struct {
 	store  *CreateStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewCreateController(config *fctl.ControllerConfig) *CreateController {
+func NewCreateController(config *config.ControllerConfig) *CreateController {
 	return &CreateController{
 		store:  NewCreateStore(),
 		config: config,
@@ -57,11 +60,11 @@ func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
 
-func (c *CreateController) GetConfig() *fctl.ControllerConfig {
+func (c *CreateController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *CreateController) Run() (fctl.Renderable, error) {
+func (c *CreateController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

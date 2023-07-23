@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -15,8 +16,8 @@ import (
 
 func GetHttpClient(flags *flag.FlagSet, defaultHeaders map[string][]string, out io.Writer) *http.Client {
 	return NewHTTPClient(
-		GetBool(flags, InsecureTlsFlag),
-		GetBool(flags, DebugFlag),
+		config.GetBool(flags, config.InsecureTlsFlag),
+		config.GetBool(flags, config.DebugFlag),
 		defaultHeaders,
 		out,
 	)

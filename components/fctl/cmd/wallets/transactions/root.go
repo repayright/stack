@@ -2,6 +2,7 @@ package transactions
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -12,6 +13,6 @@ func NewCommand() *cobra.Command {
 		fctl.WithChildCommands(
 			NewListCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

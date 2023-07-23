@@ -2,6 +2,9 @@ package invitations
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -26,28 +29,28 @@ func NewSendStore() *SendStore {
 		Invitation: InvitationSend{},
 	}
 }
-func NewSendConfig() *fctl.ControllerConfig {
+func NewSendConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useSend, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useSend,
 		shortSend,
 		shortSend,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-var _ fctl.Controller[*SendStore] = (*SendController)(nil)
+var _ config.Controller[*SendStore] = (*SendController)(nil)
 
 type SendController struct {
 	store  *SendStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewSendController(config *fctl.ControllerConfig) *SendController {
+func NewSendController(config *config.ControllerConfig) *SendController {
 	return &SendController{
 		store:  NewSendStore(),
 		config: config,
@@ -58,11 +61,11 @@ func (c *SendController) GetStore() *SendStore {
 	return c.store
 }
 
-func (c *SendController) GetConfig() *fctl.ControllerConfig {
+func (c *SendController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *SendController) Run() (fctl.Renderable, error) {
+func (c *SendController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

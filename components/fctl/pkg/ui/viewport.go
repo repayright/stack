@@ -1,13 +1,14 @@
 package ui
 
 import (
+	"github.com/formancehq/fctl/pkg/config"
 	"io"
 
-	"github.com/charmbracelet/bubbles/key"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
+
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
@@ -21,82 +22,82 @@ type modelManager struct {
 func (m modelManager) Init() tea.Cmd {
 	return nil
 }
-func (m modelManager) GetListKeyMapHandler() *modelutils.KeyMapHandler {
-	k := modelutils.NewKeyMapHandler()
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("q", "esc", "ctrl+c"),
-			key.WithHelp("q", "Quit the application"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("up", "k"),
-			key.WithHelp("↑/k", "move up"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("down", "j"),
-			key.WithHelp("↓/j", "move down"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("?"),
-			key.WithHelp("?", "Toggle help"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
-
-	k.AddNewBinding(
-		key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "show selected item"),
-		),
-	)
+func (m modelManager) GetListKeyMapHandler() *config.KeyMapHandler {
+	k := config.NewKeyMapHandler()
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("q", "esc", "ctrl+c"),
+	//		key.WithHelp("q", "Quit the application"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("up", "k"),
+	//		key.WithHelp("↑/k", "move up"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("down", "j"),
+	//		key.WithHelp("↓/j", "move down"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("?"),
+	//		key.WithHelp("?", "Toggle help"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
+	//
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
+	//
+	//k.AddNewBinding(
+	//	key.NewBinding(
+	//		key.WithKeys("enter"),
+	//		key.WithHelp("enter", "show selected item"),
+	//	),
+	//)
 
 	return k
 }
@@ -141,7 +142,7 @@ func (m modelManager) GetHelpViewHeight() int {
 	return h.GetMaxPossibleHeight()
 }
 
-func (m modelManager) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m modelManager) Update(msg tea.Msg) (modelutils.Model, tea.Cmd) {
 
 	var (
 		cmd  tea.Cmd

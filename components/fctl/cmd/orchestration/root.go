@@ -4,6 +4,7 @@ import (
 	"github.com/formancehq/fctl/cmd/orchestration/instances"
 	"github.com/formancehq/fctl/cmd/orchestration/workflows"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +17,6 @@ func NewCommand() *cobra.Command {
 			instances.NewCommand(),
 			workflows.NewCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

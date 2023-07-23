@@ -3,6 +3,7 @@ package clients
 import (
 	"github.com/formancehq/fctl/cmd/auth/clients/secrets"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,6 @@ func NewCommand() *cobra.Command {
 			NewShowCommand(),
 			secrets.NewCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

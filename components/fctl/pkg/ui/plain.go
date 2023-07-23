@@ -2,6 +2,7 @@ package ui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 )
 
@@ -15,7 +16,7 @@ func NewPlainOutput(content string) *PlainOutput {
 	}
 }
 
-func (po *PlainOutput) GetListKeyMapHandler() *modelutils.KeyMapHandler {
+func (po *PlainOutput) GetListKeyMapHandler() *config.KeyMapHandler {
 	return nil
 }
 
@@ -23,7 +24,7 @@ func (po *PlainOutput) Init() tea.Cmd {
 	return nil
 }
 
-func (po *PlainOutput) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (po *PlainOutput) Update(msg tea.Msg) (modelutils.Model, tea.Cmd) {
 	return nil, nil
 }
 

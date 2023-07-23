@@ -3,6 +3,9 @@ package login
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -30,11 +33,11 @@ func NewStore() *Store {
 	}
 }
 
-func NewConfig() *fctl.ControllerConfig {
+func NewConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useLogin, flag.ExitOnError)
-	flags.String(fctl.MembershipURIFlag, "", "service url")
+	flags.String(config.MembershipURIFlag, "", "service url")
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useLogin,
 		descriptionLogin,
 		descriptionLogin,
@@ -45,14 +48,14 @@ func NewConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*Store] = (*LoginController)(nil)
+var _ config.Controller[*Store] = (*LoginController)(nil)
 
 type LoginController struct {
 	store  *Store
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewController(config *fctl.ControllerConfig) *LoginController {
+func NewController(config *config.ControllerConfig) *LoginController {
 	return &LoginController{
 		store:  NewStore(),
 		config: config,
@@ -63,11 +66,11 @@ func (c *LoginController) GetStore() *Store {
 	return c.store
 }
 
-func (c *LoginController) GetConfig() *fctl.ControllerConfig {
+func (c *LoginController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *LoginController) Run() (fctl.Renderable, error) {
+func (c *LoginController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -77,7 +80,7 @@ func (c *LoginController) Run() (fctl.Renderable, error) {
 	}
 
 	profile := fctl.GetCurrentProfile(flags, cfg)
-	membershipUri := fctl.GetString(flags, fctl.MembershipURIFlag)
+	membershipUri := fctl.GetString(flags, config.MembershipURIFlag)
 	if membershipUri == "" {
 		membershipUri = profile.GetMembershipURI()
 	}

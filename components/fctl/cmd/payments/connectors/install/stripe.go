@@ -3,6 +3,9 @@ package install
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -25,25 +28,25 @@ type StripeStore struct {
 }
 type StripeController struct {
 	store  *StripeStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewStripeConfig() *fctl.ControllerConfig {
+func NewStripeConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useStripeConnector, flag.ExitOnError)
 	flags.String(stripeApiKeyFLag, "", "Stripe API key")
 	fctl.WithConfirmFlag(flags)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useStripeConnector,
 		shortStripeConnector,
 		shortStripeConnector,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 }
 
-var _ fctl.Controller[*StripeStore] = (*StripeController)(nil)
+var _ config.Controller[*StripeStore] = (*StripeController)(nil)
 
 func NewDefaultStripeStore() *StripeStore {
 	return &StripeStore{
@@ -51,7 +54,7 @@ func NewDefaultStripeStore() *StripeStore {
 	}
 }
 
-func NewStripeController(config *fctl.ControllerConfig) *StripeController {
+func NewStripeController(config *config.ControllerConfig) *StripeController {
 	return &StripeController{
 		store:  NewDefaultStripeStore(),
 		config: config,
@@ -62,11 +65,11 @@ func (c *StripeController) GetStore() *StripeStore {
 	return c.store
 }
 
-func (c *StripeController) GetConfig() *fctl.ControllerConfig {
+func (c *StripeController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *StripeController) Run() (fctl.Renderable, error) {
+func (c *StripeController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

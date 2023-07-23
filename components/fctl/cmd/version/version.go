@@ -2,6 +2,9 @@ package version
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -20,10 +23,10 @@ type Store struct {
 }
 type Controller struct {
 	store  *Store
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*Store] = (*Controller)(nil)
+var _ config.Controller[*Store] = (*Controller)(nil)
 
 func NewStore() *Store {
 	return &Store{
@@ -32,9 +35,9 @@ func NewStore() *Store {
 		Commit:    fctl.Commit,
 	}
 }
-func NewVersionConfig() *fctl.ControllerConfig {
+func NewVersionConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useVersion, flag.ExitOnError)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useVersion,
 		shortVersion,
 		shortVersion,
@@ -42,7 +45,7 @@ func NewVersionConfig() *fctl.ControllerConfig {
 		flags,
 	)
 }
-func NewController(config *fctl.ControllerConfig) *Controller {
+func NewController(config *config.ControllerConfig) *Controller {
 	return &Controller{
 		store:  NewStore(),
 		config: config,
@@ -53,11 +56,11 @@ func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *Controller) GetConfig() *fctl.ControllerConfig {
+func (c *Controller) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *Controller) Run() (fctl.Renderable, error) {
+func (c *Controller) Run() (modelutils.Renderable, error) {
 	return c, nil
 }
 

@@ -3,6 +3,7 @@ package fctl
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"strings"
 
 	"github.com/formancehq/fctl/membershipclient"
@@ -34,7 +35,7 @@ func NeedConfirm(flags *flag.FlagSet, stack *membershipclient.Stack) bool {
 	if !IsProtectedStack(stack) {
 		return false
 	}
-	if GetBool(flags, confirmFlag) {
+	if config.GetBool(flags, confirmFlag) {
 		return false
 	}
 	return true
@@ -44,7 +45,7 @@ func CheckStackApprobation(flags *flag.FlagSet, stack *membershipclient.Stack, d
 	if !IsProtectedStack(stack) {
 		return true
 	}
-	if GetBool(flags, confirmFlag) {
+	if config.GetBool(flags, confirmFlag) {
 		return true
 	}
 
@@ -58,7 +59,7 @@ func CheckStackApprobation(flags *flag.FlagSet, stack *membershipclient.Stack, d
 }
 
 func CheckOrganizationApprobation(flags *flag.FlagSet, disclaimer string, args ...any) bool {
-	if GetBool(flags, confirmFlag) {
+	if config.GetBool(flags, confirmFlag) {
 		return true
 	}
 

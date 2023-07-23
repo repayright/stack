@@ -2,7 +2,10 @@ package regions
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
 	"time"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -23,9 +26,9 @@ func NewShowStore() *ShowStore {
 	return &ShowStore{}
 }
 
-func NewShowConfig() *fctl.ControllerConfig {
+func NewShowConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useShow, flag.ExitOnError)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useShow,
 		shortShow,
 		shortShow,
@@ -33,18 +36,18 @@ func NewShowConfig() *fctl.ControllerConfig {
 			"sh", "s",
 		},
 		flags,
-		fctl.Organization,
+		config.Organization,
 	)
 }
 
-var _ fctl.Controller[*ShowStore] = (*ShowController)(nil)
+var _ config.Controller[*ShowStore] = (*ShowController)(nil)
 
 type ShowController struct {
 	store  *ShowStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewShowController(config *fctl.ControllerConfig) *ShowController {
+func NewShowController(config *config.ControllerConfig) *ShowController {
 	return &ShowController{
 		store:  NewShowStore(),
 		config: config,
@@ -55,11 +58,11 @@ func (c *ShowController) GetStore() *ShowStore {
 	return c.store
 }
 
-func (c *ShowController) GetConfig() *fctl.ControllerConfig {
+func (c *ShowController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ShowController) Run() (fctl.Renderable, error) {
+func (c *ShowController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

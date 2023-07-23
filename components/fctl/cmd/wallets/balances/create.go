@@ -3,6 +3,9 @@ package balances
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -23,15 +26,15 @@ type CreateStore struct {
 }
 type CreateController struct {
 	store  *CreateStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*CreateStore] = (*CreateController)(nil)
+var _ config.Controller[*CreateStore] = (*CreateController)(nil)
 
 func NewCreateStore() *CreateStore {
 	return &CreateStore{}
 }
-func NewCreateConfig() *fctl.ControllerConfig {
+func NewCreateConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useCreate, flag.ExitOnError)
 
 	fctl.WithConfirmFlag(flags)
@@ -39,7 +42,7 @@ func NewCreateConfig() *fctl.ControllerConfig {
 	internal.WithTargetingWalletByName(flags)
 	internal.WithTargetingWalletByID(flags)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useCreate,
 		shortCreate,
 		shortCreate,
@@ -47,12 +50,12 @@ func NewCreateConfig() *fctl.ControllerConfig {
 			"c", "cr",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
 }
-func NewCreateController(config *fctl.ControllerConfig) *CreateController {
+func NewCreateController(config *config.ControllerConfig) *CreateController {
 	return &CreateController{
 		store:  NewCreateStore(),
 		config: config,
@@ -63,11 +66,11 @@ func (c *CreateController) GetStore() *CreateStore {
 	return c.store
 }
 
-func (c *CreateController) GetConfig() *fctl.ControllerConfig {
+func (c *CreateController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *CreateController) Run() (fctl.Renderable, error) {
+func (c *CreateController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

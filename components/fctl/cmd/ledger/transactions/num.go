@@ -3,9 +3,12 @@ package transactions
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"math/big"
 	"strings"
 	"time"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	internal "github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -34,33 +37,33 @@ type NumStore struct {
 func NewNumStore() *NumStore {
 	return &NumStore{}
 }
-func NewNumConfig() *fctl.ControllerConfig {
+func NewNumConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
-	fctl.WithConfirmFlag(flags)
+	config.WithConfirmFlag(flags)
 	flags.String(amountVarFlag, "", "Pass a variable of type 'amount'")
 	flags.String(portionVarFlag, "", "Pass a variable of type 'portion'")
 	flags.String(accountVarFlag, "", "Pass a variable of type 'account'")
 	flags.String(timestampFlag, "", "Timestamp to use (format RFC3339)")
 	flags.String(internal.ReferenceFlag, "", "Reference to add to the generated transaction")
-	flags.String(internal.MetadataFlag, "", "Filter accounts with metadata") //  experimental feature: Should be hidden
-	return fctl.NewControllerConfig(
+	flags.String(config.MetadataFlag, "", "Filter accounts with metadata") //  experimental feature: Should be hidden
+	return config.NewControllerConfig(
 		useNum,
 		descriptionNum,
 		shortNum,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack, fctl.Ledger,
+		config.Organization, config.Stack, config.Ledger,
 	)
 }
 
-var _ fctl.Controller[*NumStore] = (*NumController)(nil)
+var _ config.Controller[*NumStore] = (*NumController)(nil)
 
 type NumController struct {
 	store  *NumStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewNumController(config *fctl.ControllerConfig) *NumController {
+func NewNumController(config *config.ControllerConfig) *NumController {
 	return &NumController{
 		store:  NewNumStore(),
 		config: config,
@@ -71,11 +74,11 @@ func (c *NumController) GetStore() *NumStore {
 	return c.store
 }
 
-func (c *NumController) GetConfig() *fctl.ControllerConfig {
+func (c *NumController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *NumController) Run() (fctl.Renderable, error) {
+func (c *NumController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
@@ -161,7 +164,7 @@ func (c *NumController) Run() (fctl.Renderable, error) {
 
 	reference := fctl.GetString(flags, internal.ReferenceFlag)
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, config.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}

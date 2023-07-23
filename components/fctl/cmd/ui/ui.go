@@ -3,6 +3,9 @@ package ui
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/spf13/cobra"
@@ -21,10 +24,10 @@ type Store struct {
 
 type Controller struct {
 	store  *Store
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*Store] = (*Controller)(nil)
+var _ config.Controller[*Store] = (*Controller)(nil)
 
 func NewDefaultUiStore() *Store {
 	return &Store{
@@ -32,20 +35,20 @@ func NewDefaultUiStore() *Store {
 		FoundBrowser: false,
 	}
 }
-func NewUiConfig() *fctl.ControllerConfig {
+func NewUiConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useUI, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useUI,
 		descriptionUI,
 		shortUI,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-func NewController(config *fctl.ControllerConfig) *Controller {
+func NewController(config *config.ControllerConfig) *Controller {
 	return &Controller{
 		store:  NewDefaultUiStore(),
 		config: config,
@@ -56,11 +59,11 @@ func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *Controller) GetConfig() *fctl.ControllerConfig {
+func (c *Controller) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *Controller) Run() (fctl.Renderable, error) {
+func (c *Controller) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 

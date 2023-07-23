@@ -3,6 +3,9 @@ package webhooks
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -26,11 +29,11 @@ func NewActivateStore() *ActivateStore {
 		Success: true,
 	}
 }
-func NewActivateConfig() *fctl.ControllerConfig {
+func NewActivateConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useActivate, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useActivate,
 		descriptionActivate,
 		shortActivate,
@@ -39,14 +42,14 @@ func NewActivateConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*ActivateStore] = (*Activate)(nil)
+var _ config.Controller[*ActivateStore] = (*Activate)(nil)
 
 type Activate struct {
 	store  *ActivateStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewActivateController(config *fctl.ControllerConfig) *Activate {
+func NewActivateController(config *config.ControllerConfig) *Activate {
 	return &Activate{
 		store:  NewActivateStore(),
 		config: config,
@@ -57,11 +60,11 @@ func (c *Activate) GetStore() *ActivateStore {
 	return c.store
 }
 
-func (c *Activate) GetConfig() *fctl.ControllerConfig {
+func (c *Activate) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *Activate) Run() (fctl.Renderable, error) {
+func (c *Activate) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

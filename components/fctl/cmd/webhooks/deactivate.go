@@ -3,6 +3,9 @@ package webhooks
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -26,11 +29,11 @@ func NewDesactivateStore() *DesactivateStore {
 	}
 }
 
-func NewDesactivateConfig() *fctl.ControllerConfig {
+func NewDesactivateConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useDesactivate, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useDesactivate,
 		shortDesactivate,
 		shortDesactivate,
@@ -42,14 +45,14 @@ func NewDesactivateConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*DesactivateStore] = (*DesactivateController)(nil)
+var _ config.Controller[*DesactivateStore] = (*DesactivateController)(nil)
 
 type DesactivateController struct {
 	store  *DesactivateStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewDesactivateController(config *fctl.ControllerConfig) *DesactivateController {
+func NewDesactivateController(config *config.ControllerConfig) *DesactivateController {
 	return &DesactivateController{
 		store:  NewDesactivateStore(),
 		config: config,
@@ -60,11 +63,11 @@ func (c *DesactivateController) GetStore() *DesactivateStore {
 	return c.store
 }
 
-func (c *DesactivateController) GetConfig() *fctl.ControllerConfig {
+func (c *DesactivateController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *DesactivateController) Run() (fctl.Renderable, error) {
+func (c *DesactivateController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

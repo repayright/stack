@@ -3,7 +3,10 @@ package workflows
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"strings"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/orchestration/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -30,12 +33,12 @@ func NewRunStore() *RunStore {
 	return &RunStore{}
 }
 
-func NewRunConfig() *fctl.ControllerConfig {
+func NewRunConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useRun, flag.ExitOnError)
 	flags.Bool(waitFlag, false, "Wait end of the run")
 	flags.String(variableFlag, "", "Variable to pass to the workflow")
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useRun,
 		shortRun,
 		shortRun,
@@ -43,7 +46,7 @@ func NewRunConfig() *fctl.ControllerConfig {
 			"r",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
@@ -52,12 +55,12 @@ func NewRunConfig() *fctl.ControllerConfig {
 type RunController struct {
 	store  *RunStore
 	client *formance.Formance
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*RunStore] = (*RunController)(nil)
+var _ config.Controller[*RunStore] = (*RunController)(nil)
 
-func NewRunController(config *fctl.ControllerConfig) *RunController {
+func NewRunController(config *config.ControllerConfig) *RunController {
 	return &RunController{
 		store:  NewRunStore(),
 		config: config,
@@ -68,11 +71,11 @@ func (c *RunController) GetStore() *RunStore {
 	return c.store
 }
 
-func (c *RunController) GetConfig() *fctl.ControllerConfig {
+func (c *RunController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *RunController) Run() (fctl.Renderable, error) {
+func (c *RunController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

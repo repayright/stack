@@ -2,6 +2,7 @@ package stack
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +17,6 @@ func NewCommand() *cobra.Command {
 			//NewShowCommand(),
 			//NewRestoreStackCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization),
+		fctl.WithCommandScopesFlags(config.Organization),
 	)
 }

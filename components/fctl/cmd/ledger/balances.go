@@ -3,6 +3,9 @@ package ledger
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -26,10 +29,10 @@ func NewBalancesStore() *BalancesStore {
 	return &BalancesStore{}
 }
 
-func NewBalancesConfig() *fctl.ControllerConfig {
+func NewBalancesConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useBalances, flag.ExitOnError)
 	flags.String(addressFlag, "", "Filter on specific address")
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useBalances,
 		shortBalances,
 		shortBalances,
@@ -37,18 +40,18 @@ func NewBalancesConfig() *fctl.ControllerConfig {
 			"balance", "bal", "b",
 		},
 		flags,
-		fctl.Organization, fctl.Stack, fctl.Ledger,
+		config.Organization, config.Stack, config.Ledger,
 	)
 }
 
 type BalancesController struct {
 	store  *BalancesStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*BalancesStore] = (*BalancesController)(nil)
+var _ config.Controller[*BalancesStore] = (*BalancesController)(nil)
 
-func NewBalancesController(config *fctl.ControllerConfig) *BalancesController {
+func NewBalancesController(config *config.ControllerConfig) *BalancesController {
 	return &BalancesController{
 		store:  NewBalancesStore(),
 		config: config,
@@ -59,11 +62,11 @@ func (c *BalancesController) GetStore() *BalancesStore {
 	return c.store
 }
 
-func (c *BalancesController) GetConfig() *fctl.ControllerConfig {
+func (c *BalancesController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *BalancesController) Run() (fctl.Renderable, error) {
+func (c *BalancesController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

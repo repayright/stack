@@ -3,6 +3,9 @@ package install
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -31,27 +34,27 @@ func NewMoneycorpStore() *MoneycorpStore {
 	}
 }
 
-func NewMoneycorpConfig() *fctl.ControllerConfig {
+func NewMoneycorpConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useMoneycorpConnector, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointMoneyCorp, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useMoneycorpConnector,
 		shortMoneycorpConnector,
 		shortMoneycorpConnector,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 }
 
 type MoneycorpController struct {
 	store  *MoneycorpStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewMoneycorpController(config *fctl.ControllerConfig) *MoneycorpController {
+func NewMoneycorpController(config *config.ControllerConfig) *MoneycorpController {
 	return &MoneycorpController{
 		store:  NewMoneycorpStore(),
 		config: config,
@@ -61,11 +64,11 @@ func NewMoneycorpController(config *fctl.ControllerConfig) *MoneycorpController 
 func (c *MoneycorpController) GetStore() *MoneycorpStore {
 	return c.store
 }
-func (c *MoneycorpController) GetConfig() *fctl.ControllerConfig {
+func (c *MoneycorpController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *MoneycorpController) Run() (fctl.Renderable, error) {
+func (c *MoneycorpController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

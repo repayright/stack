@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/formancehq/fctl/pkg/config"
 	"os"
 	"os/signal"
 	"runtime/debug"
@@ -38,14 +39,14 @@ func NewRootCommand() *cobra.Command {
 			//wallets.NewCommand(),
 			//orchestration.NewCommand(),
 		),
-		fctl.WithGoPersistentFlagSet(fctl.GlobalFlags),
+		fctl.WithGoPersistentFlagSet(config.GlobalFlags),
 	)
 
 	// Register flag completion functions
 	// Already registered with fctl.WithGoFlagSet(fctl.GlobalFlags)
 	// And in ControllerConfig who is assigned by each WithController call
-	err := cmd.RegisterFlagCompletionFunc(fctl.ProfileFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		flags := fctl.ConvertPFlagSetToFlagSet(cmd.Flags())
+	err := cmd.RegisterFlagCompletionFunc(config.ProfileFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		flags := config.ConvertPFlagSetToFlagSet(cmd.Flags())
 
 		cfg, err := fctl.GetConfig(flags)
 		if err != nil {

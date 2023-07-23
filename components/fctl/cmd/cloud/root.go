@@ -7,6 +7,7 @@ import (
 	"github.com/formancehq/fctl/cmd/cloud/regions"
 	"github.com/formancehq/fctl/cmd/cloud/users"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,6 @@ func NewCommand() *cobra.Command {
 			billing.NewCommand(),
 			NewGeneratePersonalTokenCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

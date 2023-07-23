@@ -3,7 +3,10 @@ package workflows
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"time"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
@@ -32,10 +35,10 @@ func NewListStore() *ListStore {
 	return &ListStore{}
 }
 
-func NewListConfig() *fctl.ControllerConfig {
+func NewListConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useList,
 		shortList,
 		shortList,
@@ -44,7 +47,7 @@ func NewListConfig() *fctl.ControllerConfig {
 			"ls",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
@@ -52,12 +55,12 @@ func NewListConfig() *fctl.ControllerConfig {
 
 type ListController struct {
 	store  *ListStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+var _ config.Controller[*ListStore] = (*ListController)(nil)
 
-func NewListController(config *fctl.ControllerConfig) *ListController {
+func NewListController(config *config.ControllerConfig) *ListController {
 	return &ListController{
 		store:  NewListStore(),
 		config: config,
@@ -68,11 +71,11 @@ func (c *ListController) GetStore() *ListStore {
 	return c.store
 }
 
-func (c *ListController) GetConfig() *fctl.ControllerConfig {
+func (c *ListController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ListController) Run() (fctl.Renderable, error) {
+func (c *ListController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

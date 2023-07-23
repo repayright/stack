@@ -3,6 +3,9 @@ package install
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -29,29 +32,29 @@ func NewDefaultModulrStore() *ModulrStore {
 		Success: false,
 	}
 }
-func NewModulrConfig() *fctl.ControllerConfig {
+func NewModulrConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useModulrConnector, flag.ExitOnError)
 	flags.String(EndpointFlag, defaultEndpointModulr, "API endpoint")
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useModulrConnector,
 		shortModulrConnector,
 		shortModulrConnector,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 }
 
 type ModulrController struct {
 	store  *ModulrStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*ModulrStore] = (*ModulrController)(nil)
+var _ config.Controller[*ModulrStore] = (*ModulrController)(nil)
 
-func NewModulrController(config *fctl.ControllerConfig) *ModulrController {
+func NewModulrController(config *config.ControllerConfig) *ModulrController {
 	return &ModulrController{
 		store:  NewDefaultModulrStore(),
 		config: config,
@@ -62,11 +65,11 @@ func (c *ModulrController) GetStore() *ModulrStore {
 	return c.store
 }
 
-func (c *ModulrController) GetConfig() *fctl.ControllerConfig {
+func (c *ModulrController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ModulrController) Run() (fctl.Renderable, error) {
+func (c *ModulrController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()

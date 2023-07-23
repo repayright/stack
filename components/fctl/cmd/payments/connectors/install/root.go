@@ -2,6 +2,7 @@ package install
 
 import (
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,6 @@ func NewInstallCommand() *cobra.Command {
 			NewMangoPayCommand(),
 			NewMoneycorpCommand(),
 		),
-		fctl.WithCommandScopesFlags(fctl.Organization, fctl.Stack),
+		fctl.WithCommandScopesFlags(config.Organization, config.Stack),
 	)
 }

@@ -3,7 +3,10 @@ package wallets
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"math/big"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/wallets/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -29,10 +32,10 @@ type DebitWalletStore struct {
 }
 type DebitController struct {
 	store  *DebitWalletStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*DebitWalletStore] = (*DebitController)(nil)
+var _ config.Controller[*DebitWalletStore] = (*DebitController)(nil)
 
 func NewDebitStore() *DebitWalletStore {
 	return &DebitWalletStore{
@@ -40,7 +43,7 @@ func NewDebitStore() *DebitWalletStore {
 		Success: false,
 	}
 }
-func NewDebitConfig() *fctl.ControllerConfig {
+func NewDebitConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useDebit, flag.ExitOnError)
 	flags.String(descriptionFlag, "", "Debit description")
 	flags.String(pendingFlag, "", "Create a pending debit")
@@ -53,7 +56,7 @@ func NewDebitConfig() *fctl.ControllerConfig {
 	internal.WithTargetingWalletByName(flags)
 	internal.WithTargetingWalletByID(flags)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useDebit,
 		shortDebit,
 		shortDebit,
@@ -61,12 +64,12 @@ func NewDebitConfig() *fctl.ControllerConfig {
 			"deb",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
 }
-func NewDebitController(config *fctl.ControllerConfig) *DebitController {
+func NewDebitController(config *config.ControllerConfig) *DebitController {
 	return &DebitController{
 		store:  NewDebitStore(),
 		config: config,
@@ -77,11 +80,11 @@ func (c *DebitController) GetStore() *DebitWalletStore {
 	return c.store
 }
 
-func (c *DebitController) GetConfig() *fctl.ControllerConfig {
+func (c *DebitController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *DebitController) Run() (fctl.Renderable, error) {
+func (c *DebitController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	cfg, err := fctl.GetConfig(flags)
@@ -111,7 +114,7 @@ func (c *DebitController) Run() (fctl.Renderable, error) {
 
 	pending := fctl.GetBool(flags, pendingFlag)
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
+	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, config.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}

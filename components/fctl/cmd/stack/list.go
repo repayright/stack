@@ -2,9 +2,13 @@ package stack
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+	"time"
+
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/formancehq/fctl/pkg/ui"
-	"time"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -47,11 +51,11 @@ func NewListStore() *ListStore {
 	}
 }
 
-func NewListControllerConfig() *fctl.ControllerConfig {
+func NewListControllerConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useList, flag.ExitOnError)
 	flags.Bool(deletedFlag, false, "Show deleted stacks")
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useList,
 		shortList,
 		shortList,
@@ -60,35 +64,35 @@ func NewListControllerConfig() *fctl.ControllerConfig {
 			"ls",
 		},
 		flags,
-		fctl.Organization,
+		config.Organization,
 	)
 }
 
-var _ fctl.Controller[*ListStore] = (*ListController)(nil)
+var _ config.Controller = (*ListController)(nil)
 
 type ListController struct {
 	store        *ListStore
 	profile      *fctl.Profile
-	config       *fctl.ControllerConfig
+	config       *config.ControllerConfig
 	organization string
 }
 
-func NewListController(config *fctl.ControllerConfig) *ListController {
+func NewListController(config *config.ControllerConfig) *ListController {
 	return &ListController{
 		store:  NewListStore(),
 		config: config,
 	}
 }
 
-func (c *ListController) GetStore() *ListStore {
+func (c *ListController) GetStore() any {
 	return c.store
 }
 
-func (c *ListController) GetConfig() *fctl.ControllerConfig {
+func (c *ListController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ListController) Run() (fctl.Renderable, error) {
+func (c *ListController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
@@ -110,7 +114,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 	}
 
 	rsp, _, err := apiClient.DefaultApi.ListStacks(ctx, organization).
-		Deleted(fctl.GetBool(flags, deletedFlag)).
+		Deleted(config.GetBool(flags, deletedFlag)).
 		Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "listing stacks")
@@ -148,7 +152,7 @@ func (c *ListController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *ListController) Render() (ui.Model, error) {
+func (c *ListController) Render() (modelutils.Model, error) {
 
 	flags := c.config.GetAllFLags()
 
@@ -163,7 +167,7 @@ func (c *ListController) Render() (ui.Model, error) {
 			*stack.CreatedAt,
 		}
 
-		if fctl.GetBool(flags, deletedFlag) {
+		if config.GetBool(flags, deletedFlag) {
 			if stack.DeletedAt != nil {
 				data = append(data, *stack.DeletedAt)
 			} else {
@@ -177,7 +181,7 @@ func (c *ListController) Render() (ui.Model, error) {
 	var columns ui.ArrayColumn
 
 	// Add plain table option if --plain flag is set
-	isPlain := fctl.GetString(flags, fctl.OutputFlag) == "plain"
+	isPlain := config.GetString(flags, config.OutputFlag) == "plain"
 	// Default Columns
 	columns = ui.NewArrayColumn(
 		ui.NewColumn("Organization Id", minLengthOrganizationId),
@@ -187,7 +191,7 @@ func (c *ListController) Render() (ui.Model, error) {
 		ui.NewColumn("Region", minLengthStackRegion),
 		ui.NewColumn("Created At", minLengthStackCreatedAt),
 	)
-	if fctl.GetBool(flags, deletedFlag) {
+	if config.GetBool(flags, deletedFlag) {
 		columns = columns.AddColumn("Deleted At", minLengthStackDeletedAt)
 	}
 	// Default table options
@@ -203,11 +207,71 @@ func (c *ListController) Render() (ui.Model, error) {
 	return ui.NewTableModel(columns, opts...), nil
 }
 
+func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
+	k := config.NewKeyMapHandler()
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("q", "esc", "ctrl+c"),
+			key.WithHelp("q", "Quit the application"),
+		),
+		func() config.Controller {
+
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("up", "k"),
+			key.WithHelp("up/k", "move up"),
+		),
+		func() config.Controller {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("down", "j"),
+			key.WithHelp("down/j", "move down"),
+		),
+		func() config.Controller {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("?"),
+			key.WithHelp("? ", "Toggle help"),
+		),
+		func() config.Controller {
+			return nil
+		},
+	)
+	k.AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "show selected item"),
+		),
+		func() config.Controller {
+
+			//config := NewShowControllerConfig()
+			//controller := NewShowController(config)
+			//config.SetOut(os.Stdout)
+			//config.SetContext(context.TODO())
+
+			//Retrieve the selected item
+
+			return nil
+		},
+	)
+
+	return k
+}
+
 func NewListCommand() *cobra.Command {
 	config := NewListControllerConfig()
 
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(0)),
-		fctl.WithController[*ListStore](NewListController(config)),
+		fctl.WithController(NewListController(config)),
 	)
 }

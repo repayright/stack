@@ -1,39 +1,29 @@
-package fctl
+package config
 
 import (
-	"errors"
 	"flag"
-	"os"
 	"sync"
 )
-
-type fValue[T any] struct {
-	value T
-}
-
-func (f *fValue[T]) String() T {
-	return f.value
-}
-
-func (f *fValue[T]) Set(s T) error {
-	f.value = s
-	return nil
-}
-
-func (f *fValue[T]) Get() *T {
-	return &f.value
-}
 
 var scopeFlags *flag.FlagSet
 var lock = &sync.Mutex{}
 
 var (
-	stackFlagV        = &fValue[string]{value: ""}
-	organizationFlagV = &fValue[string]{value: ""}
-	ledgerFlagV       = &fValue[string]{value: ""}
-	Stack             = getScopeFlags(stackFlag)
-	Ledger            = getScopeFlags("ledger")
-	Organization      = getScopeFlags(organizationFlag)
+	stackFlagV = &fValue[string]{
+		value: "",
+	}
+	organizationFlagV = &fValue[string]{
+		value: "",
+	}
+	ledgerFlagV = &fValue[string]{
+		value: "default",
+	}
+)
+
+var (
+	Stack        = getScopeFlags(StackFlag)
+	Ledger       = getScopeFlags("ledger")
+	Organization = getScopeFlags(OrganizationFlag)
 )
 
 func getScopesFlagsInstance() *flag.FlagSet {
@@ -53,12 +43,4 @@ func getScopesFlagsInstance() *flag.FlagSet {
 
 func getScopeFlags(name string) *flag.Flag {
 	return getScopesFlagsInstance().Lookup(name)
-}
-
-func getHomeDir() string {
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		panic(errors.New("unable to get home directory"))
-	}
-	return homedir
 }

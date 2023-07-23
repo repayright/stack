@@ -8,13 +8,13 @@ import (
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
-// TODO: This should extend list.Model from github.com/charmbracelet/bubbles/list
-type ListModel struct {
+// Model TODO: This should extend list.Model from github.com/charmbracelet/bubbles/list
+type Model struct {
 	list     list.Model
 	itemType string // Should be enum (vertical, horizontal)
 }
 
-func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, height int) *ListModel {
+func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, height int) *Model {
 	l := list.New(items, delegate, width, height)
 
 	// Can be done in Controller for each setup
@@ -23,15 +23,15 @@ func NewListModel(items []list.Item, delegate list.ItemDelegate, width int, heig
 	l.SetShowHelp(false)
 	l.SetShowStatusBar(false)
 
-	return &ListModel{
+	return &Model{
 		list: l,
 	}
 }
 
-// ViewWidth, ViewHeight
+// NewDefaultListModel ViewWidth, ViewHeight
 // Default width and height
-// Should be dynamic and scale with terminale view
-func NewDefaultListModel(items []list.Item) (*ListModel, error) {
+// Should be dynamic and scale with terminal view
+func NewDefaultListModel(items []list.Item) (*Model, error) {
 	if len(items) == 0 {
 		return nil, errors.New("ITEMS_EMPTY")
 	}
@@ -51,21 +51,21 @@ func NewDefaultListModel(items []list.Item) (*ListModel, error) {
 	return m, nil
 }
 
-func (m ListModel) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m ListModel) View() string {
+func (m Model) View() string {
 	return theme.DocStyle.Render(m.list.View())
 }
 
-func (m ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
 
-func (m *ListModel) WithTitle(title string) *ListModel {
+func (m *Model) WithTitle(title string) *Model {
 	m.list.Title = title
 	return m
 }
@@ -73,7 +73,7 @@ func (m *ListModel) WithTitle(title string) *ListModel {
 // The width counter depends on the max character
 // of the longest line of the terminal
 // The terminal width is limitant
-func (m *ListModel) GetMaxPossibleWidth() int {
+func (m *Model) GetMaxPossibleWidth() int {
 
 	max := 0
 	for _, item := range m.list.Items() {
@@ -91,21 +91,21 @@ func (m *ListModel) GetMaxPossibleWidth() int {
 }
 
 // header is equivalent to one line + 1 breackline
-func (m *ListModel) GetHeaderHeight() int {
+func (m *Model) GetHeaderHeight() int {
 	if m.list.ShowTitle() {
 		return 2
 	}
 	return 0
 }
 
-func (m *ListModel) GetFooterHeight() int {
+func (m *Model) GetFooterHeight() int {
 	return 0
 }
 
 // Each item has X lines defined with ItemDelegate.Height()
 // Each item has 1 breackline
 // It should be calculed from ItemDelegate.Height()
-func (m *ListModel) GetBodyHeight() (int, error) {
+func (m *Model) GetBodyHeight() (int, error) {
 
 	sum := 0
 
@@ -124,7 +124,7 @@ func (m *ListModel) GetBodyHeight() (int, error) {
 // The height counter depends on row count
 // of the terminal
 // res = header + body + footer
-func (m *ListModel) GetMaxPossibleHeight() (int, error) {
+func (m *Model) GetMaxPossibleHeight() (int, error) {
 	bodyHeight, err := m.GetBodyHeight()
 	if err != nil {
 		return 0, err
@@ -133,7 +133,7 @@ func (m *ListModel) GetMaxPossibleHeight() (int, error) {
 	return m.GetHeaderHeight() + bodyHeight + m.GetFooterHeight(), nil
 }
 
-func (m *ListModel) WithMaxPossibleHeight() (*ListModel, error) {
+func (m *Model) WithMaxPossibleHeight() (*Model, error) {
 	height, err := m.GetMaxPossibleHeight()
 	if err != nil {
 		return nil, err
@@ -143,14 +143,14 @@ func (m *ListModel) WithMaxPossibleHeight() (*ListModel, error) {
 	return m, nil
 
 }
-func (m *ListModel) WithMaxPossibleWidth() *ListModel {
+func (m *Model) WithMaxPossibleWidth() *Model {
 	m.list.SetWidth(m.GetMaxPossibleWidth())
 
 	return m
 }
-func (m ListModel) GetHeigth() int {
+func (m Model) GetHeigth() int {
 	return m.list.Height()
 }
-func (m ListModel) GetWidth() int {
+func (m Model) GetWidth() int {
 	return m.list.Width()
 }

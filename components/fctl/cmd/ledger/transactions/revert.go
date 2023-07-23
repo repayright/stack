@@ -3,6 +3,9 @@ package transactions
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -22,10 +25,10 @@ type RevertStore struct {
 func NewRevertStore() *RevertStore {
 	return &RevertStore{}
 }
-func NewRevertConfig() *fctl.ControllerConfig {
+func NewRevertConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useRevert, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useRevert,
 		shortRevert,
 		shortRevert,
@@ -33,18 +36,18 @@ func NewRevertConfig() *fctl.ControllerConfig {
 			"rev",
 		},
 		flags,
-		fctl.Organization, fctl.Stack, fctl.Ledger,
+		config.Organization, config.Stack, config.Ledger,
 	)
 }
 
 type RevertController struct {
 	store  *RevertStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*RevertStore] = (*RevertController)(nil)
+var _ config.Controller[*RevertStore] = (*RevertController)(nil)
 
-func NewRevertController(config *fctl.ControllerConfig) *RevertController {
+func NewRevertController(config *config.ControllerConfig) *RevertController {
 	return &RevertController{
 		store:  NewRevertStore(),
 		config: config,
@@ -55,11 +58,11 @@ func (c *RevertController) GetStore() *RevertStore {
 	return c.store
 }
 
-func (c *RevertController) GetConfig() *fctl.ControllerConfig {
+func (c *RevertController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *RevertController) Run() (fctl.Renderable, error) {
+func (c *RevertController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

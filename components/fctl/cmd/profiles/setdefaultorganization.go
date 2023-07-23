@@ -2,6 +2,9 @@ package profiles
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -26,10 +29,10 @@ func NewSetOrgStore() *SetOrgStore {
 	}
 }
 
-func NewSetOrgConfig() *fctl.ControllerConfig {
+func NewSetOrgConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useSetOrg, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useSetOrg,
 		descriptionSetOrg,
 		shortSetOrg,
@@ -43,14 +46,14 @@ func NewSetOrgConfig() *fctl.ControllerConfig {
 	return c
 }
 
-var _ fctl.Controller[*SetOrgStore] = (*SetOrgController)(nil)
+var _ config.Controller[*SetOrgStore] = (*SetOrgController)(nil)
 
 type SetOrgController struct {
 	store  *SetOrgStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewSetOrgController(config *fctl.ControllerConfig) *SetOrgController {
+func NewSetOrgController(config *config.ControllerConfig) *SetOrgController {
 	return &SetOrgController{
 		store:  NewSetOrgStore(),
 		config: config,
@@ -61,11 +64,11 @@ func (c *SetOrgController) GetStore() *SetOrgStore {
 	return c.store
 }
 
-func (c *SetOrgController) GetConfig() *fctl.ControllerConfig {
+func (c *SetOrgController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *SetOrgController) Run() (fctl.Renderable, error) {
+func (c *SetOrgController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	args := flags.Args()

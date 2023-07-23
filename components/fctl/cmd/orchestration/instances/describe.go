@@ -3,6 +3,9 @@ package instances
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/orchestration/instances/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -25,10 +28,10 @@ type DescribeStore struct {
 func NewDescribeStore() *DescribeStore {
 	return &DescribeStore{}
 }
-func NewDescribeConfig() *fctl.ControllerConfig {
+func NewDescribeConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useDescribe, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useDescribe,
 		descriptionDescribe,
 		descriptionDescribe,
@@ -36,7 +39,7 @@ func NewDescribeConfig() *fctl.ControllerConfig {
 			"des",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
@@ -45,12 +48,12 @@ func NewDescribeConfig() *fctl.ControllerConfig {
 type DescribeController struct {
 	store  *DescribeStore
 	client *formance.Formance
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*DescribeStore] = (*DescribeController)(nil)
+var _ config.Controller[*DescribeStore] = (*DescribeController)(nil)
 
-func NewDescribeController(config *fctl.ControllerConfig) *DescribeController {
+func NewDescribeController(config *config.ControllerConfig) *DescribeController {
 	return &DescribeController{
 		store:  NewDescribeStore(),
 		config: config,
@@ -61,11 +64,11 @@ func (c *DescribeController) GetStore() *DescribeStore {
 	return c.store
 }
 
-func (c *DescribeController) GetConfig() *fctl.ControllerConfig {
+func (c *DescribeController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *DescribeController) Run() (fctl.Renderable, error) {
+func (c *DescribeController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

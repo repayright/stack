@@ -3,6 +3,7 @@ package ledger
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"math/big"
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
@@ -26,13 +27,13 @@ type SendStore struct {
 func NewSendStore() *SendStore {
 	return &SendStore{}
 }
-func NewSendConfig() *fctl.ControllerConfig {
+func NewSendConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useSend, flag.ExitOnError)
-	fctl.WithConfirmFlag(flags)
-	fctl.WithMetadataFlag(flags)
+	config.WithConfirmFlag(flags)
+	config.WithMetadataFlag(flags)
 	flags.String(referenceFlag, "", "Reference to add to the generated transaction")
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useSend,
 		descriptionSend,
 		shortSend,
@@ -40,18 +41,18 @@ func NewSendConfig() *fctl.ControllerConfig {
 			"s", "se",
 		},
 		flags,
-		fctl.Organization, fctl.Stack, fctl.Ledger,
+		config.Organization, config.Stack, config.Ledger,
 	)
 }
 
 type SendController struct {
 	store  *SendStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*SendStore] = (*SendController)(nil)
+var _ config.Controller[*SendStore] = (*SendController)(nil)
 
-func NewSendController(config *fctl.ControllerConfig) *SendController {
+func NewSendController(config *config.ControllerConfig) *SendController {
 	return &SendController{
 		store:  NewSendStore(),
 		config: config,
@@ -62,11 +63,11 @@ func (c *SendController) GetStore() *SendStore {
 	return c.store
 }
 
-func (c *SendController) GetConfig() *fctl.ControllerConfig {
+func (c *SendController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *SendController) Run() (fctl.Renderable, error) {
+func (c *SendController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()
@@ -114,12 +115,12 @@ func (c *SendController) Run() (fctl.Renderable, error) {
 		return nil, fmt.Errorf("unable to parse '%s' as big int", amountStr)
 	}
 
-	metadata, err := fctl.ParseMetadata(fctl.GetStringSlice(flags, fctl.MetadataFlag))
+	metadata, err := fctl.ParseMetadata(config.GetStringSlice(flags, config.MetadataFlag))
 	if err != nil {
 		return nil, err
 	}
 
-	reference := fctl.GetString(flags, referenceFlag)
+	reference := config.GetString(flags, referenceFlag)
 
 	tx, err := internal.CreateTransaction(ledgerClient, ctx, operations.CreateTransactionRequest{
 		PostTransaction: shared.PostTransaction{
@@ -134,7 +135,7 @@ func (c *SendController) Run() (fctl.Renderable, error) {
 			},
 			Reference: &reference,
 		},
-		Ledger: fctl.GetString(flags, internal.LedgerFlag),
+		Ledger: config.GetString(flags, internal.LedgerFlag),
 	})
 	if err != nil {
 		return nil, err

@@ -2,6 +2,9 @@ package profiles
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -25,10 +28,10 @@ func NewDeleteStore() *DeleteStore {
 		Success: false,
 	}
 }
-func NewDeleteConfig() *fctl.ControllerConfig {
+func NewDeleteConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useDelete, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useDelete,
 		descriptionDelete,
 		shortDelete,
@@ -40,14 +43,14 @@ func NewDeleteConfig() *fctl.ControllerConfig {
 
 }
 
-var _ fctl.Controller[*DeleteStore] = (*DeleteController)(nil)
+var _ config.Controller[*DeleteStore] = (*DeleteController)(nil)
 
 type DeleteController struct {
 	store  *DeleteStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewDeleteController(config *fctl.ControllerConfig) *DeleteController {
+func NewDeleteController(config *config.ControllerConfig) *DeleteController {
 	return &DeleteController{
 		store:  NewDeleteStore(),
 		config: config,
@@ -58,11 +61,11 @@ func (c *DeleteController) GetStore() *DeleteStore {
 	return c.store
 }
 
-func (c *DeleteController) GetConfig() *fctl.ControllerConfig {
+func (c *DeleteController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *DeleteController) Run() (fctl.Renderable, error) {
+func (c *DeleteController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetFlags()
 	args := c.config.GetArgs()

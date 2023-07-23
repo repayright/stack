@@ -3,6 +3,9 @@ package ledger
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -25,10 +28,10 @@ func NewStatsStore() *StatsStore {
 	return &StatsStore{}
 }
 
-func NewStatsConfig() *fctl.ControllerConfig {
+func NewStatsConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useStats, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useStats,
 		descriptionStats,
 		descriptionStats,
@@ -36,18 +39,18 @@ func NewStatsConfig() *fctl.ControllerConfig {
 			"st",
 		},
 		flags,
-		fctl.Organization, fctl.Stack, fctl.Ledger,
+		config.Organization, config.Stack, config.Ledger,
 	)
 }
 
-var _ fctl.Controller[*StatsStore] = (*StatsController)(nil)
+var _ config.Controller[*StatsStore] = (*StatsController)(nil)
 
 type StatsController struct {
 	store  *StatsStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewStatsController(config *fctl.ControllerConfig) *StatsController {
+func NewStatsController(config *config.ControllerConfig) *StatsController {
 	return &StatsController{
 		store:  NewStatsStore(),
 		config: config,
@@ -58,11 +61,11 @@ func (c *StatsController) GetStore() *StatsStore {
 	return c.store
 }
 
-func (c *StatsController) GetConfig() *fctl.ControllerConfig {
+func (c *StatsController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *StatsController) Run() (fctl.Renderable, error) {
+func (c *StatsController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()

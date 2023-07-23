@@ -3,6 +3,9 @@ package holds
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -22,19 +25,19 @@ type VoidStore struct {
 }
 type VoidController struct {
 	store  *VoidStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*VoidStore] = (*VoidController)(nil)
+var _ config.Controller[*VoidStore] = (*VoidController)(nil)
 
 func NewVoidStore() *VoidStore {
 	return &VoidStore{}
 }
 
-func NewVoidConfig() *fctl.ControllerConfig {
+func NewVoidConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useVoid, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useVoid,
 		shortVoid,
 		shortVoid,
@@ -42,12 +45,12 @@ func NewVoidConfig() *fctl.ControllerConfig {
 			"deb",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 }
 
-func NewVoidController(config *fctl.ControllerConfig) *VoidController {
+func NewVoidController(config *config.ControllerConfig) *VoidController {
 	return &VoidController{
 		store:  NewVoidStore(),
 		config: config,
@@ -58,11 +61,11 @@ func (c *VoidController) GetStore() *VoidStore {
 	return c.store
 }
 
-func (c *VoidController) GetConfig() *fctl.ControllerConfig {
+func (c *VoidController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *VoidController) Run() (fctl.Renderable, error) {
+func (c *VoidController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

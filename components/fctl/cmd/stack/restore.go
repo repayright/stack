@@ -3,8 +3,10 @@ package stack
 import (
 	"flag"
 	"fmt"
-	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/config"
 	"net/http"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
@@ -31,11 +33,11 @@ func NewRestoreStore() *RestoreStore {
 	}
 }
 
-func NewRestoreConfig() *fctl.ControllerConfig {
+func NewRestoreConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useRestore, flag.ExitOnError)
 	flags.String(internal.StackNameFlag, "", "Stack name")
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useRestore,
 		shortRestore,
 		shortRestore,
@@ -44,34 +46,38 @@ func NewRestoreConfig() *fctl.ControllerConfig {
 			"re",
 		},
 		flags,
-		fctl.Organization,
+		config.Organization,
 	)
 }
 
-var _ fctl.Controller[*RestoreStore] = (*RestoreController)(nil)
+//var _ config.Controller[*RestoreStore] = (*RestoreController)(nil)
 
 type RestoreController struct {
 	store      *RestoreStore
-	config     *fctl.ControllerConfig
+	config     *config.ControllerConfig
 	fctlConfig *fctl.Config
 }
 
-func NewRestoreController(config *fctl.ControllerConfig) *RestoreController {
+func (c *RestoreController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
+
+func NewRestoreController(config *config.ControllerConfig) *RestoreController {
 	return &RestoreController{
 		store:  NewRestoreStore(),
 		config: config,
 	}
 }
 
-func (c *RestoreController) GetStore() *RestoreStore {
+func (c *RestoreController) GetStore() any {
 	return c.store
 }
 
-func (c *RestoreController) GetConfig() *fctl.ControllerConfig {
+func (c *RestoreController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *RestoreController) Run() (fctl.Renderable, error) {
+func (c *RestoreController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()
@@ -128,7 +134,7 @@ func (c *RestoreController) Run() (fctl.Renderable, error) {
 	return c, nil
 }
 
-func (c *RestoreController) Render() (ui.Model, error) {
+func (c *RestoreController) Render() (modelutils.Model, error) {
 	return nil, internal.PrintStackInformation(c.config.GetOut(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 }
 
@@ -136,6 +142,6 @@ func NewRestoreStackCommand() *cobra.Command {
 	config := NewRestoreConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
-		fctl.WithController[*RestoreStore](NewRestoreController(config)),
+		fctl.WithController(NewRestoreController(config)),
 	)
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"io"
 	"os"
 	"runtime/debug"
@@ -33,7 +34,7 @@ func (p *prompt) completionsFromCommand(subCommand *cobra.Command, completionsAr
 		// The autocompletion library sometimes panic
 		// As it is not critical, we just catch the error and display it only when debug enabled
 		if err := recover(); err != nil {
-			isDebug, _ := subCommand.Flags().GetBool(fctl.DebugFlag)
+			isDebug, _ := subCommand.Flags().GetBool(config.DebugFlag)
 			if isDebug {
 				fmt.Println(err)
 				debug.PrintStack()
@@ -62,7 +63,7 @@ func (p *prompt) completionsFromCommand(subCommand *cobra.Command, completionsAr
 func (p *prompt) completions(cfg *fctl.Config, d goprompt.Document) []goprompt.Suggest {
 	suggestions := make([]goprompt.Suggest, 0)
 	switch {
-	case strings.HasPrefix(d.Text, ":set "+fctl.ProfileFlag):
+	case strings.HasPrefix(d.Text, ":set "+config.ProfileFlag):
 		profiles := fctl.MapKeys(cfg.GetProfiles())
 		sort.Strings(profiles)
 		for _, p := range profiles {
@@ -71,7 +72,7 @@ func (p *prompt) completions(cfg *fctl.Config, d goprompt.Document) []goprompt.S
 				Description: "Select profile",
 			})
 		}
-	case strings.HasPrefix(d.Text, ":set "+fctl.DebugFlag) || strings.HasPrefix(d.Text, ":set "+fctl.InsecureTlsFlag):
+	case strings.HasPrefix(d.Text, ":set "+config.DebugFlag) || strings.HasPrefix(d.Text, ":set "+config.InsecureTlsFlag):
 		suggestions = append(suggestions, goprompt.Suggest{
 			Text: "true",
 		}, goprompt.Suggest{
@@ -79,13 +80,13 @@ func (p *prompt) completions(cfg *fctl.Config, d goprompt.Document) []goprompt.S
 		})
 	case strings.HasPrefix(d.Text, ":set"):
 		suggestions = append(suggestions, goprompt.Suggest{
-			Text:        fctl.ProfileFlag,
+			Text:        config.ProfileFlag,
 			Description: "Select profile",
 		}, goprompt.Suggest{
-			Text:        fctl.DebugFlag,
+			Text:        config.DebugFlag,
 			Description: "Set debug",
 		}, goprompt.Suggest{
-			Text:        fctl.InsecureTlsFlag,
+			Text:        config.InsecureTlsFlag,
 			Description: "Set insecure TLS",
 		})
 	default:
@@ -151,7 +152,7 @@ func (p *prompt) executePromptCommand(cmd *cobra.Command, t string) error {
 		if len(parts) != 2 {
 			return errors.New("malformed command")
 		} else {
-			if v := parts[0]; v != fctl.ProfileFlag && v != fctl.DebugFlag && v != fctl.InsecureTlsFlag {
+			if v := parts[0]; v != config.ProfileFlag && v != config.DebugFlag && v != config.InsecureTlsFlag {
 				return fmt.Errorf("unknown configuration: %s", v)
 			}
 			_ = cmd.Flags().Set(parts[0], parts[1])
@@ -193,7 +194,7 @@ func (p *prompt) displayHeader(flags *flag.FlagSet, cfg *fctl.Config, out io.Wri
 }
 
 func (p *prompt) nextCommand(cmd *cobra.Command) error {
-	flags := fctl.ConvertPFlagSetToFlagSet(cmd.Flags())
+	flags := config.ConvertPFlagSetToFlagSet(cmd.Flags())
 
 	cfg, err := fctl.GetConfig(flags)
 	if err != nil {

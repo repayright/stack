@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
 	"strings"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/search/views"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -27,10 +30,10 @@ type Store struct {
 	Response *shared.Response `json:"response"`
 }
 
-func NewSearchConfig() *fctl.ControllerConfig {
+func NewSearchConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useSearch, flag.ExitOnError)
 	flags.Int(sizeFlag, 5, "Number of items to fetch")
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useSearch,
 		descriptionSearch,
 		shortDescription,
@@ -38,7 +41,7 @@ func NewSearchConfig() *fctl.ControllerConfig {
 			"se",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
@@ -53,15 +56,15 @@ func NewStore() *Store {
 	}
 }
 
-var _ fctl.Controller[*Store] = (*Controller)(nil)
+var _ config.Controller[*Store] = (*Controller)(nil)
 
 type Controller struct {
 	store  *Store
 	target string
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewController(config *fctl.ControllerConfig) *Controller {
+func NewController(config *config.ControllerConfig) *Controller {
 	return &Controller{
 		store:  NewStore(),
 		config: config,
@@ -72,11 +75,11 @@ func (c *Controller) GetStore() *Store {
 	return c.store
 }
 
-func (c *Controller) GetConfig() *fctl.ControllerConfig {
+func (c *Controller) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *Controller) Run() (fctl.Renderable, error) {
+func (c *Controller) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

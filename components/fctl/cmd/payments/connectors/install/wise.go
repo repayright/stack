@@ -3,6 +3,9 @@ package install
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/payments/connectors/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -29,28 +32,28 @@ func NewWiseStore() *WiseStore {
 		Success: false,
 	}
 }
-func NewWiseConfig() *fctl.ControllerConfig {
+func NewWiseConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useWise, flag.ExitOnError)
 	flags.String(PollingPeriodFlag, DefaultPollingPeriod, "Polling duration")
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useWise,
 		descriptionWise,
 		shortWise,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 }
 
-var _ fctl.Controller[*WiseStore] = (*WiseController)(nil)
+var _ config.Controller[*WiseStore] = (*WiseController)(nil)
 
 type WiseController struct {
 	store  *WiseStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewWiseController(config *fctl.ControllerConfig) *WiseController {
+func NewWiseController(config *config.ControllerConfig) *WiseController {
 	return &WiseController{
 		store:  NewWiseStore(),
 		config: config,
@@ -61,11 +64,11 @@ func (c *WiseController) GetStore() *WiseStore {
 	return c.store
 }
 
-func (c *WiseController) GetConfig() *fctl.ControllerConfig {
+func (c *WiseController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *WiseController) Run() (fctl.Renderable, error) {
+func (c *WiseController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

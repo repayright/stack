@@ -3,6 +3,9 @@ package instances
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
@@ -21,16 +24,16 @@ type StopStore struct {
 	InstanceID string `json:"instanceId"`
 }
 
-func NewStopConfig() *fctl.ControllerConfig {
+func NewStopConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useStop, flag.ExitOnError)
 
-	c := fctl.NewControllerConfig(
+	c := config.NewControllerConfig(
 		useStop,
 		shortStop,
 		shortStop,
 		[]string{},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 
 	return c
@@ -38,16 +41,16 @@ func NewStopConfig() *fctl.ControllerConfig {
 
 type StopController struct {
 	store  *StopStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-var _ fctl.Controller[*StopStore] = (*StopController)(nil)
+var _ config.Controller[*StopStore] = (*StopController)(nil)
 
 func NewStopStore() *StopStore {
 	return &StopStore{}
 }
 
-func NewStopController(config *fctl.ControllerConfig) *StopController {
+func NewStopController(config *config.ControllerConfig) *StopController {
 	return &StopController{
 		store:  NewStopStore(),
 		config: config,
@@ -58,11 +61,11 @@ func (c *StopController) GetStore() *StopStore {
 	return c.store
 }
 
-func (c *StopController) GetConfig() *fctl.ControllerConfig {
+func (c *StopController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *StopController) Run() (fctl.Renderable, error) {
+func (c *StopController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	args := c.config.GetArgs()

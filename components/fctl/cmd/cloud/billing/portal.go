@@ -2,6 +2,9 @@ package billing
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -25,9 +28,9 @@ func NewPortalStore() *PortalStore {
 	}
 }
 
-func NewPortalConfig() *fctl.ControllerConfig {
+func NewPortalConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(usePortal, flag.ExitOnError)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		usePortal,
 		shortPortal,
 		shortPortal,
@@ -35,18 +38,18 @@ func NewPortalConfig() *fctl.ControllerConfig {
 			"p",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-var _ fctl.Controller[*PortalStore] = (*PortalController)(nil)
+var _ config.Controller[*PortalStore] = (*PortalController)(nil)
 
 type PortalController struct {
 	store  *PortalStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewPortalController(config *fctl.ControllerConfig) *PortalController {
+func NewPortalController(config *config.ControllerConfig) *PortalController {
 	return &PortalController{
 		store:  NewPortalStore(),
 		config: config,
@@ -57,11 +60,11 @@ func (c *PortalController) GetStore() *PortalStore {
 	return c.store
 }
 
-func (c *PortalController) GetConfig() *fctl.ControllerConfig {
+func (c *PortalController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *PortalController) Run() (fctl.Renderable, error) {
+func (c *PortalController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

@@ -3,6 +3,7 @@ package ui
 import (
 	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
@@ -65,7 +66,7 @@ func (c *Context) GetMaxPossibleWidth() int {
 	return c.model.GetMaxPossibleWidth()
 }
 
-func (c *Context) GetListKeyMapHandler() *modelutils.KeyMapHandler {
+func (c *Context) GetListKeyMapHandler() *config.KeyMapHandler {
 	return nil
 }
 

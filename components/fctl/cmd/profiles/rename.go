@@ -2,6 +2,9 @@ package profiles
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -24,10 +27,10 @@ func NewRenameStore() *RenameStore {
 		Success: false,
 	}
 }
-func NewRenameConfig() *fctl.ControllerConfig {
+func NewRenameConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useRename, flag.ExitOnError)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useRename,
 		shortRename,
 		shortRename,
@@ -36,14 +39,14 @@ func NewRenameConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*RenameStore] = (*RenameController)(nil)
+var _ config.Controller[*RenameStore] = (*RenameController)(nil)
 
 type RenameController struct {
 	store  *RenameStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewRenameController(config *fctl.ControllerConfig) *RenameController {
+func NewRenameController(config *config.ControllerConfig) *RenameController {
 	return &RenameController{
 		store:  NewRenameStore(),
 		config: config,
@@ -54,11 +57,11 @@ func (c *RenameController) GetStore() *RenameStore {
 	return c.store
 }
 
-func (c *RenameController) GetConfig() *fctl.ControllerConfig {
+func (c *RenameController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *RenameController) Run() (fctl.Renderable, error) {
+func (c *RenameController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetFlags()
 	args := c.config.GetArgs()
 

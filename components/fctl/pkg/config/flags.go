@@ -1,21 +1,23 @@
-package fctl
+package config
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"github.com/iancoleman/strcase"
+	"github.com/spf13/pflag"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/iancoleman/strcase"
-	"github.com/spf13/pflag"
 )
 
 const (
+	StackFlag                = "stack"
+	OrganizationFlag         = "organization"
+	OutputFlag        string = "output"
 	MembershipURIFlag string = "membership-uri"
 	ConfigFlag        string = "config"
 	ProfileFlag       string = "profile"
-	OutputFlag        string = "output"
 	DebugFlag         string = "debug"
 	InsecureTlsFlag   string = "insecure-tls"
 	TelemetryFlag     string = "telemetry"
@@ -25,12 +27,20 @@ const (
 var (
 	insecureTlsV   = &fValue[bool]{value: false}
 	telemetryFlagV = &fValue[bool]{value: false}
-	debugFlagV     = &fValue[bool]{value: false}
-	profileFlagV   = &fValue[string]{value: ""}
-	configFlagV    = &fValue[string]{value: fmt.Sprintf("%s/.formance/fctl.config", getHomeDir())}
-	outputFlagV    = &fValue[string]{value: "plain"}
+	DebugFlagV     = &fValue[bool]{value: false}
+	ProfileFlagV   = &fValue[string]{value: ""}
+	ConfigFlagV    = &fValue[string]{value: fmt.Sprintf("%s/.formance/fctl.config", getHomeDir())}
+	OutputFlagV    = &fValue[string]{value: "plain"}
 	GlobalFlags    = withGlobalFlags(flag.NewFlagSet("global", flag.ContinueOnError))
 )
+
+func getHomeDir() string {
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		panic(errors.New("unable to get home directory"))
+	}
+	return homedir
+}
 
 func GetBool(flags *flag.FlagSet, flagName string) bool {
 	f := flags.Lookup(flagName)
@@ -133,10 +143,10 @@ func WithScopesFlags(flagSet *flag.FlagSet, scopes ...*flag.Flag) *flag.FlagSet 
 func withGlobalFlags(flagSet *flag.FlagSet) *flag.FlagSet {
 	flagSet.BoolVar(insecureTlsV.Get(), InsecureTlsFlag, false, "insecure TLS")
 	flagSet.BoolVar(telemetryFlagV.Get(), TelemetryFlag, false, "enable telemetry")
-	flagSet.BoolVar(debugFlagV.Get(), DebugFlag, false, "debug mode")
-	flagSet.StringVar(profileFlagV.Get(), ProfileFlag, "", "config profile to use")
-	flagSet.StringVar(configFlagV.Get(), ConfigFlag, fmt.Sprintf("%s/.formance/fctl.config", getHomeDir()), "config file to use")
-	flagSet.StringVar(outputFlagV.Get(), outputFlag, "plain", "output format (plain, json)")
+	flagSet.BoolVar(DebugFlagV.Get(), DebugFlag, false, "debug mode")
+	flagSet.StringVar(ProfileFlagV.Get(), ProfileFlag, "", "config profile to use")
+	flagSet.StringVar(ConfigFlagV.Get(), ConfigFlag, fmt.Sprintf("%s/.formance/fctl.config", getHomeDir()), "config file to use")
+	flagSet.StringVar(OutputFlagV.Get(), OutputFlag, "plain", "output format (plain, json)")
 	return flagSet
 }
 

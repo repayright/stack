@@ -1,11 +1,11 @@
 package ui
 
 import (
+	"github.com/formancehq/fctl/pkg/config"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
@@ -25,7 +25,7 @@ func NewLogo() *Logo {
 	}
 }
 
-func GetListKeyMapHandler() *modelutils.KeyMapHandler {
+func GetListKeyMapHandler() *config.KeyMapHandler {
 	return nil
 }
 

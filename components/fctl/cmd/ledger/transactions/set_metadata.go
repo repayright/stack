@@ -3,6 +3,9 @@ package transactions
 import (
 	"flag"
 	"fmt"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/cmd/ledger/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -23,29 +26,29 @@ type SetMetadataStore struct {
 func NewSetMetadataStore() *SetMetadataStore {
 	return &SetMetadataStore{}
 }
-func NewSetMetadataConfig() *fctl.ControllerConfig {
+func NewSetMetadataConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useSetMetadata, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
 
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useSetMetadata,
 		shortSetMetadata,
 		shortSetMetadata,
 		[]string{
 			"sm", "set-meta",
 		},
-		flags, fctl.Organization, fctl.Stack, fctl.Ledger,
+		flags, config.Organization, config.Stack, config.Ledger,
 	)
 }
 
-var _ fctl.Controller[*SetMetadataStore] = (*SetMetadataController)(nil)
+var _ config.Controller[*SetMetadataStore] = (*SetMetadataController)(nil)
 
 type SetMetadataController struct {
 	store  *SetMetadataStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewSetMetadataController(config *fctl.ControllerConfig) *SetMetadataController {
+func NewSetMetadataController(config *config.ControllerConfig) *SetMetadataController {
 	return &SetMetadataController{
 		store:  NewSetMetadataStore(),
 		config: config,
@@ -56,11 +59,11 @@ func (c *SetMetadataController) GetStore() *SetMetadataStore {
 	return c.store
 }
 
-func (c *SetMetadataController) GetConfig() *fctl.ControllerConfig {
+func (c *SetMetadataController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *SetMetadataController) Run() (fctl.Renderable, error) {
+func (c *SetMetadataController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()

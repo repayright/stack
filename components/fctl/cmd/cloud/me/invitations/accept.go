@@ -2,6 +2,9 @@ package invitations
 
 import (
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -22,10 +25,10 @@ func NewAcceptStore() *AcceptStore {
 	return &AcceptStore{}
 }
 
-func NewAcceptConfig() *fctl.ControllerConfig {
+func NewAcceptConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useAccept, flag.ExitOnError)
 	fctl.WithConfirmFlag(flags)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useAccept,
 		shortAccept,
 		shortAccept,
@@ -33,18 +36,18 @@ func NewAcceptConfig() *fctl.ControllerConfig {
 			"a",
 		},
 		flags,
-		fctl.Organization, fctl.Stack,
+		config.Organization, config.Stack,
 	)
 }
 
-var _ fctl.Controller[*AcceptStore] = (*AcceptController)(nil)
+var _ config.Controller[*AcceptStore] = (*AcceptController)(nil)
 
 type AcceptController struct {
 	store  *AcceptStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewAcceptController(config *fctl.ControllerConfig) *AcceptController {
+func NewAcceptController(config *config.ControllerConfig) *AcceptController {
 	return &AcceptController{
 		store:  NewAcceptStore(),
 		config: config,
@@ -55,11 +58,11 @@ func (c *AcceptController) GetStore() *AcceptStore {
 	return c.store
 }
 
-func (c *AcceptController) GetConfig() *fctl.ControllerConfig {
+func (c *AcceptController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *AcceptController) Run() (fctl.Renderable, error) {
+func (c *AcceptController) Run() (modelutils.Renderable, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	args := c.config.GetArgs()

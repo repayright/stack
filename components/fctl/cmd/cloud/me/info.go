@@ -3,6 +3,9 @@ package me
 import (
 	"errors"
 	"flag"
+	"github.com/formancehq/fctl/pkg/config"
+
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/pterm/pterm"
@@ -23,9 +26,9 @@ func NewInfoStore() *InfoStore {
 	return &InfoStore{}
 }
 
-func NewInfoConfig() *fctl.ControllerConfig {
+func NewInfoConfig() *config.ControllerConfig {
 	flags := flag.NewFlagSet(useInfo, flag.ExitOnError)
-	return fctl.NewControllerConfig(
+	return config.NewControllerConfig(
 		useInfo,
 		shortInfo,
 		shortInfo,
@@ -36,14 +39,14 @@ func NewInfoConfig() *fctl.ControllerConfig {
 	)
 }
 
-var _ fctl.Controller[*InfoStore] = (*InfoController)(nil)
+var _ config.Controller[*InfoStore] = (*InfoController)(nil)
 
 type InfoController struct {
 	store  *InfoStore
-	config *fctl.ControllerConfig
+	config *config.ControllerConfig
 }
 
-func NewInfoController(config *fctl.ControllerConfig) *InfoController {
+func NewInfoController(config *config.ControllerConfig) *InfoController {
 	return &InfoController{
 		store:  NewInfoStore(),
 		config: config,
@@ -54,11 +57,11 @@ func (c *InfoController) GetStore() *InfoStore {
 	return c.store
 }
 
-func (c *InfoController) GetConfig() *fctl.ControllerConfig {
+func (c *InfoController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *InfoController) Run() (fctl.Renderable, error) {
+func (c *InfoController) Run() (modelutils.Renderable, error) {
 
 	flags := c.config.GetAllFLags()
 
