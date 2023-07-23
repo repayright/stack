@@ -23,8 +23,8 @@ const (
 )
 
 type CreateStore struct {
-	Stack    *membershipclient.Stack
-	Versions *shared.GetVersionsResponse
+	Stack    *membershipclient.Stack     `json:"stack"`
+	Versions *shared.GetVersionsResponse `json:"versions"`
 }
 
 func NewCreateStore() *CreateStore {
@@ -155,22 +155,24 @@ func (c *CreateController) Run() (fctl.Renderable, error) {
 	profile := fctl.GetCurrentProfile(flags, cfg)
 
 	if !fctl.GetBool(flags, nowaitFlag) {
-		spinner, err := pterm.DefaultSpinner.Start("Waiting services availability")
-		if err != nil {
-			return nil, err
+		var spinner *pterm.SpinnerPrinter
+		if fctl.GetString(flags, fctl.OutputFlag) == "plain" {
+			spinner, err = pterm.DefaultSpinner.Start("Waiting services availability")
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if err := waitStackReady(ctx, c.config.GetOut(), flags, profile, stackResponse.Data); err != nil {
 			return nil, err
 		}
 
-		if err := spinner.Stop(); err != nil {
-			return nil, err
+		if spinner != nil {
+			if err := spinner.Stop(); err != nil {
+				return nil, err
+			}
 		}
 	}
-
-	fctl.BasicTextCyan.WithWriter(c.config.GetOut()).Printfln("Your dashboard will be reachable on: %s",
-		profile.ServicesBaseUrl(stackResponse.Data).String())
 
 	stackClient, err := fctl.NewStackClient(flags, ctx, cfg, stackResponse.Data, c.config.GetOut())
 	if err != nil {
@@ -193,6 +195,8 @@ func (c *CreateController) Run() (fctl.Renderable, error) {
 }
 
 func (c *CreateController) Render() error {
+	fctl.BasicTextCyan.WithWriter(c.config.GetOut()).Printfln("Your dashboard will be reachable on: %s",
+		c.profile.ServicesBaseUrl(c.store.Stack).String())
 	return internal.PrintStackInformation(c.config.GetOut(), c.profile, c.store.Stack, c.store.Versions)
 }
 
