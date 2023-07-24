@@ -22,11 +22,9 @@ func (k *KeyMapHandler) GetKeyMapAction() map[*key.Binding]func(tea.Model) Contr
 
 func (k *KeyMapHandler) GetAction(teaKey tea.Key) func(tea.Model) Controller {
 	for keyBind := range k.keyMapsAction {
-		//fmt.Println(keyBind.Keys())
-		if !collectionutils.Contains(keyBind.Keys(), teaKey.String()) {
-			return nil
+		if collectionutils.Contains(keyBind.Keys(), teaKey.String()) {
+			return k.keyMapsAction[keyBind]
 		}
-		return k.keyMapsAction[keyBind]
 	}
 	return nil
 }

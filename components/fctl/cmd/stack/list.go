@@ -275,7 +275,6 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 			return controller
 		},
 	)
-	//fmt.Println(k)
 	return k
 }
 

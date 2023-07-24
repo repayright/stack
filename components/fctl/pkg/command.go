@@ -291,12 +291,13 @@ func configureCobraWithControllerConfig(cmd *cobra.Command, c *config.Controller
 	cmd.Short = c.GetShortDescription()
 	cmd.Long = c.GetDescription()
 
-	//Adding flags
+	//Adding scopes flags
 	scopes := c.GetScopes()
 	cmd.Flags().AddGoFlagSet(scopes)
 	cmd.Flags().AddGoFlagSet(c.GetFlags())
 
-	//Adding completion flags
+	// Adding completion flags
+	// We need to add the completion function only if the flag is not already added
 	if cmd.Flags().Lookup(config.StackFlag) != nil {
 		withStackCompletion()(cmd)
 	}

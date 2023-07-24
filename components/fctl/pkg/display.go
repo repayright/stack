@@ -7,7 +7,11 @@ import (
 	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/theme"
+	"sync"
 )
+
+var lock = &sync.Mutex{}
+var instance *Display
 
 type Display struct {
 	header     *ui.Header
@@ -16,11 +20,18 @@ type Display struct {
 }
 
 func NewDisplay() *Display {
-	return &Display{
-		header:     ui.NewHeader(),
-		controller: nil,
-		renderer:   nil,
+	if instance == nil {
+		lock.Lock()
+		defer lock.Unlock()
+		if instance == nil {
+			instance = &Display{
+				header:     ui.NewHeader(),
+				controller: nil,
+				renderer:   nil,
+			}
+		}
 	}
+	return instance
 }
 
 func (d *Display) SetHeader(model *ui.Header) *Display {
@@ -91,7 +102,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Width:  w,
 				Height: h - d.header.GetMaxPossibleHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
 			}
-			//fmt.Println("window size msg", msg.Height)
+			//fmt.Fprintln(os.Stderr, "window size msg", msg.Height)
 			m, cmd := d.renderer.Update(newMsg)
 			if cmd != nil {
 				cmds = append(cmds, cmd)
@@ -100,53 +111,50 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
 				action := keyMapHandler.GetAction(tea.Key(msg))
-				//fmt.Println("action", tea.Key(msg))
 				if action != nil {
 					controller := action(d.renderer)
-					if controller == nil {
-						return d, nil
-					}
-					d.controller = controller
+					if controller != nil {
+						d.controller = controller
+						renderer, err := d.controller.Run()
+						if err != nil {
+							return d, tea.Quit
+						}
 
-					renderer, err := d.controller.Run()
-					if err != nil {
-						//fmt.Println("error", err)
-						return d, tea.Quit
-					}
+						model, err := renderer.Render()
+						if err != nil {
+							return d, tea.Quit
+						}
 
-					model, err := renderer.Render()
-					if err != nil {
-						//fmt.Println("error", err)
-						return d, tea.Quit
-					}
+						// A controller keymap action does not always return a model
+						if model == nil {
+							return d, nil
+						}
 
-					if model == nil {
-						return d, nil
-					}
+						// At this point we are sure that the model is generated
+						d.renderer = model
+						w, h, err := modelutils.GetTerminalSize()
+						if err != nil {
+							return d, tea.Quit
+						}
 
-					d.renderer = model
-					w, h, err := modelutils.GetTerminalSize()
-					if err != nil {
-						return d, tea.Quit
-					}
+						newMsg := tea.WindowSizeMsg{
+							Width:  w,
+							Height: h - d.header.GetMaxPossibleHeight() - 4, //theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
+						}
+						m, cmd := d.renderer.Update(newMsg)
+						if cmd != nil {
+							cmds = append(cmds, cmd)
+						}
+						d.renderer = m
 
-					newMsg := tea.WindowSizeMsg{
-						Width:  w,
-						Height: h - d.header.GetMaxPossibleHeight() - 4,
+						// Update headers actions
+						d.ResetKeyMapAction()
+						header, cmd := d.header.Update(newMsg)
+						if cmd != nil {
+							cmds = append(cmds, cmd)
+						}
+						d.header = header
 					}
-					m, cmd := d.renderer.Update(newMsg)
-					if cmd != nil {
-						cmds = append(cmds, cmd)
-					}
-					d.renderer = m
-
-					// Update headers actions
-					d.ResetKeyMapAction()
-					header, cmd := d.header.Update(newMsg)
-					if cmd != nil {
-						cmds = append(cmds, cmd)
-					}
-					d.header = header
 				}
 			}
 
