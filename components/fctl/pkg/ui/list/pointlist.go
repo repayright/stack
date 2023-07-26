@@ -1,10 +1,12 @@
 package list
 
 import (
+	"sort"
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
-	"strings"
 )
 
 type PointList struct {
@@ -19,6 +21,20 @@ func NewPointList(list ...*HorizontalItem) *PointList {
 func (pl *PointList) GetListKeyMapHandler() *config.KeyMapHandler {
 	return nil
 }
+
+// SortDir sort the list by asc or desc
+// true = asc
+// false = desc
+func (pl *PointList) SortDir(dir bool) {
+	sort.Slice(pl.list, func(i int, j int) bool {
+		if dir {
+			return pl.list[i].title < pl.list[j].title
+		}
+		return pl.list[i].title > pl.list[j].title
+	})
+
+}
+
 func (pl *PointList) Init() tea.Cmd {
 	return nil
 }

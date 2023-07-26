@@ -9,28 +9,48 @@ import (
 )
 
 var (
-	Regions     = "Regions: "
-	Org         = "Organization: "
-	FctlVersion = "Fctl Version: "
+	Regions     = "region: "
+	Org         = "organization: "
+	FctlVersion = "version: "
+	Profile     = "profile: "
 )
 
 type Context struct {
 	regions     string
 	org         string
 	fctlversion string
+	profile     string
 	model       *list.PointList
 }
 
 func NewContext() *Context {
-	c := &Context{
+	return &Context{
 		regions:     "us-east-1",
 		org:         "123456789012",
-		fctlversion: "0.0.1",
+		profile:     "default",
+		fctlversion: FctlVersion,
 	}
+}
 
+func (c *Context) SetRegions(regions string) {
+	c.regions = regions
+}
+
+func (c *Context) SetProfile(profile string) {
+	c.profile = profile
+}
+
+func (c *Context) SetOrg(org string) {
+	c.org = org
+}
+
+func (c *Context) SetFctlVersion(fctlversion string) {
+	c.fctlversion = fctlversion
+}
+
+func (c *Context) InitModel() {
 	c.model = c.GeneratePointList()
-
-	return c
+	c.model.SortDir(true)
 }
 
 func (c *Context) GeneratePointList() *list.PointList {
@@ -44,10 +64,12 @@ func (c *Context) GeneratePointList() *list.PointList {
 	Regions = modelutils.FillCharBeforeChar(Regions, " ", ":", maxWidth)
 	Org = modelutils.FillCharBeforeChar(Org, " ", ":", maxWidth)
 	FctlVersion = modelutils.FillCharBeforeChar(FctlVersion, " ", ":", maxWidth)
+	Profile = modelutils.FillCharBeforeChar(Profile, " ", ":", maxWidth)
 
 	return list.NewPointList(
 		list.NewHorizontalItem(Regions, c.regions),
 		list.NewHorizontalItem(Org, c.org),
+		list.NewHorizontalItem(Profile, c.profile),
 		list.NewHorizontalItem(FctlVersion, c.fctlversion),
 	)
 }
@@ -65,6 +87,7 @@ func (c *Context) GetListKeyMapHandler() *config.KeyMapHandler {
 }
 
 func (c *Context) Init() tea.Cmd {
+	c.InitModel()
 	return nil
 }
 

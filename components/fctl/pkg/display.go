@@ -1,13 +1,14 @@
 package fctl
 
 import (
+	"sync"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/theme"
-	"sync"
 )
 
 var lock = &sync.Mutex{}
@@ -59,6 +60,17 @@ func (d *Display) GetKeyMapAction() *config.KeyMapHandler {
 
 func (d *Display) Init() tea.Cmd {
 	var cmd tea.Cmd = nil
+	d.header.GetContext().SetFctlVersion(Version)
+	flags := d.controller.GetConfig().GetAllFLags()
+	config, err := GetConfig(flags)
+
+	if err != nil {
+		panic(err)
+	}
+
+	profiles := GetCurrentProfile(flags, config)
+	d.header.GetContext().SetOrg(profiles.defaultOrganization)
+	d.header.GetContext().SetProfile(config.currentProfile)
 
 	var keys = d.GetKeyMapAction()
 	if keys != nil {
@@ -67,6 +79,7 @@ func (d *Display) Init() tea.Cmd {
 	}
 
 	cmd = d.header.Init()
+
 	if d.controller != nil {
 
 		renderer, err := d.controller.Run()

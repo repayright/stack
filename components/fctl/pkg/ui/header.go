@@ -1,9 +1,10 @@
 package ui
 
 import (
-	"github.com/formancehq/fctl/pkg/config"
 	"math"
 	"strings"
+
+	"github.com/formancehq/fctl/pkg/config"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -27,6 +28,10 @@ func NewHeader() *Header {
 	}
 }
 
+func (h *Header) GetContext() *Context {
+	return h.fctlContext
+}
+
 func (h *Header) AddModel(model *list.PointList) *Header {
 	h.modelAction = append(h.modelAction, model)
 	return h
@@ -37,7 +42,10 @@ func (h *Header) GetMaxPossibleHeight() int {
 }
 
 func (h *Header) Init() tea.Cmd {
-	return h.logo.Init()
+	return tea.Batch(
+		h.fctlContext.Init(),
+		h.logo.Init(),
+	)
 }
 
 func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
