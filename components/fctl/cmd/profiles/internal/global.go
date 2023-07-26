@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -17,6 +18,6 @@ func ProfileNamesAutoCompletion(flags *flag.FlagSet, args []string, toComplete s
 }
 
 func ProfileCobraAutoCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	flags := fctl.ConvertPFlagSetToFlagSet(cmd.Flags())
+	flags := config.ConvertPFlagSetToFlagSet(cmd.Flags())
 	return ProfileNamesAutoCompletion(flags, args, toComplete)
 }

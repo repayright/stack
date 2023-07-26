@@ -2,9 +2,9 @@ package profiles
 
 import (
 	"flag"
-	"github.com/formancehq/fctl/pkg/config"
 
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -43,7 +43,7 @@ func NewDeleteConfig() *config.ControllerConfig {
 
 }
 
-var _ config.Controller[*DeleteStore] = (*DeleteController)(nil)
+var _ config.Controller = (*DeleteController)(nil)
 
 type DeleteController struct {
 	store  *DeleteStore
@@ -56,8 +56,10 @@ func NewDeleteController(config *config.ControllerConfig) *DeleteController {
 		config: config,
 	}
 }
-
-func (c *DeleteController) GetStore() *DeleteStore {
+func (c *DeleteController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
+func (c *DeleteController) GetStore() any {
 	return c.store
 }
 
@@ -65,7 +67,7 @@ func (c *DeleteController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *DeleteController) Run() (modelutils.Renderable, error) {
+func (c *DeleteController) Run() (config.Renderer, error) {
 
 	flags := c.config.GetFlags()
 	args := c.config.GetArgs()
@@ -91,9 +93,9 @@ func (c *DeleteController) Run() (modelutils.Renderable, error) {
 	return c, nil
 }
 
-func (c *DeleteController) Render() error {
+func (c *DeleteController) Render() (tea.Model, error) {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Profile deleted!")
-	return nil
+	return nil, nil
 }
 
 func NewDeleteCommand() *cobra.Command {
@@ -101,6 +103,6 @@ func NewDeleteCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
-		fctl.WithController[*DeleteStore](NewDeleteController(config)),
+		fctl.WithController(NewDeleteController(config)),
 	)
 }

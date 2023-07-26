@@ -2,12 +2,13 @@ package profiles
 
 import (
 	"flag"
-	"github.com/formancehq/fctl/pkg/config"
 
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/ui"
 
 	fctl "github.com/formancehq/fctl/pkg"
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -44,7 +45,7 @@ func NewListConfig() *config.ControllerConfig {
 	)
 }
 
-var _ config.Controller[*ListStore] = (*ListController)(nil)
+var _ config.Controller = (*ListController)(nil)
 
 type ListController struct {
 	store  *ListStore
@@ -57,8 +58,10 @@ func NewListController(config *config.ControllerConfig) *ListController {
 		config: config,
 	}
 }
-
-func (c *ListController) GetStore() *ListStore {
+func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
+func (c *ListController) GetStore() any {
 	return c.store
 }
 
@@ -66,7 +69,7 @@ func (c *ListController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ListController) Run() (modelutils.Renderable, error) {
+func (c *ListController) Run() (config.Renderer, error) {
 
 	flags := c.config.GetAllFLags()
 
@@ -74,13 +77,15 @@ func (c *ListController) Run() (modelutils.Renderable, error) {
 	if err != nil {
 		return nil, err
 	}
-	profiles := cfg.GetProfiles()
 
+	profiles := cfg.GetProfiles()
 	p := fctl.MapKeys(profiles)
+
 	currentProfileName := fctl.GetCurrentProfileName(flags, cfg)
 
-	for _, k := range p {
-		c.store.Profiles = append(c.store.Profiles, &Profile{
+	c.store.Profiles = make([]*Profile, len(p))
+	for i, k := range p {
+		c.store.Profiles[i] = &Profile{
 			Name: k,
 			Active: func(k string) string {
 				if currentProfileName == k {
@@ -88,34 +93,44 @@ func (c *ListController) Run() (modelutils.Renderable, error) {
 				}
 				return "No"
 			}(k),
-		})
+		}
 	}
 
 	return c, nil
 
 }
 
-func (c *ListController) Render() error {
-	tableData := fctl.Map(c.store.Profiles, func(p *Profile) []string {
+func (c *ListController) Render() (tea.Model, error) {
+	flags := c.config.GetAllFLags()
+	tableData := fctl.Map(c.store.Profiles, func(p *Profile) table.Row {
 		return []string{
 			p.Name,
 			p.Active,
 		}
 	})
-	tableData = fctl.Prepend(tableData, []string{"Name", "Active"})
 
-	pterm.DefaultTable.
-		WithHasHeader().
-		WithWriter(c.config.GetOut()).
-		WithData(tableData).
-		Render()
-	return nil
+	columns := ui.NewArrayColumn(
+		ui.NewColumn("Name", 10),
+		ui.NewColumn("Active", 20),
+	)
+
+	opts := ui.NewTableOptions(columns, tableData)
+
+	if config.GetString(flags, config.OutputFlag) == "plain" {
+		opt := ui.WithHeight(len(tableData))
+		// Add Deleted At column if --deleted flag is set
+		return ui.NewTableModel(columns, append(opts, opt)...), nil
+	}
+
+	opts = ui.NewTableOptions(ui.WithFullScreenTable(columns), tableData)
+
+	return ui.NewTableModel(columns, opts...), nil
 }
 
 func NewListCommand() *cobra.Command {
 	config := NewListConfig()
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithShortDescription(config.GetDescription()),
-		fctl.WithController[*ListStore](NewListController(config)),
+		fctl.WithController(NewListController(config)),
 	)
 }

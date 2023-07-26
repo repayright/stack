@@ -2,9 +2,9 @@ package profiles
 
 import (
 	"flag"
-	"github.com/formancehq/fctl/pkg/config"
 
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -46,7 +46,7 @@ func NewShowConfig() *config.ControllerConfig {
 
 }
 
-var _ config.Controller[*ShowStore] = (*ShowController)(nil)
+var _ config.Controller = (*ShowController)(nil)
 
 type ShowController struct {
 	store  *ShowStore
@@ -59,8 +59,10 @@ func NewShowController(config *config.ControllerConfig) *ShowController {
 		config: config,
 	}
 }
-
-func (c *ShowController) GetStore() *ShowStore {
+func (c *ShowController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
+func (c *ShowController) GetStore() any {
 	return c.store
 }
 
@@ -68,7 +70,7 @@ func (c *ShowController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *ShowController) Run() (modelutils.Renderable, error) {
+func (c *ShowController) Run() (config.Renderer, error) {
 
 	args := c.config.GetArgs()
 	if len(args) < 1 {
@@ -91,12 +93,12 @@ func (c *ShowController) Run() (modelutils.Renderable, error) {
 	return c, nil
 }
 
-func (c *ShowController) Render() error {
+func (c *ShowController) Render() (tea.Model, error) {
 
 	tableData := pterm.TableData{}
 	tableData = append(tableData, []string{pterm.LightCyan("Membership URI"), c.store.MembershipURI})
 	tableData = append(tableData, []string{pterm.LightCyan("Default organization"), c.store.DefaultOrganization})
-	return pterm.DefaultTable.
+	return nil, pterm.DefaultTable.
 		WithWriter(c.config.GetOut()).
 		WithData(tableData).
 		Render()
@@ -107,6 +109,6 @@ func NewShowCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
-		fctl.WithController[*ShowStore](NewShowController(config)),
+		fctl.WithController(NewShowController(config)),
 	)
 }

@@ -2,9 +2,9 @@ package profiles
 
 import (
 	"flag"
-	"github.com/formancehq/fctl/pkg/config"
 
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -39,7 +39,7 @@ func NewRenameConfig() *config.ControllerConfig {
 	)
 }
 
-var _ config.Controller[*RenameStore] = (*RenameController)(nil)
+var _ config.Controller = (*RenameController)(nil)
 
 type RenameController struct {
 	store  *RenameStore
@@ -53,15 +53,18 @@ func NewRenameController(config *config.ControllerConfig) *RenameController {
 	}
 }
 
-func (c *RenameController) GetStore() *RenameStore {
+func (c *RenameController) GetStore() any {
 	return c.store
 }
 
+func (c *RenameController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
 func (c *RenameController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *RenameController) Run() (modelutils.Renderable, error) {
+func (c *RenameController) Run() (config.Renderer, error) {
 	flags := c.config.GetFlags()
 	args := c.config.GetArgs()
 
@@ -95,9 +98,9 @@ func (c *RenameController) Run() (modelutils.Renderable, error) {
 	return c, nil
 }
 
-func (c *RenameController) Render() error {
+func (c *RenameController) Render() (tea.Model, error) {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Profile renamed!")
-	return nil
+	return nil, nil
 }
 
 func NewRenameCommand() *cobra.Command {
@@ -105,6 +108,6 @@ func NewRenameCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(2)),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
-		fctl.WithController[*RenameStore](NewRenameController(config)),
+		fctl.WithController(NewRenameController(config)),
 	)
 }

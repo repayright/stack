@@ -2,9 +2,9 @@ package profiles
 
 import (
 	"flag"
-	"github.com/formancehq/fctl/pkg/config"
 
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/formancehq/fctl/cmd/profiles/internal"
 	fctl "github.com/formancehq/fctl/pkg"
@@ -48,7 +48,7 @@ type UseController struct {
 	config *config.ControllerConfig
 }
 
-var _ config.Controller[*UseStore] = (*UseController)(nil)
+var _ config.Controller = (*UseController)(nil)
 
 func NewUseController(config *config.ControllerConfig) *UseController {
 	return &UseController{
@@ -57,7 +57,11 @@ func NewUseController(config *config.ControllerConfig) *UseController {
 	}
 }
 
-func (c *UseController) GetStore() *UseStore {
+func (c *UseController) GetKeyMapAction() *config.KeyMapHandler {
+	return nil
+}
+
+func (c *UseController) GetStore() any {
 	return c.store
 }
 
@@ -65,7 +69,7 @@ func (c *UseController) GetConfig() *config.ControllerConfig {
 	return c.config
 }
 
-func (c *UseController) Run() (modelutils.Renderable, error) {
+func (c *UseController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	args := c.config.GetArgs()
 
@@ -87,9 +91,9 @@ func (c *UseController) Run() (modelutils.Renderable, error) {
 	return c, nil
 }
 
-func (c *UseController) Render() error {
+func (c *UseController) Render() (tea.Model, error) {
 	pterm.Success.WithWriter(c.config.GetOut()).Printfln("Selected profile updated!")
-	return nil
+	return nil, nil
 }
 
 func NewUseCommand() *cobra.Command {
@@ -98,6 +102,6 @@ func NewUseCommand() *cobra.Command {
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.ExactArgs(1)),
 		fctl.WithValidArgsFunction(internal.ProfileCobraAutoCompletion),
-		fctl.WithController[*UseStore](NewUseController(config)),
+		fctl.WithController(NewUseController(config)),
 	)
 }
