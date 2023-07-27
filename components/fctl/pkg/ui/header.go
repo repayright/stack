@@ -49,6 +49,19 @@ func (h *Header) Init() tea.Cmd {
 }
 
 func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
+
+	var (
+		cmds []tea.Cmd
+		// cmd  tea.Cmd
+	)
+
+	// h.prompt, cmd = h.prompt.Update(msg)
+	// cmds = append(cmds, cmd)
+
+	// terminalWidth, terminalHeight, err := modelutils.GetTerminalSize()
+	// if err != nil {
+	// 	panic(err)
+	// }
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		headerStyle := lipgloss.NewStyle().Margin(1, 1, 1, 1)
@@ -85,12 +98,16 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 
 		text := lipgloss.NewStyle().Render(lipgloss.JoinHorizontal(lipgloss.Top, m...))
 		middleDiv := lipgloss.Place(middleDivSize, h.GetMaxPossibleHeight(), lipgloss.Center, lipgloss.Top, text)
-		h.rendered = headerStyle.Render(lipgloss.JoinHorizontal(lipgloss.Top, leftDiv, middleDiv, rightDiv))
+		// bottomDiv := lipgloss.Place(msg.Width-2, h.prompt.GetHeight(), lipgloss.Top, lipgloss.Top, h.prompt.View())
+		div := lipgloss.JoinHorizontal(lipgloss.Top, leftDiv, middleDiv, rightDiv)
+		// bloc := lipgloss.JoinVertical(lipgloss.Top, div, bottomDiv)
+		h.rendered = headerStyle.Render(div)
+		return h, tea.Batch(cmds...)
+	case tea.KeyMsg:
 
-		return h, nil
 	}
 
-	return h, nil
+	return h, tea.Batch(cmds...)
 }
 
 func (h *Header) View() string {

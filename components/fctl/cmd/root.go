@@ -30,7 +30,7 @@ func NewRootCommand() *cobra.Command {
 			//ui.NewCommand(),
 			//version.NewCommand(),
 			login.NewCommand(),
-			//NewPromptCommand(),
+			NewPromptCommand(),
 			//ledger.NewCommand(),
 			//payments.NewCommand(),
 			profiles.NewCommand(),

@@ -16,6 +16,7 @@ var instance *Display
 
 type Display struct {
 	header     *ui.Header
+	prompt     *ui.Prompt
 	controller config.Controller
 	renderer   modelutils.Model
 }
@@ -29,6 +30,7 @@ func NewDisplay() *Display {
 				header:     ui.NewHeader(),
 				controller: nil,
 				renderer:   nil,
+				prompt:     ui.NewPrompt(),
 			}
 		}
 	}
@@ -59,16 +61,14 @@ func (d *Display) GetKeyMapAction() *config.KeyMapHandler {
 }
 
 func (d *Display) Init() tea.Cmd {
-	var cmd tea.Cmd = nil
-	d.header.GetContext().SetFctlVersion(Version)
 	flags := d.controller.GetConfig().GetAllFLags()
 	config, err := GetConfig(flags)
-
 	if err != nil {
 		panic(err)
 	}
 
 	profiles := GetCurrentProfile(flags, config)
+	d.header.GetContext().SetFctlVersion(Version)
 	d.header.GetContext().SetOrg(profiles.defaultOrganization)
 	d.header.GetContext().SetProfile(config.currentProfile)
 
@@ -78,7 +78,7 @@ func (d *Display) Init() tea.Cmd {
 
 	}
 
-	cmd = d.header.Init()
+	cmd := d.header.Init()
 
 	if d.controller != nil {
 
@@ -96,7 +96,22 @@ func (d *Display) Init() tea.Cmd {
 		cmd = tea.Batch(cmd, m.Init())
 	}
 
-	return cmd
+	return tea.Batch(cmd, d.prompt.Init())
+}
+
+func (d *Display) GetChildrenHeight() int {
+	return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight()
+}
+
+func (d *Display) newBodyWindowMsg() (*tea.WindowSizeMsg, error) {
+	w, h, err := modelutils.GetTerminalSize()
+	if err != nil {
+		return nil, err
+	}
+	return &tea.WindowSizeMsg{
+		Width:  w,
+		Height: h - d.GetChildrenHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
+	}, nil
 }
 
 func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -107,20 +122,24 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if d.controller != nil {
 		switch msg := msg.(type) {
 		case tea.WindowSizeMsg:
-			w, h, err := modelutils.GetTerminalSize()
+
+			bodyMsg, err := d.newBodyWindowMsg()
 			if err != nil {
 				return d, tea.Quit
 			}
-			newMsg := tea.WindowSizeMsg{
-				Width:  w,
-				Height: h - d.header.GetMaxPossibleHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
-			}
-			//fmt.Fprintln(os.Stderr, "window size msg", msg.Height)
-			m, cmd := d.renderer.Update(newMsg)
+			m, cmd := d.renderer.Update(*bodyMsg)
 			if cmd != nil {
 				cmds = append(cmds, cmd)
 			}
 			d.renderer = m
+
+			p, cmd := d.prompt.Update(msg)
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+
+			d.prompt = p
+
 		case tea.KeyMsg:
 			if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
 				action := keyMapHandler.GetAction(tea.Key(msg))
@@ -152,7 +171,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 						newMsg := tea.WindowSizeMsg{
 							Width:  w,
-							Height: h - d.header.GetMaxPossibleHeight() - 4, //theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
+							Height: h - d.GetChildrenHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
 						}
 						m, cmd := d.renderer.Update(newMsg)
 						if cmd != nil {
@@ -167,6 +186,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							cmds = append(cmds, cmd)
 						}
 						d.header = header
+
 					}
 				}
 			}
@@ -177,13 +197,19 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			d.renderer = m
 		}
-
 	}
+
 	m, cmd := d.header.Update(msg)
 	if cmd != nil {
 		cmds = append(cmds, cmd)
 	}
 
+	p, cmd := d.prompt.Update(msg)
+	if cmd != nil {
+		cmds = append(cmds, cmd)
+	}
+
+	d.prompt = p
 	d.header = m
 	return d, tea.Batch(cmds...)
 }
@@ -202,6 +228,7 @@ func (d *Display) ResetKeyMapAction() *Display {
 func (d *Display) View() string {
 	var s = []string{
 		d.header.View(),
+		d.prompt.View(),
 	}
 
 	if d.controller != nil {

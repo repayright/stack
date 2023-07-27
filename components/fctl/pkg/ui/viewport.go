@@ -1,8 +1,9 @@
 package ui
 
 import (
-	"github.com/formancehq/fctl/pkg/config"
 	"io"
+
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -154,10 +155,6 @@ func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 	case tea.WindowSizeMsg:
-		//if !m.ready {
-		//	//w, h := theme.DocStyle.GetFrameSize()
-		//fmt.Println("Window size changed", msg)
-		//
 		m.vp.Width = msg.Width
 		m.vp.Height = msg.Height + 1
 
@@ -176,10 +173,6 @@ func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.vp.SetContent(str)
 
 	}
-
-	//m.vp, cmd = m.vp.Update(msg)
-	//
-	//cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }

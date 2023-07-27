@@ -3,9 +3,10 @@ package stack
 import (
 	"flag"
 	"fmt"
+	"net/http"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"net/http"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
@@ -55,7 +56,7 @@ func NewStackConfig() *config.ControllerConfig {
 	)
 }
 
-//var _ config.Controller[*CreateStore] = (*CreateController)(nil)
+var _ config.Controller = (*CreateController)(nil)
 
 type CreateController struct {
 	store   *CreateStore
@@ -215,9 +216,7 @@ func (c *CreateController) Render() (tea.Model, error) {
 }
 
 func NewCreateCommand() *cobra.Command {
-
 	config := NewStackConfig()
-
 	return fctl.NewCommand(config.GetUse(),
 		fctl.WithArgs(cobra.RangeArgs(0, 1)),
 		fctl.WithController(NewStackController(config)),
