@@ -3,11 +3,12 @@ package stack
 import (
 	"context"
 	"flag"
+	"os"
+	"time"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"os"
-	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/formancehq/fctl/membershipclient"
@@ -76,12 +77,14 @@ type ListController struct {
 	profile      *fctl.Profile
 	config       *config.ControllerConfig
 	organization string
+	keyMapAction *config.KeyMapHandler
 }
 
 func NewListController(config *config.ControllerConfig) *ListController {
 	return &ListController{
-		store:  NewListStore(),
-		config: config,
+		store:        NewListStore(),
+		config:       config,
+		keyMapAction: NewKeyMapAction(),
 	}
 }
 
@@ -208,9 +211,8 @@ func (c *ListController) Render() (tea.Model, error) {
 	return ui.NewTableModel(columns, opts...), nil
 }
 
-func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
-	k := config.NewKeyMapHandler()
-	k.AddNewKeyBinding(
+func NewKeyMapAction() *config.KeyMapHandler {
+	return config.NewKeyMapHandler().AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("q", "esc", "ctrl+c"),
 			key.WithHelp("q", "Quit the application"),
@@ -218,8 +220,7 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 		func(m tea.Model) config.Controller {
 			return nil
 		},
-	)
-	k.AddNewKeyBinding(
+	).AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("up", "k"),
 			key.WithHelp("up/k", "move up"),
@@ -227,8 +228,7 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 		func(m tea.Model) config.Controller {
 			return nil
 		},
-	)
-	k.AddNewKeyBinding(
+	).AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("down", "j"),
 			key.WithHelp("down/j", "move down"),
@@ -236,8 +236,7 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 		func(m tea.Model) config.Controller {
 			return nil
 		},
-	)
-	k.AddNewKeyBinding(
+	).AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("?"),
 			key.WithHelp("? ", "Toggle help"),
@@ -245,8 +244,7 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 		func(m tea.Model) config.Controller {
 			return nil
 		},
-	)
-	k.AddNewKeyBinding(
+	).AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "show selected item"),
@@ -275,7 +273,10 @@ func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
 			return controller
 		},
 	)
-	return k
+}
+
+func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
+	return c.keyMapAction
 }
 
 func NewListCommand() *cobra.Command {

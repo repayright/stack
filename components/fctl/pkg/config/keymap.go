@@ -64,11 +64,3 @@ func (k *KeyMapHandler) View() string {
 
 	return s
 }
-
-func (k *KeyMapHandler) Copy() *KeyMapHandler {
-	newKeyMap := NewKeyMapHandler()
-	for keyBind, action := range k.keyMapsAction {
-		newKeyMap.AddNewKeyBinding(*keyBind, action)
-	}
-	return newKeyMap
-}

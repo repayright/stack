@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/formancehq/fctl/pkg/config"
 	"io"
 	"strconv"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/TylerBrock/colorjson"
 	"github.com/formancehq/fctl/membershipclient"
@@ -400,7 +401,6 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer) error {
 		}
 
 		d.SetController(c)
-		d.Init()
 
 		if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
 			return err

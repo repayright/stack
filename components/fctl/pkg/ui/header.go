@@ -32,6 +32,10 @@ func (h *Header) GetContext() *Context {
 	return h.fctlContext
 }
 
+func (h *Header) GetModelList() []*list.PointList {
+	return h.modelAction
+}
+
 func (h *Header) AddModel(model *list.PointList) *Header {
 	h.modelAction = append(h.modelAction, model)
 	return h
@@ -55,13 +59,6 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 		// cmd  tea.Cmd
 	)
 
-	// h.prompt, cmd = h.prompt.Update(msg)
-	// cmds = append(cmds, cmd)
-
-	// terminalWidth, terminalHeight, err := modelutils.GetTerminalSize()
-	// if err != nil {
-	// 	panic(err)
-	// }
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		headerStyle := lipgloss.NewStyle().Margin(1, 1, 1, 1)
