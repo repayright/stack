@@ -130,6 +130,8 @@ func (h *Header) SetKeyBinding(keys ...*config.KeyMapHandler) *Header {
 		buffer = append(buffer, s...)
 	}
 
+	// sort.Strings(buffer)
+
 	// Get the number of list to create
 	n := math.Ceil(float64(len((buffer))) / float64(maxHeigth))
 	i := int(n)
@@ -162,11 +164,9 @@ func (h *Header) SetKeyBinding(keys ...*config.KeyMapHandler) *Header {
 	}
 
 	h.modelAction = make([]*list.PointList, 0)
-
 	for _, o := range out {
 		pl := list.NewPointList(o...)
 		h.AddModel(pl)
 	}
-
 	return h
 }

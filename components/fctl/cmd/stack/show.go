@@ -3,9 +3,10 @@ package stack
 import (
 	"flag"
 	"fmt"
+	"net/http"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"net/http"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
@@ -57,12 +58,15 @@ type ShowController struct {
 	store      *ShowStore
 	config     *config.ControllerConfig
 	fctlConfig *fctl.Config
+
+	keymap *config.KeyMapHandler
 }
 
-func NewShowController(config *config.ControllerConfig) *ShowController {
+func NewShowController(conf *config.ControllerConfig) *ShowController {
 	return &ShowController{
 		store:  NewShowStore(),
-		config: config,
+		config: conf,
+		keymap: config.NewKeyMapHandler(),
 	}
 }
 
@@ -71,7 +75,7 @@ func (c *ShowController) GetStore() any {
 }
 
 func (c *ShowController) GetKeyMapAction() *config.KeyMapHandler {
-	return nil
+	return c.keymap
 }
 func (c *ShowController) GetConfig() *config.ControllerConfig {
 	return c.config

@@ -50,16 +50,18 @@ var _ config.Controller = (*ListController)(nil)
 type ListController struct {
 	store  *ListStore
 	config *config.ControllerConfig
+	keymap *config.KeyMapHandler
 }
 
-func NewListController(config *config.ControllerConfig) *ListController {
+func NewListController(conf *config.ControllerConfig) *ListController {
 	return &ListController{
 		store:  NewListStore(),
-		config: config,
+		config: conf,
+		keymap: config.NewKeyMapHandler(),
 	}
 }
 func (c *ListController) GetKeyMapAction() *config.KeyMapHandler {
-	return nil
+	return c.keymap
 }
 func (c *ListController) GetStore() any {
 	return c.store

@@ -56,7 +56,6 @@ func (d *Display) ResetModels() *Display {
 }
 
 func (d *Display) Init() tea.Cmd {
-
 	flags := d.controller.GetConfig().GetAllFLags()
 	conf, err := GetConfig(flags)
 	if err != nil {
@@ -74,60 +73,37 @@ func (d *Display) Init() tea.Cmd {
 
 	}
 
-	cmd := d.header.Init()
-	d.controller.GetKeyMapAction().AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("p"),
-			key.WithHelp("p", "Turn on the prompt"),
-		),
-		func(model tea.Model) config.Controller {
-			if d.prompt.IsFocused() {
-				return nil
-			}
-			d.prompt.SwitchFocus()
-			d.ResetKeyMapAction()
-			d.Update(*d.lastTerminalSize)
-			return nil
-		},
-	)
+	d.controller.GetKeyMapAction()
+	d.addControllerPromptKeyBinding(d.controller)
+
 	renderer, err := d.controller.Run()
 	if err != nil {
-		panic(err)
+		return tea.Quit
 	}
 
-	m, err := renderer.Render()
+	body, err := renderer.Render()
 	if err != nil {
-		panic(err)
+		return tea.Quit
 	}
 
-	d.renderer = m
-	cmd = tea.Batch(cmd, m.Init())
-
-	pCmd := d.prompt.Init()
-	if pCmd != nil {
-		cmd = tea.Batch(cmd, pCmd)
-	}
+	d.renderer = body
 
 	msg, err := d.newBodyWindowMsg()
 	if err != nil {
-		panic(err)
+		return tea.Quit
 	}
 
+	// This is needed to set the width of the prompt
 	d.prompt.SetWidth(msg.Width)
-	d.prompt.GetKeyMapAction().AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("exit"),
-			key.WithHelp("exit", "Quit the prompt"),
-		),
-		func(model tea.Model) config.Controller {
-			d.prompt.SwitchFocus()
-			d.ResetKeyMapAction()
-			return nil
-		},
-	)
+	d.addPromptExitKeyBinding()
 
-	d.ResetKeyMapAction()
-	return cmd
+	// Generate
+	d.GenerateKeyMapAction()
+	return tea.Batch(
+		d.header.Init(),
+		d.prompt.Init(),
+		body.Init(),
+	)
 }
 
 func (d *Display) GetChildrenHeight() int {
@@ -148,6 +124,39 @@ func (d *Display) newBodyWindowMsg() (*tea.WindowSizeMsg, error) {
 		Width:  w,
 		Height: h - d.GetChildrenHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
 	}, nil
+}
+
+func (d *Display) addControllerPromptKeyBinding(c config.Controller) {
+
+	c.GetKeyMapAction().AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("p"),
+			key.WithHelp("p", "Turn on the prompt"),
+		),
+		func(model tea.Model) config.Controller {
+			if d.prompt.IsFocused() {
+				return nil
+			}
+			d.prompt.SwitchFocus()
+			d.GenerateKeyMapAction()
+			d.Update(*d.lastTerminalSize)
+			return nil
+		},
+	)
+}
+
+func (d *Display) addPromptExitKeyBinding() {
+	d.prompt.GetKeyMapAction().AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("exit"),
+			key.WithHelp("exit", "quit the prompt"),
+		),
+		func(model tea.Model) config.Controller {
+			d.prompt.SwitchFocus()
+			d.GenerateKeyMapAction()
+			return nil
+		},
+	)
 }
 
 func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -196,24 +205,16 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						return d, tea.Quit
 					}
 
-					// A controller keymap action does not always return a model
-					if model == nil {
-						return d, nil
-					}
-
 					// At this point we are sure that the model is generated
 					d.renderer = model
-					newMsg, err := d.newBodyWindowMsg()
-					if err != nil {
-						return d, nil
-					}
+					cmds = append(cmds, func() tea.Msg {
+						d.renderer.Init()
+						d.addControllerPromptKeyBinding(d.controller)
+						d.GenerateKeyMapAction()
+						d.Update(*d.lastTerminalSize)
+						return nil
 
-					m, cmd := d.renderer.Update(newMsg)
-					if cmd != nil {
-						cmds = append(cmds, cmd)
-					}
-					d.renderer = m
-					d.ResetKeyMapAction()
+					})
 
 				}
 			}
@@ -225,14 +226,9 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.renderer = m
 	case modelutils.BlurMsg:
 		cmds = append(cmds, func() tea.Msg {
-			d.ResetKeyMapAction()
+			d.GenerateKeyMapAction()
 			d.Update(*d.lastTerminalSize)
-			msg, err := d.newBodyWindowMsg()
-			if err != nil {
-				return tea.Quit
-			}
-
-			return msg
+			return nil
 
 		})
 	}
@@ -240,8 +236,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return d, tea.Sequence(cmds...)
 }
 
-func (d *Display) ResetKeyMapAction() *Display {
-	d.header.ResetBinding()
+func (d *Display) GenerateKeyMapAction() *Display {
 	if d.prompt.IsFocused() {
 		if handler := d.prompt.GetKeyMapAction(); handler != nil {
 			d.header.SetKeyBinding(handler)
@@ -257,6 +252,7 @@ func (d *Display) ResetKeyMapAction() *Display {
 
 	}
 
+	d.header.ResetBinding()
 	return d
 }
 

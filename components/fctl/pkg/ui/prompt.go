@@ -78,6 +78,19 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 			return p, func() tea.Msg {
 				return modelutils.BlurMsg{}
 			}
+		case "profiles":
+			p.model.Reset()
+			p.model.Blur()
+			// config := profiles.NewListConfig()
+			// config.SetOut(config.GetOut())
+			// config.SetContext(config.GetContext())
+			// controller := profiles.NewListController(config)
+			return p, func() tea.Msg {
+				// return modelutils.ChangeViewMsg{
+				// 	controller: controller,
+				// }
+				return nil
+			}
 		}
 	}
 

@@ -390,19 +390,13 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer) error {
 	case "dynamic":
 
 		d := NewDisplay()
-
-		m, err := r.Render()
-		if err != nil {
-			return err
-		}
-
-		if m == nil { // If the renderer returns nil, we don't want to render anything
-			return nil
-		}
-
 		d.SetController(c)
 
-		if _, err := tea.NewProgram(d, tea.WithAltScreen()).Run(); err != nil {
+		if _, err := tea.NewProgram(
+			d,
+			tea.WithAltScreen(),
+			tea.WithContext(getConfig.GetContext()),
+		).Run(); err != nil {
 			return err
 		}
 

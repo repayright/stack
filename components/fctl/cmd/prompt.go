@@ -5,12 +5,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/formancehq/fctl/pkg/config"
 	"io"
 	"os"
 	"runtime/debug"
 	"sort"
 	"strings"
+
+	"github.com/formancehq/fctl/pkg/config"
 
 	_ "github.com/athul/shelby/mods"
 	goprompt "github.com/c-bata/go-prompt"
