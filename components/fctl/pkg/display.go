@@ -1,6 +1,7 @@
 package fctl
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -8,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/ui/helpers"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
@@ -21,7 +23,12 @@ type Display struct {
 	controller config.Controller
 	renderer   modelutils.Model
 
-	lastTerminalSize *tea.WindowSizeMsg
+	confirm *ui.Confirm
+
+	lastBodySize *tea.WindowSizeMsg
+	lastTermSize *tea.WindowSizeMsg
+
+	rendered string
 }
 
 func NewDisplay() *Display {
@@ -120,6 +127,7 @@ func (d *Display) newBodyWindowMsg() (*tea.WindowSizeMsg, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &tea.WindowSizeMsg{
 		Width:  w,
 		Height: h - d.GetChildrenHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
@@ -139,7 +147,7 @@ func (d *Display) addControllerPromptKeyBinding(c config.Controller) {
 			}
 			d.prompt.SwitchFocus()
 			d.GenerateKeyMapAction()
-			d.Update(*d.lastTerminalSize)
+			d.Update(*d.lastBodySize)
 			return nil
 		},
 	)
@@ -181,7 +189,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return d, tea.Quit
 		}
 
-		d.lastTerminalSize = bodyMsg
+		d.lastBodySize = bodyMsg
 		m, cmd := d.renderer.Update(*bodyMsg)
 		if cmd != nil {
 			cmds = append(cmds, cmd)
@@ -211,7 +219,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						d.renderer.Init()
 						d.addControllerPromptKeyBinding(d.controller)
 						d.GenerateKeyMapAction()
-						d.Update(*d.lastTerminalSize)
+						d.Update(*d.lastBodySize)
 						return nil
 
 					})
@@ -227,12 +235,13 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case modelutils.BlurMsg:
 		cmds = append(cmds, func() tea.Msg {
 			d.GenerateKeyMapAction()
-			d.Update(*d.lastTerminalSize)
+			d.Update(*d.lastBodySize)
 			return nil
 
 		})
 	}
 
+	d.Render()
 	return d, tea.Sequence(cmds...)
 }
 
@@ -268,7 +277,7 @@ func (d *Display) GetKeyMapAction() *config.KeyMapHandler {
 
 }
 
-func (d *Display) View() string {
+func (d *Display) Render() string {
 	var s = []string{
 		d.header.View(),
 	}
@@ -281,5 +290,27 @@ func (d *Display) View() string {
 		s = append(s, d.renderer.View())
 	}
 
-	return lipgloss.JoinVertical(lipgloss.Top, s...)
+	screen := lipgloss.JoinVertical(lipgloss.Top, s...)
+	d.rendered = screen
+
+	if d.confirm == nil {
+		return d.rendered
+	}
+
+	cfimView := d.confirm.View()
+	box := lipgloss.Place(20, 10, lipgloss.Center, lipgloss.Center, cfimView)
+
+	w, h, err := modelutils.GetTerminalSize()
+	if err != nil {
+		panic(err)
+	}
+	str := helpers.PlaceOverlay(w/2-10, h/2-5, box, screen, false)
+
+	d.rendered = fmt.Sprint(str)
+
+	return d.rendered
+}
+
+func (d *Display) View() string {
+	return d.rendered
 }
