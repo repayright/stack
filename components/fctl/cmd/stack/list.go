@@ -272,6 +272,34 @@ func NewKeyMapAction() *config.KeyMapHandler {
 
 			return controller
 		},
+	).AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("ctrl+d"),
+			key.WithHelp("ctrl+d", "delete selected item"),
+		),
+		func(m tea.Model) config.Controller {
+			//Cast model to table.Model
+			t, ok := m.(ui.TableModel)
+			if !ok {
+				panic("invalid model type")
+				return nil
+			}
+
+			selectedRow := t.SelectedRow()
+			if selectedRow == nil || selectedRow[1] == "" {
+				return nil
+			}
+
+			id := selectedRow[1]
+
+			c := NewShowControllerConfig()
+			controller := NewShowController(c)
+			c.SetOut(os.Stdout)
+			c.SetContext(context.TODO())
+			c.SetArgs([]string{id})
+
+			return controller
+		},
 	)
 }
 

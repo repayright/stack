@@ -11,11 +11,11 @@ func NewCommand() *cobra.Command {
 		fctl.WithShortDescription("Manage your stack"),
 		fctl.WithAliases("stack", "stacks", "st"),
 		fctl.WithChildCommands(
-			// NewCreateCommand(),
+			NewCreateCommand(),
 			NewListCommand(),
-			//NewDeleteCommand(),
+			NewDeleteCommand(),
 			NewShowCommand(),
-			//NewRestoreStackCommand(),
+			NewRestoreStackCommand(),
 		),
 		fctl.WithCommandScopesFlags(config.Organization),
 	)

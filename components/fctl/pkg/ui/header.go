@@ -100,8 +100,6 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 		// bloc := lipgloss.JoinVertical(lipgloss.Top, div, bottomDiv)
 		h.rendered = headerStyle.Render(div)
 		return h, tea.Batch(cmds...)
-	case tea.KeyMsg:
-
 	}
 
 	return h, tea.Batch(cmds...)

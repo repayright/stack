@@ -340,7 +340,7 @@ func WithController(c config.Controller) CommandOptionFn {
 				return err
 			}
 
-			err = render(controllerConfig.GetPFlags(), c, renderer)
+			err = render(controllerConfig.GetPFlags(), c, renderer, cmd)
 
 			if err != nil {
 				return err
@@ -350,7 +350,8 @@ func WithController(c config.Controller) CommandOptionFn {
 		}
 	}
 }
-func render(flags *flag.FlagSet, c config.Controller, r config.Renderer) error {
+
+func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *cobra.Command) error {
 	f := config.GetString(flags, config.OutputFlag)
 	getConfig := c.GetConfig()
 	outWriter := getConfig.GetOut()
@@ -389,7 +390,7 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer) error {
 		}
 	case "dynamic":
 
-		d := NewDisplay()
+		d := NewDisplay(cmd)
 		d.SetController(c)
 
 		if _, err := tea.NewProgram(
