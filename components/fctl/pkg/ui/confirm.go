@@ -22,7 +22,7 @@ func (c Confirm) GetKeyMapAction() *config.KeyMapHandler {
 }
 func (c Confirm) View() string {
 
-	style := lipgloss.NewStyle().Foreground(theme.SelectedColorForegroundBackground).Width(20).Align(lipgloss.Center).Border(lipgloss.NormalBorder())
+	style := lipgloss.NewStyle().Foreground(theme.SelectedColorForegroundBackground).Width(20).Height(10).Align(lipgloss.Center).AlignVertical(lipgloss.Center).Border(lipgloss.NormalBorder())
 
 	return style.Render("Are you sure ?")
 }

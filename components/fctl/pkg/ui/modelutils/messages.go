@@ -2,16 +2,21 @@ package modelutils
 
 import "github.com/formancehq/fctl/pkg/config"
 
+type OpenPromptMsg struct{}
+type ClosePromptMsg struct{}
+
 type BlurMsg struct{}
 
+type ChangeContextMsg struct{}
+
 type ChangeViewMsg struct {
-	controller config.Controller
+	Controller config.Controller
 }
 
 type ConfirmAskMsg struct {
-	question string
+	Question string
 }
 
 type ConfirmMsg struct {
-	confirm bool
+	Confirm bool
 }

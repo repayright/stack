@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/formancehq/fctl/membershipclient"
@@ -214,18 +215,10 @@ func (c *ListController) Render() (tea.Model, error) {
 func NewKeyMapAction() *config.KeyMapHandler {
 	return config.NewKeyMapHandler().AddNewKeyBinding(
 		key.NewBinding(
-			key.WithKeys("q", "esc", "ctrl+c"),
-			key.WithHelp("q", "Quit the application"),
-		),
-		func(m tea.Model) config.Controller {
-			return nil
-		},
-	).AddNewKeyBinding(
-		key.NewBinding(
 			key.WithKeys("up", "k"),
 			key.WithHelp("up/k", "move up"),
 		),
-		func(m tea.Model) config.Controller {
+		func(m tea.Model) tea.Msg {
 			return nil
 		},
 	).AddNewKeyBinding(
@@ -233,7 +226,7 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			key.WithKeys("down", "j"),
 			key.WithHelp("down/j", "move down"),
 		),
-		func(m tea.Model) config.Controller {
+		func(m tea.Model) tea.Msg {
 			return nil
 		},
 	).AddNewKeyBinding(
@@ -241,7 +234,7 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			key.WithKeys("?"),
 			key.WithHelp("? ", "Toggle help"),
 		),
-		func(m tea.Model) config.Controller {
+		func(m tea.Model) tea.Msg {
 			return nil
 		},
 	).AddNewKeyBinding(
@@ -249,7 +242,7 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "show selected item"),
 		),
-		func(m tea.Model) config.Controller {
+		func(m tea.Model) tea.Msg {
 			//Cast model to table.Model
 			t, ok := m.(ui.TableModel)
 			if !ok {
@@ -277,7 +270,7 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			key.WithKeys("ctrl+d"),
 			key.WithHelp("ctrl+d", "delete selected item"),
 		),
-		func(m tea.Model) config.Controller {
+		func(m tea.Model) tea.Msg {
 			//Cast model to table.Model
 			t, ok := m.(ui.TableModel)
 			if !ok {
@@ -298,7 +291,9 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			c.SetContext(context.TODO())
 			c.SetArgs([]string{id})
 
-			return controller
+			return modelutils.ChangeViewMsg{
+				Controller: controller,
+			}
 		},
 	)
 }

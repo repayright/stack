@@ -3,8 +3,6 @@ package ui
 import (
 	"io"
 
-	"github.com/formancehq/fctl/pkg/config"
-
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -21,11 +19,10 @@ type ModelManager struct {
 func (m ModelManager) Init() tea.Cmd {
 	return nil
 }
-func (m ModelManager) GetListKeyMapHandler() *config.KeyMapHandler {
-	k := config.NewKeyMapHandler()
 
-	return k
-}
+//	func (m ModelManager) GetListKeyMapHandler() *config.KeyMapHandler {
+//		return m.keyMapAction
+//	}
 func NewViewPortManager(content string, out io.Writer) (*ModelManager, error) {
 	width := theme.ViewWidth
 	vp := viewport.New(width, theme.ViewHeight)
@@ -36,9 +33,10 @@ func NewViewPortManager(content string, out io.Writer) (*ModelManager, error) {
 	// vp.HighPerformanceRendering = true
 
 	vp.Style = theme.WindowStyle
+	vp.MouseWheelEnabled = false
 
 	renderer, err := glamour.NewTermRenderer(
-		//glamour.WithAutoStyle(),
+		glamour.WithAutoStyle(),
 		glamour.WithWordWrap(width),
 	)
 
@@ -66,19 +64,19 @@ func (m ModelManager) View() string {
 func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var (
-		//cmd  tea.Cmd
+		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
+	m.vp, cmd = m.vp.Update(msg)
+	if cmd != nil {
+		cmds = append(cmds, cmd)
+	}
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "ctrl+c", "esc":
+		case "ctrl+c", "esc":
 			return m, tea.Quit
-		default:
-			var cmd tea.Cmd
-			m.vp, cmd = m.vp.Update(msg)
-			return m, cmd
 		}
 	case tea.WindowSizeMsg:
 		m.vp.Width = msg.Width

@@ -8,6 +8,7 @@ import (
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/hbollon/go-edlib"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +32,7 @@ func NewPrompt(cmd *cobra.Command) *Prompt {
 				key.WithKeys("enter"),
 				key.WithHelp("enter", "Validate the prompt"),
 			),
-			func(model tea.Model) config.Controller {
+			func(model tea.Model) tea.Msg {
 				return nil
 			},
 		),
@@ -83,6 +84,7 @@ func (p *Prompt) Init() tea.Cmd {
 
 func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 	var cmd tea.Cmd
+
 	p.model, cmd = p.model.Update(msg)
 
 	switch msg := msg.(type) {
@@ -116,27 +118,27 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 			p.lastInput = v
 			p.suggestions = nil
 
-			// go func() {
-			// 	//Get map keys
-			// 	rootCmd := p.dataset.Root()
-			// 	flatCommandtree, descsMap := getTreeCommand(rootCmd)
-			// 	// Cosine distance OK
-			// 	// Levenshtein distance OK
-			// 	res, err := edlib.FuzzySearchSetThreshold(v, flatCommandtree, 4, 0.3, edlib.Cosine)
-			// 	if err != nil || len(res) == 0 {
-			// 		return
-			// 	}
+			go func() {
+				//Get map keys
+				rootCmd := p.dataset.Root()
+				flatCommandtree, descsMap := getTreeCommand(rootCmd)
+				// Cosine distance OK
+				// Levenshtein distance OK
+				res, err := edlib.FuzzySearchSetThreshold(v, flatCommandtree, 4, 0.3, edlib.Cosine)
+				if err != nil || len(res) == 0 {
+					return
+				}
 
-			// 	var rows []*list.HorizontalItem = make([]*list.HorizontalItem, 0)
-			// 	for _, r := range res {
-			// 		if r == "" {
-			// 			continue
-			// 		}
-			// 		item := list.NewHorizontalItem(r, descsMap[r])
-			// 		rows = append(rows, item)
-			// 	}
-			// 	p.suggestions = rows
-			// }()
+				var rows []*list.HorizontalItem = make([]*list.HorizontalItem, 0)
+				for _, r := range res {
+					if r == "" {
+						continue
+					}
+					item := list.NewHorizontalItem(r, descsMap[r])
+					rows = append(rows, item)
+				}
+				p.suggestions = rows
+			}()
 
 		}
 	}

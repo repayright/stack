@@ -7,20 +7,20 @@ import (
 )
 
 type KeyMapHandler struct {
-	keyMapsAction map[*key.Binding]func(tea.Model) Controller
+	keyMapsAction map[*key.Binding]func(tea.Model) tea.Msg
 }
 
 func NewKeyMapHandler() *KeyMapHandler {
 	return &KeyMapHandler{
-		keyMapsAction: make(map[*key.Binding]func(tea.Model) Controller),
+		keyMapsAction: make(map[*key.Binding]func(tea.Model) tea.Msg),
 	}
 }
 
-func (k *KeyMapHandler) GetKeyMapAction() map[*key.Binding]func(tea.Model) Controller {
+func (k *KeyMapHandler) GetKeyMapAction() map[*key.Binding]func(tea.Model) tea.Msg {
 	return k.keyMapsAction
 }
 
-func (k *KeyMapHandler) GetAction(teaKey tea.Key) func(tea.Model) Controller {
+func (k *KeyMapHandler) GetAction(teaKey tea.Key) func(tea.Model) tea.Msg {
 	for keyBind := range k.keyMapsAction {
 		if collectionutils.Contains(keyBind.Keys(), teaKey.String()) {
 			return k.keyMapsAction[keyBind]
@@ -37,13 +37,13 @@ func (k *KeyMapHandler) GetListKeys() []*key.Binding {
 	return keys
 }
 
-func (k *KeyMapHandler) AddNewKeyBinding(key key.Binding, action func(tea.Model) Controller) *KeyMapHandler {
+func (k *KeyMapHandler) AddNewKeyBinding(key key.Binding, action func(tea.Model) tea.Msg) *KeyMapHandler {
 	k.keyMapsAction[&key] = action
 	return k
 }
 
 func (k *KeyMapHandler) Reset() *KeyMapHandler {
-	k.keyMapsAction = make(map[*key.Binding]func(tea.Model) Controller)
+	k.keyMapsAction = make(map[*key.Binding]func(tea.Model) tea.Msg)
 	return k
 }
 

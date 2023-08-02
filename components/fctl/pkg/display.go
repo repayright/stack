@@ -10,8 +10,10 @@ import (
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/fctl/pkg/ui/helpers"
+	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/theme"
+	"github.com/spf13/cobra"
 )
 
 var lock = &sync.Mutex{}
@@ -26,12 +28,12 @@ type Display struct {
 	confirm *ui.Confirm
 
 	lastBodySize *tea.WindowSizeMsg
-	lastTermSize *tea.WindowSizeMsg
+	lastTermSize tea.WindowSizeMsg
 
 	rendered string
 }
 
-func NewDisplay() *Display {
+func NewDisplay(cmd *cobra.Command) *Display {
 	if instance == nil {
 		lock.Lock()
 		defer lock.Unlock()
@@ -40,7 +42,8 @@ func NewDisplay() *Display {
 				header:     ui.NewHeader(),
 				controller: nil,
 				renderer:   nil,
-				prompt:     ui.NewPrompt(),
+				prompt:     ui.NewPrompt(cmd),
+				confirm:    ui.NewConfirm(),
 			}
 		}
 	}
@@ -63,6 +66,10 @@ func (d *Display) ResetModels() *Display {
 }
 
 func (d *Display) Init() tea.Cmd {
+	d.addControllerPromptKeyBinding(d.controller)
+	d.addPromptExitKeyBinding()
+	d.GenerateKeyMapAction()
+
 	flags := d.controller.GetConfig().GetAllFLags()
 	conf, err := GetConfig(flags)
 	if err != nil {
@@ -79,9 +86,6 @@ func (d *Display) Init() tea.Cmd {
 		d.header = d.header.SetKeyBinding(keys)
 
 	}
-
-	d.controller.GetKeyMapAction()
-	d.addControllerPromptKeyBinding(d.controller)
 
 	renderer, err := d.controller.Run()
 	if err != nil {
@@ -102,10 +106,7 @@ func (d *Display) Init() tea.Cmd {
 
 	// This is needed to set the width of the prompt
 	d.prompt.SetWidth(msg.Width)
-	d.addPromptExitKeyBinding()
 
-	// Generate
-	d.GenerateKeyMapAction()
 	return tea.Batch(
 		d.header.Init(),
 		d.prompt.Init(),
@@ -135,20 +136,24 @@ func (d *Display) newBodyWindowMsg() (*tea.WindowSizeMsg, error) {
 }
 
 func (d *Display) addControllerPromptKeyBinding(c config.Controller) {
-
 	c.GetKeyMapAction().AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("p"),
 			key.WithHelp("p", "Turn on the prompt"),
 		),
-		func(model tea.Model) config.Controller {
+		func(model tea.Model) tea.Msg {
 			if d.prompt.IsFocused() {
 				return nil
 			}
-			d.prompt.SwitchFocus()
-			d.GenerateKeyMapAction()
-			d.Update(*d.lastBodySize)
-			return nil
+			return modelutils.OpenPromptMsg{}
+		},
+	).AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("ctrl+c", "esc"),
+			key.WithHelp("ctrl+c", "Exit program"),
+		),
+		func(m tea.Model) tea.Msg {
+			return tea.QuitMsg{}
 		},
 	)
 }
@@ -159,10 +164,16 @@ func (d *Display) addPromptExitKeyBinding() {
 			key.WithKeys("exit"),
 			key.WithHelp("exit", "quit the prompt"),
 		),
-		func(model tea.Model) config.Controller {
-			d.prompt.SwitchFocus()
-			d.GenerateKeyMapAction()
-			return nil
+		func(model tea.Model) tea.Msg {
+			return modelutils.ClosePromptMsg{}
+		},
+	).AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("ctrl+c", "esc"),
+			key.WithHelp("ctrl+c", "Exit program"),
+		),
+		func(m tea.Model) tea.Msg {
+			return tea.QuitMsg{}
 		},
 	)
 }
@@ -171,17 +182,14 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmds []tea.Cmd
 	)
-	p, cmd := d.prompt.Update(msg)
-	if cmd != nil {
-		cmds = append(cmds, cmd)
-	}
-	d.prompt = p
+
 	m, cmd := d.header.Update(msg)
 	if cmd != nil {
 		cmds = append(cmds, cmd)
 	}
 
 	d.header = m
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		bodyMsg, err := d.newBodyWindowMsg()
@@ -190,58 +198,94 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		d.lastBodySize = bodyMsg
+		d.lastTermSize = msg
+
 		m, cmd := d.renderer.Update(*bodyMsg)
 		if cmd != nil {
 			cmds = append(cmds, cmd)
 		}
 		d.renderer = m
+	case modelutils.ChangeViewMsg:
+		d.controller = msg.Controller
+		renderer, err := d.controller.Run()
+		if err != nil {
+			return d, tea.Quit
+		}
 
+		model, err := renderer.Render()
+		if err != nil {
+			return d, tea.Quit
+		}
+
+		// At this point we are sure that the model is generated
+		d.renderer = model
+		d.renderer.Init()
+		d.addControllerPromptKeyBinding(d.controller)
+		d.GenerateKeyMapAction()
+		cmds = append(cmds, func() tea.Msg {
+			return d.lastTermSize
+		})
+	case modelutils.OpenPromptMsg:
+		d.prompt.SwitchFocus()
+		d.GenerateKeyMapAction()
+		cmds = append(cmds, func() tea.Msg {
+			// w, h, err := modelutils.GetTerminalSize()
+			// if err != nil {
+			// 	return tea.Quit
+			// }
+
+			return tea.WindowSizeMsg{}
+		})
+	case modelutils.ClosePromptMsg:
+		d.prompt.SwitchFocus()
+		d.GenerateKeyMapAction()
+		cmds = append(cmds, func() tea.Msg {
+			// w, h, err := modelutils.GetTerminalSize()
+			// if err != nil {
+			// 	return tea.Quit
+			// }
+
+			return tea.WindowSizeMsg{}
+		})
 	case tea.KeyMsg:
-		if keyMapHandler := d.controller.GetKeyMapAction(); !d.prompt.IsFocused() && keyMapHandler != nil {
+		if d.prompt.IsFocused() {
+			break
+		}
+		if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
 			action := keyMapHandler.GetAction(tea.Key(msg))
 			if action != nil {
-				controller := action(d.renderer)
-				if controller != nil {
-					d.controller = controller
-					renderer, err := d.controller.Run()
-					if err != nil {
-						return d, tea.Quit
-					}
-
-					model, err := renderer.Render()
-					if err != nil {
-						return d, tea.Quit
-					}
-
-					// At this point we are sure that the model is generated
-					d.renderer = model
+				newMsg := action(d.renderer)
+				if newMsg != nil {
 					cmds = append(cmds, func() tea.Msg {
-						d.renderer.Init()
-						d.addControllerPromptKeyBinding(d.controller)
-						d.GenerateKeyMapAction()
-						d.Update(*d.lastBodySize)
-						return nil
-
+						return newMsg
 					})
-
 				}
 			}
 		}
+
 		m, cmd := d.renderer.Update(msg)
 		if cmd != nil {
 			cmds = append(cmds, cmd)
 		}
 		d.renderer = m
-	case modelutils.BlurMsg:
-		cmds = append(cmds, func() tea.Msg {
-			d.GenerateKeyMapAction()
-			d.Update(*d.lastBodySize)
-			return nil
 
-		})
+		// case modelutils.BlurMsg:
+		// 	cmds = append(cmds, func() tea.Msg {
+		// 		d.GenerateKeyMapAction()
+		// 		// d.Update(*d.las)
+		// 		return *d.lastTermSize
+
+		// 	})
 	}
 
-	d.Render()
+	if d.prompt.IsFocused() {
+		m, cmd := d.prompt.Update(msg)
+		if cmd != nil {
+			cmds = append(cmds, cmd)
+		}
+		d.prompt = m
+	}
+
 	return d, tea.Sequence(cmds...)
 }
 
@@ -293,12 +337,24 @@ func (d *Display) Render() string {
 	screen := lipgloss.JoinVertical(lipgloss.Top, s...)
 	d.rendered = screen
 
+	// PROMPT SUGGESTIONS
+	if len(d.prompt.GetSuggestions()) > 0 && d.prompt.IsFocused() {
+		model := list.NewPointList(
+			d.prompt.GetSuggestions()...,
+		)
+		// model.SortDir(true)
+		v := model.View()
+		style := lipgloss.NewStyle().Foreground(theme.SelectedColorForegroundBackground).Width(40).Align(lipgloss.Center).Border(lipgloss.NormalBorder())
+		v = style.Render(v)
+		d.rendered = helpers.PlaceOverlay(d.prompt.GetCursorPosition()+4, d.header.GetMaxPossibleHeight()+3, v, d.rendered, false)
+	}
+
 	if d.confirm == nil {
 		return d.rendered
 	}
 
-	cfimView := d.confirm.View()
-	box := lipgloss.Place(20, 10, lipgloss.Center, lipgloss.Center, cfimView)
+	confirmView := d.confirm.View()
+	box := lipgloss.Place(20, 10, lipgloss.Center, lipgloss.Center, confirmView)
 
 	w, h, err := modelutils.GetTerminalSize()
 	if err != nil {
@@ -312,5 +368,7 @@ func (d *Display) Render() string {
 }
 
 func (d *Display) View() string {
+	d.Render()
+
 	return d.rendered
 }

@@ -1,8 +1,9 @@
 package ui
 
 import (
-	"github.com/charmbracelet/lipgloss"
 	"os"
+
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,11 +24,6 @@ func (t TableModel) Init() tea.Cmd {
 func (t TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c": // Need to be deported in the key handler, same for action
-			return t, tea.Quit
-		}
 	case tea.WindowSizeMsg:
 		t.table.SetColumns(WithFullScreenTable(t.columns))
 		//fmt.Println("Window size changed", msg)
@@ -131,7 +127,7 @@ func CalculateColumnWidths(buffer []int, tabWidth int) []int {
 	for i := range buffer {
 		buffer[i] = buffer[i] + each
 	}
-	
+
 	return buffer
 }
 
