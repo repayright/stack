@@ -44,7 +44,6 @@ func New(
 	compiler *Compiler,
 	referencer *Referencer,
 	metricsRegistry metrics.PerLedgerRegistry,
-	onBatchProcessed batching.OnBatchProcessed[*core.ActiveLog],
 ) *Commander {
 	log, err := store.ReadLastLogWithType(context.Background(), core.NewTransactionLogType, core.RevertedTransactionLogType)
 	if err != nil && !storageerrors.IsNotFoundError(err) {
@@ -82,7 +81,7 @@ func New(
 		referencer:      referencer,
 		lastTXID:        lastTXID,
 		lastLog:         lastLog,
-		Batcher:         batching.NewBatcher(store.InsertLogs, onBatchProcessed, 1, 4096),
+		Batcher:         batching.NewBatcher(store.InsertLogs, 1, 4096),
 	}
 }
 

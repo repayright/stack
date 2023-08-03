@@ -5,7 +5,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/formancehq/ledger/pkg/core"
-	"github.com/formancehq/ledger/pkg/ledger/query"
+	"github.com/formancehq/ledger/pkg/ledger"
 	"github.com/formancehq/stack/libs/go-libs/logging"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/formancehq/stack/libs/go-libs/publish"
@@ -16,7 +16,7 @@ type ledgerMonitor struct {
 	ledgerName string
 }
 
-var _ query.Monitor = &ledgerMonitor{}
+var _ ledger.Monitor = &ledgerMonitor{}
 
 func NewLedgerMonitor(publisher message.Publisher, ledgerName string) *ledgerMonitor {
 	m := &ledgerMonitor{

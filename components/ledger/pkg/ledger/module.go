@@ -3,7 +3,6 @@ package ledger
 import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/formancehq/ledger/pkg/ledger/command"
-	"github.com/formancehq/ledger/pkg/ledger/query"
 	"github.com/formancehq/ledger/pkg/opentelemetry/metrics"
 	"github.com/formancehq/ledger/pkg/storage/driver"
 	"github.com/formancehq/stack/libs/go-libs/logging"
@@ -36,7 +35,7 @@ func Module(configuration Configuration) fx.Option {
 			}
 			return NewResolver(storageDriver, options...)
 		}),
-		fx.Provide(fx.Annotate(query.NewNoOpMonitor, fx.As(new(query.Monitor)))),
+		fx.Provide(fx.Annotate(NewNoOpMonitor, fx.As(new(Monitor)))),
 		fx.Provide(fx.Annotate(metrics.NewNoOpRegistry, fx.As(new(metrics.GlobalRegistry)))),
 	)
 }

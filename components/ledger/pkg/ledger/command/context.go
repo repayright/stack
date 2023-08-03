@@ -13,25 +13,25 @@ type executionContext struct {
 	parameters Parameters
 }
 
-func (e *executionContext) AppendLog(ctx context.Context, log *core.Log) (*core.ActiveLog, chan struct{}, error) {
+func (e *executionContext) AppendLog(ctx context.Context, log *core.Log) (*core.ChainedLog, chan struct{}, error) {
 	if e.parameters.DryRun {
 		ret := make(chan struct{})
 		close(ret)
-		return core.NewActiveLog(log.ChainLog(nil)), ret, nil
+		return log.ChainLog(nil), ret, nil
 	}
 
-	activeLog := core.NewActiveLog(e.commander.chainLog(log))
+	chainedLog := e.commander.chainLog(log)
 	logging.FromContext(ctx).WithFields(map[string]any{
-		"id": activeLog.ChainedLog.ID,
+		"id": chainedLog.ID,
 	}).Debugf("Appending log")
 	done := make(chan struct{})
-	e.commander.Append(activeLog, func() {
+	e.commander.Append(chainedLog, func() {
 		close(done)
 	})
-	return activeLog, done, nil
+	return chainedLog, done, nil
 }
 
-func (e *executionContext) run(ctx context.Context, executor func(e *executionContext) (*core.ActiveLog, chan struct{}, error)) (*core.ChainedLog, error) {
+func (e *executionContext) run(ctx context.Context, executor func(e *executionContext) (*core.ChainedLog, chan struct{}, error)) (*core.ChainedLog, error) {
 	if ik := e.parameters.IdempotencyKey; ik != "" {
 		if err := e.commander.referencer.take(referenceIks, ik); err != nil {
 			return nil, err
@@ -46,20 +46,16 @@ func (e *executionContext) run(ctx context.Context, executor func(e *executionCo
 			return nil, err
 		}
 	}
-	activeLog, done, err := executor(e)
+	chainedLog, done, err := executor(e)
 	if err != nil {
 		return nil, err
 	}
 	<-done
 	logger := logging.FromContext(ctx).WithFields(map[string]any{
-		"id": activeLog.ID,
+		"id": chainedLog.ID,
 	})
 	logger.Debugf("Log inserted in database")
-	if !e.parameters.Async {
-		<-activeLog.Projected
-		logger.Debugf("Log fully ingested")
-	}
-	return activeLog.ChainedLog, nil
+	return chainedLog, nil
 }
 
 func newExecutionContext(commander *Commander, parameters Parameters) *executionContext {

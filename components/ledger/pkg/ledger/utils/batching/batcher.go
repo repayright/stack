@@ -22,7 +22,6 @@ type pending[T any] struct {
 
 type batcherJob[T any] struct {
 	items            []*pending[T]
-	onBatchProcessed OnBatchProcessed[T]
 }
 
 func (b batcherJob[T]) String() string {
@@ -33,11 +32,6 @@ func (b batcherJob[T]) Terminated() {
 	for _, v := range b.items {
 		v.callback()
 	}
-	if b.onBatchProcessed != nil {
-		b.onBatchProcessed(collectionutils.Map(b.items, func(from *pending[T]) T {
-			return from.object
-		})...)
-	}
 }
 
 type Batcher[T any] struct {
@@ -45,7 +39,6 @@ type Batcher[T any] struct {
 	pending          []*pending[T]
 	mu               sync.Mutex
 	maxBatchSize     int
-	onBatchProcessed OnBatchProcessed[T]
 }
 
 func (s *Batcher[T]) Append(object T, callback func()) {
@@ -69,7 +62,6 @@ func (s *Batcher[T]) nextBatch() *batcherJob[T] {
 		batch := s.pending[:s.maxBatchSize]
 		s.pending = s.pending[s.maxBatchSize:]
 		return &batcherJob[T]{
-			onBatchProcessed: s.onBatchProcessed,
 			items:            batch,
 		}
 	}
@@ -77,14 +69,12 @@ func (s *Batcher[T]) nextBatch() *batcherJob[T] {
 	s.pending = make([]*pending[T], 0)
 	return &batcherJob[T]{
 		items:            batch,
-		onBatchProcessed: s.onBatchProcessed,
 	}
 }
 
-func NewBatcher[T any](runner func(context.Context, ...T) error, onBatchProcessed OnBatchProcessed[T], nbWorkers, maxBatchSize int) *Batcher[T] {
+func NewBatcher[T any](runner func(context.Context, ...T) error, nbWorkers, maxBatchSize int) *Batcher[T] {
 	ret := &Batcher[T]{
 		maxBatchSize:     maxBatchSize,
-		onBatchProcessed: onBatchProcessed,
 	}
 	ret.Runner = job.NewJobRunner[batcherJob[T]](func(ctx context.Context, job *batcherJob[T]) error {
 		return runner(ctx, collectionutils.Map(job.items, func(from *pending[T]) T {

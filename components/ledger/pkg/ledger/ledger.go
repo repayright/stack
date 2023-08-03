@@ -4,10 +4,8 @@ import (
 	"context"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/formancehq/ledger/pkg/bus"
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/ledger/command"
-	"github.com/formancehq/ledger/pkg/ledger/query"
 	"github.com/formancehq/ledger/pkg/opentelemetry/metrics"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/api"
@@ -19,7 +17,6 @@ import (
 type Ledger struct {
 	commander *command.Commander
 	store     *ledgerstore.Store
-	projector *query.Projector
 }
 
 func (l *Ledger) CreateTransaction(ctx context.Context, parameters command.Parameters, data core.RunScript) (*core.Transaction, error) {
@@ -40,15 +37,15 @@ func New(
 	publisher message.Publisher,
 	compiler *command.Compiler,
 ) *Ledger {
-	var monitor query.Monitor = query.NewNoOpMonitor()
-	if publisher != nil {
-		monitor = bus.NewLedgerMonitor(publisher, name)
-	}
+	//TODO: reimplements
+	//var monitor Monitor = NewNoOpMonitor()
+	//if publisher != nil {
+	//	monitor = bus.NewLedgerMonitor(publisher, name)
+	//}
 	metricsRegistry, err := metrics.RegisterPerLedgerMetricsRegistry(name)
 	if err != nil {
 		panic(err)
 	}
-	projector := query.NewProjector(store, monitor, metricsRegistry)
 	return &Ledger{
 		commander: command.New(
 			store,
@@ -56,24 +53,18 @@ func New(
 			compiler,
 			command.NewReferencer(),
 			metricsRegistry,
-			projector.QueueLog,
 		),
 		store:     store,
-		projector: projector,
 	}
 }
 
 func (l *Ledger) Start(ctx context.Context) {
 	go l.commander.Run(logging.ContextWithField(ctx, "component", "commander"))
-	l.projector.Start(logging.ContextWithField(ctx, "component", "projector"))
 }
 
 func (l *Ledger) Close(ctx context.Context) {
 	logging.FromContext(ctx).Debugf("Close commander")
 	l.commander.Close()
-
-	logging.FromContext(ctx).Debugf("Close projector")
-	l.projector.Stop(logging.ContextWithField(ctx, "component", "projector"))
 }
 
 func (l *Ledger) GetTransactions(ctx context.Context, q ledgerstore.TransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {

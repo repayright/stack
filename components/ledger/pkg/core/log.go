@@ -315,23 +315,6 @@ func HydrateLog(_type LogType, data []byte) (hashable, error) {
 
 type Accounts map[string]Account
 
-type ActiveLog struct {
-	*ChainedLog
-	Projected chan struct{} `json:"-"`
-}
-
-func (h *ActiveLog) SetProjected() {
-	h.ChainedLog.Projected = true
-	close(h.Projected)
-}
-
-func NewActiveLog(log *ChainedLog) *ActiveLog {
-	return &ActiveLog{
-		ChainedLog: log,
-		Projected:  make(chan struct{}),
-	}
-}
-
 type buffer struct {
 	buf *bytes.Buffer
 }
