@@ -10,6 +10,7 @@ import (
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
+	"github.com/formancehq/stack/libs/go-libs/migrations"
 )
 
 //go:generate mockgen -source api.go -destination api_test.go -package controllers_test . Ledger
@@ -20,7 +21,7 @@ type Ledger interface {
 	CountAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (uint64, error)
 	GetBalancesAggregated(ctx context.Context, q ledgerstore.BalancesQuery) (core.BalancesByAssets, error)
 	GetBalances(ctx context.Context, q ledgerstore.BalancesQuery) (*api.Cursor[core.BalancesByAssetsByAccounts], error)
-	GetMigrationsInfo(ctx context.Context) ([]core.MigrationInfo, error)
+	GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error)
 	Stats(ctx context.Context) (ledger.Stats, error)
 	GetLogs(ctx context.Context, query ledgerstore.LogsQuery) (*api.Cursor[core.ChainedLog], error)
 	CountTransactions(ctx context.Context, query ledgerstore.TransactionsQuery) (uint64, error)

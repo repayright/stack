@@ -9,6 +9,7 @@ import (
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"
+	"github.com/formancehq/stack/libs/go-libs/migrations"
 	"github.com/go-chi/chi/v5"
 	"github.com/pkg/errors"
 )
@@ -19,7 +20,7 @@ type Info struct {
 }
 
 type StorageInfo struct {
-	Migrations []core.MigrationInfo `json:"migrations"`
+	Migrations []migrations.Info `json:"migrations"`
 }
 
 func GetLedgerInfo(w http.ResponseWriter, r *http.Request) {

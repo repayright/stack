@@ -40,7 +40,7 @@ func (s *Store) Delete(ctx context.Context) error {
 
 func (s *Store) getMigrator() *migrations.Migrator {
 	migrator := migrations.NewMigrator(migrations.WithSchema(s.Name(), true))
-	registerMigrations(migrator)
+	registerMigrations(migrator, s.schema)
 	return migrator
 }
 

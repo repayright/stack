@@ -17,6 +17,7 @@ import (
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
+	"github.com/formancehq/stack/libs/go-libs/migrations"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
@@ -27,18 +28,18 @@ func TestGetLedgerInfo(t *testing.T) {
 	backend, mock := newTestingBackend(t)
 	router := routes.NewRouter(backend, nil, metrics.NewNoOpRegistry())
 
-	migrationInfo := []core.MigrationInfo{
+	migrationInfo := []migrations.Info{
 		{
 			Version: "1",
 			Name:    "init",
 			State:   "ready",
-			Date:    core.Now().Add(-2 * time.Minute).Round(time.Second),
+			Date:    time.Now().Add(-2 * time.Minute).Round(time.Second),
 		},
 		{
 			Version: "2",
 			Name:    "fix",
 			State:   "ready",
-			Date:    core.Now().Add(-time.Minute).Round(time.Second),
+			Date:    time.Now().Add(-time.Minute).Round(time.Second),
 		},
 	}
 

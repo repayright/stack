@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	"sync"
+	"math/big"
 
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/stack/libs/go-libs/collectionutils"
@@ -10,207 +10,118 @@ import (
 )
 
 type InMemoryStore struct {
-	mu sync.Mutex
-
-	Logs         []*core.ChainedLog
-	Accounts     map[string]*core.AccountWithVolumes
-	Transactions []*core.ExpandedTransaction
+	logs         []*core.ChainedLog
+	transactions []*core.ExpandedTransaction
+	accounts     []*core.Account
 }
 
-func (m *InMemoryStore) MarkedLogsAsProjected(ctx context.Context, id uint64) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	for _, log := range m.Logs {
-		if log.ID == id {
-			log.Projected = true
-			return nil
-		}
+func (m *InMemoryStore) GetTransactionByReference(ctx context.Context, ref string) (*core.ExpandedTransaction, error) {
+	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
+		return transaction.Reference == ref
+	})
+	if len(filtered) == 0 {
+		return nil, ErrNotFound
 	}
-	return nil
+	return filtered[0], nil
 }
 
-func (m *InMemoryStore) InsertMoves(ctx context.Context, insert ...*core.Move) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	// TODO(gfyrag): to reflect the behavior of the real storage, we should compute accounts volumes there
-	return nil
-}
-
-func (m *InMemoryStore) UpdateAccountsMetadata(ctx context.Context, update ...core.Account) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, account := range update {
-		persistedAccount, ok := m.Accounts[account.Address]
-		if !ok {
-			m.Accounts[account.Address] = &core.AccountWithVolumes{
-				Account: account,
-				Volumes: core.VolumesByAssets{},
-			}
-			return nil
-		}
-		persistedAccount.Metadata = persistedAccount.Metadata.Merge(account.Metadata)
+func (m *InMemoryStore) GetTransaction(ctx context.Context, txID uint64) (*core.ExpandedTransaction, error) {
+	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
+		return transaction.ID == txID
+	})
+	if len(filtered) == 0 {
+		return nil, ErrNotFound
 	}
-	return nil
+	return filtered[0], nil
 }
 
-func (m *InMemoryStore) InsertTransactions(ctx context.Context, insert ...core.Transaction) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, transaction := range insert {
-		expandedTransaction := &core.ExpandedTransaction{
-			Transaction:       transaction,
-			PreCommitVolumes:  core.AccountsAssetsVolumes{},
-			PostCommitVolumes: core.AccountsAssetsVolumes{},
-		}
-		for _, posting := range transaction.Postings {
-			account, ok := m.Accounts[posting.Source]
-			if !ok {
-				account = core.NewAccountWithVolumes(posting.Source)
-				m.Accounts[posting.Source] = account
-			}
+func (m *InMemoryStore) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
+	if len(m.logs) == 0 {
+		return nil, nil
+	}
+	return m.logs[len(m.logs)-1], nil
+}
 
-			asset, ok := account.Volumes[posting.Asset]
-			if !ok {
-				asset = core.NewEmptyVolumes()
-				account.Volumes[posting.Asset] = asset
-			}
-
-			account, ok = m.Accounts[posting.Destination]
-			if !ok {
-				account = core.NewAccountWithVolumes(posting.Destination)
-				m.Accounts[posting.Destination] = account
-			}
-
-			asset, ok = account.Volumes[posting.Asset]
-			if !ok {
-				asset = core.NewEmptyVolumes()
-				account.Volumes[posting.Asset] = asset
+func (m *InMemoryStore) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
+	balance := new(big.Int)
+	for _, log := range m.logs {
+		switch payload := log.Data.(type) {
+		case core.NewTransactionLogPayload:
+			postings := payload.Transaction.Postings
+			for _, posting := range postings {
+				if posting.Asset != asset {
+					continue
+				}
+				if posting.Source == address {
+					balance = balance.Sub(balance, posting.Amount)
+				}
+				if posting.Destination == address {
+					balance = balance.Add(balance, posting.Amount)
+				}
 			}
 		}
-		for _, posting := range transaction.Postings {
-			expandedTransaction.PreCommitVolumes.AddOutput(posting.Source, posting.Asset,
-				m.Accounts[posting.Source].Volumes[posting.Asset].Output)
-			expandedTransaction.PreCommitVolumes.AddInput(posting.Source, posting.Asset,
-				m.Accounts[posting.Source].Volumes[posting.Asset].Input)
-
-			expandedTransaction.PreCommitVolumes.AddOutput(posting.Destination, posting.Asset,
-				m.Accounts[posting.Destination].Volumes[posting.Asset].Output)
-			expandedTransaction.PreCommitVolumes.AddInput(posting.Destination, posting.Asset,
-				m.Accounts[posting.Destination].Volumes[posting.Asset].Input)
-		}
-		for _, posting := range transaction.Postings {
-			account := m.Accounts[posting.Source]
-			asset := account.Volumes[posting.Asset]
-			asset.Output = asset.Output.Add(asset.Output, posting.Amount)
-
-			account = m.Accounts[posting.Destination]
-			asset = account.Volumes[posting.Asset]
-			asset.Input = asset.Input.Add(asset.Input, posting.Amount)
-		}
-		for _, posting := range transaction.Postings {
-			expandedTransaction.PostCommitVolumes.AddOutput(posting.Source, posting.Asset,
-				m.Accounts[posting.Source].Volumes[posting.Asset].Output)
-			expandedTransaction.PostCommitVolumes.AddInput(posting.Source, posting.Asset,
-				m.Accounts[posting.Source].Volumes[posting.Asset].Input)
-
-			expandedTransaction.PostCommitVolumes.AddOutput(posting.Destination, posting.Asset,
-				m.Accounts[posting.Destination].Volumes[posting.Asset].Output)
-			expandedTransaction.PostCommitVolumes.AddInput(posting.Destination, posting.Asset,
-				m.Accounts[posting.Destination].Volumes[posting.Asset].Input)
-		}
-
-		m.Transactions = append(m.Transactions, expandedTransaction)
 	}
-	return nil
+	return balance, nil
 }
 
-func (m *InMemoryStore) UpdateTransactionsMetadata(ctx context.Context, update ...core.TransactionWithMetadata) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, tx := range update {
-		m.Transactions[tx.ID].Metadata = m.Transactions[tx.ID].Metadata.Merge(tx.Metadata)
-	}
-	return nil
-}
-
-func (m *InMemoryStore) EnsureAccountsExist(ctx context.Context, accounts []string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, address := range accounts {
-		_, ok := m.Accounts[address]
-		if ok {
-			continue
-		}
-		m.Accounts[address] = &core.AccountWithVolumes{
-			Account: core.Account{
-				Address:  address,
-				Metadata: metadata.Metadata{},
-			},
-			Volumes: core.VolumesByAssets{},
-		}
-	}
-	return nil
-}
-
-func (m *InMemoryStore) IsInitialized() bool {
-	return true
-}
-
-func (m *InMemoryStore) GetNextLogID(ctx context.Context) (uint64, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, log := range m.Logs {
-		if !log.Projected {
-			return log.ID, nil
-		}
-	}
-	return uint64(len(m.Logs)), nil
-}
-
-func (m *InMemoryStore) ReadLogsRange(ctx context.Context, idMin, idMax uint64) ([]core.ChainedLog, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if idMax > uint64(len(m.Logs)) {
-		idMax = uint64(len(m.Logs))
-	}
-
-	if idMin < uint64(len(m.Logs)) {
-		return collectionutils.Map(m.Logs[idMin:idMax], func(from *core.ChainedLog) core.ChainedLog {
-			return *from
-		}), nil
-	}
-
-	return []core.ChainedLog{}, nil
-}
-
-func (m *InMemoryStore) GetAccountWithVolumes(ctx context.Context, address string) (*core.AccountWithVolumes, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	account, ok := m.Accounts[address]
-	if !ok {
-		return &core.AccountWithVolumes{
-			Account: core.Account{
-				Address:  address,
-				Metadata: metadata.Metadata{},
-			},
-			Volumes: core.VolumesByAssets{},
+func (m *InMemoryStore) GetAccount(ctx context.Context, address string) (*core.Account, error) {
+	account := collectionutils.Filter(m.accounts, func(account *core.Account) bool {
+		return account.Address == address
+	})
+	if len(account) == 0 {
+		return &core.Account{
+			Address:  address,
+			Metadata: metadata.Metadata{},
 		}, nil
 	}
-	return account, nil
+	return account[0], nil
 }
 
-func (m *InMemoryStore) GetTransaction(ctx context.Context, id uint64) (*core.ExpandedTransaction, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (m *InMemoryStore) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error) {
+	first := collectionutils.First(m.logs, func(log *core.ChainedLog) bool {
+		return log.IdempotencyKey == key
+	})
+	if first == nil {
+		return nil, ErrNotFound
+	}
+	return first, nil
+}
 
-	return m.Transactions[id], nil
+func (m *InMemoryStore) ReadLastLogWithType(background context.Context, logType ...core.LogType) (*core.ChainedLog, error) {
+	first := collectionutils.First(m.logs, func(log *core.ChainedLog) bool {
+		return collectionutils.Contains(logType, log.Type)
+	})
+	if first == nil {
+		return nil, ErrNotFound
+	}
+	return first, nil
+}
+
+func (m *InMemoryStore) InsertLogs(ctx context.Context, logs ...*core.ChainedLog) error {
+	m.logs = append(m.logs, logs...)
+	for _, log := range logs {
+		switch payload := log.Data.(type) {
+		case core.NewTransactionLogPayload:
+			m.transactions = append(m.transactions, &core.ExpandedTransaction{
+				Transaction: *payload.Transaction,
+				// TODO
+				PreCommitVolumes:  nil,
+				PostCommitVolumes: nil,
+			})
+		case core.RevertedTransactionLogPayload:
+			tx := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
+				return transaction.ID == payload.RevertedTransactionID
+			})[0]
+			tx.Reverted = true
+		case core.SetMetadataLogPayload:
+		}
+	}
+
+	return nil
 }
 
 func NewInMemoryStore() *InMemoryStore {
 	return &InMemoryStore{
-		Accounts: make(map[string]*core.AccountWithVolumes),
+		logs: []*core.ChainedLog{},
 	}
 }

@@ -62,7 +62,6 @@ func NewRootCommand() *cobra.Command {
 	internal.InitAnalyticsFlags(root, DefaultSegmentWriteKey)
 	publish.InitCLIFlags(root)
 	driver.InitCLIFlags(root)
-	initschema.InitMigrationConfigCLIFlags(root.PersistentFlags())
 
 	if err := viper.BindPFlags(root.PersistentFlags()); err != nil {
 		panic(err)

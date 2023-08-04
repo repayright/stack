@@ -7,166 +7,15 @@ import (
 
 	"github.com/formancehq/ledger/pkg/core"
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
-	"github.com/formancehq/stack/libs/go-libs/collectionutils"
 	"github.com/formancehq/stack/libs/go-libs/logging"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
-type mockStore struct {
-	logs         []*core.ChainedLog
-	transactions []*core.ExpandedTransaction
-}
-
-func (m *mockStore) GetTransactionByReference(ctx context.Context, ref string) (*core.ExpandedTransaction, error) {
-	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
-		return transaction.Reference == ref
-	})
-	if len(filtered) == 0 {
-		return nil, storageerrors.ErrNotFound
-	}
-	return filtered[0], nil
-}
-
-func (m *mockStore) GetTransaction(ctx context.Context, txID uint64) (*core.ExpandedTransaction, error) {
-	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
-		return transaction.ID == txID
-	})
-	if len(filtered) == 0 {
-		return nil, storageerrors.ErrNotFound
-	}
-	return filtered[0], nil
-}
-
-func (m *mockStore) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
-	if len(m.logs) == 0 {
-		return nil, nil
-	}
-	return m.logs[len(m.logs)-1], nil
-}
-
-func (m *mockStore) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
-	balance := new(big.Int)
-	for _, log := range m.logs {
-		switch payload := log.Data.(type) {
-		case core.NewTransactionLogPayload:
-			postings := payload.Transaction.Postings
-			for _, posting := range postings {
-				if posting.Asset != asset {
-					continue
-				}
-				if posting.Source == address {
-					balance = balance.Sub(balance, posting.Amount)
-				}
-				if posting.Destination == address {
-					balance = balance.Add(balance, posting.Amount)
-				}
-			}
-		}
-	}
-	return balance, nil
-}
-
-func (m *mockStore) GetAccount(ctx context.Context, address, key string) (string, error) {
-	for i := len(m.logs) - 1; i >= 0; i-- {
-		switch payload := m.logs[i].Data.(type) {
-		case core.NewTransactionLogPayload:
-			forAccount, ok := payload.AccountMetadata[address]
-			if ok {
-				value, ok := forAccount[key]
-				if ok {
-					return value, nil
-				}
-			}
-		case core.SetMetadataLogPayload:
-			if payload.TargetID != address {
-				continue
-			}
-			value, ok := payload.Metadata[key]
-			if ok {
-				return value, nil
-			}
-		}
-	}
-	return "", errors.New("not found")
-}
-
-func (m *mockStore) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error) {
-	first := collectionutils.First(m.logs, func(log *core.ChainedLog) bool {
-		return log.IdempotencyKey == key
-	})
-	if first == nil {
-		return nil, storageerrors.ErrNotFound
-	}
-	return first, nil
-}
-
-func (m *mockStore) ReadLogForCreatedTransactionWithReference(ctx context.Context, reference string) (*core.ChainedLog, error) {
-	first := collectionutils.First(m.logs, func(log *core.ChainedLog) bool {
-		if log.Type != core.NewTransactionLogType {
-			return false
-		}
-		return log.Data.(core.NewTransactionLogPayload).Transaction.Reference == reference
-	})
-	if first == nil {
-		return nil, storageerrors.ErrNotFound
-	}
-	return first, nil
-}
-
-func (m *mockStore) ReadLogForCreatedTransaction(ctx context.Context, txID uint64) (*core.ChainedLog, error) {
-	first := collectionutils.First(m.logs, func(log *core.ChainedLog) bool {
-		if log.Type != core.NewTransactionLogType {
-			return false
-		}
-		return log.Data.(core.NewTransactionLogPayload).Transaction.ID == txID
-	})
-	if first == nil {
-		return nil, storageerrors.ErrNotFound
-	}
-	return first, nil
-}
-
-func (m *mockStore) ReadLogForRevertedTransaction(ctx context.Context, txID uint64) (*core.ChainedLog, error) {
-	first := collectionutils.First(m.logs, func(log *core.ChainedLog) bool {
-		if log.Type != core.RevertedTransactionLogType {
-			return false
-		}
-		return log.Data.(core.RevertedTransactionLogPayload).RevertedTransactionID == txID
-	})
-	if first == nil {
-		return nil, storageerrors.ErrNotFound
-	}
-	return first, nil
-}
-
-func (m *mockStore) ReadLastLogWithType(background context.Context, logType ...core.LogType) (*core.ChainedLog, error) {
-	first := collectionutils.First(m.logs, func(log *core.ChainedLog) bool {
-		return collectionutils.Contains(logType, log.Type)
-	})
-	if first == nil {
-		return nil, storageerrors.ErrNotFound
-	}
-	return first, nil
-}
-
-func (m *mockStore) InsertLogs(ctx context.Context, logs ...*core.ChainedLog) error {
-	m.logs = append(m.logs, logs...)
-
-	return nil
-}
-
 var (
-	_   Store = (*mockStore)(nil)
-	now       = core.Now()
+	now = core.Now()
 )
-
-func newMockStore() *mockStore {
-	return &mockStore{
-		logs: []*core.ChainedLog{},
-	}
-}
 
 type testCase struct {
 	name          string
@@ -296,7 +145,7 @@ func TestCreateTransaction(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 
-			store := newMockStore()
+			store := storageerrors.NewInMemoryStore()
 			ctx := logging.TestingContext()
 
 			commander := New(store, NoOpLocker, NewCompiler(1024),
@@ -323,7 +172,6 @@ func TestCreateTransaction(t *testing.T) {
 				tc.expectedTx.Date = now
 				require.Equal(t, tc.expectedTx, ret)
 
-				require.Len(t, store.logs, len(tc.expectedLogs))
 				for ind := range tc.expectedLogs {
 					expectedLog := tc.expectedLogs[ind]
 					switch v := expectedLog.Data.(type) {
@@ -340,7 +188,7 @@ func TestCreateTransaction(t *testing.T) {
 
 func TestRevert(t *testing.T) {
 	txID := uint64(0)
-	store := newMockStore()
+	store := storageerrors.NewInMemoryStore()
 	ctx := logging.TestingContext()
 
 	log := core.NewTransactionLog(
@@ -362,12 +210,16 @@ func TestRevert(t *testing.T) {
 
 func TestRevertWithAlreadyReverted(t *testing.T) {
 
-	store := newMockStore()
+	store := storageerrors.NewInMemoryStore()
 	ctx := logging.TestingContext()
 
-	log := core.
-		NewRevertedTransactionLog(core.Now(), 0, core.NewTransaction())
-	err := store.InsertLogs(context.Background(), log.ChainLog(nil))
+	err := store.InsertLogs(context.Background(),
+		core.NewTransactionLog(
+			core.NewTransaction().WithPostings(core.NewPosting("world", "bank", "USD", big.NewInt(100))),
+			map[string]metadata.Metadata{},
+		).ChainLog(nil),
+		core.NewRevertedTransactionLog(core.Now(), 0, core.NewTransaction()).ChainLog(nil),
+	)
 	require.NoError(t, err)
 
 	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer(), nil)
@@ -380,7 +232,7 @@ func TestRevertWithAlreadyReverted(t *testing.T) {
 
 func TestRevertWithRevertOccurring(t *testing.T) {
 
-	store := newMockStore()
+	store := storageerrors.NewInMemoryStore()
 	ctx := logging.TestingContext()
 
 	log := core.NewTransactionLog(

@@ -15,6 +15,7 @@ import (
 	ledgerstore "github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	api "github.com/formancehq/stack/libs/go-libs/api"
 	metadata "github.com/formancehq/stack/libs/go-libs/metadata"
+	"github.com/formancehq/stack/libs/go-libs/migrations"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -162,10 +163,10 @@ func (mr *MockLedgerMockRecorder) GetLogs(ctx, query interface{}) *gomock.Call {
 }
 
 // GetMigrationsInfo mocks base method.
-func (m *MockLedger) GetMigrationsInfo(ctx context.Context) ([]core.MigrationInfo, error) {
+func (m *MockLedger) GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMigrationsInfo", ctx)
-	ret0, _ := ret[0].([]core.MigrationInfo)
+	ret0, _ := ret[0].([]migrations.Info)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
