@@ -80,30 +80,28 @@ type LogsV2 struct {
 	bun.BaseModel `bun:"logs,alias:logs"`
 
 	ID             uint64    `bun:"id,unique,type:bigint"`
-	Type           int16     `bun:"type,type:smallint"`
+	Type           string    `bun:"type,type:log_type"`
 	Hash           []byte    `bun:"hash,type:bytea"`
 	Date           core.Time `bun:"date,type:timestamptz"`
 	Data           []byte    `bun:"data,type:jsonb"`
 	IdempotencyKey string    `bun:"idempotency_key,type:varchar(256),unique"`
-	Projected      bool      `bun:"projected,type:boolean"`
 }
 
 func (log LogsV2) ToCore() core.ChainedLog {
-	payload, err := core.HydrateLog(core.LogType(log.Type), log.Data)
+	payload, err := core.HydrateLog(core.LogTypeFromString(log.Type), log.Data)
 	if err != nil {
 		panic(errors.Wrap(err, "hydrating log data"))
 	}
 
 	return core.ChainedLog{
 		Log: core.Log{
-			Type:           core.LogType(log.Type),
+			Type:           core.LogTypeFromString(log.Type),
 			Data:           payload,
 			Date:           log.Date.UTC(),
 			IdempotencyKey: log.IdempotencyKey,
 		},
-		ID:        log.ID,
-		Hash:      log.Hash,
-		Projected: log.Projected,
+		ID:   log.ID,
+		Hash: log.Hash,
 	}
 }
 
@@ -116,7 +114,7 @@ func (j RawMessage) Value() (driver.Value, error) {
 	return string(j), nil
 }
 
-func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ActiveLog) error {
+func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedLog) error {
 
 	txn, err := s.schema.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -134,22 +132,22 @@ func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ActiveLog) e
 	}
 
 	ls := make([]LogsV2, len(activeLogs))
-	for i, activeLog := range activeLogs {
-		data, err := json.Marshal(activeLog.Data)
+	for i, chainedLogs := range activeLogs {
+		data, err := json.Marshal(chainedLogs.Data)
 		if err != nil {
 			return errors.Wrap(err, "marshaling log data")
 		}
 
 		ls[i] = LogsV2{
-			ID:             activeLog.ChainedLog.ID,
-			Type:           int16(activeLog.ChainedLog.Type),
-			Hash:           activeLog.ChainedLog.Hash,
-			Date:           activeLog.ChainedLog.Date,
+			ID:             chainedLogs.ID,
+			Type:           chainedLogs.Type.String(),
+			Hash:           chainedLogs.Hash,
+			Date:           chainedLogs.Date,
 			Data:           data,
-			IdempotencyKey: activeLog.ChainedLog.IdempotencyKey,
+			IdempotencyKey: chainedLogs.IdempotencyKey,
 		}
 
-		_, err = stmt.Exec(ls[i].ID, ls[i].Type, ls[i].Hash, ls[i].Date, RawMessage(ls[i].Data), activeLog.ChainedLog.IdempotencyKey)
+		_, err = stmt.Exec(ls[i].ID, ls[i].Type, ls[i].Hash, ls[i].Date, RawMessage(ls[i].Data), chainedLogs.IdempotencyKey)
 		if err != nil {
 			return storageerrors.PostgresError(err)
 		}
@@ -243,7 +241,7 @@ func (s *Store) ReadLastLogWithType(ctx context.Context, logTypes ...core.LogTyp
 	raw := &LogsV2{}
 	err := s.schema.
 		NewSelect(LogTableName).
-		Where("type IN (?)", bun.In(logTypes)).
+		Where("type IN (?)", bun.In(collectionutils.Map(logTypes, core.LogType.String))).
 		OrderExpr("date DESC").
 		Model(raw).
 		Limit(1).
@@ -254,54 +252,6 @@ func (s *Store) ReadLastLogWithType(ctx context.Context, logTypes ...core.LogTyp
 	ret := raw.ToCore()
 
 	return &ret, nil
-}
-
-func (s *Store) ReadLogForCreatedTransactionWithReference(ctx context.Context, reference string) (*core.ChainedLog, error) {
-	raw := &LogsV2{}
-	err := s.schema.NewSelect(LogTableName).
-		Model(raw).
-		OrderExpr("id desc").
-		Limit(1).
-		Where("data->'transaction'->>'reference' = ?", reference).
-		Scan(ctx)
-	if err != nil {
-		return nil, storageerrors.PostgresError(err)
-	}
-
-	l := raw.ToCore()
-	return &l, nil
-}
-
-func (s *Store) ReadLogForCreatedTransaction(ctx context.Context, txID uint64) (*core.ChainedLog, error) {
-	raw := &LogsV2{}
-	err := s.schema.NewSelect(LogTableName).
-		Model(raw).
-		OrderExpr("id desc").
-		Limit(1).
-		Where("data->'transaction'->>'txid' = ?", fmt.Sprint(txID)).
-		Scan(ctx)
-	if err != nil {
-		return nil, storageerrors.PostgresError(err)
-	}
-
-	l := raw.ToCore()
-	return &l, nil
-}
-
-func (s *Store) ReadLogForRevertedTransaction(ctx context.Context, txID uint64) (*core.ChainedLog, error) {
-	raw := &LogsV2{}
-	err := s.schema.NewSelect(LogTableName).
-		Model(raw).
-		OrderExpr("id desc").
-		Limit(1).
-		Where("data->>'revertedTransactionID' = ?", fmt.Sprint(txID)).
-		Scan(ctx)
-	if err != nil {
-		return nil, storageerrors.PostgresError(err)
-	}
-
-	l := raw.ToCore()
-	return &l, nil
 }
 
 func (s *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error) {
@@ -320,15 +270,7 @@ func (s *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*cor
 	return &l, nil
 }
 
-func (s *Store) MarkedLogsAsProjected(ctx context.Context, id uint64) error {
-	_, err := s.schema.NewUpdate(LogTableName).
-		Where("id = ?", id).
-		Set("projected = TRUE").
-		Exec(ctx)
-	return storageerrors.PostgresError(err)
-}
-
-func (s *Store) GetBalanceFromLogs(ctx context.Context, address, asset string) (*big.Int, error) {
+func (s *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
 	selectLogsForExistingAccount := s.schema.
 		NewSelect(LogTableName).
 		Model(&LogsV2{}).
@@ -352,37 +294,4 @@ func (s *Store) GetBalanceFromLogs(ctx context.Context, address, asset string) (
 		return nil, err
 	}
 	return (*big.Int)(balance), nil
-}
-
-func (s *Store) GetMetadataFromLogs(ctx context.Context, address, key string) (string, error) {
-	l := LogsV2{}
-	if err := s.schema.NewSelect(LogTableName).
-		Model(&l).
-		Order("id DESC").
-		WhereOr(
-			"type = ? AND data->>'targetId' = ? AND data->>'targetType' = ? AND "+fmt.Sprintf("data->'metadata' ? '%s'", key),
-			core.SetMetadataLogType, address, core.MetaTargetTypeAccount,
-		).
-		WhereOr(
-			"type = ? AND "+fmt.Sprintf("data->'accountMetadata'->'%s' ? '%s'", address, key),
-			core.NewTransactionLogType,
-		).
-		Limit(1).
-		Scan(ctx); err != nil {
-		return "", storageerrors.PostgresError(err)
-	}
-
-	payload, err := core.HydrateLog(core.LogType(l.Type), l.Data)
-	if err != nil {
-		panic(errors.Wrap(err, "hydrating log data"))
-	}
-
-	switch payload := payload.(type) {
-	case core.NewTransactionLogPayload:
-		return payload.AccountMetadata[address][key], nil
-	case core.SetMetadataLogPayload:
-		return payload.Metadata[key], nil
-	default:
-		panic("should not happen")
-	}
 }

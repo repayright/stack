@@ -118,7 +118,7 @@ func TestGetBalancesAggregated(t *testing.T) {
 	q := ledgerstore.NewBalancesQuery().WithPageSize(10)
 	cursor, err := store.GetBalancesAggregated(context.Background(), q)
 	require.NoError(t, err)
-	require.Equal(t, core.BalancesByAssets{
+	RequireEqual(t, core.BalancesByAssets{
 		"USD": big.NewInt(0),
 	}, cursor)
 

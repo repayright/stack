@@ -16,7 +16,18 @@ const (
 )
 
 type Migrator struct {
-	migrations []Migration
+	migrations   []Migration
+	schema       string
+	createSchema bool
+}
+
+type option func(m *Migrator)
+
+func WithSchema(schema string, create bool) option {
+	return func(m *Migrator) {
+		m.schema = schema
+		m.createSchema = create
+	}
 }
 
 func (m *Migrator) RegisterMigrations(migrations ...Migration) *Migrator {
@@ -82,14 +93,32 @@ func (m *Migrator) GetDBVersion(ctx context.Context, db *bun.DB) (int64, error) 
 	return m.getLastVersion(ctx, db)
 }
 
-func (m *Migrator) Up(ctx context.Context, db *bun.DB) error {
-	tx, err := db.Begin()
+func (m *Migrator) Up(ctx context.Context, db bun.IDB) error {
+	tx, err := db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
 	defer func() {
 		_ = tx.Rollback()
 	}()
+
+	if m.schema != "" {
+		if m.createSchema {
+			_, err := tx.Exec(fmt.Sprintf(`create schema if not exists "%s"`, m.schema))
+			if err != nil {
+				return err
+			}
+		}
+		_, err := tx.Exec(fmt.Sprintf(`set search_path = "%s"`, m.schema))
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = tx.Exec("SET idle_in_transaction_session_timeout TO '30000';")
+	if err != nil {
+		panic(err)
+	}
 
 	if err := m.createVersionTable(ctx, tx); err != nil {
 		return err
@@ -113,6 +142,10 @@ func (m *Migrator) Up(ctx context.Context, db *bun.DB) error {
 	return tx.Commit()
 }
 
-func NewMigrator() *Migrator {
-	return &Migrator{}
+func NewMigrator(opts ...option) *Migrator {
+	ret := &Migrator{}
+	for _, opt := range opts {
+		opt(ret)
+	}
+	return ret
 }

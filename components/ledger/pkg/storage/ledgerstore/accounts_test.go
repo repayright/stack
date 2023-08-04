@@ -20,11 +20,9 @@ func TestUpdateAccountsMetadata(t *testing.T) {
 			"foo": "bar",
 		}
 
-		err := store.UpdateAccountsMetadata(context.Background(), core.Account{
-			Address:  "bank",
-			Metadata: metadata,
-		})
-		require.NoError(t, err, "account insertion should not fail")
+		require.NoError(t, store.InsertLogs(context.Background(),
+			core.NewSetMetadataOnAccountLog(core.Now(), "bank", metadata).ChainLog(nil),
+		), "account insertion should not fail")
 
 		account, err := store.GetAccount(context.Background(), "bank")
 		require.NoError(t, err, "account retrieval should not fail")
@@ -49,7 +47,11 @@ func TestUpdateAccountsMetadata(t *testing.T) {
 			},
 		}
 
-		err := store.UpdateAccountsMetadata(context.Background(), accounts...)
+		err := store.InsertLogs(context.Background(),
+			core.NewSetMetadataOnAccountLog(core.Now(), "test:account1", metadata.Metadata{"foo1": "bar1"}).ChainLog(nil),
+			core.NewSetMetadataOnAccountLog(core.Now(), "test:account2", metadata.Metadata{"foo2": "bar2"}).ChainLog(nil),
+			core.NewSetMetadataOnAccountLog(core.Now(), "test:account3", metadata.Metadata{"foo3": "bar3"}).ChainLog(nil),
+		)
 		require.NoError(t, err, "account insertion should not fail")
 
 		for _, account := range accounts {
@@ -107,13 +109,11 @@ func TestUpdateAccountMetadata(t *testing.T) {
 	t.Parallel()
 	store := newLedgerStore(t)
 
-	err := store.UpdateAccountsMetadata(context.Background(), core.Account{
-		Address: "central_bank",
-		Metadata: metadata.Metadata{
+	require.NoError(t, store.InsertLogs(context.Background(),
+		core.NewSetMetadataOnAccountLog(core.Now(), "central_bank", metadata.Metadata{
 			"foo": "bar",
-		},
-	})
-	require.NoError(t, err)
+		}).ChainLog(nil),
+	))
 
 	account, err := store.GetAccount(context.Background(), "central_bank")
 	require.NoError(t, err)

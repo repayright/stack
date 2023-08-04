@@ -70,7 +70,7 @@ func TestGetTransaction(t *testing.T) {
 					},
 				},
 				Reference: "tx1",
-				Timestamp: now.Add(-3 * time.Hour),
+				Date:      now.Add(-3 * time.Hour),
 			},
 		},
 		PostCommitVolumes: core.AccountsAssetsVolumes{
@@ -115,7 +115,7 @@ func TestGetTransaction(t *testing.T) {
 					},
 				},
 				Reference: "tx2",
-				Timestamp: now.Add(-2 * time.Hour),
+				Date:      now.Add(-2 * time.Hour),
 			},
 		},
 		PostCommitVolumes: core.AccountsAssetsVolumes{
@@ -154,7 +154,68 @@ func TestGetTransaction(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, tx1.Postings, tx.Postings)
 	require.Equal(t, tx1.Reference, tx.Reference)
-	require.Equal(t, tx1.Timestamp, tx.Timestamp)
+	require.Equal(t, tx1.Date, tx.Date)
+	RequireEqual(t, core.AccountsAssetsVolumes{
+		"world": {
+			"USD": {
+				Input:  big.NewInt(0),
+				Output: big.NewInt(100),
+			},
+		},
+		"central_bank": {
+			"USD": {
+				Input:  big.NewInt(100),
+				Output: big.NewInt(0),
+			},
+		},
+	}, tx.PostCommitVolumes)
+	RequireEqual(t, core.AccountsAssetsVolumes{
+		"world": {
+			"USD": {
+				Input:  big.NewInt(0),
+				Output: big.NewInt(0),
+			},
+		},
+		"central_bank": {
+			"USD": {
+				Input:  big.NewInt(0),
+				Output: big.NewInt(0),
+			},
+		},
+	}, tx.PreCommitVolumes)
+
+	tx, err = store.GetTransaction(context.Background(), tx2.ID)
+	require.Equal(t, tx2.Postings, tx.Postings)
+	require.Equal(t, tx2.Reference, tx.Reference)
+	require.Equal(t, tx2.Date, tx.Date)
+	RequireEqual(t, core.AccountsAssetsVolumes{
+		"world": {
+			"USD": {
+				Input:  big.NewInt(0),
+				Output: big.NewInt(200),
+			},
+		},
+		"central_bank": {
+			"USD": {
+				Input:  big.NewInt(200),
+				Output: big.NewInt(0),
+			},
+		},
+	}, tx.PostCommitVolumes)
+	RequireEqual(t, core.AccountsAssetsVolumes{
+		"world": {
+			"USD": {
+				Input:  big.NewInt(0),
+				Output: big.NewInt(100),
+			},
+		},
+		"central_bank": {
+			"USD": {
+				Input:  big.NewInt(100),
+				Output: big.NewInt(0),
+			},
+		},
+	}, tx.PreCommitVolumes)
 }
 
 func TestInsertTransactions(t *testing.T) {
@@ -175,8 +236,8 @@ func TestInsertTransactions(t *testing.T) {
 							Asset:       "USD",
 						},
 					},
-					Timestamp: now.Add(-3 * time.Hour),
-					Metadata:  metadata.Metadata{},
+					Date:     now.Add(-3 * time.Hour),
+					Metadata: metadata.Metadata{},
 				},
 			},
 			PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -217,8 +278,8 @@ func TestInsertTransactions(t *testing.T) {
 							Asset:       "USD",
 						},
 					},
-					Timestamp: now.Add(-2 * time.Hour),
-					Metadata:  metadata.Metadata{},
+					Date:     now.Add(-2 * time.Hour),
+					Metadata: metadata.Metadata{},
 				},
 			},
 			PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -251,8 +312,8 @@ func TestInsertTransactions(t *testing.T) {
 							Asset:       "USD",
 						},
 					},
-					Timestamp: now.Add(-1 * time.Hour),
-					Metadata:  metadata.Metadata{},
+					Date:     now.Add(-1 * time.Hour),
+					Metadata: metadata.Metadata{},
 				},
 			},
 			PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -303,8 +364,8 @@ func TestCountTransactions(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Timestamp: now.Add(-3 * time.Hour),
-				Metadata:  metadata.Metadata{},
+				Date:     now.Add(-3 * time.Hour),
+				Metadata: metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -336,8 +397,8 @@ func TestCountTransactions(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Timestamp: now.Add(-2 * time.Hour),
-				Metadata:  metadata.Metadata{},
+				Date:     now.Add(-2 * time.Hour),
+				Metadata: metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -370,8 +431,8 @@ func TestCountTransactions(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Timestamp: now.Add(-1 * time.Hour),
-				Metadata:  metadata.Metadata{},
+				Date:     now.Add(-1 * time.Hour),
+				Metadata: metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -417,8 +478,8 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Timestamp: now.Add(-3 * time.Hour),
-				Metadata:  metadata.Metadata{},
+				Date:     now.Add(-3 * time.Hour),
+				Metadata: metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -450,8 +511,8 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Timestamp: now.Add(-2 * time.Hour),
-				Metadata:  metadata.Metadata{},
+				Date:     now.Add(-2 * time.Hour),
+				Metadata: metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]core.VolumesByAssets{
@@ -475,26 +536,19 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 	err := insertTransactions(context.Background(), store, tx1.Transaction, tx2.Transaction)
 	require.NoError(t, err, "inserting transaction should not fail")
 
-	txToUpdate1 := core.TransactionWithMetadata{
-		ID:       0,
-		Metadata: metadata.Metadata{"foo1": "bar2"},
-	}
-	txToUpdate2 := core.TransactionWithMetadata{
-		ID:       1,
-		Metadata: metadata.Metadata{"foo2": "bar2"},
-	}
-	txs := []core.TransactionWithMetadata{txToUpdate1, txToUpdate2}
-
-	err = store.UpdateTransactionsMetadata(context.Background(), txs...)
+	err = store.InsertLogs(context.Background(),
+		core.NewSetMetadataOnTransactionLog(core.Now(), 0, metadata.Metadata{"foo1": "bar2"}).ChainLog(nil),
+		core.NewSetMetadataOnTransactionLog(core.Now(), 1, metadata.Metadata{"foo2": "bar2"}).ChainLog(nil),
+	)
 	require.NoError(t, err, "updating multiple transaction metadata should not fail")
 
 	tx, err := store.GetTransaction(context.Background(), 0)
 	require.NoError(t, err, "getting transaction should not fail")
-	require.Equal(t, tx.Metadata, txToUpdate1.Metadata, "metadata should be equal")
+	require.Equal(t, tx.Metadata, metadata.Metadata{"foo1": "bar2"}, "metadata should be equal")
 
 	tx, err = store.GetTransaction(context.Background(), 1)
 	require.NoError(t, err, "getting transaction should not fail")
-	require.Equal(t, tx.Metadata, txToUpdate2.Metadata, "metadata should be equal")
+	require.Equal(t, tx.Metadata, metadata.Metadata{"foo2": "bar2"}, "metadata should be equal")
 }
 
 func TestInsertTransactionInPast(t *testing.T) {
@@ -604,20 +658,20 @@ func TestInsertTwoTransactionAtSameDateInSameBatch(t *testing.T) {
 
 	RequireEqual(t, core.AccountsAssetsVolumes{
 		"bank": {
-			"USD/2": core.NewVolumesInt64(100, 0),
-		},
-		"user1": {
-			"USD/2": core.NewVolumesInt64(0, 0),
-		},
-	}, tx2FromDatabase.PreCommitVolumes)
-	RequireEqual(t, core.AccountsAssetsVolumes{
-		"bank": {
 			"USD/2": core.NewVolumesInt64(100, 10),
 		},
 		"user1": {
 			"USD/2": core.NewVolumesInt64(10, 0),
 		},
 	}, tx2FromDatabase.PostCommitVolumes)
+	RequireEqual(t, core.AccountsAssetsVolumes{
+		"bank": {
+			"USD/2": core.NewVolumesInt64(100, 0),
+		},
+		"user1": {
+			"USD/2": core.NewVolumesInt64(0, 0),
+		},
+	}, tx2FromDatabase.PreCommitVolumes)
 
 	tx3FromDatabase, err := store.GetTransaction(context.Background(), tx3.ID)
 	require.NoError(t, err)
@@ -757,48 +811,4 @@ func TestListTransactions(t *testing.T) {
 			require.EqualValues(t, len(tc.expected.Data), count)
 		})
 	}
-}
-
-func TestInsertTransactionsWithConflict(t *testing.T) {
-	t.Parallel()
-	store := newLedgerStore(t)
-
-	now := core.Now()
-
-	tx1 := core.NewTransaction().WithPostings(
-		core.NewPosting("world", "bank", "USD/2", big.NewInt(100)),
-	).WithTimestamp(now)
-	tx2 := core.NewTransaction().WithPostings(
-		core.NewPosting("world", "bank", "USD/2", big.NewInt(100)),
-	).WithID(1).WithTimestamp(now.Add(time.Minute))
-
-	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2))
-
-	checkTx2 := func() {
-		tx2FromDB, err := store.GetTransaction(context.Background(), tx2.ID)
-		require.NoError(t, err)
-		require.Equal(t, core.ExpandedTransaction{
-			Transaction: *tx2,
-			PreCommitVolumes: core.AccountsAssetsVolumes{
-				"world": map[string]*core.Volumes{
-					"USD/2": core.NewVolumesInt64(0, 100),
-				},
-				"bank": map[string]*core.Volumes{
-					"USD/2": core.NewVolumesInt64(100, 0),
-				},
-			},
-			PostCommitVolumes: core.AccountsAssetsVolumes{
-				"world": map[string]*core.Volumes{
-					"USD/2": core.NewVolumesInt64(0, 200),
-				},
-				"bank": map[string]*core.Volumes{
-					"USD/2": core.NewVolumesInt64(200, 0),
-				},
-			},
-		}, *tx2FromDB)
-	}
-
-	checkTx2()
-	require.NoError(t, insertTransactions(context.Background(), store, *tx1))
-	checkTx2()
 }

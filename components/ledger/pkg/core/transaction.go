@@ -11,7 +11,7 @@ type Transactions struct {
 type TransactionData struct {
 	Postings  Postings          `json:"postings"`
 	Metadata  metadata.Metadata `json:"metadata"`
-	Timestamp Time              `json:"timestamp"`
+	Date      Time              `json:"date"`
 	Reference string            `json:"reference"`
 }
 
@@ -38,7 +38,7 @@ func (t *TransactionData) Reverse() TransactionData {
 
 func (d TransactionData) hashString(buf *buffer) {
 	buf.writeString(d.Reference)
-	buf.writeUInt64(uint64(d.Timestamp.UnixNano()))
+	buf.writeUInt64(uint64(d.Date.UnixNano()))
 	hashStringMetadata(buf, d.Metadata)
 	for _, posting := range d.Postings {
 		posting.hashString(buf)
@@ -47,7 +47,8 @@ func (d TransactionData) hashString(buf *buffer) {
 
 type Transaction struct {
 	TransactionData
-	ID uint64 `json:"txid"`
+	ID       uint64 `json:"id"`
+	Reverted bool   `json:"reverted"`
 }
 
 type TransactionWithMetadata struct {
@@ -66,7 +67,7 @@ func (t *Transaction) WithReference(ref string) *Transaction {
 }
 
 func (t *Transaction) WithTimestamp(ts Time) *Transaction {
-	t.Timestamp = ts
+	t.Date = ts
 	return t
 }
 
@@ -90,14 +91,14 @@ func (t Transaction) GetMoves() []*Move {
 			Account:       posting.Source,
 			PostingIndex:  uint8(ind),
 			IsSource:      true,
-			Timestamp:     t.Timestamp,
+			Timestamp:     t.Date,
 		}, &Move{
 			TransactionID: t.ID,
 			Amount:        posting.Amount,
 			Asset:         posting.Asset,
 			Account:       posting.Destination,
 			PostingIndex:  uint8(ind),
-			Timestamp:     t.Timestamp,
+			Timestamp:     t.Date,
 		})
 	}
 	return ret
@@ -129,7 +130,7 @@ func (t *ExpandedTransaction) IsReverted() bool {
 }
 
 func ExpandTransaction(tx *Transaction, preCommitVolumes AccountsAssetsVolumes) ExpandedTransaction {
-	postCommitVolumes := preCommitVolumes.copy()
+	postCommitVolumes := preCommitVolumes.Copy()
 	for _, posting := range tx.Postings {
 		preCommitVolumes.AddInput(posting.Destination, posting.Asset, Zero)
 		preCommitVolumes.AddOutput(posting.Source, posting.Asset, Zero)

@@ -80,10 +80,6 @@ func (d *Driver) newStore(ctx context.Context, name string) (*ledgerstore.Store,
 		return nil, errors.Wrap(err, "opening schema")
 	}
 
-	if err = schema.Create(ctx); err != nil {
-		return nil, err
-	}
-
 	store, err := ledgerstore.New(schema, func(ctx context.Context) error {
 		return d.GetSystemStore().DeleteLedger(ctx, name)
 	})

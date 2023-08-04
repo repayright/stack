@@ -12,7 +12,6 @@ import (
 	"github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/ledger/pkg/storage/driver"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
-	_ "github.com/formancehq/ledger/pkg/storage/ledgerstore/migrates/0-init-schema"
 	"github.com/formancehq/stack/libs/go-libs/logging"
 	"github.com/formancehq/stack/libs/go-libs/pgtesting"
 	"github.com/google/uuid"
@@ -42,7 +41,7 @@ func newLedgerStore(t *testing.T) *ledgerstore.Store {
 		Debug:              testing.Verbose(),
 		Trace:              testing.Verbose(),
 	},
-	//&explainHook{},
+		//&explainHook{},
 	)
 	require.NoError(t, err)
 	t.Cleanup(func() {
@@ -54,14 +53,11 @@ func newLedgerStore(t *testing.T) *ledgerstore.Store {
 	ledgerStore, err := driver.CreateLedgerStore(context.Background(), uuid.NewString())
 	require.NoError(t, err)
 
-	_, err = ledgerStore.Migrate(context.Background())
-	require.NoError(t, err)
-
 	return ledgerStore
 }
 
 func appendLog(t *testing.T, store *ledgerstore.Store, log *core.ChainedLog) *core.ChainedLog {
-	err := store.InsertLogs(context.Background(), core.NewActiveLog(log))
+	err := store.InsertLogs(context.Background(), log)
 	require.NoError(t, err)
 	return log
 }

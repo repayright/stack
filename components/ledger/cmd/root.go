@@ -6,7 +6,6 @@ import (
 
 	"github.com/formancehq/ledger/cmd/internal"
 	"github.com/formancehq/ledger/pkg/storage/driver"
-	initschema "github.com/formancehq/ledger/pkg/storage/ledgerstore/migrates/0-init-schema"
 	"github.com/formancehq/stack/libs/go-libs/otlp/otlpmetrics"
 	"github.com/formancehq/stack/libs/go-libs/otlp/otlptraces"
 	"github.com/formancehq/stack/libs/go-libs/publish"

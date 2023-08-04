@@ -498,7 +498,7 @@ func (m *Machine) ResolveBalances(ctx context.Context, store Store) error {
 
 	for address, resourceIndex := range m.UnresolvedResourceBalances {
 		monetary := m.Resources[resourceIndex].(internal.Monetary)
-		balance, err := store.GetBalanceFromLogs(ctx, address, string(monetary.Asset))
+		balance, err := store.GetBalance(ctx, address, string(monetary.Asset))
 		if err != nil {
 			return err
 		}
@@ -532,7 +532,7 @@ func (m *Machine) ResolveBalances(ctx context.Context, store Store) error {
 				continue
 			}
 
-			balance, err := store.GetBalanceFromLogs(ctx, string(accountAddress), string(asset))
+			balance, err := store.GetBalance(ctx, string(accountAddress), string(asset))
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("could not get balance for account %q", addr))
 			}
@@ -574,8 +574,13 @@ func (m *Machine) ResolveResources(ctx context.Context, store Store) ([]string, 
 			acc, _ := m.getResource(res.Account)
 			addr := string((*acc).(internal.AccountAddress))
 
-			metadata, err := store.GetMetadataFromLogs(ctx, addr, res.Key)
+			account, err := store.GetAccount(ctx, addr)
 			if err != nil {
+				return nil, nil, err
+			}
+
+			metadata, ok := account.Metadata[res.Key]
+			if !ok {
 				return nil, nil, errorsutil.NewError(ErrResourceResolutionMissingMetadata, errors.New(
 					fmt.Sprintf("missing key %v in metadata for account %s", res.Key, addr)))
 			}

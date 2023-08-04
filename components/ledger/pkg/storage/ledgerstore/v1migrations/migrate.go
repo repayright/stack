@@ -1,4 +1,4 @@
-package initschema
+package v1migrations
 
 import (
 	"context"
@@ -9,17 +9,12 @@ import (
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
-	"github.com/formancehq/ledger/pkg/storage/migrations"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/uptrace/bun"
 )
-
-func init() {
-	migrations.RegisterGoMigration(UpgradeLogs)
-}
 
 const (
 	LogTableName = "log"
@@ -108,10 +103,7 @@ func convertMetadata(data []byte) any {
 }
 
 func (l *Log) ToLogsV2() (ledgerstore.LogsV2, error) {
-	logType, err := core.LogTypeFromString(l.Type)
-	if err != nil {
-		return ledgerstore.LogsV2{}, errors.Wrap(err, "converting log type")
-	}
+	logType := core.LogTypeFromString(l.Type)
 
 	var data any
 	switch logType {
@@ -135,7 +127,7 @@ func (l *Log) ToLogsV2() (ledgerstore.LogsV2, error) {
 
 	return ledgerstore.LogsV2{
 		ID:   l.ID,
-		Type: int16(logType),
+		Type: logType.String(),
 		Hash: []byte(l.Hash),
 		Date: l.Date,
 		Data: asJson,

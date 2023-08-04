@@ -15,7 +15,28 @@ import (
 )
 
 type mockStore struct {
-	logs []*core.ChainedLog
+	logs         []*core.ChainedLog
+	transactions []*core.ExpandedTransaction
+}
+
+func (m *mockStore) GetTransactionByReference(ctx context.Context, ref string) (*core.ExpandedTransaction, error) {
+	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
+		return transaction.Reference == ref
+	})
+	if len(filtered) == 0 {
+		return nil, storageerrors.ErrNotFound
+	}
+	return filtered[0], nil
+}
+
+func (m *mockStore) GetTransaction(ctx context.Context, txID uint64) (*core.ExpandedTransaction, error) {
+	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
+		return transaction.ID == txID
+	})
+	if len(filtered) == 0 {
+		return nil, storageerrors.ErrNotFound
+	}
+	return filtered[0], nil
 }
 
 func (m *mockStore) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
@@ -25,7 +46,7 @@ func (m *mockStore) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
 	return m.logs[len(m.logs)-1], nil
 }
 
-func (m *mockStore) GetBalanceFromLogs(ctx context.Context, address, asset string) (*big.Int, error) {
+func (m *mockStore) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
 	balance := new(big.Int)
 	for _, log := range m.logs {
 		switch payload := log.Data.(type) {
@@ -47,7 +68,7 @@ func (m *mockStore) GetBalanceFromLogs(ctx context.Context, address, asset strin
 	return balance, nil
 }
 
-func (m *mockStore) GetMetadataFromLogs(ctx context.Context, address, key string) (string, error) {
+func (m *mockStore) GetAccount(ctx context.Context, address, key string) (string, error) {
 	for i := len(m.logs) - 1; i >= 0; i-- {
 		switch payload := m.logs[i].Data.(type) {
 		case core.NewTransactionLogPayload:
@@ -299,7 +320,7 @@ func TestCreateTransaction(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotNil(t, ret)
-				tc.expectedTx.Timestamp = now
+				tc.expectedTx.Date = now
 				require.Equal(t, tc.expectedTx, ret)
 
 				require.Len(t, store.logs, len(tc.expectedLogs))
@@ -307,7 +328,7 @@ func TestCreateTransaction(t *testing.T) {
 					expectedLog := tc.expectedLogs[ind]
 					switch v := expectedLog.Data.(type) {
 					case core.NewTransactionLogPayload:
-						v.Transaction.Timestamp = now
+						v.Transaction.Date = now
 						expectedLog.Data = v
 					}
 					expectedLog.Date = now

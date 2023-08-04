@@ -21,7 +21,7 @@ func (t *Time) Scan(src interface{}) (err error) {
 	switch src := src.(type) {
 	case time.Time:
 		*t = Time{
-			Time: src,
+			Time: src.UTC(),
 		}
 		return nil
 	case string:

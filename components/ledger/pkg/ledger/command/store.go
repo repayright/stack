@@ -10,10 +10,9 @@ import (
 type Store interface {
 	vm.Store
 	InsertLogs(ctx context.Context, logs ...*core.ChainedLog) error
-	ReadLastLogWithType(ctx context.Context, logType ...core.LogType) (*core.ChainedLog, error)
-	ReadLogForCreatedTransactionWithReference(ctx context.Context, reference string) (*core.ChainedLog, error)
-	ReadLogForCreatedTransaction(ctx context.Context, txID uint64) (*core.ChainedLog, error)
-	ReadLogForRevertedTransaction(ctx context.Context, txID uint64) (*core.ChainedLog, error)
-	ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error)
 	GetLastLog(ctx context.Context) (*core.ChainedLog, error)
+	ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error)
+	ReadLastLogWithType(ctx context.Context, logType ...core.LogType) (*core.ChainedLog, error)
+	GetTransactionByReference(ctx context.Context, ref string) (*core.ExpandedTransaction, error)
+	GetTransaction(ctx context.Context, txID uint64) (*core.ExpandedTransaction, error)
 }

@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/formancehq/ledger/pkg/storage"
-	"github.com/formancehq/ledger/pkg/storage/migrations"
+	"github.com/formancehq/stack/libs/go-libs/migrations"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
 )
@@ -39,17 +39,16 @@ func (s *Store) Delete(ctx context.Context) error {
 }
 
 func (s *Store) Migrate(ctx context.Context) (bool, error) {
-	ms, err := migrations.CollectMigrationFiles(MigrationsFS)
-	if err != nil {
+
+	migrator := migrations.NewMigrator(migrations.WithSchema(s.Name(), true))
+	registerMigrations(migrator)
+
+	if err := migrator.Up(ctx, s.schema.IDB); err != nil {
 		return false, err
 	}
 
-	modified, err := migrations.Migrate(ctx, s.schema, ms...)
-	if err == nil {
-		s.isInitialized = true
-	}
-
-	return modified, err
+	// TODO: Update migrations package to return modifications
+	return false, nil
 }
 
 func (s *Store) IsInitialized() bool {

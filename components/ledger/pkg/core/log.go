@@ -37,17 +37,17 @@ func (l LogType) String() string {
 	return ""
 }
 
-func LogTypeFromString(logType string) (LogType, error) {
+func LogTypeFromString(logType string) LogType {
 	switch logType {
 	case "SET_METADATA":
-		return SetMetadataLogType, nil
+		return SetMetadataLogType
 	case "NEW_TRANSACTION":
-		return NewTransactionLogType, nil
+		return NewTransactionLogType
 	case "REVERTED_TRANSACTION":
-		return RevertedTransactionLogType, nil
+		return RevertedTransactionLogType
 	}
 
-	return 0, errors.New("invalid log type")
+	panic(errors.New("invalid log type"))
 }
 
 // Needed in order to keep the compatibility with the openapi response for
@@ -209,7 +209,7 @@ func NewTransactionLogWithDate(tx *Transaction, accountMetadata map[string]metad
 }
 
 func NewTransactionLog(tx *Transaction, accountMetadata map[string]metadata.Metadata) *Log {
-	return NewTransactionLogWithDate(tx, accountMetadata, tx.Timestamp)
+	return NewTransactionLogWithDate(tx, accountMetadata, tx.Date)
 }
 
 type SetMetadataLogPayload struct {
@@ -269,6 +269,30 @@ func NewSetMetadataLog(at Time, metadata SetMetadataLogPayload) *Log {
 		Type: SetMetadataLogType,
 		Date: at,
 		Data: metadata,
+	}
+}
+
+func NewSetMetadataOnAccountLog(at Time, account string, metadata metadata.Metadata) *Log {
+	return &Log{
+		Type: SetMetadataLogType,
+		Date: at,
+		Data: SetMetadataLogPayload{
+			TargetType: MetaTargetTypeAccount,
+			TargetID:   account,
+			Metadata:   metadata,
+		},
+	}
+}
+
+func NewSetMetadataOnTransactionLog(at Time, txID uint64, metadata metadata.Metadata) *Log {
+	return &Log{
+		Type: SetMetadataLogType,
+		Date: at,
+		Data: SetMetadataLogPayload{
+			TargetType: MetaTargetTypeTransaction,
+			TargetID:   txID,
+			Metadata:   metadata,
+		},
 	}
 }
 

@@ -25,7 +25,7 @@ type Parameters struct {
 }
 
 type Commander struct {
-	*batching.Batcher[*core.ActiveLog]
+	*batching.Batcher[*core.ChainedLog]
 	store           Store
 	locker          Locker
 	metricsRegistry metrics.PerLedgerRegistry
@@ -101,14 +101,14 @@ func (commander *Commander) exec(ctx context.Context, parameters Parameters, scr
 	}
 
 	execContext := newExecutionContext(commander, parameters)
-	return execContext.run(ctx, func(executionContext *executionContext) (*core.ActiveLog, chan struct{}, error) {
+	return execContext.run(ctx, func(executionContext *executionContext) (*core.ChainedLog, chan struct{}, error) {
 		if script.Reference != "" {
 			if err := commander.referencer.take(referenceTxReference, script.Reference); err != nil {
 				return nil, nil, ErrConflictError
 			}
 			defer commander.referencer.release(referenceTxReference, script.Reference)
 
-			_, err := commander.store.ReadLogForCreatedTransactionWithReference(ctx, script.Reference)
+			_, err := commander.store.GetTransactionByReference(ctx, script.Reference)
 			if err == nil {
 				return nil, nil, ErrConflictError
 			}
@@ -199,14 +199,14 @@ func (commander *Commander) SaveMeta(ctx context.Context, parameters Parameters,
 	}
 
 	execContext := newExecutionContext(commander, parameters)
-	_, err := execContext.run(ctx, func(executionContext *executionContext) (*core.ActiveLog, chan struct{}, error) {
+	_, err := execContext.run(ctx, func(executionContext *executionContext) (*core.ChainedLog, chan struct{}, error) {
 		var (
 			log *core.Log
 			at  = core.Now()
 		)
 		switch targetType {
 		case core.MetaTargetTypeTransaction:
-			_, err := commander.store.ReadLogForCreatedTransaction(ctx, targetID.(uint64))
+			_, err := commander.store.GetTransaction(ctx, targetID.(uint64))
 			if err != nil {
 				return nil, nil, err
 			}
@@ -237,23 +237,24 @@ func (commander *Commander) RevertTransaction(ctx context.Context, parameters Pa
 	}
 	defer commander.referencer.release(referenceReverts, id)
 
-	_, err := commander.store.ReadLogForRevertedTransaction(ctx, id)
-	if err == nil {
-		return nil, ErrAlreadyReverted
-	}
-	if err != nil && !errors.Is(err, storageerrors.ErrNotFound) {
+	tx, err := commander.store.GetTransaction(ctx, id)
+	if err != nil {
+		if errors.Is(err, storageerrors.ErrNotFound) {
+			return nil, errors.New("tx not found")
+		}
 		return nil, err
 	}
+	if tx.Reverted {
+		return nil, ErrAlreadyReverted
+	}
 
-	transactionToRevertLog, err := commander.store.ReadLogForCreatedTransaction(ctx, id)
+	transactionToRevert, err := commander.store.GetTransaction(ctx, id)
 	if storageerrors.IsNotFoundError(err) {
 		return nil, errorsutil.NewError(err, errors.Errorf("transaction %d not found", id))
 	}
 	if err != nil {
 		return nil, err
 	}
-
-	transactionToRevert := transactionToRevertLog.Data.(core.NewTransactionLogPayload).Transaction
 
 	rt := transactionToRevert.Reverse()
 	rt.Metadata = core.MarkReverts(metadata.Metadata{}, transactionToRevert.ID)
@@ -264,7 +265,7 @@ func (commander *Commander) RevertTransaction(ctx context.Context, parameters Pa
 			Metadata: rt.Metadata,
 		}),
 		func(tx *core.Transaction, accountMetadata map[string]metadata.Metadata) *core.Log {
-			return core.NewRevertedTransactionLog(tx.Timestamp, transactionToRevert.ID, tx)
+			return core.NewRevertedTransactionLog(tx.Date, transactionToRevert.ID, tx)
 		})
 	if err != nil {
 		return nil, err

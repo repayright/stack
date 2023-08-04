@@ -232,7 +232,7 @@ func (a *AccountsAssetsVolumes) Scan(value interface{}) error {
 	}
 }
 
-func (a AccountsAssetsVolumes) copy() AccountsAssetsVolumes {
+func (a AccountsAssetsVolumes) Copy() AccountsAssetsVolumes {
 	ret := AccountsAssetsVolumes{}
 	for key, volumes := range a {
 		ret[key] = volumes.copy()
@@ -240,20 +240,10 @@ func (a AccountsAssetsVolumes) copy() AccountsAssetsVolumes {
 	return ret
 }
 
-func AggregatePreCommitVolumes(txs ...ExpandedTransaction) AccountsAssetsVolumes {
-	ret := AccountsAssetsVolumes{}
-	for i := 0; i < len(txs); i++ {
-		tx := txs[i]
-		for _, posting := range tx.Postings {
-			if !ret.HasAccountAndAsset(posting.Source, posting.Asset) {
-				ret.SetVolumes(posting.Source, posting.Asset,
-					tx.PreCommitVolumes.GetVolumes(posting.Source, posting.Asset))
-			}
-			if !ret.HasAccountAndAsset(posting.Destination, posting.Asset) {
-				ret.SetVolumes(posting.Destination, posting.Asset,
-					tx.PreCommitVolumes.GetVolumes(posting.Destination, posting.Asset))
-			}
-		}
+func (a AccountsAssetsVolumes) Balances() BalancesByAssetsByAccounts {
+	ret := BalancesByAssetsByAccounts{}
+	for account, volumesByAssets := range a {
+		ret[account] = volumesByAssets.Balances()
 	}
 	return ret
 }

@@ -192,7 +192,7 @@ func PostTransaction(w http.ResponseWriter, r *http.Request) {
 		}
 		txData := core.TransactionData{
 			Postings:  payload.Postings,
-			Timestamp: payload.Timestamp,
+			Date:      payload.Timestamp,
 			Reference: payload.Reference,
 			Metadata:  payload.Metadata,
 		}

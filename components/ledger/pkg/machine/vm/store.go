@@ -5,22 +5,25 @@ import (
 	"math/big"
 
 	"github.com/formancehq/ledger/pkg/core"
-	storageerrors "github.com/formancehq/ledger/pkg/storage"
+	"github.com/formancehq/stack/libs/go-libs/metadata"
 )
 
 type Store interface {
-	GetBalanceFromLogs(ctx context.Context, address, asset string) (*big.Int, error)
-	GetMetadataFromLogs(ctx context.Context, address, key string) (string, error)
+	GetBalance(ctx context.Context, address, asset string) (*big.Int, error)
+	GetAccount(ctx context.Context, address string) (*core.Account, error)
 }
 
 type emptyStore struct{}
 
-func (e *emptyStore) GetBalanceFromLogs(ctx context.Context, address, asset string) (*big.Int, error) {
+func (e *emptyStore) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
 	return new(big.Int), nil
 }
 
-func (e *emptyStore) GetMetadataFromLogs(ctx context.Context, address, key string) (string, error) {
-	return "", storageerrors.ErrNotFound
+func (e *emptyStore) GetAccount(ctx context.Context, address string) (*core.Account, error) {
+	return &core.Account{
+		Address:  address,
+		Metadata: metadata.Metadata{},
+	}, nil
 }
 
 var _ Store = (*emptyStore)(nil)
@@ -34,7 +37,7 @@ type AccountWithBalances struct {
 
 type StaticStore map[string]*AccountWithBalances
 
-func (s StaticStore) GetBalanceFromLogs(ctx context.Context, address, asset string) (*big.Int, error) {
+func (s StaticStore) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
 	account, ok := s[address]
 	if !ok {
 		return new(big.Int), nil
@@ -47,17 +50,16 @@ func (s StaticStore) GetBalanceFromLogs(ctx context.Context, address, asset stri
 	return balance, nil
 }
 
-func (s StaticStore) GetMetadataFromLogs(ctx context.Context, address, key string) (string, error) {
+func (s StaticStore) GetAccount(ctx context.Context, address string) (*core.Account, error) {
 	account, ok := s[address]
 	if !ok {
-		return "", nil
-	}
-	metadata, ok := account.Metadata[key]
-	if !ok {
-		return "", storageerrors.ErrNotFound
+		return &core.Account{
+			Address:  address,
+			Metadata: metadata.Metadata{},
+		}, nil
 	}
 
-	return metadata, nil
+	return &account.Account, nil
 }
 
 var _ Store = StaticStore{}

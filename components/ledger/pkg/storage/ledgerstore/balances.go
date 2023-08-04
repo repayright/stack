@@ -5,11 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"strings"
 
 	"github.com/formancehq/ledger/pkg/core"
-	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/api"
 )
 
@@ -66,99 +64,102 @@ func (b *balancesByAssets) Scan(value interface{}) error {
 }
 
 func (s *Store) GetBalancesAggregated(ctx context.Context, q BalancesQuery) (core.BalancesByAssets, error) {
-	selectLastMoveForEachAccountAsset := s.schema.NewSelect(MovesTableName).
-		ColumnExpr("account").
-		ColumnExpr("asset").
-		ColumnExpr(fmt.Sprintf(`"%s".first(post_commit_input_value order by timestamp desc) as post_commit_input_value`, s.schema.Name())).
-		ColumnExpr(fmt.Sprintf(`"%s".first(post_commit_output_value order by timestamp desc) as post_commit_output_value`, s.schema.Name())).
-		GroupExpr("account, asset")
+
+	/**
+	with
+	    potentially_staled_moves as (
+	        select distinct on (m.account_address, m.asset) m.*
+	        from moves m
+	        order by account_address, asset, m.seq desc
+	    ),
+	    moves as (
+	        select move.*
+	        from potentially_staled_moves, ensure_move_computed(potentially_staled_moves) move
+	    )
+	select v.asset, sum(v.post_commit_aggregated_input) as inputs, sum(v.post_commit_aggregated_output) as outputs
+	from moves v
+	group by v.asset
+	*/
+
+	potentiallyStaledMoves := s.schema.
+		NewSelect(MovesTableName).
+		ColumnExpr("distinct on (moves.account_address, moves.asset) moves.*").
+		Order("account_address", "asset", "moves.seq desc")
 
 	if q.Filters.AddressRegexp != "" {
 		src := strings.Split(q.Filters.AddressRegexp, ":")
-		selectLastMoveForEachAccountAsset.Where(fmt.Sprintf("jsonb_array_length(account_array) = %d", len(src)))
+		potentiallyStaledMoves.Where(fmt.Sprintf("jsonb_array_length(account_address_array) = %d", len(src)))
 
 		for i, segment := range src {
 			if segment == "" {
 				continue
 			}
-			selectLastMoveForEachAccountAsset.Where(fmt.Sprintf("account_array @@ ('$[%d] == \"' || ?::text || '\"')::jsonpath", i), segment)
+			potentiallyStaledMoves.Where(fmt.Sprintf("account_address_array @@ ('$[%d] == \"' || ?::text || '\"')::jsonpath", i), segment)
 		}
 	}
 
-	type row struct {
-		Asset      string `bun:"asset"`
-		Aggregated *Int   `bun:"aggregated"`
+	moves := s.schema.IDB.
+		NewSelect().
+		ColumnExpr("move.*").
+		TableExpr("potentially_staled_moves").
+		TableExpr("ensure_move_computed(potentially_staled_moves) move")
+
+	type Temp struct {
+		Aggregated core.VolumesByAssets `bun:"aggregated,type:jsonb"`
+	}
+	temp := Temp{}
+
+	if err := s.schema.IDB.
+		NewSelect().
+		With("potentially_staled_moves", potentiallyStaledMoves).
+		With("moves", moves).
+		TableExpr("moves").
+		ColumnExpr("volumes_to_jsonb((moves.asset, sum(moves.post_commit_aggregated_input), sum(moves.post_commit_aggregated_output))) as aggregated").
+		Group("moves.asset").
+		Scan(ctx, &temp); err != nil {
+		return nil, err
 	}
 
-	rows := make([]row, 0)
-	if err := s.schema.IDB.NewSelect().
-		With("cte1", selectLastMoveForEachAccountAsset).
-		Column("asset").
-		ColumnExpr("sum(cte1.post_commit_input_value) - sum(cte1.post_commit_output_value) as aggregated").
-		Table("cte1").
-		Group("cte1.asset").
-		Scan(ctx, &rows); err != nil {
-		return nil, storageerrors.PostgresError(err)
-	}
-
-	aggregatedBalances := core.BalancesByAssets{}
-	for _, row := range rows {
-		aggregatedBalances[row.Asset] = (*big.Int)(row.Aggregated)
-	}
-
-	return aggregatedBalances, nil
+	return temp.Aggregated.Balances(), nil
 }
 
 func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[core.BalancesByAssetsByAccounts], error) {
-	selectLastMoveForEachAccountAsset := s.schema.NewSelect(MovesTableName).
-		ColumnExpr("account").
-		ColumnExpr("asset").
-		ColumnExpr(fmt.Sprintf(`"%s".first(post_commit_input_value order by timestamp desc) as post_commit_input_value`, s.schema.Name())).
-		ColumnExpr(fmt.Sprintf(`"%s".first(post_commit_output_value order by timestamp desc) as post_commit_output_value`, s.schema.Name())).
-		GroupExpr("account, asset")
+
+	type Temp struct {
+		Aggregated core.AccountsAssetsVolumes `bun:"aggregated,type:jsonb"`
+	}
+
+	query := s.schema.NewSelect(MovesTableName).
+		ColumnExpr("distinct on (moves.account_address) jsonb_build_object(moves.account_address, aggregate_objects(volumes_to_jsonb)) as aggregated").
+		TableExpr(`get_account_volumes_for_asset(moves.account_address, moves.asset) volumes`).
+		TableExpr("volumes_to_jsonb(volumes)").
+		Group("moves.account_address", "moves.asset").
+		Order("moves.account_address", "moves.asset")
 
 	if q.Filters.AddressRegexp != "" {
+		// todo(gfyrag): factorize segments handling
 		src := strings.Split(q.Filters.AddressRegexp, ":")
-		selectLastMoveForEachAccountAsset.Where(fmt.Sprintf("jsonb_array_length(account_array) = %d", len(src)))
+		query.Where(fmt.Sprintf("jsonb_array_length(account_address_array) = %d", len(src)))
 
 		for i, segment := range src {
 			if len(segment) == 0 {
 				continue
 			}
-			selectLastMoveForEachAccountAsset.Where(fmt.Sprintf("account_array @@ ('$[%d] == \"' || ?::text || '\"')::jsonpath", i), segment)
+			query.Where(fmt.Sprintf(`account_address_array @@ ('$[%d] == "' || ?::text || '"')::jsonpath`, i), segment)
 		}
 	}
 
 	if q.Filters.AfterAddress != "" {
-		selectLastMoveForEachAccountAsset.Where("account > ?", q.Filters.AfterAddress)
+		query.Where("account_address > ?", q.Filters.AfterAddress)
 	}
 
-	query := s.schema.IDB.NewSelect().
-		With("cte1", selectLastMoveForEachAccountAsset).
-		Column("data.account").
-		ColumnExpr(fmt.Sprintf(`"%s".aggregate_objects(data.asset) as balances_by_assets`, s.schema.Name())).
-		TableExpr(`(
-			select data.account, ('{"' || data.asset || '": ' || sum(data.post_commit_input_value) - sum(data.post_commit_output_value) || '}')::jsonb as asset
-			from cte1 data
-			group by data.account, data.asset
-		) data`).
-		Order("data.account").
-		Group("data.account")
-
-	type result struct {
-		Account string           `bun:"account"`
-		Assets  balancesByAssets `bun:"balances_by_assets"`
-	}
-
-	cursor, err := UsingOffset[BalancesQueryFilters, result](ctx,
+	cursor, err := UsingOffset[BalancesQueryFilters, Temp](ctx,
 		query, OffsetPaginatedQuery[BalancesQueryFilters](q))
 	if err != nil {
 		return nil, err
 	}
 
-	return api.MapCursor(cursor, func(from result) core.BalancesByAssetsByAccounts {
-		return core.BalancesByAssetsByAccounts{
-			from.Account: core.BalancesByAssets(from.Assets),
-		}
+	return api.MapCursor(cursor, func(from Temp) core.BalancesByAssetsByAccounts {
+		return from.Aggregated.Balances()
 	}), nil
 }

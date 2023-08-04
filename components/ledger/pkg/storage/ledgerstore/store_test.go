@@ -7,6 +7,7 @@ import (
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/collectionutils"
+	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,12 +21,8 @@ func TestInitializeStore(t *testing.T) {
 }
 
 func insertTransactions(ctx context.Context, s *ledgerstore.Store, txs ...core.Transaction) error {
-	if err := s.InsertTransactions(ctx, txs...); err != nil {
-		return err
-	}
-	moves := collectionutils.Flatten(collectionutils.Map(txs, core.Transaction.GetMoves))
-	if err := s.InsertMoves(ctx, moves...); err != nil {
-		return err
-	}
-	return nil
+	logs := collectionutils.Map(txs, func(from core.Transaction) *core.ChainedLog {
+		return core.NewTransactionLog(&from, map[string]metadata.Metadata{}).ChainLog(nil)
+	})
+	return s.InsertLogs(ctx, logs...)
 }
