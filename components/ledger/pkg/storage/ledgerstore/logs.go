@@ -76,7 +76,7 @@ type AccountWithBalances struct {
 	Balances map[string]*big.Int `bun:"balances,type:bytea,default:'{}'"`
 }
 
-type LogsV2 struct {
+type Logs struct {
 	bun.BaseModel `bun:"logs,alias:logs"`
 
 	ID             uint64    `bun:"id,unique,type:bigint"`
@@ -87,7 +87,7 @@ type LogsV2 struct {
 	IdempotencyKey string    `bun:"idempotency_key,type:varchar(256),unique"`
 }
 
-func (log LogsV2) ToCore() core.ChainedLog {
+func (log Logs) ToCore() core.ChainedLog {
 	payload, err := core.HydrateLog(core.LogTypeFromString(log.Type), log.Data)
 	if err != nil {
 		panic(errors.Wrap(err, "hydrating log data"))
@@ -131,14 +131,14 @@ func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedLog) 
 		return storageerrors.PostgresError(err)
 	}
 
-	ls := make([]LogsV2, len(activeLogs))
+	ls := make([]Logs, len(activeLogs))
 	for i, chainedLogs := range activeLogs {
 		data, err := json.Marshal(chainedLogs.Data)
 		if err != nil {
 			return errors.Wrap(err, "marshaling log data")
 		}
 
-		ls[i] = LogsV2{
+		ls[i] = Logs{
 			ID:             chainedLogs.ID,
 			Type:           chainedLogs.Type.String(),
 			Hash:           chainedLogs.Hash,
@@ -167,7 +167,7 @@ func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedLog) 
 }
 
 func (s *Store) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
-	raw := &LogsV2{}
+	raw := &Logs{}
 	err := s.schema.NewSelect(LogTableName).
 		Model(raw).
 		OrderExpr("id desc").
@@ -182,7 +182,7 @@ func (s *Store) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
 }
 
 func (s *Store) GetLogs(ctx context.Context, q LogsQuery) (*api.Cursor[core.ChainedLog], error) {
-	cursor, err := UsingColumn[LogsQueryFilters, LogsV2](ctx,
+	cursor, err := UsingColumn[LogsQueryFilters, Logs](ctx,
 		s.buildLogsQuery,
 		ColumnPaginatedQuery[LogsQueryFilters](q),
 	)
@@ -190,10 +190,10 @@ func (s *Store) GetLogs(ctx context.Context, q LogsQuery) (*api.Cursor[core.Chai
 		return nil, err
 	}
 
-	return api.MapCursor(cursor, LogsV2.ToCore), nil
+	return api.MapCursor(cursor, Logs.ToCore), nil
 }
 
-func (s *Store) buildLogsQuery(q LogsQueryFilters, models *[]LogsV2) *bun.SelectQuery {
+func (s *Store) buildLogsQuery(q LogsQueryFilters, models *[]Logs) *bun.SelectQuery {
 	sb := s.schema.NewSelect(LogTableName).
 		Model(models).
 		Column("id", "type", "hash", "date", "data", "idempotency_key")
@@ -223,7 +223,7 @@ func (s *Store) GetNextLogID(ctx context.Context) (uint64, error) {
 }
 
 func (s *Store) ReadLogsRange(ctx context.Context, idMin, idMax uint64) ([]core.ChainedLog, error) {
-	rawLogs := make([]LogsV2, 0)
+	rawLogs := make([]Logs, 0)
 	err := s.schema.
 		NewSelect(LogTableName).
 		Where("id >= ?", idMin).
@@ -234,11 +234,11 @@ func (s *Store) ReadLogsRange(ctx context.Context, idMin, idMax uint64) ([]core.
 		return nil, storageerrors.PostgresError(err)
 	}
 
-	return collectionutils.Map(rawLogs, LogsV2.ToCore), nil
+	return collectionutils.Map(rawLogs, Logs.ToCore), nil
 }
 
 func (s *Store) ReadLastLogWithType(ctx context.Context, logTypes ...core.LogType) (*core.ChainedLog, error) {
-	raw := &LogsV2{}
+	raw := &Logs{}
 	err := s.schema.
 		NewSelect(LogTableName).
 		Where("type IN (?)", bun.In(collectionutils.Map(logTypes, core.LogType.String))).
@@ -255,7 +255,7 @@ func (s *Store) ReadLastLogWithType(ctx context.Context, logTypes ...core.LogTyp
 }
 
 func (s *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error) {
-	raw := &LogsV2{}
+	raw := &Logs{}
 	err := s.schema.NewSelect(LogTableName).
 		Model(raw).
 		OrderExpr("id desc").
@@ -273,7 +273,7 @@ func (s *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*cor
 func (s *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
 	selectLogsForExistingAccount := s.schema.
 		NewSelect(LogTableName).
-		Model(&LogsV2{}).
+		Model(&Logs{}).
 		Where(fmt.Sprintf(`data->'transaction'->'postings' @> '[{"destination": "%s", "asset": "%s"}]' OR data->'transaction'->'postings' @> '[{"source": "%s", "asset": "%s"}]'`, address, asset, address, asset))
 
 	selectPostings := s.schema.IDB.NewSelect().

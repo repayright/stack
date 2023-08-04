@@ -102,7 +102,7 @@ func convertMetadata(data []byte) any {
 	return ret
 }
 
-func (l *Log) ToLogsV2() (ledgerstore.LogsV2, error) {
+func (l *Log) ToLogsV2() (ledgerstore.Logs, error) {
 	logType := core.LogTypeFromString(l.Type)
 
 	var data any
@@ -125,7 +125,7 @@ func (l *Log) ToLogsV2() (ledgerstore.LogsV2, error) {
 		panic(err)
 	}
 
-	return ledgerstore.LogsV2{
+	return ledgerstore.Logs{
 		ID:   l.ID,
 		Type: logType.String(),
 		Hash: []byte(l.Hash),
@@ -138,7 +138,7 @@ func batchLogs(
 	ctx context.Context,
 	schema storage.Schema,
 	sqlTx *storage.Tx,
-	logs []ledgerstore.LogsV2,
+	logs []ledgerstore.Logs,
 ) error {
 	txn, err := sqlTx.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -221,7 +221,7 @@ func migrateLogs(
 			break
 		}
 
-		logsV2 := make([]ledgerstore.LogsV2, 0, len(logs))
+		logsV2 := make([]ledgerstore.Logs, 0, len(logs))
 		for _, l := range logs {
 			logV2, err := l.ToLogsV2()
 			if err != nil {

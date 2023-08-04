@@ -15,6 +15,15 @@ const (
 	migrationTable = "goose_db_version"
 )
 
+type Info struct {
+	bun.BaseModel `bun:"goose_db_version"`
+
+	Version string    `json:"version" bun:"version_id"`
+	Name    string    `json:"name" bun:"-"`
+	State   string    `json:"state,omitempty" bun:"-"`
+	Date    time.Time `json:"date,omitempty" bun:"tstamp"`
+}
+
 type Migrator struct {
 	migrations   []Migration
 	schema       string
@@ -115,11 +124,6 @@ func (m *Migrator) Up(ctx context.Context, db bun.IDB) error {
 		}
 	}
 
-	_, err = tx.Exec("SET idle_in_transaction_session_timeout TO '30000';")
-	if err != nil {
-		panic(err)
-	}
-
 	if err := m.createVersionTable(ctx, tx); err != nil {
 		return err
 	}
@@ -140,6 +144,38 @@ func (m *Migrator) Up(ctx context.Context, db bun.IDB) error {
 	}
 
 	return tx.Commit()
+}
+
+func (m *Migrator) GetMigrations(ctx context.Context, db bun.IDB) ([]Info, error) {
+	migrationTableName := migrationTable
+	if m.schema != "" {
+		migrationTableName = fmt.Sprintf(`"%s".%s`, m.schema, migrationTableName)
+	}
+
+	ret := make([]Info, 0)
+	if err := db.NewSelect().
+		TableExpr(migrationTableName).
+		Order("version_id").
+		Where("version_id >= 1").
+		Column("version_id", "tstamp").
+		Scan(ctx, &ret); err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(ret); i++ {
+		ret[i].Name = m.migrations[i].Name
+		ret[i].State = "DONE"
+	}
+
+	for i := len(ret); i < len(m.migrations); i++ {
+		ret = append(ret, Info{
+			Version: fmt.Sprint(i),
+			Name:    m.migrations[i].Name,
+			State:   "TO DO",
+		})
+	}
+
+	return ret, nil
 }
 
 func NewMigrator(opts ...option) *Migrator {

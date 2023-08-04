@@ -18,6 +18,10 @@ func TestInitializeStore(t *testing.T) {
 	modified, err := store.Migrate(context.Background())
 	require.NoError(t, err)
 	require.False(t, modified)
+
+	migrationInfos, err := store.GetMigrationsInfo(context.Background())
+	require.NoError(t, err)
+	require.Len(t, migrationInfos, 1)
 }
 
 func insertTransactions(ctx context.Context, s *ledgerstore.Store, txs ...core.Transaction) error {

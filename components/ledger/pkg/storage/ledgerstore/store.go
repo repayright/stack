@@ -38,10 +38,14 @@ func (s *Store) Delete(ctx context.Context) error {
 	return errors.Wrap(s.onDelete(ctx), "deleting ledger store")
 }
 
-func (s *Store) Migrate(ctx context.Context) (bool, error) {
-
+func (s *Store) getMigrator() *migrations.Migrator {
 	migrator := migrations.NewMigrator(migrations.WithSchema(s.Name(), true))
 	registerMigrations(migrator)
+	return migrator
+}
+
+func (s *Store) Migrate(ctx context.Context) (bool, error) {
+	migrator := s.getMigrator()
 
 	if err := migrator.Up(ctx, s.schema.IDB); err != nil {
 		return false, err
@@ -49,6 +53,10 @@ func (s *Store) Migrate(ctx context.Context) (bool, error) {
 
 	// TODO: Update migrations package to return modifications
 	return false, nil
+}
+
+func (s *Store) GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error) {
+	return s.getMigrator().GetMigrations(ctx, s.schema.IDB)
 }
 
 func (s *Store) IsInitialized() bool {
