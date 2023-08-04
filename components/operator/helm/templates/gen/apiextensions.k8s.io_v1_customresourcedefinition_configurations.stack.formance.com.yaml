@@ -4178,6 +4178,26 @@ spec:
                 type: boolean
               monitoring:
                 properties:
+                  metrics:
+                    properties:
+                      otlp:
+                        properties:
+                          endpoint:
+                            type: string
+                          insecure:
+                            type: boolean
+                          mode:
+                            enum:
+                            - grpc
+                            - http
+                            type: string
+                          port:
+                            format: int32
+                            type: integer
+                          resourceAttributes:
+                            type: string
+                        type: object
+                    type: object
                   traces:
                     properties:
                       otlp:
@@ -4198,6 +4218,26 @@ spec:
                             type: string
                         type: object
                     type: object
+                type: object
+              s3:
+                properties:
+                  endpoint:
+                    type: string
+                  forceStylePath:
+                    type: boolean
+                  insecure:
+                    type: boolean
+                  region:
+                    type: string
+                  secret:
+                    properties:
+                      accessKey:
+                        type: string
+                      secretKey:
+                        type: string
+                    type: object
+                required:
+                - endpoint
                 type: object
               services:
                 description: ConfigurationServicesSpec define all existing services
