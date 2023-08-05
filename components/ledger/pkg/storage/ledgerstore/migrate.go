@@ -17,6 +17,7 @@ var initSchema string
 func registerMigrations(migrator *migrations.Migrator, schema storage.Schema) {
 	migrator.RegisterMigrations(
 		migrations.Migration{
+			Name: "Init schema",
 			Up: func(tx bun.Tx) error {
 
 				v1SchemaExists := false

@@ -74,7 +74,7 @@ func (d *Driver) GetSystemStore() *systemstore.Store {
 	return d.systemStore
 }
 
-func (d *Driver) newStore(ctx context.Context, name string) (*ledgerstore.Store, error) {
+func (d *Driver) newStore(name string) (*ledgerstore.Store, error) {
 	schema, err := d.db.Schema(name)
 	if err != nil {
 		return nil, errors.Wrap(err, "opening schema")
@@ -110,7 +110,7 @@ func (d *Driver) CreateLedgerStore(ctx context.Context, name string) (*ledgersto
 		return nil, err
 	}
 
-	store, err := d.newStore(ctx, name)
+	store, err := d.newStore(name)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (d *Driver) GetLedgerStore(ctx context.Context, name string) (*ledgerstore.
 		return nil, storage.ErrStoreNotFound
 	}
 
-	return d.newStore(ctx, name)
+	return d.newStore(name)
 }
 
 func (d *Driver) Initialize(ctx context.Context) error {

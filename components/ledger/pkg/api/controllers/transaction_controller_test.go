@@ -14,6 +14,7 @@ import (
 	"github.com/formancehq/ledger/pkg/ledger/command"
 	"github.com/formancehq/ledger/pkg/opentelemetry/metrics"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/golang/mock/gomock"
@@ -451,14 +452,14 @@ func TestGetTransactions(t *testing.T) {
 		{
 			name: "using empty cursor",
 			queryParams: url.Values{
-				"cursor": []string{ledgerstore.EncodeCursor(ledgerstore.NewTransactionsQuery())},
+				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewTransactionsQuery())},
 			},
 			expectQuery: ledgerstore.NewTransactionsQuery(),
 		},
 		{
 			name: "using cursor with other param",
 			queryParams: url.Values{
-				"cursor": []string{ledgerstore.EncodeCursor(ledgerstore.NewTransactionsQuery())},
+				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewTransactionsQuery())},
 				"after":  []string{"foo"},
 			},
 			expectStatusCode:  http.StatusBadRequest,

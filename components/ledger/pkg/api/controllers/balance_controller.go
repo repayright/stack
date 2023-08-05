@@ -6,6 +6,7 @@ import (
 	"github.com/formancehq/ledger/pkg/api/apierrors"
 	"github.com/formancehq/ledger/pkg/ledger/command"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"
 	"github.com/pkg/errors"
@@ -38,7 +39,7 @@ func GetBalances(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err := ledgerstore.UnmarshalCursor(r.URL.Query().Get(QueryKeyCursor), &balancesQuery)
+		err := paginate.UnmarshalCursor(r.URL.Query().Get(QueryKeyCursor), &balancesQuery)
 		if err != nil {
 			apierrors.ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
 				errors.Errorf("invalid '%s' query param", QueryKeyCursor)))

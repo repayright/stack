@@ -1,4 +1,4 @@
-package ledgerstore
+package paginate
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/pointer"
@@ -13,11 +14,10 @@ import (
 )
 
 func UsingColumn[FILTERS any, ENTITY any](ctx context.Context,
-	builder func(filters FILTERS, models *[]ENTITY) *bun.SelectQuery,
+	sb *bun.SelectQuery,
 	query ColumnPaginatedQuery[FILTERS]) (*api.Cursor[ENTITY], error) {
 	ret := make([]ENTITY, 0)
 
-	sb := builder(query.Filters, &ret)
 	sb = sb.Limit(int(query.PageSize) + 1) // Fetch one additional item to find the next token
 	order := query.Order
 	if query.Reverse {
@@ -43,13 +43,14 @@ func UsingColumn[FILTERS any, ENTITY any](ctx context.Context,
 		}
 	}
 
-	if err := sb.Scan(ctx); err != nil {
+	if err := sb.Scan(ctx, &ret); err != nil {
 		return nil, storageerrors.PostgresError(err)
 	}
 	var (
 		paginatedColumnIndex = 0
 	)
 	typeOfT := reflect.TypeOf(ret).Elem()
+	spew.Dump(typeOfT)
 	for ; paginatedColumnIndex < typeOfT.NumField(); paginatedColumnIndex++ {
 		field := typeOfT.Field(paginatedColumnIndex)
 		tag := field.Tag.Get("bun")

@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/formancehq/ledger/pkg/ledger/command"
-	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"
 	"github.com/pkg/errors"
 )
 
 const (
 	MaxPageSize     = 100
-	DefaultPageSize = ledgerstore.QueryDefaultPageSize
+	DefaultPageSize = paginate.QueryDefaultPageSize
 
 	QueryKeyCursor          = "cursor"
 	QueryKeyPageSize        = "pageSize"

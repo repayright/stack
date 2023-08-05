@@ -1,11 +1,11 @@
-package ledgerstore_test
+package paginate_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/formancehq/ledger/pkg/storage"
-	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/pgtesting"
 	"github.com/stretchr/testify/require"
 )
@@ -46,87 +46,87 @@ func TestOffsetPagination(t *testing.T) {
 
 	type testCase struct {
 		name                  string
-		query                 ledgerstore.OffsetPaginatedQuery[bool]
-		expectedNext          *ledgerstore.OffsetPaginatedQuery[bool]
-		expectedPrevious      *ledgerstore.OffsetPaginatedQuery[bool]
+		query                 paginate.OffsetPaginatedQuery[bool]
+		expectedNext          *paginate.OffsetPaginatedQuery[bool]
+		expectedPrevious      *paginate.OffsetPaginatedQuery[bool]
 		expectedNumberOfItems uint64
 	}
 	testCases := []testCase{
 		{
 			name: "asc first page",
-			query: ledgerstore.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedNext: &ledgerstore.OffsetPaginatedQuery[bool]{
+			expectedNext: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc second page using next cursor",
-			query: ledgerstore.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &ledgerstore.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   0,
 			},
-			expectedNext: &ledgerstore.OffsetPaginatedQuery[bool]{
+			expectedNext: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   20,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc last page using next cursor",
-			query: ledgerstore.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   90,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &ledgerstore.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   80,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc last page partial",
-			query: ledgerstore.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   95,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &ledgerstore.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   85,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc fist page partial",
-			query: ledgerstore.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   5,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &ledgerstore.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   0,
 			},
-			expectedNext: &ledgerstore.OffsetPaginatedQuery[bool]{
+			expectedNext: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    ledgerstore.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   15,
 			},
 			expectedNumberOfItems: 10,
@@ -141,7 +141,7 @@ func TestOffsetPagination(t *testing.T) {
 			if tc.query.Filters {
 				query = query.Where("pair = ?", true)
 			}
-			cursor, err := ledgerstore.UsingOffset[bool, model](
+			cursor, err := paginate.UsingOffset[bool, model](
 				context.Background(),
 				query,
 				tc.query)
@@ -152,8 +152,8 @@ func TestOffsetPagination(t *testing.T) {
 			} else {
 				require.NotEmpty(t, cursor.Next)
 
-				q := ledgerstore.OffsetPaginatedQuery[bool]{}
-				require.NoError(t, ledgerstore.UnmarshalCursor(cursor.Next, &q))
+				q := paginate.OffsetPaginatedQuery[bool]{}
+				require.NoError(t, paginate.UnmarshalCursor(cursor.Next, &q))
 				require.EqualValues(t, *tc.expectedNext, q)
 			}
 
@@ -162,8 +162,8 @@ func TestOffsetPagination(t *testing.T) {
 			} else {
 				require.NotEmpty(t, cursor.Previous)
 
-				q := ledgerstore.OffsetPaginatedQuery[bool]{}
-				require.NoError(t, ledgerstore.UnmarshalCursor(cursor.Previous, &q))
+				q := paginate.OffsetPaginatedQuery[bool]{}
+				require.NoError(t, paginate.UnmarshalCursor(cursor.Previous, &q))
 				require.EqualValues(t, *tc.expectedPrevious, q)
 			}
 		})

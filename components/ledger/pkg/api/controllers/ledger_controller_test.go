@@ -15,6 +15,7 @@ import (
 	"github.com/formancehq/ledger/pkg/ledger"
 	"github.com/formancehq/ledger/pkg/opentelemetry/metrics"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/formancehq/stack/libs/go-libs/migrations"
@@ -143,7 +144,7 @@ func TestGetLogs(t *testing.T) {
 		{
 			name: "using empty cursor",
 			queryParams: url.Values{
-				"cursor": []string{ledgerstore.EncodeCursor(ledgerstore.NewLogsQuery())},
+				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewLogsQuery())},
 			},
 			expectQuery: ledgerstore.NewLogsQuery(),
 		},

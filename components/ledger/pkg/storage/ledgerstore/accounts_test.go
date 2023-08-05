@@ -82,6 +82,27 @@ func TestGetAccount(t *testing.T) {
 	}, *account)
 }
 
+func TestGetAccounts(t *testing.T) {
+	t.Parallel()
+	store := newLedgerStore(t)
+
+	require.NoError(t, store.InsertLogs(context.Background(),
+		core.NewSetMetadataOnAccountLog(core.Now(), "account1", metadata.Metadata{"category": "1"}).ChainLog(nil),
+		core.NewSetMetadataOnAccountLog(core.Now(), "account2", metadata.Metadata{"category": "2"}).ChainLog(nil),
+		core.NewSetMetadataOnAccountLog(core.Now(), "account3", metadata.Metadata{"category": "3"}).ChainLog(nil),
+	))
+
+	accounts, err := store.GetAccounts(context.Background(), ledgerstore.NewAccountsQuery())
+	require.NoError(t, err)
+	require.Len(t, accounts.Data, 3)
+
+	accounts, err = store.GetAccounts(context.Background(), ledgerstore.NewAccountsQuery().WithMetadataFilter(metadata.Metadata{
+		"category": "1",
+	}))
+	require.NoError(t, err)
+	require.Len(t, accounts.Data, 1)
+}
+
 func TestGetAccountWithVolumes(t *testing.T) {
 	t.Parallel()
 	store := newLedgerStore(t)

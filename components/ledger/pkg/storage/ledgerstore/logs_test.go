@@ -10,6 +10,7 @@ import (
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/stretchr/testify/require"
 )
@@ -252,7 +253,7 @@ func TestGetLogs(t *testing.T) {
 
 	cursor, err := store.GetLogs(context.Background(), ledgerstore.NewLogsQuery())
 	require.NoError(t, err)
-	require.Equal(t, ledgerstore.QueryDefaultPageSize, cursor.PageSize)
+	require.Equal(t, paginate.QueryDefaultPageSize, cursor.PageSize)
 
 	require.Equal(t, 3, len(cursor.Data))
 	require.Equal(t, uint64(2), cursor.Data[0].ID)

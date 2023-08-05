@@ -746,18 +746,21 @@ func TestListTransactions(t *testing.T) {
 		WithPostings(
 			core.NewPosting("world", "alice", "USD", big.NewInt(100)),
 		).
+		WithMetadata(metadata.Metadata{"category": "1"}).
 		WithTimestamp(now.Add(-3 * time.Hour))
 	tx2 := core.NewTransaction().
 		WithID(1).
 		WithPostings(
 			core.NewPosting("world", "bob", "USD", big.NewInt(100)),
 		).
+		WithMetadata(metadata.Metadata{"category": "2"}).
 		WithTimestamp(now.Add(-2 * time.Hour))
 	tx3 := core.NewTransaction().
 		WithID(2).
 		WithPostings(
 			core.NewPosting("world", "users:marley", "USD", big.NewInt(100)),
 		).
+		WithMetadata(metadata.Metadata{"category": "3"}).
 		WithTimestamp(now.Add(-time.Hour))
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2, *tx3))
@@ -795,6 +798,18 @@ func TestListTransactions(t *testing.T) {
 				PageSize: 15,
 				HasMore:  false,
 				Data:     ExpandTransactions(tx1, tx2, tx3)[2:],
+			},
+		},
+		{
+			name: "filter using metadata",
+			query: ledgerstore.NewTransactionsQuery().
+				WithMetadataFilter(metadata.Metadata{
+					"category": "2",
+				}),
+			expected: &api.Cursor[core.ExpandedTransaction]{
+				PageSize: 15,
+				HasMore:  false,
+				Data:     ExpandTransactions(tx1, tx2, tx3)[1:2],
 			},
 		},
 	}

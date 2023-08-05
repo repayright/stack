@@ -12,6 +12,7 @@ import (
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/opentelemetry/metrics"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -86,7 +87,7 @@ func TestGetBalances(t *testing.T) {
 		{
 			name: "empty cursor with other param",
 			queryParams: url.Values{
-				"cursor": []string{ledgerstore.EncodeCursor(ledgerstore.NewBalancesQuery())},
+				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewBalancesQuery())},
 				"after":  []string{"bob"},
 			},
 			expectStatusCode:  http.StatusBadRequest,

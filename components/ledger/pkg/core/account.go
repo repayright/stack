@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/formancehq/stack/libs/go-libs/metadata"
+	"github.com/uptrace/bun"
 )
 
 const (
@@ -12,6 +13,8 @@ const (
 )
 
 type Account struct {
+	bun.BaseModel `bun:"table:accounts,alias:accounts"`
+
 	Address  string            `json:"address"`
 	Metadata metadata.Metadata `json:"metadata"`
 }
@@ -29,7 +32,7 @@ func NewAccount(address string) Account {
 }
 
 type AccountWithVolumes struct {
-	Account
+	Account `bun:",extend"`
 	Volumes VolumesByAssets `json:"volumes"`
 }
 

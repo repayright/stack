@@ -134,7 +134,7 @@ as $$
     on conflict do nothing
 $$;
 
-create or replace function get_account(_account_address varchar, _before timestamp default null)
+create function get_account(_account_address varchar, _before timestamp default null)
     returns setof accounts
     language sql
     stable
@@ -147,7 +147,7 @@ as $$
     limit 1;
 $$;
 
-create or replace function get_transaction(_id numeric, _before timestamp default null)
+create function get_transaction(_id numeric, _before timestamp default null)
     returns setof transactions
     language sql
     stable
@@ -163,7 +163,7 @@ $$;
 -- but Postgres is extremely inefficient with distinct
 -- so the query implementation use a "hack" to emulate skip scan feature which Postgres lack natively
 -- see https://wiki.postgresql.org/wiki/Loose_indexscan for more information
-create or replace function get_all_assets()
+create function get_all_assets()
     returns setof varchar
     language sql
 as $$
@@ -184,7 +184,7 @@ as $$
     select null where exists(select 1 from moves where asset is null)
 $$;
 
-create or replace function get_moves(_before timestamp default null)
+create function get_moves(_before timestamp default null)
     returns setof moves
     language sql
     stable
@@ -195,7 +195,7 @@ as $$
     order by date desc, seq desc
 $$;
 
-create or replace function get_moves_for_account(_account_address varchar, _before timestamp default null)
+create function get_moves_for_account(_account_address varchar, _before timestamp default null)
     returns setof moves
     language sql
     stable
@@ -205,7 +205,7 @@ as $$
     where s.account_address = _account_address
 $$;
 
-create or replace function get_moves_for_account_and_asset(_account_address varchar, _asset varchar, _before timestamp default null)
+create function get_moves_for_account_and_asset(_account_address varchar, _asset varchar, _before timestamp default null)
     returns setof moves
     language sql
     stable
@@ -215,7 +215,7 @@ as $$
     where s.asset = _asset
 $$;
 
-create or replace function get_latest_computed_move_for_account_and_asset(_account_address varchar, _asset varchar, _before timestamp default null)
+create function get_latest_computed_move_for_account_and_asset(_account_address varchar, _asset varchar, _before timestamp default null)
     returns setof moves
     language sql
     stable
@@ -226,7 +226,7 @@ as $$
     limit 1
 $$;
 
-create or replace function get_latest_move_for_account_and_asset(_account_address varchar, _asset varchar, _before timestamp default null)
+create function get_latest_move_for_account_and_asset(_account_address varchar, _asset varchar, _before timestamp default null)
     returns setof moves
     language sql
     stable
@@ -340,7 +340,7 @@ $$;
 -- to compute a balance for an account and an asset, we take the last not staled value, then we add all amounts of balances
 -- between the last not staled value and the balance we're actually trying to update.
 -- (remember the balance is versioned and each new fund movements give a new row for the balance of an account)
-create or replace function compute_move(record_to_update moves)
+create function compute_move(record_to_update moves)
     returns moves
     language sql
 as $$
@@ -413,7 +413,7 @@ as $$
     returning moves.*;
 $$;
 
-create or replace function ensure_move_computed(m moves)
+create function ensure_move_computed(m moves)
     returns moves
     language sql
 as $$
@@ -426,7 +426,7 @@ limit 1
 $$;
 
 -- function allowing to force update all balances
-create or replace function update_pre_post_commit_volumes(_limit numeric default 100)
+create function update_pre_post_commit_volumes(_limit numeric default 100)
     returns setof moves
     language plpgsql
 as $$
@@ -475,7 +475,7 @@ as $$
     end;
 $$;
 
-create or replace function refresh_volumes(_account varchar, _asset varchar, _before timestamp default null)
+create function refresh_volumes(_account varchar, _asset varchar, _before timestamp default null)
     returns volumes
     language sql
 as $$
@@ -519,7 +519,7 @@ $$;
 create trigger account_insert after insert on logs
     for each row execute procedure handle_log();
 
-create or replace function get_account_volumes_for_asset(_account varchar, _asset varchar, _before timestamp default null)
+create function get_account_volumes_for_asset(_account varchar, _asset varchar, _before timestamp default null)
     returns volumes
     language sql
     stable
@@ -534,7 +534,7 @@ as $$
     limit 1
 $$;
 
-create or replace function get_all_account_volumes(_account varchar, _before timestamp default null)
+create function get_all_account_volumes(_account varchar, _before timestamp default null)
     returns setof volumes
     language sql
     stable
@@ -565,7 +565,7 @@ as $$
     from refreshed_moves
 $$;
 
-create or replace function volumes_to_jsonb(v volumes)
+create function volumes_to_jsonb(v volumes)
     returns jsonb
     language sql
     immutable
@@ -573,7 +573,7 @@ as $$
     select ('{"' || v.asset || '": {"input": ' || v.inputs || ', "output": ' || v.outputs || '}}')::jsonb
 $$;
 
-create or replace function get_account_aggregated_volumes(_account_address varchar, _before timestamp default null)
+create function get_account_aggregated_volumes(_account_address varchar, _before timestamp default null)
     returns jsonb
     language sql
     stable
@@ -582,7 +582,7 @@ as $$
     from get_all_account_volumes(_account_address, _before := _before) volumes
 $$;
 
-create or replace function get_account_balance(_account varchar, _asset varchar, _before timestamp default null)
+create function get_account_balance(_account varchar, _asset varchar, _before timestamp default null)
     returns numeric
     language sql
     stable
@@ -591,7 +591,7 @@ as $$
     from get_account_volumes_for_asset(_account, _asset, _before := _before) volumes
 $$;
 
-create or replace function aggregate_ledger_volumes(
+create function aggregate_ledger_volumes(
     _before timestamp default null,
     _accounts varchar[] default null,
     _assets varchar[] default null
