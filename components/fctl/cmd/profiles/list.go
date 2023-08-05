@@ -121,12 +121,12 @@ func (c *ListController) Render() (tea.Model, error) {
 	if config.GetString(flags, config.OutputFlag) == "plain" {
 		opt := ui.WithHeight(len(tableData))
 		// Add Deleted At column if --deleted flag is set
-		return ui.NewTableModel(columns, append(opts, opt)...), nil
+		return ui.NewTable(columns, append(opts, opt)...), nil
 	}
 
 	opts = ui.NewTableOptions(ui.WithFullScreenTable(columns), tableData)
 
-	return ui.NewTableModel(columns, opts...), nil
+	return ui.NewTable(columns, opts...), nil
 }
 
 func NewListCommand() *cobra.Command {

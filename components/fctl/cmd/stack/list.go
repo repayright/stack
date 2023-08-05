@@ -11,10 +11,9 @@ import (
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
-	"github.com/charmbracelet/bubbles/table"
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
-	"github.com/formancehq/fctl/pkg/ui"
+	uitable "github.com/formancehq/fctl/pkg/ui/table"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +24,7 @@ const (
 	minLengthStackId        = 8
 	minLengthStackName      = 10
 	minLengthApiUrl         = 48
-	minLengthStackRegion    = 30
+	minLengthStackRegion    = 36
 	minLengthStackCreatedAt = 20
 	minLengthStackDeletedAt = 20
 )
@@ -162,7 +161,7 @@ func (c *ListController) Render() (tea.Model, error) {
 	flags := c.config.GetAllFLags()
 
 	// Create table rows
-	tableData := fctl.Map(c.store.Stacks, func(stack Stack) table.Row {
+	tableData := fctl.Map(c.store.Stacks, func(stack Stack) *uitable.Row {
 		data := []string{
 			c.organization,
 			stack.Id,
@@ -180,36 +179,34 @@ func (c *ListController) Render() (tea.Model, error) {
 			}
 		}
 
-		return data
-	})
+		cells := fctl.Map(data, func(s string) *uitable.Cell {
+			return uitable.NewCell(s)
+		})
 
-	var columns ui.ArrayColumn
+		return uitable.NewRow(cells...)
+	})
 
 	// Add plain table option if --plain flag is set
 	isPlain := config.GetString(flags, config.OutputFlag) == "plain"
 	// Default Columns
-	columns = ui.NewArrayColumn(
-		ui.NewColumn("Organization Id", minLengthOrganizationId),
-		ui.NewColumn("Stack Id", minLengthStackId),
-		ui.NewColumn("Name", minLengthStackName),
-		ui.NewColumn("API URL", minLengthApiUrl),
-		ui.NewColumn("Region", minLengthStackRegion),
-		ui.NewColumn("Created At", minLengthStackCreatedAt),
+	header := uitable.NewRow(
+		uitable.NewCell("Organization Id", uitable.WithWidth(minLengthOrganizationId)),
+		uitable.NewCell("Stack Id", uitable.WithWidth(minLengthStackId)),
+		uitable.NewCell("Name", uitable.WithWidth(minLengthStackName)),
+		uitable.NewCell("API URL", uitable.WithWidth(minLengthApiUrl)),
+		uitable.NewCell("Region", uitable.WithWidth(minLengthStackRegion)),
+		uitable.NewCell("Created At", uitable.WithWidth(minLengthStackCreatedAt)),
 	)
+
 	if config.GetBool(flags, deletedFlag) {
-		columns = columns.AddColumn("Deleted At", minLengthStackDeletedAt)
+		header.AddCell(uitable.NewCell("Deleted At", uitable.WithWidth(minLengthStackDeletedAt)))
 	}
-	// Default table options
-	opts := ui.NewTableOptions(columns, tableData)
 	if isPlain {
-		opt := ui.WithHeight(len(tableData))
 		// Add Deleted At column if --deleted flag is set
-		return ui.NewTableModel(columns, append(opts, opt)...), nil
+		return uitable.NewTable(header, tableData), nil
 	}
 
-	opts = ui.NewTableOptions(ui.WithFullScreenTable(columns), tableData)
-
-	return ui.NewTableModel(columns, opts...), nil
+	return uitable.NewTable(header, tableData, uitable.WithDefaultStyle()), nil
 }
 
 func NewKeyMapAction() *config.KeyMapHandler {
@@ -244,18 +241,14 @@ func NewKeyMapAction() *config.KeyMapHandler {
 		),
 		func(m tea.Model) tea.Msg {
 			//Cast model to table.Model
-			t, ok := m.(ui.TableModel)
+			t, ok := m.(uitable.Table)
 			if !ok {
 				panic("invalid model type")
 				return nil
 			}
 
 			selectedRow := t.SelectedRow()
-			if selectedRow == nil || selectedRow[1] == "" {
-				return nil
-			}
-
-			id := selectedRow[1]
+			id := selectedRow.Items()[1].String()
 
 			c := NewShowControllerConfig()
 			controller := NewShowController(c)
@@ -272,18 +265,14 @@ func NewKeyMapAction() *config.KeyMapHandler {
 		),
 		func(m tea.Model) tea.Msg {
 			//Cast model to table.Model
-			t, ok := m.(ui.TableModel)
+			t, ok := m.(uitable.Table)
 			if !ok {
 				panic("invalid model type")
 				return nil
 			}
 
 			selectedRow := t.SelectedRow()
-			if selectedRow == nil || selectedRow[1] == "" {
-				return nil
-			}
-
-			id := selectedRow[1]
+			id := selectedRow.Items()[1].String()
 
 			c := NewShowControllerConfig()
 			controller := NewShowController(c)

@@ -80,7 +80,7 @@ func (p *Prompt) GetKeyMapAction() *config.KeyMapHandler {
 }
 
 func (p *Prompt) Init() tea.Cmd {
-	p.model = textinput.NewModel()
+	p.model = textinput.New()
 	p.model.Placeholder = "Typing..."
 	p.model.CharLimit = 60
 
@@ -116,7 +116,6 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 		p.suggestions = nil
 
 		go func() {
-
 			// Cosine distance OK
 			// Levenshtein distance OK
 			res, err := edlib.FuzzySearchSetThreshold(v, p.commands.commands, 4, 0.3, edlib.Cosine)
