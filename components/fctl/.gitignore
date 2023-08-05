@@ -6,3 +6,6 @@ autocomplete.*
 fctl
 coverage.*
 completions
+
+# File generated during tea.debug
+*.log

@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui"
+	"github.com/formancehq/fctl/pkg/ui/header"
 	"github.com/formancehq/fctl/pkg/ui/helpers"
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
@@ -20,7 +21,7 @@ var lock = &sync.Mutex{}
 var instance *Display
 
 type Display struct {
-	header     *ui.Header
+	header     *header.Header
 	prompt     *ui.Prompt
 	controller config.Controller
 	renderer   modelutils.Model
@@ -39,7 +40,7 @@ func NewDisplay(cmd *cobra.Command) *Display {
 		defer lock.Unlock()
 		if instance == nil {
 			instance = &Display{
-				header:     ui.NewHeader(),
+				header:     header.NewHeader(),
 				controller: nil,
 				renderer:   nil,
 				prompt:     ui.NewPrompt(cmd),
@@ -49,7 +50,7 @@ func NewDisplay(cmd *cobra.Command) *Display {
 	return instance
 }
 
-func (d *Display) SetHeader(model *ui.Header) *Display {
+func (d *Display) SetHeader(model *header.Header) *Display {
 	d.header = model
 	return d
 }
@@ -148,8 +149,8 @@ func (d *Display) addControllerPromptKeyBinding(c config.Controller) {
 		},
 	).AddNewKeyBinding(
 		key.NewBinding(
-			key.WithKeys("ctrl+c", "esc"),
-			key.WithHelp("ctrl+c", "Exit program"),
+			key.WithKeys("esc", "ctrl+c"),
+			key.WithHelp("esc", "Exit program"),
 		),
 		func(m tea.Model) tea.Msg {
 			return tea.QuitMsg{}
@@ -161,14 +162,14 @@ func (d *Display) addPromptExitKeyBinding() {
 	d.prompt.GetKeyMapAction().AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("esc"),
-			key.WithHelp("esc", "quit the prompt"),
+			key.WithHelp("esc", "Quit the prompt"),
 		),
 		func(model tea.Model) tea.Msg {
 			return modelutils.ClosePromptMsg{}
 		},
 	).AddNewKeyBinding(
 		key.NewBinding(
-			key.WithKeys("ctrl+c", "esc"),
+			key.WithKeys("ctrl+c"),
 			key.WithHelp("ctrl+c", "Exit program"),
 		),
 		func(m tea.Model) tea.Msg {
@@ -240,6 +241,9 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if d.prompt.IsFocused() {
 			break
 		}
+
+		//Check for action key binding
+		// It migth change to a specific tea.Msg
 		if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
 			action := keyMapHandler.GetAction(tea.Key(msg))
 			if action != nil {
@@ -252,6 +256,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
+		//Update the body model if he handle the key
 		m, cmd := d.renderer.Update(msg)
 		if cmd != nil {
 			cmds = append(cmds, cmd)
