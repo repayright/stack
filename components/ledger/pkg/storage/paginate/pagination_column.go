@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/pointer"
@@ -50,7 +49,6 @@ func UsingColumn[FILTERS any, ENTITY any](ctx context.Context,
 		paginatedColumnIndex = 0
 	)
 	typeOfT := reflect.TypeOf(ret).Elem()
-	spew.Dump(typeOfT)
 	for ; paginatedColumnIndex < typeOfT.NumField(); paginatedColumnIndex++ {
 		field := typeOfT.Field(paginatedColumnIndex)
 		tag := field.Tag.Get("bun")
