@@ -43,7 +43,6 @@ func NewDisplay(cmd *cobra.Command) *Display {
 				controller: nil,
 				renderer:   nil,
 				prompt:     ui.NewPrompt(cmd),
-				confirm:    ui.NewConfirm(),
 			}
 		}
 	}
@@ -161,8 +160,8 @@ func (d *Display) addControllerPromptKeyBinding(c config.Controller) {
 func (d *Display) addPromptExitKeyBinding() {
 	d.prompt.GetKeyMapAction().AddNewKeyBinding(
 		key.NewBinding(
-			key.WithKeys("exit"),
-			key.WithHelp("exit", "quit the prompt"),
+			key.WithKeys("esc"),
+			key.WithHelp("esc", "quit the prompt"),
 		),
 		func(model tea.Model) tea.Msg {
 			return modelutils.ClosePromptMsg{}
@@ -205,6 +204,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 		}
 		d.renderer = m
+		d.Render()
 	case modelutils.ChangeViewMsg:
 		d.controller = msg.Controller
 		renderer, err := d.controller.Run()
@@ -229,23 +229,12 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.prompt.SwitchFocus()
 		d.GenerateKeyMapAction()
 		cmds = append(cmds, func() tea.Msg {
-			// w, h, err := modelutils.GetTerminalSize()
-			// if err != nil {
-			// 	return tea.Quit
-			// }
-
-			return tea.WindowSizeMsg{}
+			return d.lastTermSize
 		})
 	case modelutils.ClosePromptMsg:
-		d.prompt.SwitchFocus()
 		d.GenerateKeyMapAction()
 		cmds = append(cmds, func() tea.Msg {
-			// w, h, err := modelutils.GetTerminalSize()
-			// if err != nil {
-			// 	return tea.Quit
-			// }
-
-			return tea.WindowSizeMsg{}
+			return d.lastTermSize
 		})
 	case tea.KeyMsg:
 		if d.prompt.IsFocused() {
@@ -268,14 +257,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 		}
 		d.renderer = m
-
-		// case modelutils.BlurMsg:
-		// 	cmds = append(cmds, func() tea.Msg {
-		// 		d.GenerateKeyMapAction()
-		// 		// d.Update(*d.las)
-		// 		return *d.lastTermSize
-
-		// 	})
 	}
 
 	if d.prompt.IsFocused() {
@@ -321,7 +302,7 @@ func (d *Display) GetKeyMapAction() *config.KeyMapHandler {
 
 }
 
-func (d *Display) Render() string {
+func (d *Display) Render() {
 	var s = []string{
 		d.header.View(),
 	}
@@ -350,7 +331,7 @@ func (d *Display) Render() string {
 	}
 
 	if d.confirm == nil {
-		return d.rendered
+		return
 	}
 
 	confirmView := d.confirm.View()
@@ -364,7 +345,6 @@ func (d *Display) Render() string {
 
 	d.rendered = fmt.Sprint(str)
 
-	return d.rendered
 }
 
 func (d *Display) View() string {

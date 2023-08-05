@@ -26,7 +26,6 @@ func (t TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		t.table.SetColumns(WithFullScreenTable(t.columns))
-		//fmt.Println("Window size changed", msg)
 		t.table.SetHeight(msg.Height - 2)
 		return t, nil
 	}
@@ -42,7 +41,6 @@ func (t TableModel) View() string {
 func (t *TableModel) WithDefaultStyle() *TableModel {
 	//Default styles
 	s := table.DefaultStyles()
-	//s.Header = lipgloss.NewStyle().Bold(true).Padding(0, 0, 0, 0).Margin(0, 0, 0, 0)
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(theme.TabBorderColor).
@@ -74,9 +72,8 @@ func WithFullScreenTable(ac ArrayColumn) ArrayColumn {
 	if err != nil {
 		panic(err)
 	}
-	//margins := -10
 
-	columnWidths := CalculateColumnWidths(columnOrderedWidths, terminalWidth-len(ac)*2-2) //2 char padding for each column and 2 char for the table border
+	columnWidths := CalculateColumnWidths(columnOrderedWidths, terminalWidth-len(ac)*2) //2 char padding for each column and 2 char for the table border
 	for i := range ac {
 		ac[i].Width = columnWidths[i]
 	}

@@ -18,10 +18,15 @@ type Prompt struct {
 	lastInput string
 
 	keyMapAction *config.KeyMapHandler
-	dataset      *cobra.Command
 	yPosition    int
 
+	commands    *Commands
 	suggestions []*list.HorizontalItem
+}
+
+type Commands struct {
+	commands []string
+	descmap  map[string]string
 }
 
 func NewPrompt(cmd *cobra.Command) *Prompt {
@@ -36,8 +41,8 @@ func NewPrompt(cmd *cobra.Command) *Prompt {
 				return nil
 			},
 		),
-		dataset:   cmd,
 		yPosition: 0,
+		commands:  NewCommands(cmd),
 	}
 }
 
@@ -92,55 +97,44 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 		p.style = p.style.Width(msg.Width - p.style.GetHorizontalBorderSize())
 
 	case tea.KeyMsg:
+		switch msg.String() {
+		case "esc":
+			p.model.Blur()
+			p.model.Reset()
+			return p, func() tea.Msg {
+				return modelutils.ClosePromptMsg{}
+			}
+		}
+
 		v := p.model.Value()
 
-		switch v {
-		case "exit":
-			p.model.Reset()
-			p.model.Blur()
-			return p, func() tea.Msg {
-				return modelutils.BlurMsg{}
-			}
-		// case "profiles":
-		// 	p.model.Reset()
-		// 	p.model.Blur()
-		// 	return p, func() tea.Msg {
-		// 		// return modelutils.ChangeViewMsg{
-		// 		// 	controller: controller,
-		// 		// }
-		// 		return nil
-		// 	}
-		default:
-			if p.lastInput == v {
-				return p, nil
-			}
-
-			p.lastInput = v
-			p.suggestions = nil
-
-			go func() {
-				//Get map keys
-				rootCmd := p.dataset.Root()
-				flatCommandtree, descsMap := getTreeCommand(rootCmd)
-				// Cosine distance OK
-				// Levenshtein distance OK
-				res, err := edlib.FuzzySearchSetThreshold(v, flatCommandtree, 4, 0.3, edlib.Cosine)
-				if err != nil || len(res) == 0 {
-					return
-				}
-
-				var rows []*list.HorizontalItem = make([]*list.HorizontalItem, 0)
-				for _, r := range res {
-					if r == "" {
-						continue
-					}
-					item := list.NewHorizontalItem(r, descsMap[r])
-					rows = append(rows, item)
-				}
-				p.suggestions = rows
-			}()
-
+		if p.lastInput == v {
+			return p, nil
 		}
+
+		p.lastInput = v
+		p.suggestions = nil
+
+		go func() {
+
+			// Cosine distance OK
+			// Levenshtein distance OK
+			res, err := edlib.FuzzySearchSetThreshold(v, p.commands.commands, 4, 0.3, edlib.Cosine)
+			if err != nil || len(res) == 0 {
+				return
+			}
+
+			var rows []*list.HorizontalItem = make([]*list.HorizontalItem, 0)
+			for _, r := range res {
+				if r == "" {
+					continue
+				}
+				item := list.NewHorizontalItem(r, p.commands.descmap[r])
+				rows = append(rows, item)
+			}
+			p.suggestions = rows
+		}()
+
 	}
 
 	return p, cmd
@@ -150,22 +144,25 @@ func (p *Prompt) View() string {
 	return p.style.Render(p.model.View())
 }
 
-func getTreeCommand(cmd *cobra.Command) ([]string, map[string]string) {
+func NewCommands(cmd *cobra.Command) *Commands {
 	var commands []string
 	var description map[string]string = make(map[string]string)
 	for _, c := range cmd.Commands() {
 		commands = append(commands, c.Use)
 		description[c.Use] = c.Short
 		if c.HasSubCommands() {
-			subTree, desc := getTreeCommand(c)
+			subCommands := NewCommands(c)
 			// Prefix sub tree with parent command
-			for i, sub := range subTree {
-				subTree[i] = c.Use + " " + sub
-				description[subTree[i]] = desc[sub]
+			for i, sub := range subCommands.commands {
+				subCommands.commands[i] = c.Use + " " + sub
+				description[subCommands.commands[i]] = subCommands.descmap[sub]
 			}
 
-			commands = append(commands, subTree...)
+			commands = append(commands, subCommands.commands...)
 		}
 	}
-	return commands, description
+	return &Commands{
+		commands: commands,
+		descmap:  description,
+	}
 }
