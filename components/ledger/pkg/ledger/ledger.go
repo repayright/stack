@@ -54,7 +54,7 @@ func New(
 			command.NewReferencer(),
 			metricsRegistry,
 		),
-		store:     store,
+		store: store,
 	}
 }
 
@@ -103,7 +103,7 @@ func (l *Ledger) GetBalances(ctx context.Context, q ledgerstore.BalancesQuery) (
 }
 
 func (l *Ledger) GetBalancesAggregated(ctx context.Context, q ledgerstore.BalancesQuery) (core.BalancesByAssets, error) {
-	balances, err := l.store.GetBalancesAggregated(ctx, q)
+	balances, err := l.store.GetAggregatedBalances(ctx, q)
 	return balances, errors.Wrap(err, "getting balances aggregated")
 }
 

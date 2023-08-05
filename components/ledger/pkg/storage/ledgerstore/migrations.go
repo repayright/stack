@@ -11,6 +11,28 @@ import (
 	"github.com/uptrace/bun"
 )
 
+
+func (s *Store) getMigrator() *migrations.Migrator {
+	migrator := migrations.NewMigrator(migrations.WithSchema(s.Name(), true))
+	registerMigrations(migrator, s.schema)
+	return migrator
+}
+
+func (s *Store) Migrate(ctx context.Context) (bool, error) {
+	migrator := s.getMigrator()
+
+	if err := migrator.Up(ctx, s.schema.IDB); err != nil {
+		return false, err
+	}
+
+	// TODO: Update migrations package to return modifications
+	return false, nil
+}
+
+func (s *Store) GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error) {
+	return s.getMigrator().GetMigrations(ctx, s.schema.IDB)
+}
+
 //go:embed migrations/0-init-schema.sql
 var initSchema string
 
@@ -21,15 +43,10 @@ func registerMigrations(migrator *migrations.Migrator, schema storage.Schema) {
 			Up: func(tx bun.Tx) error {
 
 				v1SchemaExists := false
-				row := tx.QueryRow(`
-					SELECT EXISTS (
-						SELECT FROM
-							pg_tables
-						WHERE
-							schemaname = ? AND
-							tablename  = 'log'
-						);
-				`, schema.Name())
+				row := tx.QueryRow(`select exists (
+					select from pg_tables
+					where schemaname = ? and tablename  = 'log'
+				)`, schema.Name())
 				if row.Err() != nil {
 					return row.Err()
 				}

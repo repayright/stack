@@ -116,13 +116,13 @@ func TestGetBalancesAggregated(t *testing.T) {
 	require.NoError(t, insertTransactions(context.Background(), store, *tx))
 
 	q := ledgerstore.NewBalancesQuery().WithPageSize(10)
-	cursor, err := store.GetBalancesAggregated(context.Background(), q)
+	cursor, err := store.GetAggregatedBalances(context.Background(), q)
 	require.NoError(t, err)
 	RequireEqual(t, core.BalancesByAssets{
 		"USD": big.NewInt(0),
 	}, cursor)
 
-	ret, err := store.GetBalancesAggregated(context.Background(), ledgerstore.NewBalancesQuery().WithPageSize(10).WithAddressFilter("users:"))
+	ret, err := store.GetAggregatedBalances(context.Background(), ledgerstore.NewBalancesQuery().WithPageSize(10).WithAddressFilter("users:"))
 	require.NoError(t, err)
 	require.Equal(t, core.BalancesByAssets{
 		"USD": big.NewInt(200),

@@ -2,6 +2,7 @@ package ledgerstore
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/storage/paginate"
@@ -45,7 +46,7 @@ func (b BalancesQuery) WithPageSize(pageSize uint64) BalancesQuery {
 	return b
 }
 
-func (s *Store) GetBalancesAggregated(ctx context.Context, q BalancesQuery) (core.BalancesByAssets, error) {
+func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (core.BalancesByAssets, error) {
 
 	type Temp struct {
 		Aggregated core.VolumesByAssets `bun:"aggregated,type:jsonb"`
@@ -106,4 +107,15 @@ func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[c
 	return api.MapCursor(ret, func(from *Temp) core.BalancesByAssetsByAccounts {
 		return from.Aggregated.Balances()
 	}), nil
+}
+
+func (s *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
+	type Temp struct {
+		Balance *big.Int `bun:"balance,type:numeric"`
+	}
+	return fetchAndMap[*Temp, *big.Int](s, ctx, func(temp *Temp) *big.Int {
+		return temp.Balance
+	}, func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.TableExpr("get_account_balance(?, ?) as balance", address, asset)
+	})
 }

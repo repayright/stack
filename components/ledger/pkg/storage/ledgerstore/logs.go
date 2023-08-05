@@ -4,14 +4,12 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/json"
-	"math/big"
 
 	"github.com/formancehq/ledger/pkg/core"
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/ledger/pkg/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/collectionutils"
-	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
@@ -20,14 +18,6 @@ import (
 const (
 	LogTableName = "logs"
 )
-
-type AccountWithBalances struct {
-	bun.BaseModel `bun:"accounts,alias:accounts"`
-
-	Address  string              `bun:"address,type:varchar,unique,notnull"`
-	Metadata metadata.Metadata   `bun:"metadata,type:bytea,default:'{}'"`
-	Balances map[string]*big.Int `bun:"balances,type:bytea,default:'{}'"`
-}
 
 type Logs struct {
 	bun.BaseModel `bun:"logs,alias:logs"`
@@ -65,21 +55,6 @@ func (j RawMessage) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(j), nil
-}
-
-func (s *Store) buildLogsQuery(q LogsQueryFilters, models *[]Logs) *bun.SelectQuery {
-	sb := s.schema.NewSelect(LogTableName).
-		Model(models).
-		Column("id", "type", "hash", "date", "data", "idempotency_key")
-
-	if !q.StartTime.IsZero() {
-		sb.Where("date >= ?", q.StartTime.UTC())
-	}
-	if !q.EndTime.IsZero() {
-		sb.Where("date < ?", q.EndTime.UTC())
-	}
-
-	return sb
 }
 
 func (s *Store) logsQueryBuilder(q LogsQueryFilters) func(*bun.SelectQuery) *bun.SelectQuery {
@@ -177,17 +152,6 @@ func (s *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*cor
 				Limit(1).
 				Where("idempotency_key = ?", key)
 		})
-}
-
-func (s *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
-	type Temp struct {
-		Balance *big.Int `bun:"balance,type:numeric"`
-	}
-	return fetchAndMap[*Temp, *big.Int](s, ctx, func(temp *Temp) *big.Int {
-		return temp.Balance
-	}, func(query *bun.SelectQuery) *bun.SelectQuery {
-		return query.TableExpr("get_account_balance(?, ?) as balance", address, asset)
-	})
 }
 
 type LogsQueryFilters struct {

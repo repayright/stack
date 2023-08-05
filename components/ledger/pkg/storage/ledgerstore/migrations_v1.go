@@ -15,7 +15,7 @@ var (
 	oldSchemaRenameSuffix        = "_save_v2_0_0"
 )
 
-type Log struct {
+type LogV1 struct {
 	bun.BaseModel `bun:"log,alias:log"`
 
 	ID   uint64          `bun:"id,unique,type:bigint"`
@@ -30,8 +30,8 @@ func readLogsRange(
 	schema string,
 	sqlTx bun.Tx,
 	idMin, idMax uint64,
-) ([]Log, error) {
-	rawLogs := make([]Log, 0)
+) ([]LogV1, error) {
+	rawLogs := make([]LogV1, 0)
 	if err := sqlTx.
 		NewSelect().
 		Table(fmt.Sprintf(`"%s".log`, schema)).
@@ -60,7 +60,7 @@ func convertMetadata(data []byte) any {
 	return ret
 }
 
-func (l *Log) ToLogsV2() (Logs, error) {
+func (l *LogV1) ToLogsV2() (Logs, error) {
 	logType := core.LogTypeFromString(l.Type)
 
 	var data any
