@@ -32,3 +32,5 @@ type ResizeMsg struct {
 	Width  int
 	Height int
 }
+
+type UpdateRendererMsg struct{}

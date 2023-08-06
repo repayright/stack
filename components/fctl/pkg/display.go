@@ -199,6 +199,20 @@ func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) tea.WindowSizeMsg {
 
 func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case modelutils.RenderMsg:
+		d.Render()
+		return d, nil
+	case modelutils.ResizeMsg:
+		bodyMsg := d.newBodyWindowMsg(msg)
+		d.lastBodySize = bodyMsg
+		log := helpers.NewLogger("Display")
+		log.Log("Body width", strconv.Itoa(d.lastBodySize.Width), "heigth", strconv.Itoa(d.lastBodySize.Height))
+		log.Log("Term width", strconv.Itoa(d.lastTermSize.Width), "heigth", strconv.Itoa(d.lastTermSize.Height))
+		m, cmd := d.renderer.Update(bodyMsg)
+		d.renderer = m
+		return d, tea.Sequence(cmd, func() tea.Msg {
+			return modelutils.RenderMsg{}
+		})
 	case tea.WindowSizeMsg:
 		header, cmd := d.header.Update(msg)
 		d.header = header
@@ -208,18 +222,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Width:  msg.Width,
 				Height: msg.Height,
 			}
-		})
-	case modelutils.ResizeMsg:
-		bodyMsg := d.newBodyWindowMsg(msg)
-		d.lastBodySize = bodyMsg
-		log := helpers.NewLogger("Display")
-		log.Log("Body width", strconv.Itoa(d.lastBodySize.Width), "heigth", strconv.Itoa(d.lastBodySize.Height))
-		log.Log("Term width", strconv.Itoa(d.lastTermSize.Width), "heigth", strconv.Itoa(d.lastTermSize.Height))
-		m, cmd := d.renderer.Update(bodyMsg)
-		d.renderer = m
-		d.Render()
-		return d, tea.Sequence(cmd, func() tea.Msg {
-			return modelutils.RenderMsg{}
 		})
 	case modelutils.ChangeViewMsg:
 		d.controller = msg.Controller
@@ -243,7 +245,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			func() tea.Msg {
 				return modelutils.RenderMsg{}
 			})
-
 	case modelutils.OpenPromptMsg:
 		return d, tea.Sequence(d.prompt.SwitchFocus(), func() tea.Msg {
 			d.GenerateKeyMapAction()
@@ -260,9 +261,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return d, func() tea.Msg {
 			return modelutils.RenderMsg{}
 		}
-	case modelutils.RenderMsg:
-		d.Render()
-		return d, nil
 	case prompt.UpdateSuggestionMsg:
 		// Prompt Suggestions
 		if !d.prompt.IsFocused() {
@@ -274,6 +272,17 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			)
 			d.suggestions = prompt.NewSuggestions(model)
 		}
+	case modelutils.UpdateRendererMsg:
+		// Always rerender the view
+		// This is needed to update the key bindings
+		// All sub views are rerendered
+		// FIXME: This is not efficient
+		// Each vue should trigger the msg when needed
+		renderer, cmd := d.renderer.Update(msg)
+		d.renderer = renderer
+		return d, tea.Sequence(cmd, func() tea.Msg {
+			return modelutils.RenderMsg{}
+		})
 	case tea.KeyMsg:
 		if d.prompt.IsFocused() {
 			m, cmd := d.prompt.Update(msg)
@@ -285,27 +294,37 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Check for action key binding
 		// It migth change to a specific tea.Msg
-		var cmd tea.Cmd
-		if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
-			action := keyMapHandler.GetAction(tea.Key(msg))
-			if action != nil {
-				newMsg := action(d.renderer)
-				cmd = func() tea.Msg {
-					return newMsg
-				}
-			}
+		var postCmd tea.Cmd = func() tea.Msg {
+			return modelutils.UpdateRendererMsg{}
 		}
 
-		// Always rerender the view
-		// This is needed to update the key bindings
-		// All sub views are rerendered
-		// FIXME: This is not efficient
-		// Each vue should trigger the msg when needed
-		renderer, rCmd := d.renderer.Update(msg)
-		d.renderer = renderer
-		return d, tea.Sequence(cmd, rCmd, func() tea.Msg {
-			return modelutils.RenderMsg{}
-		})
+		keyMapHandler := d.controller.GetKeyMapAction()
+
+		// No key map handler
+		if keyMapHandler == nil {
+			return d, postCmd
+		}
+
+		action := keyMapHandler.GetAction(tea.Key(msg))
+
+		// No real action defined
+		if action == nil {
+			return d, postCmd
+		}
+
+		newMsg := action(d.renderer)
+
+		// No new message
+		if newMsg == nil {
+			return d, postCmd
+		}
+
+		// New message
+		postCmd = tea.Sequence(func() tea.Msg {
+			return newMsg
+		}, postCmd)
+
+		return d, postCmd
 	default:
 		if d.prompt.IsFocused() {
 			m, cmd := d.prompt.Update(msg)
