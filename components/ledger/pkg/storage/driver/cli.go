@@ -51,14 +51,14 @@ func CLIModule(v *viper.Viper, output io.Writer, debug bool) fx.Option {
 		return health.NewNamedCheck("postgres", health.CheckFn(db.PingContext))
 	}))
 
-	options = append(options, fx.Invoke(func(db *bun.DB, driver *Driver, lifecycle fx.Lifecycle) error {
+	options = append(options, fx.Invoke(func(db *bun.DB, driver *Driver, lifecycle fx.Lifecycle, logger logging.Logger) error {
 		lifecycle.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
-				logging.FromContext(ctx).Infof("Initializing database...")
+				logger.Infof("Initializing database...")
 				return driver.Initialize(ctx)
 			},
 			OnStop: func(ctx context.Context) error {
-				logging.FromContext(ctx).Infof("Closing database...")
+				logger.Infof("Closing database...")
 				return db.Close()
 			},
 		})
