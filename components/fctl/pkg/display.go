@@ -15,7 +15,6 @@ import (
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/prompt"
-	"github.com/formancehq/fctl/pkg/ui/theme"
 	"github.com/spf13/cobra"
 )
 
@@ -148,7 +147,7 @@ func (d *Display) newBodyWindowMsg() (*tea.WindowSizeMsg, error) {
 
 	return &tea.WindowSizeMsg{
 		Width:  w,
-		Height: h - d.HeadersHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
+		Height: h - d.HeadersHeight(),
 	}, nil
 }
 
