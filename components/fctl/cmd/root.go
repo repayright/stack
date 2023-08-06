@@ -9,6 +9,7 @@ import (
 	"runtime/debug"
 
 	"github.com/formancehq/fctl/cmd/login"
+	"github.com/formancehq/fctl/cmd/profiles"
 	"github.com/formancehq/fctl/pkg/config"
 
 	"github.com/formancehq/fctl/cmd/stack"
@@ -32,7 +33,7 @@ func NewRootCommand() *cobra.Command {
 			NewPromptCommand(),
 			//ledger.NewCommand(),
 			//payments.NewCommand(),
-			// profiles.NewCommand(),
+			profiles.NewCommand(),
 			stack.NewCommand(),
 			//auth.NewCommand(),
 			//cloud.NewCommand(),

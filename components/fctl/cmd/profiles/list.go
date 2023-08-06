@@ -3,10 +3,9 @@ package profiles
 import (
 	"flag"
 
-	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/ui"
+	uitable "github.com/formancehq/fctl/pkg/ui/table"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/spf13/cobra"
@@ -104,29 +103,30 @@ func (c *ListController) Run() (config.Renderer, error) {
 
 func (c *ListController) Render() (tea.Model, error) {
 	flags := c.config.GetAllFLags()
-	tableData := fctl.Map(c.store.Profiles, func(p *Profile) table.Row {
-		return []string{
+	tableData := fctl.Map(c.store.Profiles, func(p *Profile) *uitable.Row {
+		data := []string{
 			p.Name,
 			p.Active,
 		}
+
+		cells := fctl.Map(data, func(d string) *uitable.Cell {
+			return uitable.NewCell(d)
+		})
+
+		return uitable.NewRow(cells...)
 	})
 
-	columns := ui.NewArrayColumn(
-		ui.NewColumn("Name", 10),
-		ui.NewColumn("Active", 20),
+	header := uitable.NewRow(
+		uitable.NewCell("Name", uitable.WithWidth(20)),
+		uitable.NewCell("Active", uitable.WithWidth(20)),
 	)
 
-	opts := ui.NewTableOptions(columns, tableData)
-
 	if config.GetString(flags, config.OutputFlag) == "plain" {
-		opt := ui.WithHeight(len(tableData))
 		// Add Deleted At column if --deleted flag is set
-		return ui.NewTable(columns, append(opts, opt)...), nil
+		return uitable.NewTable(header, tableData, uitable.WithDefaultStyle()), nil
 	}
 
-	opts = ui.NewTableOptions(ui.WithFullScreenTable(columns), tableData)
-
-	return ui.NewTable(columns, opts...), nil
+	return uitable.NewTable(header, tableData, uitable.WithDefaultStyle()), nil
 }
 
 func NewListCommand() *cobra.Command {

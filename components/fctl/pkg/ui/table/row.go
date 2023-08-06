@@ -57,6 +57,9 @@ func (r Row) Update(msg tea.Msg) (Row, tea.Cmd) {
 func (r Row) View() string {
 	cells := make([]string, len(r.cells))
 	for i, c := range r.cells {
+		if c.hidden {
+			continue
+		}
 		cells[i] = c.View()
 	}
 
@@ -66,44 +69,6 @@ func (r Row) View() string {
 
 	return r.style.Render(cells...)
 }
-
-// func (r *Row) TrimLeft(c Cursor) *Row {
-// 	width := c.x
-// 	for _, cell := range r.cells {
-// 		//Reset hidden
-// 		cell.hidden = false
-
-// 		// If the cell is hidden, skip it
-// 		if cell.Width() > w {
-// 			w -= cell.Width()
-// 			cell.hidden = true
-// 			continue
-// 		}
-
-// 		cell.TrimLeft(w)
-// 	}
-
-// 	return r
-// }
-
-// func (r *Row) TrimRight(c Cursor) *Row {
-// 	width := c.x
-// 	for _, cell := range r.cells {
-// 		//Reset hidden
-// 		cell.hidden = false
-
-// 		// If the cell is hidden, skip it
-// 		if cell.Width() > w {
-// 			w -= cell.Width()
-// 			cell.hidden = true
-// 			continue
-// 		}
-
-// 		cell.TrimRight(w)
-// 	}
-
-// 	return r
-// }
 
 // This function need to decide if we need to trim left or right
 // Depending on the cursor position
