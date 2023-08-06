@@ -238,19 +238,22 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.addControllerPromptKeyBinding(d.controller)
 		d.GenerateKeyMapAction()
 		cmds = append(cmds, func() tea.Msg {
-			return d.lastTermSize
+			return modelutils.RenderMsg{}
 		})
 	case modelutils.OpenPromptMsg:
 		d.prompt.SwitchFocus()
 		d.GenerateKeyMapAction()
+		d.Render()
 		cmds = append(cmds, func() tea.Msg {
-			return d.lastTermSize
+			return modelutils.RenderMsg{}
 		})
 	case modelutils.ClosePromptMsg:
 		d.GenerateKeyMapAction()
 		cmds = append(cmds, func() tea.Msg {
-			return d.lastTermSize
+			return modelutils.RenderMsg{}
 		})
+	case modelutils.RenderMsg:
+		d.Render()
 	case tea.KeyMsg:
 		if d.prompt.IsFocused() {
 			break
@@ -276,6 +279,11 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 		}
 		d.renderer = m
+
+		cmds = append(cmds, func() tea.Msg {
+			return modelutils.RenderMsg{}
+		})
+
 	}
 
 	if d.prompt.IsFocused() {
@@ -284,9 +292,12 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 		}
 		d.prompt = m
+		cmds = append(cmds, func() tea.Msg {
+			return modelutils.RenderMsg{}
+		})
 	}
 
-	return d, tea.Sequence(cmds...)
+	return d, tea.Batch(cmds...)
 }
 
 func (d *Display) GenerateKeyMapAction() *Display {
@@ -369,7 +380,5 @@ func (d *Display) Render() {
 }
 
 func (d *Display) View() string {
-	d.Render()
-
 	return d.rendered
 }

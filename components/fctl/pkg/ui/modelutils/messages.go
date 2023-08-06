@@ -20,3 +20,5 @@ type ConfirmAskMsg struct {
 type ConfirmMsg struct {
 	Confirm bool
 }
+
+type RenderMsg struct{}
