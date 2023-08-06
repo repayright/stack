@@ -23,7 +23,7 @@ type Table struct {
 	// For full screen table
 	fullScreen   bool
 	minWidth     []int
-	terminalSize *tea.WindowSizeMsg
+	terminalSize tea.WindowSizeMsg
 
 	// Column Cursor
 	cursor *Cursor
@@ -135,7 +135,7 @@ func (t *Table) Init() tea.Cmd {
 		panic(err)
 	}
 
-	t.terminalSize = &tea.WindowSizeMsg{Width: w, Height: h}
+	t.terminalSize = tea.WindowSizeMsg{Width: w, Height: h}
 
 	cmd = tea.Batch(cmd, t.rows.Init(), func() tea.Msg {
 		return t.terminalSize
@@ -160,7 +160,7 @@ func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		t.terminalSize = &msg
+		t.terminalSize = msg
 
 		return &t, nil
 

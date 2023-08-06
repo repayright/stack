@@ -403,16 +403,34 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *co
 
 		return nil
 	default:
+		// If the renderer returns nil,
+		// we don't want to render anything
 		m, err := r.Render()
-
 		if err != nil {
 			return err
 		}
 
-		if m != nil { // If the renderer returns nil, we don't want to render anything
-			fmt.Println(m.View())
+		if m == nil {
+			return nil
 		}
-		return nil
+
+		// Then we want to run the update function once
+		// to get the initial message
+		// and resolve all subcommands
+		var teaCmd tea.Cmd = m.Init()
+		if teaCmd != nil {
+			var teaMsg = teaCmd()
+			for teaMsg != nil {
+				m, teaCmd = m.Update(teaMsg)
+				if teaCmd != nil {
+					teaMsg = teaCmd()
+				} else {
+					teaMsg = nil
+				}
+			}
+		}
+		_, err = fmt.Fprint(cmd.OutOrStdout(), m.View())
+		return err
 
 	}
 }

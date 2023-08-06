@@ -203,7 +203,7 @@ func (c *ListController) Render() (tea.Model, error) {
 	}
 	if isPlain {
 		// Add Deleted At column if --deleted flag is set
-		return uitable.NewTable(header, tableData), nil
+		return uitable.NewTable(header, tableData, uitable.WithDefaultStyle()), nil
 	}
 
 	return uitable.NewTable(header, tableData, uitable.WithDefaultStyle()), nil

@@ -27,8 +27,9 @@ func (rows Rows) Update(msg tea.Msg) (Rows, tea.Cmd) {
 	var (
 		cmds []tea.Cmd
 	)
-	for _, row := range rows {
-		_, cmd := row.Update(msg)
+	for i, row := range rows {
+		rowi, cmd := row.Update(msg)
+		rows[i] = &rowi
 		cmds = append(cmds, cmd)
 	}
 	return rows, tea.Batch(cmds...)
