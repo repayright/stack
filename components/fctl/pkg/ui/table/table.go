@@ -40,7 +40,7 @@ func (t Table) renderHeader() string {
 	if t.cursor.y == 0 {
 		style = t.style.HeaderSelected
 	} else {
-		style = t.style.Header.Background(lipgloss.Color("#1D1D1D"))
+		style = t.style.Header
 	}
 
 	// -3 is for the border, margins and padding

@@ -27,3 +27,8 @@ type WindowSizeMsg struct {
 	Width  int
 	Height int
 }
+
+type ResizeMsg struct {
+	Width  int
+	Height int
+}

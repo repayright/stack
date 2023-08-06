@@ -1,8 +1,12 @@
 package table
 
 import (
+	"fmt"
+	"math"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/formancehq/fctl/pkg/ui/helpers"
 )
 
 func (r *Row) AddCell(cell *Cell) *Row {
@@ -60,37 +64,59 @@ func (r StyleRows) Update(msg tea.Msg) (StyleRows, tea.Cmd) {
 }
 
 func (r Rows) GetScopeRows(c Cursor, t tea.WindowSizeMsg) (rows Rows) {
-
+	Log := helpers.NewLogger("SCOPE")
+	Log.Log(fmt.Sprintf("%d", t.Height-4))
+	height := t.Height - 4
 	cursorY := c.y
-	var cursorRows []*Row
-	if cursorY == len(r) {
-		cursorRows = r[t.Height-cursorY-1:]
-	} else if cursorY >= 1 {
-		cursorRows = r[cursorY-1:]
-	} else {
-		cursorRows = r[cursorY:]
-	}
-
-	if len(cursorRows) > t.Height-1 {
-		rows = cursorRows
-	} else if len(cursorRows) <= t.Height-1 {
-
-		if t.Height-cursorY+1 > len(r) {
-			cursorRows = r.Reverse()
-			cursorRows = r[t.Height-cursorY+1:]
-			cursorRows = r.Reverse()
-		} else if t.Height-cursorY+1 <= len(r) {
-			cursorRows = r.Reverse()
-			cursorRows = r[cursorY+1:]
-			cursorRows = r.Reverse()
-		} else {
-			cursorRows = r.Reverse()
-			cursorRows = r[cursorY:]
-			cursorRows = r.Reverse()
+	if cursorY == 0 || cursorY == 1 {
+		Log.Log(fmt.Sprintf("Cursor ==0 && Cursor == 1:%d", len(r[0:height])))
+		if height == len(rows) {
+			return r[0:]
 		}
 
-		rows = cursorRows
+		return r[0:height]
 	}
+
+	if cursorY > 1 {
+		// if cursorY == len(rows) {
+		// 	rows = r.Reverse()
+		// 	rows = rows[cursorY-height : cursorY]
+		// 	rows = rows.Reverse()
+		// 	return rows
+		// }
+
+		norme := cursorY - height
+		Log.Log(fmt.Sprintf("Vec1: %t", norme > 0))
+		Log.Log(fmt.Sprintf("Vec2: %t", norme < 0))
+		Log.Log(fmt.Sprintf("Vec1 == Vec2: %t", norme == 0))
+		if norme > 0 { // Vec1: je monte
+			norme = int(math.Abs(float64(norme)))
+			rows = r.Reverse()
+			rows = rows[height : len(rows)-cursorY]
+			rows = rows.Reverse()
+
+			return
+		}
+
+		if norme == 0 { // Vec1 == Vec2, je suis au milieu
+			mid := height / 2
+			rows = rows[cursorY-mid : cursorY+mid]
+			// rows = rows.Reverse()
+			return rows
+		}
+
+		if norme < 0 { // Vec2: je descend, c'est monté à l'envers :) ??
+			rows = r.Reverse()
+			if height < len(rows) {
+				rows = rows[:height]
+			}
+			rows = rows.Reverse()
+			return rows
+		}
+
+		return rows
+	}
+
 	return rows
 }
 
@@ -98,19 +124,9 @@ func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 	out := []string{}
 	// The selection start a cursorY + 1
 	cursorY := c.y
-	rows := r.rows.GetScopeRows(c, t)
 
-	// Displaying
-	for j, row := range rows {
-		// log.Log("j", strconv.Itoa(j), "y", strconv.Itoa(t.cursor.y))
-
-		if j+1 > t.Height-1 {
-			row.hidden = true
-			continue
-		} else {
-			row.hidden = false
-		}
-
+	// Switch selection
+	for j, row := range r.rows {
 		// (i,j) is for the cursor selection,
 		// (j+1) is for the header selection,
 		// we should consider the header as a row in order to be able to sort columns
@@ -122,7 +138,12 @@ func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 		} else {
 			row.style = r.rawStyle
 		}
+	}
 
+	rows := r.rows.GetScopeRows(c, t)
+	// Handle display scope
+	for _, row := range rows {
+		// log.Log("j", strconv.Itoa(j), "y", strconv.Itoa(t.cursor.y))
 		// // We should consider the cursor here
 		// // and hidden columns wich mean hidden cells
 		// // We should use TrimLeft and TrimRight

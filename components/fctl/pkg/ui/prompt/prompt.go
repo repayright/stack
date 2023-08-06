@@ -47,7 +47,7 @@ func NewPrompt(cmd *cobra.Command) *Prompt {
 // This add a border around the prompt
 // The border add 2 mores lines to the height
 func (p *Prompt) GetHeight() int {
-	return 3
+	return p.style.GetHorizontalFrameSize()
 }
 
 func (p *Prompt) GetSuggestions() []*list.HorizontalItem {
@@ -59,7 +59,7 @@ func (p *Prompt) GetCursorPosition() int {
 }
 
 func (p *Prompt) SetWidth(width int) *Prompt {
-	p.style = p.style.Width(width)
+	p.style = p.style.Width(width - p.style.GetHorizontalFrameSize())
 	return p
 }
 
