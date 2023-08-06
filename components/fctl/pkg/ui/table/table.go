@@ -16,7 +16,7 @@ type Table struct {
 
 	// Row
 	header *Row
-	rows   Rows
+	rows   StyleRows
 
 	style *Style
 
@@ -29,89 +29,11 @@ type Table struct {
 }
 
 func (t Table) renderRow(r *Row) string {
-	// log := helpers.NewLogger("ROW")
-	buffer := t.cursor.x
-	for _, c := range r.cells {
-		if buffer < 0 {
-			//Just want to break the first for loop in a magic case
-			break
-		}
-
-		width := c.style.GetMaxWidth() + c.style.GetHorizontalPadding() + c.style.GetHorizontalMargins()
-		// log.Log("i", strconv.Itoa(i), "width : ", strconv.Itoa(width), ", x", strconv.Itoa(t.cursor.x))
-
-		//Reset hidden cells
-		c.hidden = false
-		c.UnTrimLeft()
-
-		if buffer >= width {
-			c.hidden = true
-			buffer -= width
-			continue
-		}
-
-		if buffer < width && buffer >= 0 {
-			// log.Log("i", strconv.Itoa(i), "buffer", strconv.Itoa(buffer))
-			c.TrimLeft(buffer)
-			buffer -= width
-		}
-
-		// //Allign everything to header style cells
-		// r.cells[i].style = r.cells[i].style.Width(c.Width())
-	}
-
-	return r.View()
+	return r.Render(*t.cursor)
 }
 
 func (t Table) renderRows() string {
-	out := []string{}
-	// log := helpers.NewLogger("ROWS")
-	var rows Rows
-
-	cursorRows := len(t.rows[t.cursor.y:])
-	if cursorRows >= t.terminalSize.Height-3 {
-		rows = t.rows[t.cursor.y:]
-	} else if cursorRows < t.terminalSize.Height-3 {
-		origin := t.terminalSize.Height - t.cursor.y - 3
-		if origin < 0 {
-			origin = 0
-		}
-
-		rows = t.rows[origin:]
-	}
-
-	for j, r := range rows {
-		// log.Log("j", strconv.Itoa(j), "y", strconv.Itoa(t.cursor.y))
-
-		if j+1 > t.terminalSize.Height-5 {
-			r.hidden = true
-			continue
-		} else {
-
-			r.hidden = false
-		}
-
-		// (i,j) is for the cursor selection,
-		// (j+1) is for the header selection,
-		// we should consider the header as a row in order to be able to sort columns
-		if j+1 == t.cursor.y {
-			r.style = t.style.RowSelected
-		} else {
-			r.style = t.style.Row
-		}
-
-		// // We should consider the cursor here
-		// // and hidden columns wich mean hidden cells
-		// // We should use TrimLeft and TrimRight
-		// if t.cursor.x > len(r.cells)-1 {
-		// 	continue
-		// }
-
-		style := r.style.MaxWidth(t.terminalSize.Width - 3)
-		r.style = style
-		out = append(out, t.renderRow(r))
-	}
-	return lipgloss.JoinVertical(lipgloss.Top, out...)
+	return t.rows.Render(*t.cursor, t.terminalSize)
 }
 func (t Table) renderHeader() string {
 	var style lipgloss.Style
@@ -156,14 +78,14 @@ func (t *Table) Init() tea.Cmd {
 		t.terminalSize = tea.WindowSizeMsg{Width: w, Height: h}
 	} else {
 
-		t.terminalSize = tea.WindowSizeMsg{Width: t.header.style.GetMaxWidth(), Height: len(t.rows) + 1} //Rows + header
+		t.terminalSize = tea.WindowSizeMsg{Width: t.header.style.GetMaxWidth(), Height: len(t.rows.rows) + 1} //Rows + header
 	}
 
 	cmd = tea.Batch(cmd, t.rows.Init(), func() tea.Msg {
 		return t.terminalSize
 	})
 
-	for _, r := range t.rows {
+	for _, r := range t.rows.rows {
 		for i, c := range r.cells {
 			WithWidth(t.header.cells[i].getMinWidth() + t.header.cells[0].style.GetHorizontalMargins())(c)
 		}
@@ -229,14 +151,14 @@ func (t Table) View() string {
 
 func (t *Table) SelectedRow() *Row {
 
-	return t.rows[t.cursor.y]
+	return t.rows.rows[t.cursor.y]
 }
 
 func WithDefaultStyle() TableOption {
 	return func(t *Table) *Table {
 		t.style = NewStyle()
-		for i := range t.rows {
-			t.rows[i].style = t.style.Row
+		for i := range t.rows.rows {
+			t.rows.rows[i].style = t.style.Row
 		}
 
 		t.header.style = t.style.Header
@@ -253,8 +175,12 @@ func WithFullScreen(fullScreen bool) TableOption {
 
 func NewTable(header *Row, rows []*Row, tableOptions ...TableOption) *Table {
 	t := &Table{
-		header:  header,
-		rows:    rows,
+		header: header,
+		rows: NewStyleRows(
+			NewStyle().Row,
+			NewStyle().RowSelected,
+			rows...,
+		),
 		options: tableOptions,
 		cursor:  NewCursor(),
 	}
