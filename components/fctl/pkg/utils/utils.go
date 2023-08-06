@@ -7,3 +7,38 @@ func Map[SRC any, DST any](srcs []SRC, mapper func(SRC) DST) []DST {
 	}
 	return ret
 }
+
+func Min(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max(a int, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func BoolToString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
+func BoolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func BoolToAbscisse(b bool) int {
+	if b {
+		return 1
+	}
+	return -1
+}

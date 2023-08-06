@@ -118,7 +118,7 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 		go func() {
 			// Cosine distance OK
 			// Levenshtein distance OK
-			res, err := edlib.FuzzySearchSetThreshold(v, p.commands.commands, 4, 0.3, edlib.Cosine)
+			res, err := edlib.FuzzySearchSetThreshold(v, p.commands.commands, 4, 0.3, edlib.Levenshtein)
 			if err != nil || len(res) == 0 {
 				return
 			}
