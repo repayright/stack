@@ -501,7 +501,7 @@ as $$
     end if;
     if new.type = 'REVERTED_TRANSACTION' then
         perform insert_transaction(new.data->'transaction');
-        perform revert_transaction((new.data->>'revertedTransactionID')::numeric, (new.data->'transaction'->>'timestamp')::timestamp);
+        perform revert_transaction((new.data->>'revertedTransactionID')::numeric, (new.data->'transaction'->>'date')::timestamp);
     end if;
     if new.type = 'SET_METADATA' then
         if new.data->>'targetType' = 'TRANSACTION' then
