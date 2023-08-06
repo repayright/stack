@@ -2,6 +2,7 @@ package fctl
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -29,7 +30,7 @@ type Display struct {
 	confirm *ui.Confirm
 
 	lastBodySize *tea.WindowSizeMsg
-	lastTermSize tea.WindowSizeMsg
+	lastTermSize *tea.WindowSizeMsg
 
 	rendered string
 }
@@ -66,6 +67,16 @@ func (d *Display) ResetModels() *Display {
 }
 
 func (d *Display) Init() tea.Cmd {
+
+	w, h, err := modelutils.GetTerminalSize()
+	if err != nil {
+		panic(err)
+	}
+
+	d.lastTermSize = &tea.WindowSizeMsg{
+		Width:  w,
+		Height: h,
+	}
 	d.addControllerPromptKeyBinding(d.controller)
 	d.addPromptExitKeyBinding()
 	d.GenerateKeyMapAction()
@@ -107,10 +118,13 @@ func (d *Display) Init() tea.Cmd {
 	// This is needed to set the width of the prompt
 	d.prompt.SetWidth(msg.Width)
 
-	return tea.Batch(
+	return tea.Sequence(
 		d.header.Init(),
 		d.prompt.Init(),
-		body.Init(),
+		d.renderer.Init(),
+		func() tea.Msg {
+			return d.lastTermSize
+		},
 	)
 }
 
@@ -198,7 +212,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		d.lastBodySize = bodyMsg
-		d.lastTermSize = msg
+		d.lastTermSize = &msg
 
 		m, cmd := d.renderer.Update(*bodyMsg)
 		if cmd != nil {
@@ -317,6 +331,8 @@ func (d *Display) Render() {
 	}
 
 	if d.controller != nil {
+		log := helpers.NewLogger("Display")
+		log.Log(strconv.Itoa(d.lastTermSize.Height))
 		s = append(s, d.renderer.View())
 	}
 

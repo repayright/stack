@@ -35,7 +35,11 @@ func (r Row) Items() []*Cell {
 }
 
 func (r Row) Init() tea.Cmd {
-	return nil
+	var cmd tea.Cmd
+	for _, cell := range r.cells {
+		cmd = tea.Batch(cell.Init())
+	}
+	return cmd
 }
 
 func (r Row) Update(msg tea.Msg) (Row, tea.Cmd) {

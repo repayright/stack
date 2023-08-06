@@ -25,8 +25,8 @@ const (
 	minLengthStackName      = 10
 	minLengthApiUrl         = 48
 	minLengthStackRegion    = 36
-	minLengthStackCreatedAt = 20
-	minLengthStackDeletedAt = 20
+	minLengthStackCreatedAt = 21
+	minLengthStackDeletedAt = 21
 )
 const (
 	deletedFlag = "deleted"
@@ -241,7 +241,7 @@ func NewKeyMapAction() *config.KeyMapHandler {
 		),
 		func(m tea.Model) tea.Msg {
 			//Cast model to table.Model
-			t, ok := m.(uitable.Table)
+			t, ok := m.(*uitable.Table)
 			if !ok {
 				panic("invalid model type")
 				return nil
@@ -265,7 +265,7 @@ func NewKeyMapAction() *config.KeyMapHandler {
 		),
 		func(m tea.Model) tea.Msg {
 			//Cast model to table.Model
-			t, ok := m.(uitable.Table)
+			t, ok := m.(*uitable.Table)
 			if !ok {
 				panic("invalid model type")
 				return nil

@@ -1,6 +1,9 @@
 package table
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
 
 type Cell struct {
 	content string
@@ -33,6 +36,7 @@ func WithWidth(width int) CellOption {
 	return func(c *Cell) *Cell {
 		c.minWidth = width
 		c.style = c.style.Width(width)
+		c.style = c.style.MaxWidth(width)
 		return c
 	}
 }
@@ -49,23 +53,12 @@ func (c Cell) Width() int {
 	return c.style.GetWidth()
 }
 
-func (c Cell) View() string {
-	if c.hidden {
-		return ""
-	}
-	if c.Trim != nil {
-		return c.Trim.View(c)
-	}
-
-	return c.style.Width(c.minWidth).Render(c.content)
-}
-
-func (c Cell) TrimLeft(width int) Cell {
-	c.Trim = NewTrim(width)
+func (c *Cell) TrimLeft(width int) *Cell {
+	c.Trim = NewTrim(width, c)
 	return c
 }
 
-func (c Cell) UnTrimLeft() Cell {
+func (c *Cell) UnTrimLeft() *Cell {
 	c.Trim = nil
 	return c
 }
@@ -78,4 +71,31 @@ func (c Cell) TrimRight(width int) Cell {
 func (c Cell) UnTrimRight() Cell {
 	c.style.UnsetMaxWidth()
 	return c
+}
+
+func (c Cell) Init() tea.Cmd {
+	return nil
+}
+
+func (c Cell) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	var (
+		cmd tea.Cmd
+	)
+	if c.Trim != nil {
+		_, cmd = c.Trim.Update(msg)
+	}
+
+	return nil, cmd
+}
+
+func (c Cell) View() string {
+	if c.hidden {
+		return ""
+	}
+	if c.Trim != nil {
+		return c.Trim.View()
+	}
+
+	return c.style.Render(c.content)
 }
