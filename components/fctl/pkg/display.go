@@ -14,6 +14,7 @@ import (
 	"github.com/formancehq/fctl/pkg/ui/helpers"
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/ui/prompt"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 	"github.com/spf13/cobra"
 )
@@ -22,15 +23,16 @@ var lock = &sync.Mutex{}
 var instance *Display
 
 type Display struct {
-	header     *header.Header
-	prompt     *ui.Prompt
-	controller config.Controller
-	renderer   modelutils.Model
+	header      *header.Header
+	prompt      *prompt.Prompt
+	suggestions *prompt.Suggestions
+	controller  config.Controller
+	renderer    modelutils.Model
 
 	confirm *ui.Confirm
 
 	lastBodySize *tea.WindowSizeMsg
-	lastTermSize *tea.WindowSizeMsg
+	lastTermSize tea.WindowSizeMsg
 
 	rendered string
 }
@@ -44,7 +46,7 @@ func NewDisplay(cmd *cobra.Command) *Display {
 				header:     header.NewHeader(),
 				controller: nil,
 				renderer:   nil,
-				prompt:     ui.NewPrompt(cmd),
+				prompt:     prompt.NewPrompt(cmd),
 			}
 		}
 	}
@@ -73,10 +75,11 @@ func (d *Display) Init() tea.Cmd {
 		panic(err)
 	}
 
-	d.lastTermSize = &tea.WindowSizeMsg{
+	d.lastTermSize = tea.WindowSizeMsg{
 		Width:  w,
 		Height: h,
 	}
+
 	d.addControllerPromptKeyBinding(d.controller)
 	d.addPromptExitKeyBinding()
 	d.GenerateKeyMapAction()
@@ -128,7 +131,7 @@ func (d *Display) Init() tea.Cmd {
 	)
 }
 
-func (d *Display) GetChildrenHeight() int {
+func (d *Display) HeadersHeight() int {
 	if d.prompt.IsFocused() {
 		return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight()
 
@@ -145,7 +148,7 @@ func (d *Display) newBodyWindowMsg() (*tea.WindowSizeMsg, error) {
 
 	return &tea.WindowSizeMsg{
 		Width:  w,
-		Height: h - d.GetChildrenHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
+		Height: h - d.HeadersHeight() - theme.DocStyle.GetHorizontalPadding() - theme.DocStyle.GetHorizontalMargins(),
 	}, nil
 }
 
@@ -197,23 +200,25 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 
-	m, cmd := d.header.Update(msg)
-	if cmd != nil {
-		cmds = append(cmds, cmd)
-	}
-
-	d.header = m
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		header, cmd := d.header.Update(msg)
+		if cmd != nil {
+			cmds = append(cmds, cmd)
+		}
+
+		d.header = header
+
 		bodyMsg, err := d.newBodyWindowMsg()
 		if err != nil {
 			return d, tea.Quit
 		}
 
 		d.lastBodySize = bodyMsg
-		d.lastTermSize = &msg
-
+		d.lastTermSize = msg
+		log := helpers.NewLogger("Display")
+		log.Log("Body width", strconv.Itoa(d.lastBodySize.Width), "heigth", strconv.Itoa(d.lastBodySize.Height))
+		log.Log("Term width", strconv.Itoa(d.lastTermSize.Width), "heigth", strconv.Itoa(d.lastTermSize.Height))
 		m, cmd := d.renderer.Update(*bodyMsg)
 		if cmd != nil {
 			cmds = append(cmds, cmd)
@@ -249,17 +254,37 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 	case modelutils.ClosePromptMsg:
 		d.GenerateKeyMapAction()
+		d.suggestions = nil
 		cmds = append(cmds, func() tea.Msg {
 			return modelutils.RenderMsg{}
 		})
 	case modelutils.RenderMsg:
 		d.Render()
+	case prompt.UpdateSuggestionMsg:
+		// Prompt Suggestions
+		if !d.prompt.IsFocused() {
+			d.suggestions = nil
+		}
+		if len(d.prompt.GetSuggestions()) > 0 {
+			model := list.NewPointList(
+				d.prompt.GetSuggestions()...,
+			)
+			d.suggestions = prompt.NewSuggestions(model)
+		}
 	case tea.KeyMsg:
 		if d.prompt.IsFocused() {
+			m, cmd := d.prompt.Update(msg)
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+			d.prompt = m
+			cmds = append(cmds, func() tea.Msg {
+				return modelutils.RenderMsg{}
+			})
 			break
 		}
 
-		//Check for action key binding
+		// Check for action key binding
 		// It migth change to a specific tea.Msg
 		if keyMapHandler := d.controller.GetKeyMapAction(); keyMapHandler != nil {
 			action := keyMapHandler.GetAction(tea.Key(msg))
@@ -273,28 +298,36 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-		//Update the body model if he handle the key
-		m, cmd := d.renderer.Update(msg)
+		// Always rerender the view
+		// This is needed to update the key bindings
+		// All sub views are rerendered
+		// FIXME: This is not efficient
+		// Each vue should trigger the msg when needed
+		renderer, cmd := d.renderer.Update(msg)
 		if cmd != nil {
 			cmds = append(cmds, cmd)
 		}
-		d.renderer = m
-
+		d.renderer = renderer
 		cmds = append(cmds, func() tea.Msg {
 			return modelutils.RenderMsg{}
 		})
-
-	}
-
-	if d.prompt.IsFocused() {
-		m, cmd := d.prompt.Update(msg)
-		if cmd != nil {
-			cmds = append(cmds, cmd)
+	default:
+		if d.prompt.IsFocused() {
+			m, cmd := d.prompt.Update(msg)
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+			d.prompt = m
+			cmds = append(cmds, func() tea.Msg {
+				return modelutils.RenderMsg{}
+			})
+		} else {
+			renderer, cmd := d.renderer.Update(msg)
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+			d.renderer = renderer
 		}
-		d.prompt = m
-		cmds = append(cmds, func() tea.Msg {
-			return modelutils.RenderMsg{}
-		})
 	}
 
 	return d, tea.Batch(cmds...)
@@ -350,18 +383,12 @@ func (d *Display) Render() {
 	screen := lipgloss.JoinVertical(lipgloss.Top, s...)
 	d.rendered = screen
 
-	// PROMPT SUGGESTIONS
-	if len(d.prompt.GetSuggestions()) > 0 && d.prompt.IsFocused() {
-		model := list.NewPointList(
-			d.prompt.GetSuggestions()...,
-		)
-		// model.SortDir(true)
-		v := model.View()
-		style := lipgloss.NewStyle().Foreground(theme.SelectedColorForegroundBackground).Width(40).Align(lipgloss.Center).Border(lipgloss.NormalBorder())
-		v = style.Render(v)
-		d.rendered = helpers.PlaceOverlay(d.prompt.GetCursorPosition()+4, d.header.GetMaxPossibleHeight()+3, v, d.rendered, false)
+	// Prompt Suggestions
+	if d.suggestions != nil {
+		d.rendered = helpers.PlaceOverlay(d.prompt.GetCursorPosition()+4, d.header.GetMaxPossibleHeight()+3, d.suggestions.View(), d.rendered, false)
 	}
 
+	// Confirm View
 	if d.confirm == nil {
 		return
 	}

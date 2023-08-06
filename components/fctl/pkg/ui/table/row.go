@@ -12,10 +12,11 @@ type Row struct {
 	cells Cells
 
 	activable bool
+	hidden    bool
 	selected  bool
 
 	termWidth int
-	style     *lipgloss.Style
+	style     lipgloss.Style
 }
 
 func NewRow(items ...*Cell) *Row {

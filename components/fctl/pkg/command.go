@@ -390,7 +390,7 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *co
 		}
 	case "dynamic":
 
-		d := NewDisplay(cmd)
+		d := NewDisplay(cmd.Root())
 		d.SetController(c)
 
 		if _, err := tea.NewProgram(

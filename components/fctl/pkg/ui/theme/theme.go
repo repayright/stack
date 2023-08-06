@@ -11,6 +11,11 @@ var (
 	ViewHeight = 200 // Number of lines
 )
 var (
+	YellowColor lipgloss.Color = lipgloss.Color("#fff788")
+	BlackColor  lipgloss.Color = lipgloss.Color("#000000")
+	WhiteColor  lipgloss.Color = lipgloss.Color("#ffffff")
+	GreyColor   lipgloss.Color = lipgloss.Color("#d1d1d1")
+
 	//RED Logo
 	LogoColor lipgloss.Color = lipgloss.Color("#FF0000")
 
@@ -28,8 +33,10 @@ var (
 	ActiveTabStyle    = InactiveTabStyle.Copy().Border(ActiveTabBorder, true)
 
 	// Selected
-	SelectedColorForeground           = lipgloss.Color("229")
-	SelectedColorForegroundBackground = lipgloss.Color("57")
+	SelectedColorForeground            = lipgloss.Color("229")
+	SelectedColorForegroundBackground  = lipgloss.Color("#87abad")
+	SelectedHeaderForegroundBackground = lipgloss.Color("#d1cdc0")
+	SelectedTextForeground             = lipgloss.Color("229")
 
 	// Viewport
 	HighlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}

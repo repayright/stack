@@ -1,4 +1,4 @@
-package ui
+package prompt
 
 import (
 	"github.com/charmbracelet/bubbles/key"
@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type UpdateSuggestionMsg struct{}
 type Prompt struct {
 	style     lipgloss.Style
 	model     textinput.Model
@@ -22,11 +23,6 @@ type Prompt struct {
 
 	commands    *Commands
 	suggestions []*list.HorizontalItem
-}
-
-type Commands struct {
-	commands []string
-	descmap  map[string]string
 }
 
 func NewPrompt(cmd *cobra.Command) *Prompt {
@@ -90,23 +86,29 @@ func (p *Prompt) Init() tea.Cmd {
 func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 	var cmd tea.Cmd
 
-	p.model, cmd = p.model.Update(msg)
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		p.style = p.style.Width(msg.Width - p.style.GetHorizontalBorderSize())
+		msg.Width -= p.style.GetHorizontalBorderSize() - p.style.GetHorizontalMargins()
+		p.style = p.style.Width(
+			msg.Width,
+		)
+		p.model, cmd = p.model.Update(msg)
 
 	case tea.KeyMsg:
+		// Log := helpers.NewLogger("PROMPT")
 		switch msg.String() {
 		case "esc":
 			p.model.Blur()
 			p.model.Reset()
+			p.suggestions = nil
 			return p, func() tea.Msg {
 				return modelutils.ClosePromptMsg{}
 			}
 		}
 
+		p.model, cmd = p.model.Update(msg)
 		v := p.model.Value()
+		// Log.Log(v)
 
 		if p.lastInput == v {
 			return p, nil
@@ -115,6 +117,10 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 		p.lastInput = v
 		p.suggestions = nil
 
+		// We might want to use a go routine here
+		// But we need to be careful about the order of the results
+		// We might want to use a channel to send the results
+		ready := make(chan bool)
 		go func() {
 			// Cosine distance OK
 			// Levenshtein distance OK
@@ -128,12 +134,24 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 				if r == "" {
 					continue
 				}
-				item := list.NewHorizontalItem(r, p.commands.descmap[r])
-				rows = append(rows, item)
+				rows = append(rows, list.NewHorizontalItem(r, p.commands.descmap[r]))
+
 			}
+			ready <- true
 			p.suggestions = rows
 		}()
+		if <-ready {
+			return p, func() tea.Msg {
+				return UpdateSuggestionMsg{}
+			}
+		} else {
+			return p, func() tea.Msg {
+				return UpdateSuggestionMsg{}
+			}
+		}
 
+	default:
+		p.model, cmd = p.model.Update(msg)
 	}
 
 	return p, cmd
@@ -141,27 +159,4 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 
 func (p *Prompt) View() string {
 	return p.style.Render(p.model.View())
-}
-
-func NewCommands(cmd *cobra.Command) *Commands {
-	var commands []string
-	var description map[string]string = make(map[string]string)
-	for _, c := range cmd.Commands() {
-		commands = append(commands, c.Use)
-		description[c.Use] = c.Short
-		if c.HasSubCommands() {
-			subCommands := NewCommands(c)
-			// Prefix sub tree with parent command
-			for i, sub := range subCommands.commands {
-				subCommands.commands[i] = c.Use + " " + sub
-				description[subCommands.commands[i]] = subCommands.descmap[sub]
-			}
-
-			commands = append(commands, subCommands.commands...)
-		}
-	}
-	return &Commands{
-		commands: commands,
-		descmap:  description,
-	}
 }

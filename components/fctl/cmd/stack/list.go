@@ -23,7 +23,7 @@ const (
 	minLengthOrganizationId = 15
 	minLengthStackId        = 8
 	minLengthStackName      = 10
-	minLengthApiUrl         = 48
+	minLengthApiUrl         = 49
 	minLengthStackRegion    = 36
 	minLengthStackCreatedAt = 21
 	minLengthStackDeletedAt = 21
@@ -160,8 +160,7 @@ func (c *ListController) Render() (tea.Model, error) {
 
 	flags := c.config.GetAllFLags()
 
-	// Create table rows
-	tableData := fctl.Map(c.store.Stacks, func(stack Stack) *uitable.Row {
+	rows := fctl.Map(c.store.Stacks, func(stack Stack) *uitable.Row {
 		data := []string{
 			c.organization,
 			stack.Id,
@@ -186,10 +185,7 @@ func (c *ListController) Render() (tea.Model, error) {
 		return uitable.NewRow(cells...)
 	})
 
-	// Add plain table option if --plain flag is set
-	isPlain := config.GetString(flags, config.OutputFlag) == "plain"
-	// Default Columns
-	header := uitable.NewRow(
+	row := uitable.NewRow(
 		uitable.NewCell("Organization Id", uitable.WithWidth(minLengthOrganizationId)),
 		uitable.NewCell("Stack Id", uitable.WithWidth(minLengthStackId)),
 		uitable.NewCell("Name", uitable.WithWidth(minLengthStackName)),
@@ -199,14 +195,25 @@ func (c *ListController) Render() (tea.Model, error) {
 	)
 
 	if config.GetBool(flags, deletedFlag) {
-		header.AddCell(uitable.NewCell("Deleted At", uitable.WithWidth(minLengthStackDeletedAt)))
-	}
-	if isPlain {
-		// Add Deleted At column if --deleted flag is set
-		return uitable.NewTable(header, tableData, uitable.WithDefaultStyle()), nil
+		row.AddCell(uitable.NewCell("Deleted At", uitable.WithWidth(minLengthStackDeletedAt)))
 	}
 
-	return uitable.NewTable(header, tableData, uitable.WithDefaultStyle()), nil
+	isPlain := config.GetString(flags, config.OutputFlag) == "plain"
+	if isPlain {
+		return uitable.NewTable(
+			row,
+			rows,
+			uitable.WithDefaultStyle(),
+			uitable.WithFullScreen(false),
+		), nil
+	}
+
+	return uitable.NewTable(
+		row,
+		rows,
+		uitable.WithDefaultStyle(),
+		uitable.WithFullScreen(true),
+	), nil
 }
 
 func NewKeyMapAction() *config.KeyMapHandler {

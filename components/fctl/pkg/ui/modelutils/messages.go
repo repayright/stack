@@ -22,3 +22,8 @@ type ConfirmMsg struct {
 }
 
 type RenderMsg struct{}
+
+type WindowSizeMsg struct {
+	Width  int
+	Height int
+}
