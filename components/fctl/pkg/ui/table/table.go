@@ -77,7 +77,6 @@ func (t *Table) Init() tea.Cmd {
 	if t.fullScreen {
 		t.terminalSize = tea.WindowSizeMsg{Width: w, Height: h}
 	} else {
-
 		t.terminalSize = tea.WindowSizeMsg{Width: t.header.style.GetMaxWidth(), Height: len(t.rows.rows) + 1} //Rows + header
 	}
 
@@ -114,13 +113,9 @@ func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "right":
 			t.cursor.x = utils.Min(t.cursor.x+1, t.terminalSize.Width-3)
 		case "down":
-			t.cursor.y = utils.Min(t.cursor.y+1, t.terminalSize.Height-2) // -2 is for the top and bottom borders
+			t.cursor.y = utils.Min(t.cursor.y+1, len(t.rows.rows))
 		case "up":
 			t.cursor.y = utils.Max(t.cursor.y-1, 0)
-		}
-	case changeScopeMsg:
-		return &t, func() tea.Msg {
-			return t.terminalSize
 		}
 	}
 

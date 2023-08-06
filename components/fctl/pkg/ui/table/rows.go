@@ -26,6 +26,14 @@ func NewStyleRows(rawStyle, selectedStyle lipgloss.Style, rows ...*Row) StyleRow
 	}
 }
 
+func (r Rows) Reverse() Rows {
+	rows := make([]*Row, len(r))
+	for i, row := range r {
+		rows[i] = row
+	}
+	return rows
+}
+
 func (r StyleRows) AddRow(row *Row) StyleRows {
 	r.rows = append(r.rows, row)
 	return r
@@ -51,38 +59,65 @@ func (r StyleRows) Update(msg tea.Msg) (StyleRows, tea.Cmd) {
 	return r, tea.Batch(cmds...)
 }
 
-func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
-	out := []string{}
-	// log := helpers.NewLogger("ROWS")
-	var rows Rows
+func (r Rows) GetScopeRows(c Cursor, t tea.WindowSizeMsg) (rows Rows) {
 
-	cursorRows := len(r.rows[c.y:])
-	if cursorRows >= t.Height-3 {
-		rows = r.rows[c.y:]
-	} else if cursorRows < t.Height-3 {
-		origin := t.Height - c.y - 3
-		if origin < 0 {
-			origin = 0
-		}
-
-		rows = r.rows[origin:]
+	cursorY := c.y
+	var cursorRows []*Row
+	if cursorY == len(r) {
+		cursorRows = r[t.Height-cursorY-1:]
+	} else if cursorY >= 1 {
+		cursorRows = r[cursorY-1:]
+	} else {
+		cursorRows = r[cursorY:]
 	}
 
+	if len(cursorRows) > t.Height-1 {
+		rows = cursorRows
+	} else if len(cursorRows) <= t.Height-1 {
+
+		if t.Height-cursorY+1 > len(r) {
+			cursorRows = r.Reverse()
+			cursorRows = r[t.Height-cursorY+1:]
+			cursorRows = r.Reverse()
+		} else if t.Height-cursorY+1 <= len(r) {
+			cursorRows = r.Reverse()
+			cursorRows = r[cursorY+1:]
+			cursorRows = r.Reverse()
+		} else {
+			cursorRows = r.Reverse()
+			cursorRows = r[cursorY:]
+			cursorRows = r.Reverse()
+		}
+
+		rows = cursorRows
+	}
+	return rows
+}
+
+func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
+	out := []string{}
+	// The selection start a cursorY + 1
+	cursorY := c.y
+	rows := r.rows.GetScopeRows(c, t)
+
+	// Displaying
 	for j, row := range rows {
 		// log.Log("j", strconv.Itoa(j), "y", strconv.Itoa(t.cursor.y))
 
-		if j+1 > t.Height-3 {
+		if j+1 > t.Height-1 {
 			row.hidden = true
 			continue
 		} else {
-
 			row.hidden = false
 		}
 
 		// (i,j) is for the cursor selection,
 		// (j+1) is for the header selection,
 		// we should consider the header as a row in order to be able to sort columns
-		if j+1 == c.y {
+
+		if cursorY == 0 {
+			row.style = r.rawStyle
+		} else if j+1 == cursorY {
 			row.style = r.selectedStyle
 		} else {
 			row.style = r.rawStyle
