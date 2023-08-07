@@ -1,0 +1,16 @@
+---
+kind: Deploy
+description: Minio
+type: helm
+name: minio
+timeout: 3600
+spec:
+  namespace: default
+  chart:
+    repo: https://charts.bitnami.com/bitnami
+    name: minio
+  values:
+    defaultBuckets: backups
+    auth:
+      rootUser: formance
+      rootPassword: formance

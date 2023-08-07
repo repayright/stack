@@ -1,0 +1,11 @@
+---
+kind: Deploy
+description: Reloader
+type: helm
+name: reloader
+timeout: 3600
+spec:
+  namespace: default
+  chart:
+    name: reloader
+    repo: https://stakater.github.io/stakater-charts

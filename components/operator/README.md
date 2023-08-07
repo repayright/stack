@@ -17,15 +17,25 @@ Also, we use [Garden](https://docs.garden.io/) for management.
 garden create-cluster
 ```
 
-2. Deploy:
+2. Build the operator image:
 
 ```sh
-garden  deploy
+    1. BUILD: `make docker-build`
+    2. PUSH: `make docker-push
+    3. BUILD Helm: `make kustomize`
 ```
 
 Add an entry for `host.k3d.internal` inside /etc/hosts file, pointing to 127.0.0.1.
 Go to http://host.k3d.internal.
 Login with admin@formance.com / password
+
+Add an entry for `k3d-registry.host.k3d.internal` inside /etc/hosts file, pointing to 127.0.0.1.
+
+3. Deploy:
+
+```sh
+garden  deploy
+```
 
 ### Push to local registry
 
@@ -38,7 +48,7 @@ Add an entry for `k3d-registry.host.k3d.internal` inside /etc/hosts file, pointi
 Then in order to build and publish your image
     1. BUILD: `make docker-build`
     2. PUSH: `make docker-push`
-    3. BUILD CRD: `make kustomize`
+    3. BUILD Helm: `make kustomize`
     4. DEPLOY HELM:`make helm-local-install`
     5. REDEPLOY HELM: `make helm-local-upgrade`
    

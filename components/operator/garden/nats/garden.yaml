@@ -1,0 +1,17 @@
+---
+kind: Deploy
+description: Nats
+type: helm
+name: nats
+timeout: 3600
+spec:
+  namespace: default
+  chart:
+    repo: https://nats-io.github.io/k8s/helm/charts/
+    name: nats
+  values:
+    config:
+      jetstream:
+        enabled: true
+        fileStore:
+          enabled: false

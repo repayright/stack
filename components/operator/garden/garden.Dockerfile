@@ -1,5 +1,7 @@
 # Build the manager binary
-FROM golang:1.19-alpine as builder
+ARG VERSION=1.19-alpine
+
+FROM golang:${VERSION} as builder
 WORKDIR /workspace
 ENV CGO_ENABLED=0
 ENV GOOS=linux
@@ -14,7 +16,7 @@ RUN go install -v -installsuffix cgo -a std
 RUN go mod vendor
 RUN go build -v -a -o manager main.go
 
-FROM golang:1.19-alpine as reloader
+FROM golang:${VERSION} as reloader
 RUN go install github.com/cosmtrek/air@latest
 
 # # Use distroless as minimal base image to package the manager binary
