@@ -351,7 +351,8 @@ as $$
              from moves
              where account_address = record_to_update.account_address and
                    asset = record_to_update.asset and
-                   post_commit_volumes is not null -- todo: add index
+                   post_commit_volumes is not null and
+                   seq < record_to_update.seq
              order by seq desc
          ) union all
          (
@@ -735,7 +736,7 @@ as $$
     group by v.asset
 $$;
 
-create function get_aggregated_volumes_for_transaction(tx transactions) returns jsonb
+create function get_aggregated_effective_volumes_for_transaction(tx transactions) returns jsonb
     stable
     language sql
 as
@@ -746,6 +747,22 @@ from (
         volumes_to_jsonb((safe_move.asset, first(safe_move.post_commit_effective_volumes))) as aggregated
     from moves move
     join ensure_move_effective_volumes_computed(move) safe_move on true
+    where move.transaction_id = tx.id
+    group by safe_move.account_address, safe_move.asset
+) data
+$$;
+
+create function get_aggregated_volumes_for_transaction(tx transactions) returns jsonb
+    stable
+    language sql
+as
+$$
+select aggregate_objects(jsonb_build_object(data.account_address, data.aggregated))
+from (
+    select distinct on (safe_move.account_address, safe_move.asset) safe_move.account_address,
+        volumes_to_jsonb((safe_move.asset, first(safe_move.post_commit_volumes))) as aggregated
+    from moves move
+    join ensure_move_volumes_computed(move) safe_move on true
     where move.transaction_id = tx.id
     group by safe_move.account_address, safe_move.asset
 ) data

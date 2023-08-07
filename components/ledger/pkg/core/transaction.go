@@ -119,6 +119,8 @@ type ExpandedTransaction struct {
 	Transaction
 	PreCommitVolumes  AccountsAssetsVolumes `json:"preCommitVolumes,omitempty"`
 	PostCommitVolumes AccountsAssetsVolumes `json:"postCommitVolumes,omitempty"`
+	PreCommitEffectiveVolumes  AccountsAssetsVolumes `json:"preCommitEffectiveVolumes,omitempty"`
+	PostCommitEffectiveVolumes AccountsAssetsVolumes `json:"postCommitEffectiveVolumes,omitempty"`
 }
 
 func (t *ExpandedTransaction) AppendPosting(p Posting) {

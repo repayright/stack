@@ -21,18 +21,29 @@ const (
 type Transaction struct {
 	bun.BaseModel `bun:"transactions,alias:transactions"`
 
-	ID                          uint64                     `bun:"id,type:bigint,pk"`
-	Timestamp                   core.Time                  `bun:"date,type:timestamp without time zone"`
-	Reference                   string                     `bun:"reference,type:varchar,unique,nullzero"`
-	Postings                    []core.Posting             `bun:"postings,type:jsonb"`
-	Metadata                    metadata.Metadata          `bun:"metadata,type:jsonb,default:'{}'"`
-	PostCommitAggregatedVolumes core.AccountsAssetsVolumes `bun:"post_commit_aggregated_volumes,type:jsonb"`
+	ID                         uint64                     `bun:"id,type:bigint,pk"`
+	Timestamp                  core.Time                  `bun:"date,type:timestamp without time zone"`
+	Reference                  string                     `bun:"reference,type:varchar,unique,nullzero"`
+	Postings                   []core.Posting             `bun:"postings,type:jsonb"`
+	Metadata                   metadata.Metadata          `bun:"metadata,type:jsonb,default:'{}'"`
+	PostCommitEffectiveVolumes core.AccountsAssetsVolumes `bun:"post_commit_effective_volumes,type:jsonb"`
+	PostCommitVolumes          core.AccountsAssetsVolumes `bun:"post_commit_volumes,type:jsonb"`
 }
 
 func (t *Transaction) toCore() *core.ExpandedTransaction {
-	var preCommitVolumes core.AccountsAssetsVolumes
-	if t.PostCommitAggregatedVolumes != nil {
-		preCommitVolumes = t.PostCommitAggregatedVolumes.Copy()
+	var (
+		preCommitEffectiveVolumes core.AccountsAssetsVolumes
+		preCommitVolumes          core.AccountsAssetsVolumes
+	)
+	if t.PostCommitEffectiveVolumes != nil {
+		preCommitEffectiveVolumes = t.PostCommitEffectiveVolumes.Copy()
+		for _, posting := range t.Postings {
+			preCommitEffectiveVolumes.AddOutput(posting.Source, posting.Asset, big.NewInt(0).Neg(posting.Amount))
+			preCommitEffectiveVolumes.AddInput(posting.Destination, posting.Asset, big.NewInt(0).Neg(posting.Amount))
+		}
+	}
+	if t.PostCommitVolumes != nil {
+		preCommitVolumes = t.PostCommitVolumes.Copy()
 		for _, posting := range t.Postings {
 			preCommitVolumes.AddOutput(posting.Source, posting.Asset, big.NewInt(0).Neg(posting.Amount))
 			preCommitVolumes.AddInput(posting.Destination, posting.Asset, big.NewInt(0).Neg(posting.Amount))
@@ -48,8 +59,10 @@ func (t *Transaction) toCore() *core.ExpandedTransaction {
 			},
 			ID: t.ID,
 		},
-		PreCommitVolumes:  preCommitVolumes,
-		PostCommitVolumes: t.PostCommitAggregatedVolumes,
+		PreCommitEffectiveVolumes:  preCommitEffectiveVolumes,
+		PostCommitEffectiveVolumes: t.PostCommitEffectiveVolumes,
+		PreCommitVolumes:           preCommitVolumes,
+		PostCommitVolumes:          t.PostCommitVolumes,
 	}
 }
 
@@ -130,8 +143,11 @@ func (s *Store) listTransactionsBuilder(p TransactionsQueryFilters) func(query *
 				query = query.Apply(filterAccountAddress(p.Account, "account_address"))
 			}
 		}
+		if p.ExpandEffectiveVolumes {
+			query = query.ColumnExpr("get_aggregated_effective_volumes_for_transaction(transactions) as post_commit_effective_volumes")
+		}
 		if p.ExpandVolumes {
-			query = query.ColumnExpr("get_aggregated_volumes_for_transaction(transactions) as post_commit_aggregated_volumes")
+			query = query.ColumnExpr("get_aggregated_volumes_for_transaction(transactions) as post_commit_volumes")
 		}
 		return query
 	}
@@ -154,13 +170,31 @@ func (s *Store) CountTransactions(ctx context.Context, q TransactionsQuery) (uin
 	return count(s, ctx, s.listTransactionsBuilder(q.Filters))
 }
 
+func (s *Store) GetTransactionWithVolumes(ctx context.Context, txId uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error) {
+	return fetchAndMap[*Transaction, *core.ExpandedTransaction](s, ctx,
+		(*Transaction).toCore,
+		func(query *bun.SelectQuery) *bun.SelectQuery {
+			query = query.
+				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.date`).
+				Where("id = ?", txId).
+				Order("revision desc").
+				Limit(1)
+			if expandEffectiveVolumes {
+				query = query.ColumnExpr(`get_aggregated_effective_volumes_for_transaction(transactions) as post_commit_effective_volumes`)
+			}
+			if expandVolumes {
+				query = query.ColumnExpr(`get_aggregated_volumes_for_transaction(transactions) as post_commit_volumes`)
+			}
+			return query
+		})
+}
+
 func (s *Store) GetTransaction(ctx context.Context, txId uint64) (*core.ExpandedTransaction, error) {
 	return fetchAndMap[*Transaction, *core.ExpandedTransaction](s, ctx,
 		(*Transaction).toCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
-				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings,
-					transactions.date, get_aggregated_volumes_for_transaction(transactions) as post_commit_aggregated_volumes`).
+				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.date`).
 				Where("id = ?", txId).
 				Order("revision desc").
 				Limit(1)
@@ -172,8 +206,7 @@ func (s *Store) GetTransactionByReference(ctx context.Context, ref string) (*cor
 		(*Transaction).toCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
-				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings,
-					transactions.date, get_aggregated_volumes_for_transaction(transactions) as post_commit_aggregated_volumes`).
+				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.date`).
 				Where("reference = ?", ref).
 				Order("revision desc").
 				Limit(1)
@@ -194,15 +227,16 @@ func NewTransactionsQuery() TransactionsQuery {
 }
 
 type TransactionsQueryFilters struct {
-	AfterTxID     uint64            `json:"afterTxID,omitempty"`
-	Reference     string            `json:"reference,omitempty"`
-	Destination   string            `json:"destination,omitempty"`
-	Source        string            `json:"source,omitempty"`
-	Account       string            `json:"account,omitempty"`
-	EndTime       core.Time         `json:"endTime,omitempty"`
-	StartTime     core.Time         `json:"startTime,omitempty"`
-	Metadata      metadata.Metadata `json:"metadata,omitempty"`
-	ExpandVolumes bool              `json:"expandVolumes"`
+	AfterTxID              uint64            `json:"afterTxID,omitempty"`
+	Reference              string            `json:"reference,omitempty"`
+	Destination            string            `json:"destination,omitempty"`
+	Source                 string            `json:"source,omitempty"`
+	Account                string            `json:"account,omitempty"`
+	EndTime                core.Time         `json:"endTime,omitempty"`
+	StartTime              core.Time         `json:"startTime,omitempty"`
+	Metadata               metadata.Metadata `json:"metadata,omitempty"`
+	ExpandVolumes          bool              `json:"expandVolumes"`
+	ExpandEffectiveVolumes bool              `json:"expandEffectiveVolumes"`
 }
 
 func (a TransactionsQuery) WithPageSize(pageSize uint64) TransactionsQuery {
@@ -261,6 +295,18 @@ func (a TransactionsQuery) WithSourceFilter(source string) TransactionsQuery {
 
 func (a TransactionsQuery) WithMetadataFilter(metadata metadata.Metadata) TransactionsQuery {
 	a.Filters.Metadata = metadata
+
+	return a
+}
+
+func (a TransactionsQuery) WithExpandEffectiveVolumes(v bool) TransactionsQuery {
+	a.Filters.ExpandEffectiveVolumes = v
+
+	return a
+}
+
+func (a TransactionsQuery) WithExpandVolumes(v bool) TransactionsQuery {
+	a.Filters.ExpandVolumes = v
 
 	return a
 }

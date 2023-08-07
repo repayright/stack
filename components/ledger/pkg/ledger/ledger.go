@@ -77,8 +77,8 @@ func (l *Ledger) CountTransactions(ctx context.Context, q ledgerstore.Transactio
 	return count, errors.Wrap(err, "counting transactions")
 }
 
-func (l *Ledger) GetTransaction(ctx context.Context, id uint64) (*core.ExpandedTransaction, error) {
-	tx, err := l.store.GetTransaction(ctx, id)
+func (l *Ledger) GetTransactionWithVolumes(ctx context.Context, id uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error) {
+	tx, err := l.store.GetTransactionWithVolumes(ctx, id, expandVolumes, expandEffectiveVolumes)
 	return tx, errors.Wrap(err, "getting transaction")
 }
 

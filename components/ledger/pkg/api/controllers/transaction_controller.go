@@ -12,6 +12,7 @@ import (
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	"github.com/formancehq/ledger/pkg/storage/paginate"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
+	"github.com/formancehq/stack/libs/go-libs/collectionutils"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/go-chi/chi/v5"
@@ -129,6 +130,8 @@ func GetTransactions(w http.ResponseWriter, r *http.Request) {
 			WithStartTimeFilter(startTimeParsed).
 			WithEndTimeFilter(endTimeParsed).
 			WithMetadataFilter(sharedapi.GetQueryMap(r.URL.Query(), "metadata")).
+			WithExpandEffectiveVolumes(collectionutils.Contains(r.URL.Query()["expand"], "effectiveVolumes")).
+			WithExpandVolumes(collectionutils.Contains(r.URL.Query()["expand"], "volumes")).
 			WithPageSize(pageSize)
 	}
 
@@ -234,7 +237,10 @@ func GetTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := l.GetTransaction(r.Context(), txId)
+	tx, err := l.GetTransactionWithVolumes(r.Context(), txId,
+		collectionutils.Contains(r.URL.Query()["expand"], "volumes"),
+		collectionutils.Contains(r.URL.Query()["expand"], "effectiveVolumes"),
+	)
 	if err != nil {
 		apierrors.ResponseError(w, r, err)
 		return

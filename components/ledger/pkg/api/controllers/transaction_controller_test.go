@@ -325,7 +325,7 @@ func TestGetTransaction(t *testing.T) {
 
 	backend, mock := newTestingBackend(t)
 	mock.EXPECT().
-		GetTransaction(gomock.Any(), uint64(0)).
+		GetTransactionWithVolumes(gomock.Any(), uint64(0), false, false).
 		Return(&tx, nil)
 
 	router := routes.NewRouter(backend, nil, metrics.NewNoOpRegistry())

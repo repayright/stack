@@ -15,7 +15,7 @@ import (
 	ledgerstore "github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	api "github.com/formancehq/stack/libs/go-libs/api"
 	metadata "github.com/formancehq/stack/libs/go-libs/metadata"
-	"github.com/formancehq/stack/libs/go-libs/migrations"
+	migrations "github.com/formancehq/stack/libs/go-libs/migrations"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -177,19 +177,19 @@ func (mr *MockLedgerMockRecorder) GetMigrationsInfo(ctx interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMigrationsInfo", reflect.TypeOf((*MockLedger)(nil).GetMigrationsInfo), ctx)
 }
 
-// GetTransaction mocks base method.
-func (m *MockLedger) GetTransaction(ctx context.Context, id uint64) (*core.ExpandedTransaction, error) {
+// GetTransactionWithVolumes mocks base method.
+func (m *MockLedger) GetTransactionWithVolumes(ctx context.Context, id uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransaction", ctx, id)
+	ret := m.ctrl.Call(m, "GetTransactionWithVolumes", ctx, id, expandVolumes, expandEffectiveVolumes)
 	ret0, _ := ret[0].(*core.ExpandedTransaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetTransaction indicates an expected call of GetTransaction.
-func (mr *MockLedgerMockRecorder) GetTransaction(ctx, id interface{}) *gomock.Call {
+// GetTransactionWithVolumes indicates an expected call of GetTransactionWithVolumes.
+func (mr *MockLedgerMockRecorder) GetTransactionWithVolumes(ctx, id, expandVolumes, expandEffectiveVolumes interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransaction", reflect.TypeOf((*MockLedger)(nil).GetTransaction), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionWithVolumes", reflect.TypeOf((*MockLedger)(nil).GetTransactionWithVolumes), ctx, id, expandVolumes, expandEffectiveVolumes)
 }
 
 // GetTransactions mocks base method.
@@ -272,20 +272,6 @@ func NewMockBackend(ctrl *gomock.Controller) *MockBackend {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockBackend) EXPECT() *MockBackendMockRecorder {
 	return m.recorder
-}
-
-// CloseLedgers mocks base method.
-func (m *MockBackend) CloseLedgers(ctx context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CloseLedgers", ctx)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CloseLedgers indicates an expected call of CloseLedgers.
-func (mr *MockBackendMockRecorder) CloseLedgers(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CloseLedgers", reflect.TypeOf((*MockBackend)(nil).CloseLedgers), ctx)
 }
 
 // GetLedger mocks base method.
