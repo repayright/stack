@@ -21,7 +21,7 @@ const (
 type Transaction struct {
 	bun.BaseModel `bun:"transactions,alias:transactions"`
 
-	ID                         uint64                     `bun:"id,type:bigint,pk"`
+	ID                         uint64                     `bun:"id,type:bigint"`
 	Timestamp                  core.Time                  `bun:"date,type:timestamp without time zone"`
 	Reference                  string                     `bun:"reference,type:varchar,unique,nullzero"`
 	Postings                   []core.Posting             `bun:"postings,type:jsonb"`

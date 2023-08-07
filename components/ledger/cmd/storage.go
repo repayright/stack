@@ -124,7 +124,7 @@ func NewStorageUpgrade() *cobra.Command {
 			}
 			defer sqlDB.Close()
 
-			driver := driver.New(storage.NewDatabase(sqlDB))
+			driver := driver.New(sqlDB)
 			if err := driver.Initialize(cmd.Context()); err != nil {
 				return err
 			}
@@ -155,7 +155,7 @@ func NewStorageUpgradeAll() *cobra.Command {
 			}
 			defer sqlDB.Close()
 
-			driver := driver.New(storage.NewDatabase(sqlDB))
+			driver := driver.New(sqlDB)
 			if err := driver.Initialize(cmd.Context()); err != nil {
 				return err
 			}

@@ -339,6 +339,7 @@ func HydrateLog(_type LogType, data []byte) (hashable, error) {
 
 type Accounts map[string]Account
 
+// TODO: reuse simple json for hashing
 type buffer struct {
 	buf *bytes.Buffer
 }
@@ -396,3 +397,14 @@ var (
 		},
 	}
 )
+
+func ChainLogs(logs ...*Log) []*ChainedLog {
+	var previous *ChainedLog
+	ret := make([]*ChainedLog, 0)
+	for _, log := range logs {
+		next := log.ChainLog(previous)
+		ret = append(ret, next)
+		previous = next
+	}
+	return ret
+}

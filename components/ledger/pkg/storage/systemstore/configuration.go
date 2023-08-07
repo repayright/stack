@@ -8,10 +8,8 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const configTableName = "configuration"
-
 type configuration struct {
-	bun.BaseModel `bun:"configuration,alias:configuration"`
+	bun.BaseModel `bun:"_system.configuration,alias:configuration"`
 
 	Key     string    `bun:"key,type:varchar(255),pk"` // Primary key
 	Value   string    `bun:"value,type:text"`
@@ -19,7 +17,7 @@ type configuration struct {
 }
 
 func (s *Store) CreateConfigurationTable(ctx context.Context) error {
-	_, err := s.schema.NewCreateTable(configTableName).
+	_, err := s.db.NewCreateTable().
 		Model((*configuration)(nil)).
 		IfNotExists().
 		Exec(ctx)
@@ -28,14 +26,14 @@ func (s *Store) CreateConfigurationTable(ctx context.Context) error {
 }
 
 func (s *Store) GetConfiguration(ctx context.Context, key string) (string, error) {
-	query := s.schema.NewSelect(configTableName).
+	query := s.db.NewSelect().
 		Model((*configuration)(nil)).
 		Column("value").
 		Where("key = ?", key).
 		Limit(1).
 		String()
 
-	row := s.schema.QueryRowContext(ctx, query)
+	row := s.db.QueryRowContext(ctx, query)
 	if row.Err() != nil {
 		return "", storageerrors.PostgresError(row.Err())
 	}
@@ -54,7 +52,7 @@ func (s *Store) InsertConfiguration(ctx context.Context, key, value string) erro
 		AddedAt: core.Now(),
 	}
 
-	_, err := s.schema.NewInsert(configTableName).
+	_, err := s.db.NewInsert().
 		Model(config).
 		Exec(ctx)
 

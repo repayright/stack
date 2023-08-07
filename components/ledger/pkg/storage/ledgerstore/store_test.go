@@ -24,6 +24,7 @@ func TestInitializeStore(t *testing.T) {
 	require.Len(t, migrationInfos, 1)
 }
 
+// TODO: remove that
 func insertTransactions(ctx context.Context, s *ledgerstore.Store, txs ...core.Transaction) error {
 	logs := collectionutils.Map(txs, func(from core.Transaction) *core.ChainedLog {
 		return core.NewTransactionLog(&from, map[string]metadata.Metadata{}).ChainLog(nil)

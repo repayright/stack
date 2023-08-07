@@ -12,6 +12,7 @@ import (
 	systemstore "github.com/formancehq/ledger/pkg/storage/systemstore"
 	"github.com/formancehq/stack/libs/go-libs/logging"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 	"go.nhat.io/otelsql"
 )
 
@@ -65,7 +66,7 @@ func InstrumentalizeSQLDriver() {
 }
 
 type Driver struct {
-	db          *storage.Database
+	db          *bun.DB
 	systemStore *systemstore.Store
 	lock        sync.Mutex
 }
@@ -75,12 +76,7 @@ func (d *Driver) GetSystemStore() *systemstore.Store {
 }
 
 func (d *Driver) newStore(name string) (*ledgerstore.Store, error) {
-	schema, err := d.db.Schema(name)
-	if err != nil {
-		return nil, errors.Wrap(err, "opening schema")
-	}
-
-	store, err := ledgerstore.New(schema, func(ctx context.Context) error {
+	store, err := ledgerstore.New(d.db, name, func(ctx context.Context) error {
 		return d.GetSystemStore().DeleteLedger(ctx, name)
 	})
 	if err != nil {
@@ -138,20 +134,17 @@ func (d *Driver) GetLedgerStore(ctx context.Context, name string) (*ledgerstore.
 func (d *Driver) Initialize(ctx context.Context) error {
 	logging.FromContext(ctx).Debugf("Initialize driver")
 
-	if err := d.db.Initialize(ctx); err != nil {
-		return err
-	}
-
-	systemSchema, err := d.db.Schema(SystemSchema)
+	_, err := d.db.ExecContext(ctx, "create extension if not exists pgcrypto")
 	if err != nil {
-		return err
+		return storage.PostgresError(err)
 	}
 
-	if err := systemSchema.Create(ctx); err != nil {
-		return err
+	_, err = d.db.ExecContext(ctx, fmt.Sprintf(`create schema if not exists "%s"`, SystemSchema))
+	if err != nil {
+		return storage.PostgresError(err)
 	}
 
-	d.systemStore = systemstore.NewStore(systemSchema)
+	d.systemStore = systemstore.NewStore(d.db)
 
 	if err := d.systemStore.Initialize(ctx); err != nil {
 		return err
@@ -160,7 +153,7 @@ func (d *Driver) Initialize(ctx context.Context) error {
 	return nil
 }
 
-func New(db *storage.Database) *Driver {
+func New(db *bun.DB) *Driver {
 	return &Driver{
 		db: db,
 	}

@@ -56,13 +56,14 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (cor
 			return temp.Aggregated.Balances()
 		},
 		func(query *bun.SelectQuery) *bun.SelectQuery {
-			potentiallyStaledMoves := s.schema.
-				NewSelect(MovesTableName).
+			potentiallyStaledMoves := s.db.
+				NewSelect().
+				Table(MovesTableName).
 				ColumnExpr("distinct on (moves.account_address, moves.asset) moves.*").
 				Order("account_address", "asset", "moves.seq desc").
 				Apply(filterAccountAddress(q.Filters.AddressRegexp, "account_address"))
 
-			moves := s.schema.IDB.
+			moves := s.db.
 				NewSelect().
 				ColumnExpr("move.*").
 				TableExpr("potentially_staled_moves").

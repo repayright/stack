@@ -4,14 +4,15 @@ import (
 	"context"
 
 	"github.com/formancehq/ledger/pkg/storage"
+	"github.com/uptrace/bun"
 )
 
 type Store struct {
-	schema storage.Schema
+	db *bun.DB
 }
 
-func NewStore(schema storage.Schema) *Store {
-	return &Store{schema: schema}
+func NewStore(db *bun.DB) *Store {
+	return &Store{db: db}
 }
 
 func (s *Store) Initialize(ctx context.Context) error {

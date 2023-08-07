@@ -27,7 +27,7 @@ func StorageDriver(t pgtesting.TestingT) *driver.Driver {
 		db.Close()
 	})
 
-	d := driver.New(storage.NewDatabase(db))
+	d := driver.New(db)
 
 	require.NoError(t, d.Initialize(context.Background()))
 

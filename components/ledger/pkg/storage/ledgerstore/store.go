@@ -9,27 +9,30 @@ import (
 	"github.com/formancehq/ledger/pkg/storage"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type Store struct {
-	schema   storage.Schema
+	db       *bun.DB
 	onDelete func(ctx context.Context) error
 
 	once sync.Once
 
 	isInitialized bool
-}
-
-func (s *Store) Schema() storage.Schema {
-	return s.schema
+	name          string
 }
 
 func (s *Store) Name() string {
-	return s.schema.Name()
+	return s.name
+}
+
+func (d *Store) GetDatabase() *bun.DB {
+	return d.db
 }
 
 func (s *Store) Delete(ctx context.Context) error {
-	if err := s.schema.Delete(ctx); err != nil {
+	_, err := s.db.ExecContext(ctx, "delete schema ? cascade", s.name)
+	if err != nil {
 		return err
 	}
 	return errors.Wrap(s.onDelete(ctx), "deleting ledger store")
@@ -39,8 +42,8 @@ func (s *Store) IsInitialized() bool {
 	return s.isInitialized
 }
 
-func (s *Store) prepareTransaction(ctx context.Context) (*storage.Tx, error) {
-	tx, err := s.schema.BeginTx(ctx, &sql.TxOptions{})
+func (s *Store) prepareTransaction(ctx context.Context) (bun.Tx, error) {
+	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return tx, err
 	}
@@ -50,7 +53,7 @@ func (s *Store) prepareTransaction(ctx context.Context) (*storage.Tx, error) {
 	return tx, nil
 }
 
-func (s *Store) withTransaction(ctx context.Context, callback func(tx *storage.Tx) error) error {
+func (s *Store) withTransaction(ctx context.Context, callback func(tx bun.Tx) error) error {
 	tx, err := s.prepareTransaction(ctx)
 	if err != nil {
 		return err
@@ -63,11 +66,13 @@ func (s *Store) withTransaction(ctx context.Context, callback func(tx *storage.T
 }
 
 func New(
-	schema storage.Schema,
+	db *bun.DB,
+	name string,
 	onDelete func(ctx context.Context) error,
 ) (*Store, error) {
 	return &Store{
-		schema:   schema,
+		db:       db,
+		name:     name,
 		onDelete: onDelete,
 	}, nil
 }

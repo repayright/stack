@@ -71,10 +71,10 @@ func (s *Store) logsQueryBuilder(q LogsQueryFilters) func(*bun.SelectQuery) *bun
 }
 
 func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedLog) error {
-	return s.withTransaction(ctx, func(tx *storageerrors.Tx) error {
+	return s.withTransaction(ctx, func(tx bun.Tx) error {
 		// Beware: COPY query is not supported by bun if the pgx driver is used.
 		stmt, err := tx.Prepare(pq.CopyInSchema(
-			s.schema.Name(),
+			s.name,
 			LogTableName,
 			"id", "type", "hash", "date", "data", "idempotency_key",
 		))

@@ -16,8 +16,8 @@ import (
 func fetch[T any](s *Store, ctx context.Context, builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (T, error) {
 	var ret T
 	ret = reflect.New(reflect.TypeOf(ret).Elem()).Interface().(T)
-	err := s.withTransaction(ctx, func(tx *storage.Tx) error {
-		query := s.schema.IDB.NewSelect().Conn(tx)
+	err := s.withTransaction(ctx, func(tx bun.Tx) error {
+		query := s.db.NewSelect().Conn(tx)
 		for _, builder := range builders {
 			query = query.Apply(builder)
 		}
@@ -31,7 +31,7 @@ func fetch[T any](s *Store, ctx context.Context, builders ...func(query *bun.Sel
 }
 
 func fetchAndMap[T any, TO any](s *Store, ctx context.Context,
-	mapper func(T) (TO),
+	mapper func(T) TO,
 	builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (TO, error) {
 	ret, err := fetch[T](s, ctx, builders...)
 	if err != nil {
@@ -50,7 +50,7 @@ func paginateWithOffset[FILTERS any, RETURN any](s *Store, ctx context.Context,
 	defer tx.Rollback()
 
 	var ret RETURN
-	query := s.schema.IDB.NewSelect().Conn(tx)
+	query := s.db.NewSelect().Conn(tx)
 	for _, builder := range builders {
 		query = query.Apply(builder)
 	}
@@ -69,7 +69,7 @@ func paginateWithColumn[FILTERS any, RETURN any](s *Store, ctx context.Context, 
 	defer tx.Rollback()
 
 	var ret RETURN
-	query := s.schema.IDB.NewSelect().Conn(tx)
+	query := s.db.NewSelect().Conn(tx)
 	for _, builder := range builders {
 		query = query.Apply(builder)
 	}
@@ -85,8 +85,8 @@ func count(s *Store, ctx context.Context, builders ...func(query *bun.SelectQuer
 		count int
 		err   error
 	)
-	if err := s.withTransaction(ctx, func(tx *storage.Tx) error {
-		query := s.schema.IDB.NewSelect().Conn(tx)
+	if err := s.withTransaction(ctx, func(tx bun.Tx) error {
+		query := s.db.NewSelect().Conn(tx)
 		for _, builder := range builders {
 			query = query.Apply(builder)
 		}

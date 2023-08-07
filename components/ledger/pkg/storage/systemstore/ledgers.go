@@ -9,17 +9,15 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const ledgersTableName = "ledgers"
-
 type Ledgers struct {
-	bun.BaseModel `bun:"ledgers,alias:ledgers"`
+	bun.BaseModel `bun:"_system.ledgers,alias:ledgers"`
 
 	Ledger  string    `bun:"ledger,type:varchar(255),pk"` // Primary key
 	AddedAt core.Time `bun:"addedAt,type:timestamp"`
 }
 
 func (s *Store) CreateLedgersTable(ctx context.Context) error {
-	_, err := s.schema.NewCreateTable(ledgersTableName).
+	_, err := s.db.NewCreateTable().
 		Model((*Ledgers)(nil)).
 		IfNotExists().
 		Exec(ctx)
@@ -28,12 +26,12 @@ func (s *Store) CreateLedgersTable(ctx context.Context) error {
 }
 
 func (s *Store) ListLedgers(ctx context.Context) ([]string, error) {
-	query := s.schema.NewSelect(ledgersTableName).
+	query := s.db.NewSelect().
 		Model((*Ledgers)(nil)).
 		Column("ledger").
 		String()
 
-	rows, err := s.schema.QueryContext(ctx, query)
+	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, storageerrors.PostgresError(err)
 	}
@@ -51,7 +49,7 @@ func (s *Store) ListLedgers(ctx context.Context) ([]string, error) {
 }
 
 func (s *Store) DeleteLedger(ctx context.Context, name string) error {
-	_, err := s.schema.NewDelete(ledgersTableName).
+	_, err := s.db.NewDelete().
 		Model((*Ledgers)(nil)).
 		Where("ledger = ?", name).
 		Exec(ctx)
@@ -65,7 +63,7 @@ func (s *Store) Register(ctx context.Context, ledger string) (bool, error) {
 		AddedAt: core.Now(),
 	}
 
-	ret, err := s.schema.NewInsert(ledgersTableName).
+	ret, err := s.db.NewInsert().
 		Model(l).
 		Ignore().
 		Exec(ctx)
@@ -82,13 +80,13 @@ func (s *Store) Register(ctx context.Context, ledger string) (bool, error) {
 }
 
 func (s *Store) Exists(ctx context.Context, ledger string) (bool, error) {
-	query := s.schema.NewSelect(ledgersTableName).
+	query := s.db.NewSelect().
 		Model((*Ledgers)(nil)).
 		Column("ledger").
 		Where("ledger = ?", ledger).
 		String()
 
-	ret := s.schema.QueryRowContext(ctx, query)
+	ret := s.db.QueryRowContext(ctx, query)
 	if ret.Err() != nil {
 		return false, nil
 	}

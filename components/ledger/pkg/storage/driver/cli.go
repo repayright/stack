@@ -41,10 +41,7 @@ func CLIModule(v *viper.Viper, output io.Writer, debug bool) fx.Option {
 	options = append(options, fx.Provide(func() (*bun.DB, error) {
 		return storage.OpenSQLDB(storage.ConnectionOptionsFromFlags(v, output, debug))
 	}))
-	options = append(options, fx.Provide(func(db *bun.DB) *storage.Database {
-		return storage.NewDatabase(db)
-	}))
-	options = append(options, fx.Provide(func(db *storage.Database) (*Driver, error) {
+	options = append(options, fx.Provide(func(db *bun.DB) (*Driver, error) {
 		return New(db), nil
 	}))
 	options = append(options, health.ProvideHealthCheck(func(db *bun.DB) health.NamedCheck {

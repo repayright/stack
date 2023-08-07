@@ -14,7 +14,7 @@ import (
 
 func (s *Store) accountQueryBuilder(p AccountsQuery) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
-		selectAccounts := s.schema.IDB.NewSelect().
+		selectAccounts := s.db.NewSelect().
 			Table("accounts").
 			Apply(filterMetadata(p.Filters.Metadata)).
 			Apply(filterAccountAddress(p.Filters.Address, "address"))

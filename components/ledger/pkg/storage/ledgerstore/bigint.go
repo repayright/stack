@@ -8,13 +8,13 @@ import (
 	"math/big"
 )
 
-type Int big.Int
+type BigInt big.Int
 
-func (i *Int) MarshalJSON() ([]byte, error) {
+func (i *BigInt) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.ToMathBig())
 }
 
-func (i *Int) UnmarshalJSON(bytes []byte) error {
+func (i *BigInt) UnmarshalJSON(bytes []byte) error {
 	v, err := i.FromString(string(bytes))
 	if err != nil {
 		return err
@@ -23,23 +23,23 @@ func (i *Int) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
-func NewInt() *Int {
-	return new(Int)
+func NewInt() *BigInt {
+	return new(BigInt)
 }
-func newBigint(x *big.Int) *Int {
-	return (*Int)(x)
+func newBigint(x *big.Int) *BigInt {
+	return (*BigInt)(x)
 }
 
 // same as NewBigint()
-func FromMathBig(x *big.Int) *Int {
-	return (*Int)(x)
+func FromMathBig(x *big.Int) *BigInt {
+	return (*BigInt)(x)
 }
 
-func FromInt64(x int64) *Int {
+func FromInt64(x int64) *BigInt {
 	return FromMathBig(big.NewInt(x))
 }
 
-func (i *Int) FromString(x string) (*Int, error) {
+func (i *BigInt) FromString(x string) (*BigInt, error) {
 	if x == "" {
 		return FromInt64(0), nil
 	}
@@ -53,19 +53,19 @@ func (i *Int) FromString(x string) (*Int, error) {
 	return newBigint(b), nil
 }
 
-func (b *Int) Value() (driver.Value, error) {
+func (b *BigInt) Value() (driver.Value, error) {
 	return (*big.Int)(b).String(), nil
 }
 
-func (b *Int) Set(v *Int) *Int {
-	return (*Int)((*big.Int)(b).Set((*big.Int)(v)))
+func (b *BigInt) Set(v *BigInt) *BigInt {
+	return (*BigInt)((*big.Int)(b).Set((*big.Int)(v)))
 }
 
-func (b *Int) Sub(x *Int, y *Int) *Int {
-	return (*Int)((*big.Int)(b).Sub((*big.Int)(x), (*big.Int)(y)))
+func (b *BigInt) Sub(x *BigInt, y *BigInt) *BigInt {
+	return (*BigInt)((*big.Int)(b).Sub((*big.Int)(x), (*big.Int)(y)))
 }
 
-func (b *Int) Scan(value interface{}) error {
+func (b *BigInt) Scan(value interface{}) error {
 
 	var i sql.NullString
 
@@ -80,9 +80,9 @@ func (b *Int) Scan(value interface{}) error {
 	return fmt.Errorf("Error converting type %T into Bigint", value)
 }
 
-func (b *Int) ToMathBig() *big.Int {
+func (b *BigInt) ToMathBig() *big.Int {
 	return (*big.Int)(b)
 }
 
-var _ json.Unmarshaler = (*Int)(nil)
-var _ json.Marshaler = (*Int)(nil)
+var _ json.Unmarshaler = (*BigInt)(nil)
+var _ json.Marshaler = (*BigInt)(nil)
