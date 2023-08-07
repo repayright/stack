@@ -352,7 +352,7 @@ as $$
              where account_address = record_to_update.account_address and
                    asset = record_to_update.asset and
                    post_commit_volumes is not null and
-                   seq < record_to_update.seq
+                   moves.seq < record_to_update.seq
              order by seq desc
          ) union all
          (
@@ -672,6 +672,37 @@ as $$
     from refreshed_moves
 $$;
 
+create function get_all_account_volumes(_account varchar, _before timestamp default null)
+    returns setof volumes_with_asset
+    language sql
+    stable
+as $$
+    with
+        all_assets as (
+            select v.v as asset
+            from get_all_assets() v
+        ),
+        moves as (
+            select m.*
+            from all_assets, get_latest_move_for_account_and_asset(_account, all_assets.asset, _before := _before) m
+        ),
+        fresh_moves as (
+            select moves.asset, moves.post_commit_volumes
+            from moves
+            where post_commit_volumes is not null
+        ),
+        refreshed_moves as (
+            select refreshed_move.asset, refreshed_move.post_commit_volumes
+            from moves, compute_move_volumes(moves) as refreshed_move
+            where moves.post_commit_volumes is null
+        )
+    select *
+    from fresh_moves
+    union
+    select *
+    from refreshed_moves
+$$;
+
 create function volumes_to_jsonb(v volumes_with_asset)
     returns jsonb
     language sql
@@ -680,13 +711,22 @@ as $$
     select ('{"' || v.asset || '": {"input": ' || (v.volumes).inputs || ', "output": ' || (v.volumes).outputs || '}}')::jsonb
 $$;
 
-create function get_account_aggregated_volumes(_account_address varchar, _before timestamp default null)
+create function get_account_aggregated_effective_volumes(_account_address varchar, _before timestamp default null)
     returns jsonb
     language sql
     stable
 as $$
     select aggregate_objects(volumes_to_jsonb(volumes_with_asset))
     from get_all_account_effective_volumes(_account_address, _before := _before) volumes_with_asset
+$$;
+
+create function get_account_aggregated_volumes(_account_address varchar, _before timestamp default null)
+    returns jsonb
+    language sql
+    stable
+as $$
+    select aggregate_objects(volumes_to_jsonb(volumes_with_asset))
+    from get_all_account_volumes(_account_address, _before := _before) volumes_with_asset
 $$;
 
 create function get_account_balance(_account varchar, _asset varchar, _before timestamp default null)

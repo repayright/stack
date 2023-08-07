@@ -92,8 +92,8 @@ func (l *Ledger) GetAccounts(ctx context.Context, a ledgerstore.AccountsQuery) (
 	return accounts, errors.Wrap(err, "getting accounts")
 }
 
-func (l *Ledger) GetAccount(ctx context.Context, address string) (*core.AccountWithVolumes, error) {
-	accounts, err := l.store.GetAccountWithVolumes(ctx, address)
+func (l *Ledger) GetAccountWithVolumes(ctx context.Context, address string, expandVolumes, expandEffectiveVolumes bool) (*core.AccountWithVolumes, error) {
+	accounts, err := l.store.GetAccountWithVolumes(ctx, address, expandVolumes, expandEffectiveVolumes)
 	return accounts, errors.Wrap(err, "getting account")
 }
 

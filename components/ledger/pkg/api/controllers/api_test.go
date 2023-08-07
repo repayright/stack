@@ -87,19 +87,19 @@ func (mr *MockLedgerMockRecorder) CreateTransaction(ctx, parameters, data interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransaction", reflect.TypeOf((*MockLedger)(nil).CreateTransaction), ctx, parameters, data)
 }
 
-// GetAccount mocks base method.
-func (m *MockLedger) GetAccount(ctx context.Context, param string) (*core.AccountWithVolumes, error) {
+// GetAccountWithVolumes mocks base method.
+func (m *MockLedger) GetAccountWithVolumes(ctx context.Context, param string, expandVolumes, expandEffectiveVolumes bool) (*core.AccountWithVolumes, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccount", ctx, param)
+	ret := m.ctrl.Call(m, "GetAccountWithVolumes", ctx, param, expandVolumes, expandEffectiveVolumes)
 	ret0, _ := ret[0].(*core.AccountWithVolumes)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAccount indicates an expected call of GetAccount.
-func (mr *MockLedgerMockRecorder) GetAccount(ctx, param interface{}) *gomock.Call {
+// GetAccountWithVolumes indicates an expected call of GetAccountWithVolumes.
+func (mr *MockLedgerMockRecorder) GetAccountWithVolumes(ctx, param, expandVolumes, expandEffectiveVolumes interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockLedger)(nil).GetAccount), ctx, param)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountWithVolumes", reflect.TypeOf((*MockLedger)(nil).GetAccountWithVolumes), ctx, param, expandVolumes, expandEffectiveVolumes)
 }
 
 // GetAccounts mocks base method.

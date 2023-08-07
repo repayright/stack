@@ -113,7 +113,7 @@ func TestGetAccountWithVolumes(t *testing.T) {
 		),
 	))
 
-	accountWithVolumes, err := store.GetAccountWithVolumes(context.Background(), "multi")
+	accountWithVolumes, err := store.GetAccountWithVolumes(context.Background(), "multi", true, false)
 	require.NoError(t, err)
 	require.Equal(t, &core.AccountWithVolumes{
 		Account: core.Account{

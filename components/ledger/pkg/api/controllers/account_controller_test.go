@@ -169,12 +169,11 @@ func TestGetAccount(t *testing.T) {
 			Address:  "foo",
 			Metadata: metadata.Metadata{},
 		},
-		Volumes: core.VolumesByAssets{},
 	}
 
 	backend, mock := newTestingBackend(t)
 	mock.EXPECT().
-		GetAccount(gomock.Any(), "foo").
+		GetAccountWithVolumes(gomock.Any(), "foo", false, false).
 		Return(&account, nil)
 
 	router := routes.NewRouter(backend, nil, metrics.NewNoOpRegistry())

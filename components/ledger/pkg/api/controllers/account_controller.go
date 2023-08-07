@@ -12,6 +12,7 @@ import (
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	"github.com/formancehq/ledger/pkg/storage/paginate"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
+	"github.com/formancehq/stack/libs/go-libs/collectionutils"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/go-chi/chi/v5"
@@ -93,7 +94,10 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 func GetAccount(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	acc, err := l.GetAccount(r.Context(), chi.URLParam(r, "address"))
+	acc, err := l.GetAccountWithVolumes(r.Context(), chi.URLParam(r, "address"),
+		collectionutils.Contains(r.URL.Query()["expand"], "volumes"),
+		collectionutils.Contains(r.URL.Query()["expand"], "effectiveVolumes"),
+	)
 	if err != nil {
 		apierrors.ResponseError(w, r, err)
 		return

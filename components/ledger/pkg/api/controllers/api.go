@@ -16,7 +16,7 @@ import (
 //go:generate mockgen -source api.go -destination api_test.go -package controllers_test . Ledger
 
 type Ledger interface {
-	GetAccount(ctx context.Context, param string) (*core.AccountWithVolumes, error)
+	GetAccountWithVolumes(ctx context.Context, param string, expandVolumes, expandEffectiveVolumes bool) (*core.AccountWithVolumes, error)
 	GetAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (*api.Cursor[core.Account], error)
 	CountAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (uint64, error)
 	GetBalancesAggregated(ctx context.Context, q ledgerstore.BalancesQuery) (core.BalancesByAssets, error)

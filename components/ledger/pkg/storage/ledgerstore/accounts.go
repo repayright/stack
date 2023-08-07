@@ -51,12 +51,18 @@ func (s *Store) GetAccount(ctx context.Context, addr string) (*core.Account, err
 	return account, nil
 }
 
-func (s *Store) GetAccountWithVolumes(ctx context.Context, account string) (*core.AccountWithVolumes, error) {
+func (s *Store) GetAccountWithVolumes(ctx context.Context, account string, volumes, effectiveVolumes bool) (*core.AccountWithVolumes, error) {
 	return fetch[*core.AccountWithVolumes](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
-		return query.
+		query = query.
 			Column("address", "metadata").
-			ColumnExpr("get_account_aggregated_volumes(accounts.address) as volumes").
 			Where("address = ?", account)
+		if volumes {
+			query = query.ColumnExpr("get_account_aggregated_volumes(accounts.address) as volumes")
+		}
+		if effectiveVolumes {
+			query = query.ColumnExpr("get_account_aggregated_effective_volumes(accounts.address) as effective_volumes")
+		}
+		return query
 	})
 }
 

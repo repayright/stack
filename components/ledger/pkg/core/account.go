@@ -33,7 +33,8 @@ func NewAccount(address string) Account {
 
 type AccountWithVolumes struct {
 	Account `bun:",extend"`
-	Volumes VolumesByAssets `json:"volumes"`
+	Volumes VolumesByAssets `json:"volumes,omitempty" bun:"volumes,type:jsonb"`
+	EffectiveVolumes VolumesByAssets `json:"effectiveVolumes" bun:"effectiveVolumes,type:jsonb"`
 }
 
 func NewAccountWithVolumes(address string) *AccountWithVolumes {
