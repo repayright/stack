@@ -72,7 +72,7 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (cor
 				With("potentially_staled_moves", potentiallyStaledMoves).
 				With("moves", moves).
 				TableExpr("moves").
-				ColumnExpr("volumes_to_jsonb((moves.asset, (sum(moves.post_commit_aggregated_input), sum(moves.post_commit_aggregated_output))::volumes)) as aggregated").
+				ColumnExpr("volumes_to_jsonb((moves.asset, (sum((moves.post_commit_effective_volumes).inputs), sum((moves.post_commit_effective_volumes).outputs))::volumes)) as aggregated").
 				Group("moves.asset")
 		})
 }
