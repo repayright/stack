@@ -30,10 +30,13 @@ type Transaction struct {
 }
 
 func (t *Transaction) toCore() *core.ExpandedTransaction {
-	preCommitVolumes := t.PostCommitAggregatedVolumes.Copy()
-	for _, posting := range t.Postings {
-		preCommitVolumes.AddOutput(posting.Source, posting.Asset, big.NewInt(0).Neg(posting.Amount))
-		preCommitVolumes.AddInput(posting.Destination, posting.Asset, big.NewInt(0).Neg(posting.Amount))
+	var preCommitVolumes core.AccountsAssetsVolumes
+	if t.PostCommitAggregatedVolumes != nil {
+		preCommitVolumes = t.PostCommitAggregatedVolumes.Copy()
+		for _, posting := range t.Postings {
+			preCommitVolumes.AddOutput(posting.Source, posting.Asset, big.NewInt(0).Neg(posting.Amount))
+			preCommitVolumes.AddInput(posting.Destination, posting.Asset, big.NewInt(0).Neg(posting.Amount))
+		}
 	}
 	return &core.ExpandedTransaction{
 		Transaction: core.Transaction{
@@ -97,7 +100,6 @@ func (s *Store) listTransactionsBuilder(p TransactionsQueryFilters) func(query *
 			ColumnExpr("transactions.metadata").
 			ColumnExpr("transactions.postings").
 			ColumnExpr("transactions.date").
-			ColumnExpr("get_aggregated_volumes_for_transaction(transactions) as post_commit_aggregated_volumes").
 			Apply(filterMetadata(p.Metadata))
 		if p.Reference != "" {
 			query.Where("transactions.reference = ?", p.Reference)
@@ -127,6 +129,9 @@ func (s *Store) listTransactionsBuilder(p TransactionsQueryFilters) func(query *
 			if p.Account != "" {
 				query = query.Apply(filterAccountAddress(p.Account, "account_address"))
 			}
+		}
+		if p.ExpandVolumes {
+			query = query.ColumnExpr("get_aggregated_volumes_for_transaction(transactions) as post_commit_aggregated_volumes")
 		}
 		return query
 	}
@@ -189,14 +194,15 @@ func NewTransactionsQuery() TransactionsQuery {
 }
 
 type TransactionsQueryFilters struct {
-	AfterTxID   uint64            `json:"afterTxID,omitempty"`
-	Reference   string            `json:"reference,omitempty"`
-	Destination string            `json:"destination,omitempty"`
-	Source      string            `json:"source,omitempty"`
-	Account     string            `json:"account,omitempty"`
-	EndTime     core.Time         `json:"endTime,omitempty"`
-	StartTime   core.Time         `json:"startTime,omitempty"`
-	Metadata    metadata.Metadata `json:"metadata,omitempty"`
+	AfterTxID     uint64            `json:"afterTxID,omitempty"`
+	Reference     string            `json:"reference,omitempty"`
+	Destination   string            `json:"destination,omitempty"`
+	Source        string            `json:"source,omitempty"`
+	Account       string            `json:"account,omitempty"`
+	EndTime       core.Time         `json:"endTime,omitempty"`
+	StartTime     core.Time         `json:"startTime,omitempty"`
+	Metadata      metadata.Metadata `json:"metadata,omitempty"`
+	ExpandVolumes bool              `json:"expandVolumes"`
 }
 
 func (a TransactionsQuery) WithPageSize(pageSize uint64) TransactionsQuery {
