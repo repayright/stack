@@ -72,7 +72,7 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (cor
 				With("potentially_staled_moves", potentiallyStaledMoves).
 				With("moves", moves).
 				TableExpr("moves").
-				ColumnExpr("volumes_to_jsonb((moves.asset, sum(moves.post_commit_aggregated_input), sum(moves.post_commit_aggregated_output))) as aggregated").
+				ColumnExpr("volumes_to_jsonb((moves.asset, (sum(moves.post_commit_aggregated_input), sum(moves.post_commit_aggregated_output))::volumes)) as aggregated").
 				Group("moves.asset")
 		})
 }
@@ -89,8 +89,8 @@ func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[c
 			query = query.
 				ColumnExpr("distinct on (moves.account_address) jsonb_build_object(moves.account_address, aggregate_objects(volumes_to_jsonb)) as aggregated").
 				Table("moves").
-				TableExpr(`get_account_volumes_for_asset(moves.account_address, moves.asset) volumes`).
-				TableExpr("volumes_to_jsonb(volumes)").
+				TableExpr(`get_account_volumes_for_asset(moves.account_address, moves.asset) v`).
+				TableExpr("volumes_to_jsonb(v)").
 				Group("moves.account_address", "moves.asset").
 				Order("moves.account_address", "moves.asset").
 				Apply(filterAccountAddress(q.Filters.AddressRegexp, "account_address"))

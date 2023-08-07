@@ -21,7 +21,7 @@ func (s *Store) GetAssetsVolumes(ctx context.Context, accountAddress string) (co
 			return query.
 				ColumnExpr("aggregate_objects(aggregated_volumes) as aggregated").
 				// TODO: Check SQL injections
-				TableExpr(fmt.Sprintf(`aggregate_ledger_volumes(_accounts := '{"%s"}') volumes`, accountAddress)).
-				TableExpr("volumes_to_jsonb(volumes) as aggregated_volumes")
+				TableExpr(fmt.Sprintf(`aggregate_ledger_volumes(_accounts := '{"%s"}') v`, accountAddress)).
+				TableExpr("volumes_to_jsonb(v) as aggregated_volumes")
 		})
 }
