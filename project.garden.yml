@@ -1,16 +1,17 @@
 ---
-apiVersion: garden.io/v0
+apiVersion: garden.io/v1
 kind: Project
-name: operator
+name: stack
 
 variables:
   cluster-name: formance
 
 environments:
-  - name: default
+  - name: dev
 
 providers:
   - name: kubernetes
+    environments: ["dev"]
     setupIngressController: false
     context: k3d-formance
     buildMode: kaniko
@@ -22,7 +23,6 @@ providers:
       - --snapshotMode=redo
       - --use-new-run
     deploymentRegistry:
-      hostname: internal-registry
-      namespace: formancehq
+      hostname: k3d-registry.host.k3d.internal
       insecure: true
-      port: 5000
+      port: 12345
