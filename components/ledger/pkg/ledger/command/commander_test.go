@@ -148,8 +148,7 @@ func TestCreateTransaction(t *testing.T) {
 			store := storageerrors.NewInMemoryStore()
 			ctx := logging.TestingContext()
 
-			commander := New(store, NoOpLocker, NewCompiler(1024),
-				NewReferencer(), nil)
+			commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer())
 			go commander.Run(ctx)
 			defer commander.Close()
 
@@ -200,7 +199,7 @@ func TestRevert(t *testing.T) {
 	err := store.InsertLogs(context.Background(), log)
 	require.NoError(t, err)
 
-	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer(), nil)
+	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer())
 	go commander.Run(ctx)
 	defer commander.Close()
 
@@ -222,7 +221,7 @@ func TestRevertWithAlreadyReverted(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer(), nil)
+	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer())
 	go commander.Run(ctx)
 	defer commander.Close()
 
@@ -245,7 +244,7 @@ func TestRevertWithRevertOccurring(t *testing.T) {
 	require.NoError(t, err)
 
 	referencer := NewReferencer()
-	commander := New(store, NoOpLocker, NewCompiler(1024), referencer, nil)
+	commander := New(store, NoOpLocker, NewCompiler(1024), referencer)
 	go commander.Run(ctx)
 	defer commander.Close()
 

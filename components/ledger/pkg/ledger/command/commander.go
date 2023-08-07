@@ -10,7 +10,6 @@ import (
 	"github.com/formancehq/ledger/pkg/ledger/utils/batching"
 	"github.com/formancehq/ledger/pkg/machine"
 	"github.com/formancehq/ledger/pkg/machine/vm"
-	"github.com/formancehq/ledger/pkg/opentelemetry/metrics"
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/collectionutils"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"
@@ -28,7 +27,6 @@ type Commander struct {
 	*batching.Batcher[*core.ChainedLog]
 	store           Store
 	locker          Locker
-	metricsRegistry metrics.PerLedgerRegistry
 	compiler        *Compiler
 	running         sync.WaitGroup
 	lastTXID        *atomic.Int64
@@ -43,7 +41,6 @@ func New(
 	locker Locker,
 	compiler *Compiler,
 	referencer *Referencer,
-	metricsRegistry metrics.PerLedgerRegistry,
 ) *Commander {
 	log, err := store.ReadLastLogWithType(context.Background(), core.NewTransactionLogType, core.RevertedTransactionLogType)
 	if err != nil && !storageerrors.IsNotFoundError(err) {
@@ -76,7 +73,6 @@ func New(
 	return &Commander{
 		store:           store,
 		locker:          locker,
-		metricsRegistry: metricsRegistry,
 		compiler:        compiler,
 		referencer:      referencer,
 		lastTXID:        lastTXID,

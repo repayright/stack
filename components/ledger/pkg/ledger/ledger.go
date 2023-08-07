@@ -6,7 +6,6 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/ledger/command"
-	"github.com/formancehq/ledger/pkg/opentelemetry/metrics"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/logging"
@@ -34,7 +33,6 @@ func (l *Ledger) SaveMeta(ctx context.Context, parameters command.Parameters, ta
 }
 
 func New(
-	name string,
 	store *ledgerstore.Store,
 	publisher message.Publisher,
 	compiler *command.Compiler,
@@ -44,17 +42,12 @@ func New(
 	//if publisher != nil {
 	//	monitor = bus.NewLedgerMonitor(publisher, name)
 	//}
-	metricsRegistry, err := metrics.RegisterPerLedgerMetricsRegistry(name)
-	if err != nil {
-		panic(err)
-	}
 	return &Ledger{
 		commander: command.New(
 			store,
 			command.NewDefaultLocker(),
 			compiler,
 			command.NewReferencer(),
-			metricsRegistry,
 		),
 		store:                  store,
 		updateVolumesPeriodic:  newPeriodic(store.UpdateVolumes),

@@ -105,7 +105,7 @@ func (r *Resolver) GetLedger(ctx context.Context, name string) (*Ledger, error) 
 			}
 		}
 
-		ledger = New(name, store, r.publisher, r.compiler)
+		ledger = New(store, r.publisher, r.compiler)
 		ledger.Start(logging.ContextWithLogger(context.Background(), r.logger))
 		r.ledgers[name] = ledger
 		r.metricsRegistry.ActiveLedgers().Add(ctx, +1)
