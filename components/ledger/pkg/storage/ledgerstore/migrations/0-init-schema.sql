@@ -121,6 +121,7 @@ create index moves_account_address_array_length on moves (jsonb_array_length(acc
 create index moves_date on moves (date);
 --create index moves_date_ranges on moves using brin(date); --todo: monitor usage
 create index moves_asset on moves(asset);
+create index moves_transaction_id on moves(transaction_id);
 
 create unique index accounts_revisions on accounts(address asc, revision desc);
 
