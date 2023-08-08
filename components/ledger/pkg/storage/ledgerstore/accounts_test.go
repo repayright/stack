@@ -25,7 +25,7 @@ func TestUpdateAccountsMetadata(t *testing.T) {
 			core.NewSetMetadataOnAccountLog(core.Now(), "bank", metadata).ChainLog(nil),
 		), "account insertion should not fail")
 
-		account, err := store.GetAccount(context.Background(), ledgerstore.NewGetAccountQuery("bank"))
+		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("bank"))
 		require.NoError(t, err, "account retrieval should not fail")
 
 		require.Equal(t, "bank", account.Address, "account address should match")
@@ -56,7 +56,7 @@ func TestUpdateAccountsMetadata(t *testing.T) {
 		require.NoError(t, err, "account insertion should not fail")
 
 		for _, account := range accounts {
-			acc, err := store.GetAccount(context.Background(), ledgerstore.NewGetAccountQuery(account.Address))
+			acc, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery(account.Address))
 			require.NoError(t, err, "account retrieval should not fail")
 
 			require.Equal(t, account.Address, acc.Address, "account address should match")
@@ -86,7 +86,7 @@ func TestGetAccount(t *testing.T) {
 	))
 
 	t.Run("find account", func(t *testing.T) {
-		account, err := store.GetAccount(context.Background(), ledgerstore.NewGetAccountQuery("multi"))
+		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("multi"))
 		require.NoError(t, err)
 		require.Equal(t, core.Account{
 			Address: "multi",
@@ -97,7 +97,7 @@ func TestGetAccount(t *testing.T) {
 	})
 
 	t.Run("find account using pit", func(t *testing.T) {
-		account, err := store.GetAccount(context.Background(), ledgerstore.NewGetAccountQuery("multi").WithPIT(now))
+		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("multi").WithPIT(now))
 		require.NoError(t, err)
 		require.Equal(t, core.Account{
 			Address:  "multi",
@@ -106,7 +106,7 @@ func TestGetAccount(t *testing.T) {
 	})
 
 	t.Run("not existent account", func(t *testing.T) {
-		account, err := store.GetAccount(context.Background(), ledgerstore.NewGetAccountQuery("account_not_existing"))
+		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("account_not_existing"))
 		require.NoError(t, err)
 		require.NotNil(t, account)
 	})
@@ -187,7 +187,7 @@ func TestUpdateAccountMetadata(t *testing.T) {
 		}).ChainLog(nil),
 	))
 
-	account, err := store.GetAccount(context.Background(), ledgerstore.NewGetAccountQuery("central_bank"))
+	account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("central_bank"))
 	require.NoError(t, err)
 	require.EqualValues(t, "bar", account.Metadata["foo"])
 }

@@ -39,7 +39,7 @@ func (s *Store) GetAccounts(ctx context.Context, q AccountsQuery) (*api.Cursor[c
 
 type GetAccountQuery struct {
 	Addr string
-	PIT core.Time
+	PIT  core.Time
 }
 
 func (q GetAccountQuery) WithPIT(pit core.Time) GetAccountQuery {
@@ -54,7 +54,25 @@ func NewGetAccountQuery(addr string) GetAccountQuery {
 	}
 }
 
-func (s *Store) GetAccount(ctx context.Context, q GetAccountQuery) (*core.Account, error) {
+func (s *Store) GetAccount(ctx context.Context, address string) (*core.Account, error) {
+	account, err := fetch[*core.Account](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.
+			ColumnExpr("address").
+			ColumnExpr("metadata").
+			Where("address = ?", address).
+			Order("revision desc").
+			Limit(1)
+	})
+	if err != nil {
+		if storageerrors.IsNotFoundError(err) {
+			return pointer.For(core.NewAccount(address)), nil
+		}
+		return nil, err
+	}
+	return account, nil
+}
+
+func (s *Store) GetAccountWithQuery(ctx context.Context, q GetAccountQuery) (*core.Account, error) {
 	account, err := fetch[*core.Account](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.
 			ColumnExpr("address").

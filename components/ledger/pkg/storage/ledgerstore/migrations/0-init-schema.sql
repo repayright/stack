@@ -82,7 +82,8 @@ create table moves (
     account_address_array jsonb not null,
     asset varchar not null,
     amount numeric not null,
-    date timestamp not null,
+    insertion_date timestamp not null,
+    effective_date timestamp not null,
     post_commit_volumes volumes default null,
     post_commit_effective_volumes volumes default null,
     is_source boolean not null,
@@ -108,10 +109,10 @@ create table logs (
 
 /** Index required for write part */
 -- todo: if 'where not stale' is used, logs insertion is speedup (maybe by 40%), but slow down some read query
-create index moves_range_dates on moves (account_address, asset, date); -- where not stale
+create index moves_range_dates on moves (account_address, asset, effective_date); -- where not stale
 
-create index moves_range_dates_not_staled on moves (account_address, asset, date) where not stale;
-create index moves_staled on moves (stale, date, seq);
+create index moves_range_dates_not_staled on moves (account_address, asset, effective_date) where not stale;
+create index moves_staled on moves (stale, effective_date, seq);
 
 /** Index requires for read */
 create index transactions_date on transactions (date);
@@ -123,7 +124,7 @@ create unique index transactions_revisions on transactions(id desc, revision des
 create index moves_account_address on moves (account_address);
 create index moves_account_address_array on moves using gin (account_address_array jsonb_ops);
 create index moves_account_address_array_length on moves (jsonb_array_length(account_address_array));
-create index moves_date on moves (date);
+create index moves_date on moves (effective_date);
 create index moves_asset on moves(asset);
 
 create unique index accounts_revisions on accounts(address asc, revision desc);
@@ -195,8 +196,8 @@ create function get_moves(_before timestamp default null)
 as $$
     select *
     from moves s
-    where _before is null or s.date <= _before
-    order by date desc, seq desc
+    where _before is null or s.effective_date <= _before
+    order by effective_date desc, seq desc
 $$;
 
 create function get_moves_for_account(_account_address varchar, _before timestamp default null)
@@ -293,7 +294,7 @@ as $$
 $$;
 
 -- todo: maybe we could avoid plpgsql functions
-create function insert_transaction(data jsonb)
+create function insert_transaction(data jsonb, _date timestamp without time zone)
     returns void
     language plpgsql
 as $$
@@ -318,10 +319,10 @@ as $$
         index = 0;
         for posting in (select jsonb_array_elements(data->'postings')) loop
             -- todo: sometimes the balance is known at commit time (for sources != world), we need to forward the value to populate the pre_commit_aggregated_input and output
-            insert into moves (date, account_address, asset, transaction_id, posting_index, amount, is_source, account_address_array, stale)
+            insert into moves (insertion_date, effective_date, account_address, asset, transaction_id, posting_index, amount, is_source, account_address_array, stale)
             values
-                ((data->>'date')::timestamp without time zone, posting->>'source', posting->>'asset', (data->>'id')::numeric, index, (posting->>'amount')::numeric, true, (select to_json(string_to_array(posting->>'source', ':'))), true),
-                ((data->>'date')::timestamp without time zone, posting->>'destination', posting->>'asset', (data->>'id')::numeric, index, (posting->>'amount')::numeric, false, (select to_json(string_to_array(posting->>'destination', ':'))), true);
+                (_date, (data->>'date')::timestamp without time zone, posting->>'source', posting->>'asset', (data->>'id')::numeric, index, (posting->>'amount')::numeric, true, (select to_json(string_to_array(posting->>'source', ':'))), true),
+                (_date, (data->>'date')::timestamp without time zone, posting->>'destination', posting->>'asset', (data->>'id')::numeric, index, (posting->>'amount')::numeric, false, (select to_json(string_to_array(posting->>'destination', ':'))), true);
 
             -- todo: we could probably avoid insertion using some kind of full join later
             perform insert_new_account(posting->>'source', (data->>'date')::timestamp without time zone);
@@ -334,7 +335,7 @@ as $$
         -- todo: use a window?
         update moves b
         set stale = true
-        where not b.stale and b.date > (data->>'date')::timestamp without time zone and (
+        where not b.stale and b.effective_date > (data->>'date')::timestamp without time zone and (
             account_address = any(involved_sources) or account_address = any(involved_destinations)
         );
     end
@@ -347,7 +348,7 @@ as $$
     with
      latest_computed_move as (
          (
-             select moves.seq, moves.date, moves.post_commit_volumes, moves.is_source, moves.amount
+             select moves.seq, moves.effective_date, moves.post_commit_volumes, moves.is_source, moves.amount
              from moves
              where account_address = record_to_update.account_address and
                    asset = record_to_update.asset and
@@ -401,15 +402,15 @@ as $$
     with
          latest_computed_move as (
              (
-                 select moves.seq, moves.date, moves.post_commit_effective_volumes, moves.is_source, moves.amount
+                 select moves.seq, moves.effective_date, moves.post_commit_effective_volumes, moves.is_source, moves.amount
                  from moves
-                 where date = (
-                     select max(date)
+                 where effective_date = (
+                     select max(effective_date)
                      from moves
                      where
                          account_address = record_to_update.account_address and
                          asset = record_to_update.asset and
-                         date <= record_to_update.date and
+                         effective_date <= record_to_update.effective_date and
                          not stale
                  ) and
                        account_address = record_to_update.account_address and
@@ -428,8 +429,8 @@ as $$
              join latest_computed_move on true
              where m.account_address = record_to_update.account_address and
                  m.asset = record_to_update.asset and
-                 m.date < record_to_update.date and
-                 m.date > latest_computed_move.date
+                 m.effective_date < record_to_update.effective_date and
+                 m.effective_date > latest_computed_move.effective_date
          ),
          new_moves_since_latest_computed_move_at_same_date as (
              select m.*
@@ -437,7 +438,7 @@ as $$
              join latest_computed_move on true
              where m.account_address = record_to_update.account_address and
                  m.asset = record_to_update.asset and
-                 m.date = record_to_update.date and
+                 m.effective_date = record_to_update.effective_date and
                  m.seq > latest_computed_move.seq and
                  m.seq < record_to_update.seq
          ),
@@ -501,10 +502,10 @@ as $$
     begin
 
         while true loop
-            select * into move
-            from moves where stale
-            order by date, seq
-            limit 1;
+                select *into move
+                from moves where stale
+                order by effective_date, seq
+                limit 1;
 
             if move.seq is null then
                 exit;
@@ -512,12 +513,12 @@ as $$
 
             with last_computed_move as (
                 (
-                    select moves.date, moves.seq, moves.post_commit_effective_volumes, moves.is_source, moves.amount
+                    select moves.effective_date, moves.seq, moves.post_commit_effective_volumes, moves.is_source, moves.amount
                     from moves
-                    where date = (
-                        select max(date)
+                    where effective_date = (
+                        select max(effective_date)
                         from moves
-                        where account_address = move.account_address and asset = move.asset and not stale and date < move.date
+                        where account_address = move.account_address and asset = move.asset and not stale and effective_date < move.effective_date
                     ) and
                         account_address = move.account_address and
                         asset = move.asset and
@@ -530,12 +531,14 @@ as $$
             ),
             computed_moves as (
                 select moves.seq, moves.amount, moves.is_source,
-                    (last_computed_move.post_commit_effective_volumes).outputs + sum(case when moves.is_source then moves.amount else 0 end) over (order by moves.date asc, moves.seq asc) as outputs,
-                    (last_computed_move.post_commit_effective_volumes).inputs + sum(case when not moves.is_source then moves.amount else 0 end) over (order by moves.date asc, moves.seq asc) as inputs
+                    (last_computed_move.post_commit_effective_volumes).outputs + sum(case when moves.is_source then moves.amount
+                                                                                          else 0 end) over (order by moves.effective_date asc, moves.seq asc) as outputs,
+                    (last_computed_move.post_commit_effective_volumes).inputs + sum(case when not moves.is_source then moves.amount
+                                                                                         else 0 end) over (order by moves.effective_date asc, moves.seq asc)  as inputs
                 from moves
                 join last_computed_move on true
-                where moves.account_address = move.account_address and moves.asset = move.asset and (moves.date > last_computed_move.date or (moves.date = last_computed_move.date and moves.seq > last_computed_move.seq))
-                order by moves.date asc, moves.seq asc
+                where moves.account_address = move.account_address and moves.asset = move.asset and (moves.effective_date > last_computed_move.effective_date or (moves.effective_date = last_computed_move.effective_date and moves.seq > last_computed_move.seq))
+                order by moves.effective_date asc, moves.seq asc
                 limit _limit
             )
             update moves
@@ -566,7 +569,7 @@ as $$
 
             with last_computed_move as (
                     (
-                        select moves.date, moves.seq, moves.post_commit_volumes, moves.is_source, moves.amount
+                        select moves.effective_date, moves.seq, moves.post_commit_volumes, moves.is_source, moves.amount
                         from moves
                         where account_address = move.account_address and
                             asset = move.asset and
@@ -607,13 +610,13 @@ as $$
     _value jsonb;
   begin
     if new.type = 'NEW_TRANSACTION' then
-      perform insert_transaction(new.data->'transaction');
+      perform insert_transaction(new.data->'transaction', new.date);
       for _key, _value in (select * from jsonb_each_text(new.data->'accountMetadata')) loop
           perform update_account_metadata(_key, _value, (new.data->'transaction'->>'date')::timestamp);
       end loop;
     end if;
     if new.type = 'REVERTED_TRANSACTION' then
-        perform insert_transaction(new.data->'transaction');
+        perform insert_transaction(new.data->'transaction', new.date);
         perform revert_transaction((new.data->>'revertedTransactionID')::numeric, (new.data->'transaction'->>'date')::timestamp);
     end if;
     if new.type = 'SET_METADATA' then

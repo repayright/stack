@@ -26,7 +26,7 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (cor
 				ColumnExpr("distinct on (moves.account_address, moves.asset) moves.*").
 				Order("account_address", "asset", "moves.seq desc").
 				Apply(filterAccountAddress(q.Options.AddressRegexp, "account_address")).
-				Apply(filterPIT(q.Options.PIT, "date"))
+				Apply(filterPIT(q.Options.PIT, "insertion_date")) // todo(gfyrag): expose capability to use effective_date
 
 			moves := s.db.
 				NewSelect().
@@ -60,7 +60,7 @@ func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[c
 				Group("moves.account_address", "moves.asset").
 				Order("moves.account_address", "moves.asset").
 				Apply(filterAccountAddress(q.Options.AddressRegexp, "account_address")).
-				Apply(filterPIT(q.Options.PIT, "date"))
+				Apply(filterPIT(q.Options.PIT, "insertion_date"))
 
 			if q.Options.AfterAddress != "" {
 				query.Where("account_address > ?", q.Options.AfterAddress)
