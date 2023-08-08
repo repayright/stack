@@ -1,4 +1,4 @@
-FROM golang:1.20 AS builder
+FROM golang:1.20-alpine3.16 AS builder
 ARG SEGMENT_WRITE_KEY
 ARG VERSION
 ARG APP_SHA
@@ -17,6 +17,7 @@ RUN --mount=type=cache,id=gomod,target=/go/pkg/mod \
 FROM alpine:3.16 as app
 RUN apk update && apk add ca-certificates
 COPY --from=builder /src/ledger /usr/local/bin/ledger
+RUN chmod +x /usr/local/bin/ledger
 EXPOSE 3068
 ENTRYPOINT ["ledger"]
 ENV OTEL_SERVICE_NAME ledger

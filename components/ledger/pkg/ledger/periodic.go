@@ -21,7 +21,11 @@ func (pc *periodic) Trigger(ctx context.Context) error {
 	defer func() {
 		pc.sem <- struct{}{}
 	}()
-	return pc.fn(ctx)
+	err := pc.fn(ctx)
+	if err != nil {
+		logging.FromContext(ctx).Error("Error with procedure: %s", err)
+	}
+	return err
 }
 
 func (pc *periodic) Run(ctx context.Context) error {

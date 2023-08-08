@@ -597,6 +597,8 @@ as $$
                 set post_commit_volumes = (computed_moves.inputs, computed_moves.outputs)::volumes
                 from computed_moves
                 where moves.seq = computed_moves.seq;
+
+            commit;
         end loop;
     end;
 $$;
