@@ -127,7 +127,8 @@ create index moves_account_address_array_length on moves (jsonb_array_length(acc
 create index moves_date on moves (effective_date);
 create index moves_asset on moves(asset);
 create index moves_seq_post_commit_volumes_null on moves(seq) where post_commit_volumes is null;
-create index moves_post_commit_volumes_undefined on moves(seq, account_address, asset) where post_commit_volumes is not null;
+create index moves_post_commit_volumes_undefined on moves(account_address, asset, seq) where post_commit_volumes is null;
+create index moves_post_commit_volumes_defined on moves(seq, account_address, asset) where post_commit_volumes is not null;
 
 create unique index accounts_revisions on accounts(address asc, revision desc);
 
@@ -557,7 +558,8 @@ $$;
 create procedure update_moves_volumes(_limit numeric default 100)
     language plpgsql
 as $$
-    declare move moves;
+    declare
+        move moves;
     begin
         while true loop
             select * into move
