@@ -57,7 +57,7 @@ func (j RawMessage) Value() (driver.Value, error) {
 	return string(j), nil
 }
 
-func (s *Store) logsQueryBuilder(q LogsQueryFilters) func(*bun.SelectQuery) *bun.SelectQuery {
+func (s *Store) logsQueryBuilder(q LogsQueryOptions) func(*bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		query = query.Table(LogTableName)
 		if !q.StartTime.IsZero() {
@@ -121,9 +121,9 @@ func (s *Store) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
 }
 
 func (s *Store) GetLogs(ctx context.Context, q LogsQuery) (*api.Cursor[core.ChainedLog], error) {
-	logs, err := paginateWithColumn[LogsQueryFilters, Logs](s, ctx,
-		paginate.ColumnPaginatedQuery[LogsQueryFilters](q),
-		s.logsQueryBuilder(q.Filters),
+	logs, err := paginateWithColumn[LogsQueryOptions, Logs](s, ctx,
+		paginate.ColumnPaginatedQuery[LogsQueryOptions](q),
+		s.logsQueryBuilder(q.Options),
 	)
 	if err != nil {
 		return nil, err
@@ -154,19 +154,19 @@ func (s *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*cor
 		})
 }
 
-type LogsQueryFilters struct {
+type LogsQueryOptions struct {
 	EndTime   core.Time `json:"endTime"`
 	StartTime core.Time `json:"startTime"`
 }
 
-type LogsQuery paginate.ColumnPaginatedQuery[LogsQueryFilters]
+type LogsQuery paginate.ColumnPaginatedQuery[LogsQueryOptions]
 
 func NewLogsQuery() LogsQuery {
 	return LogsQuery{
 		PageSize: paginate.QueryDefaultPageSize,
 		Column:   "id",
 		Order:    paginate.OrderDesc,
-		Filters:  LogsQueryFilters{},
+		Options:  LogsQueryOptions{},
 	}
 }
 
@@ -185,7 +185,7 @@ func (l LogsQuery) WithPageSize(pageSize uint64) LogsQuery {
 
 func (l LogsQuery) WithStartTimeFilter(start core.Time) LogsQuery {
 	if !start.IsZero() {
-		l.Filters.StartTime = start
+		l.Options.StartTime = start
 	}
 
 	return l
@@ -193,7 +193,7 @@ func (l LogsQuery) WithStartTimeFilter(start core.Time) LogsQuery {
 
 func (l LogsQuery) WithEndTimeFilter(end core.Time) LogsQuery {
 	if !end.IsZero() {
-		l.Filters.EndTime = end
+		l.Options.EndTime = end
 	}
 
 	return l

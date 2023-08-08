@@ -104,7 +104,7 @@ func (m1 *account) Scan(value interface{}) error {
 	return nil
 }
 
-func (s *Store) listTransactionsBuilder(p TransactionsQueryFilters) func(query *bun.SelectQuery) *bun.SelectQuery {
+func (s *Store) listTransactionsBuilder(p TransactionsQueryOptions) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		query = query.
 			Table("transactions").
@@ -154,9 +154,9 @@ func (s *Store) listTransactionsBuilder(p TransactionsQueryFilters) func(query *
 }
 
 func (s *Store) GetTransactions(ctx context.Context, q TransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {
-	transactions, err := paginateWithColumn[TransactionsQueryFilters, Transaction](s, ctx,
-		paginate.ColumnPaginatedQuery[TransactionsQueryFilters](q),
-		s.listTransactionsBuilder(q.Filters),
+	transactions, err := paginateWithColumn[TransactionsQueryOptions, Transaction](s, ctx,
+		paginate.ColumnPaginatedQuery[TransactionsQueryOptions](q),
+		s.listTransactionsBuilder(q.Options),
 	)
 	if err != nil {
 		return nil, err
@@ -167,7 +167,7 @@ func (s *Store) GetTransactions(ctx context.Context, q TransactionsQuery) (*api.
 }
 
 func (s *Store) CountTransactions(ctx context.Context, q TransactionsQuery) (uint64, error) {
-	return count(s, ctx, s.listTransactionsBuilder(q.Filters))
+	return count(s, ctx, s.listTransactionsBuilder(q.Options))
 }
 
 func (s *Store) GetTransactionWithVolumes(ctx context.Context, txId uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error) {
@@ -213,20 +213,20 @@ func (s *Store) GetTransactionByReference(ctx context.Context, ref string) (*cor
 		})
 }
 
-type TransactionsQuery paginate.ColumnPaginatedQuery[TransactionsQueryFilters]
+type TransactionsQuery paginate.ColumnPaginatedQuery[TransactionsQueryOptions]
 
 func NewTransactionsQuery() TransactionsQuery {
 	return TransactionsQuery{
 		PageSize: paginate.QueryDefaultPageSize,
 		Column:   "id",
 		Order:    paginate.OrderDesc,
-		Filters: TransactionsQueryFilters{
+		Options: TransactionsQueryOptions{
 			Metadata: metadata.Metadata{},
 		},
 	}
 }
 
-type TransactionsQueryFilters struct {
+type TransactionsQueryOptions struct {
 	AfterTxID              uint64            `json:"afterTxID,omitempty"`
 	Reference              string            `json:"reference,omitempty"`
 	Destination            string            `json:"destination,omitempty"`
@@ -248,14 +248,14 @@ func (a TransactionsQuery) WithPageSize(pageSize uint64) TransactionsQuery {
 }
 
 func (a TransactionsQuery) WithAfterTxID(after uint64) TransactionsQuery {
-	a.Filters.AfterTxID = after
+	a.Options.AfterTxID = after
 
 	return a
 }
 
 func (a TransactionsQuery) WithStartTimeFilter(start core.Time) TransactionsQuery {
 	if !start.IsZero() {
-		a.Filters.StartTime = start
+		a.Options.StartTime = start
 	}
 
 	return a
@@ -263,50 +263,50 @@ func (a TransactionsQuery) WithStartTimeFilter(start core.Time) TransactionsQuer
 
 func (a TransactionsQuery) WithEndTimeFilter(end core.Time) TransactionsQuery {
 	if !end.IsZero() {
-		a.Filters.EndTime = end
+		a.Options.EndTime = end
 	}
 
 	return a
 }
 
 func (a TransactionsQuery) WithAccountFilter(account string) TransactionsQuery {
-	a.Filters.Account = account
+	a.Options.Account = account
 
 	return a
 }
 
 func (a TransactionsQuery) WithDestinationFilter(dest string) TransactionsQuery {
-	a.Filters.Destination = dest
+	a.Options.Destination = dest
 
 	return a
 }
 
 func (a TransactionsQuery) WithReferenceFilter(ref string) TransactionsQuery {
-	a.Filters.Reference = ref
+	a.Options.Reference = ref
 
 	return a
 }
 
 func (a TransactionsQuery) WithSourceFilter(source string) TransactionsQuery {
-	a.Filters.Source = source
+	a.Options.Source = source
 
 	return a
 }
 
 func (a TransactionsQuery) WithMetadataFilter(metadata metadata.Metadata) TransactionsQuery {
-	a.Filters.Metadata = metadata
+	a.Options.Metadata = metadata
 
 	return a
 }
 
 func (a TransactionsQuery) WithExpandEffectiveVolumes(v bool) TransactionsQuery {
-	a.Filters.ExpandEffectiveVolumes = v
+	a.Options.ExpandEffectiveVolumes = v
 
 	return a
 }
 
 func (a TransactionsQuery) WithExpandVolumes(v bool) TransactionsQuery {
-	a.Filters.ExpandVolumes = v
+	a.Options.ExpandVolumes = v
 
 	return a
 }

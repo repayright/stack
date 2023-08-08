@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/ledger/pkg/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/api"
@@ -122,5 +123,14 @@ func filterAccountAddress(address, key string) func(query *bun.SelectQuery) *bun
 			}
 		}
 		return query
+	}
+}
+
+func filterPIT(pit core.Time, column string) func(query *bun.SelectQuery) *bun.SelectQuery {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		if pit.IsZero() {
+			return query
+		}
+		return query.Where(fmt.Sprintf("%s <= ?", column), pit)
 	}
 }

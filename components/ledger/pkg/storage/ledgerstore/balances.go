@@ -10,42 +10,6 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type BalancesQueryFilters struct {
-	AfterAddress  string `json:"afterAddress"`
-	AddressRegexp string `json:"addressRegexp"`
-}
-
-type BalancesQuery paginate.OffsetPaginatedQuery[BalancesQueryFilters]
-
-func NewBalancesQuery() BalancesQuery {
-	return BalancesQuery{
-		PageSize: paginate.QueryDefaultPageSize,
-		Order:    paginate.OrderAsc,
-		Filters:  BalancesQueryFilters{},
-	}
-}
-
-func (q BalancesQuery) GetPageSize() uint64 {
-	return q.PageSize
-}
-
-func (b BalancesQuery) WithAfterAddress(after string) BalancesQuery {
-	b.Filters.AfterAddress = after
-
-	return b
-}
-
-func (b BalancesQuery) WithAddressFilter(address string) BalancesQuery {
-	b.Filters.AddressRegexp = address
-
-	return b
-}
-
-func (b BalancesQuery) WithPageSize(pageSize uint64) BalancesQuery {
-	b.PageSize = pageSize
-	return b
-}
-
 func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (core.BalancesByAssets, error) {
 
 	type Temp struct {
@@ -61,7 +25,8 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (cor
 				Table(MovesTableName).
 				ColumnExpr("distinct on (moves.account_address, moves.asset) moves.*").
 				Order("account_address", "asset", "moves.seq desc").
-				Apply(filterAccountAddress(q.Filters.AddressRegexp, "account_address"))
+				Apply(filterAccountAddress(q.Options.AddressRegexp, "account_address")).
+				Apply(filterPIT(q.Options.PIT, "date"))
 
 			moves := s.db.
 				NewSelect().
@@ -84,8 +49,8 @@ func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[c
 		Aggregated core.AccountsAssetsVolumes `bun:"aggregated,type:jsonb"`
 	}
 
-	ret, err := paginateWithOffset[BalancesQueryFilters, *Temp](s, ctx,
-		paginate.OffsetPaginatedQuery[BalancesQueryFilters](q),
+	ret, err := paginateWithOffset[BalancesQueryOptions, *Temp](s, ctx,
+		paginate.OffsetPaginatedQuery[BalancesQueryOptions](q),
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			query = query.
 				ColumnExpr("distinct on (moves.account_address) jsonb_build_object(moves.account_address, aggregate_objects(volumes_to_jsonb)) as aggregated").
@@ -94,10 +59,11 @@ func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[c
 				TableExpr("volumes_to_jsonb(v)").
 				Group("moves.account_address", "moves.asset").
 				Order("moves.account_address", "moves.asset").
-				Apply(filterAccountAddress(q.Filters.AddressRegexp, "account_address"))
+				Apply(filterAccountAddress(q.Options.AddressRegexp, "account_address")).
+				Apply(filterPIT(q.Options.PIT, "date"))
 
-			if q.Filters.AfterAddress != "" {
-				query.Where("account_address > ?", q.Filters.AfterAddress)
+			if q.Options.AfterAddress != "" {
+				query.Where("account_address > ?", q.Options.AfterAddress)
 			}
 
 			return query
@@ -119,4 +85,47 @@ func (s *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int
 	}, func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.TableExpr("get_account_balance(?, ?) as balance", address, asset)
 	})
+}
+
+type BalancesQueryOptions struct {
+	AfterAddress  string `json:"afterAddress"`
+	AddressRegexp string `json:"addressRegexp"`
+
+	PIT core.Time `json:"pit"`
+}
+
+type BalancesQuery paginate.OffsetPaginatedQuery[BalancesQueryOptions]
+
+func NewBalancesQuery() BalancesQuery {
+	return BalancesQuery{
+		PageSize: paginate.QueryDefaultPageSize,
+		Order:    paginate.OrderAsc,
+		Options:  BalancesQueryOptions{},
+	}
+}
+
+func (q BalancesQuery) GetPageSize() uint64 {
+	return q.PageSize
+}
+
+func (q BalancesQuery) WithAfterAddress(after string) BalancesQuery {
+	q.Options.AfterAddress = after
+
+	return q
+}
+
+func (q BalancesQuery) WithAddressFilter(address string) BalancesQuery {
+	q.Options.AddressRegexp = address
+
+	return q
+}
+
+func (q BalancesQuery) WithPageSize(pageSize uint64) BalancesQuery {
+	q.PageSize = pageSize
+	return q
+}
+
+func (q BalancesQuery) WithPIT(pit core.Time) BalancesQuery {
+	q.Options.PIT = pit
+	return q
 }

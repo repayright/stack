@@ -314,7 +314,7 @@ func TestColumnPagination(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			models := make([]model, 0)
 			query := db.NewSelect().Model(&models).Column("id")
-			if tc.query.Filters {
+			if tc.query.Options {
 				query = query.Where("pair = ?", true)
 			}
 			cursor, err := paginate.UsingColumn[bool, model](context.Background(), query, tc.query)

@@ -817,8 +817,8 @@ func TestListTransactions(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			tc.query.Filters.ExpandVolumes = true
-			tc.query.Filters.ExpandEffectiveVolumes = false
+			tc.query.Options.ExpandVolumes = true
+			tc.query.Options.ExpandEffectiveVolumes = false
 			cursor, err := store.GetTransactions(context.Background(), tc.query)
 			require.NoError(t, err)
 			RequireEqual(t, *tc.expected, *cursor)

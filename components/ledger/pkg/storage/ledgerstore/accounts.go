@@ -12,16 +12,18 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (s *Store) accountQueryBuilder(p AccountsQuery) func(query *bun.SelectQuery) *bun.SelectQuery {
+func (s *Store) accountQueryBuilder(q AccountsQuery) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		selectAccounts := s.db.NewSelect().
+			DistinctOn("address").
 			Table("accounts").
-			Apply(filterMetadata(p.Filters.Metadata)).
-			Apply(filterAccountAddress(p.Filters.Address, "address"))
+			Apply(filterMetadata(q.Options.Metadata)).
+			Apply(filterAccountAddress(q.Options.Address, "address")).
+			Order("address", "revision desc").
+			Apply(filterPIT(q.Options.PIT, "last_update"))
 
 		return query.
 			With("cte1", selectAccounts).
-			DistinctOn("cte1.address").
 			ColumnExpr("cte1.address").
 			ColumnExpr("cte1.metadata").
 			Table("cte1")
@@ -29,22 +31,42 @@ func (s *Store) accountQueryBuilder(p AccountsQuery) func(query *bun.SelectQuery
 }
 
 func (s *Store) GetAccounts(ctx context.Context, q AccountsQuery) (*api.Cursor[core.Account], error) {
-	return paginateWithOffset[AccountsQueryFilters, core.Account](s, ctx,
-		paginate.OffsetPaginatedQuery[AccountsQueryFilters](q),
+	return paginateWithOffset[AccountsQueryOptions, core.Account](s, ctx,
+		paginate.OffsetPaginatedQuery[AccountsQueryOptions](q),
 		s.accountQueryBuilder(q),
 	)
 }
 
-func (s *Store) GetAccount(ctx context.Context, addr string) (*core.Account, error) {
+type GetAccountQuery struct {
+	Addr string
+	PIT core.Time
+}
+
+func (q GetAccountQuery) WithPIT(pit core.Time) GetAccountQuery {
+	q.PIT = pit
+
+	return q
+}
+
+func NewGetAccountQuery(addr string) GetAccountQuery {
+	return GetAccountQuery{
+		Addr: addr,
+	}
+}
+
+func (s *Store) GetAccount(ctx context.Context, q GetAccountQuery) (*core.Account, error) {
 	account, err := fetch[*core.Account](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.
 			ColumnExpr("address").
 			ColumnExpr("metadata").
-			Where("address = ?", addr)
+			Where("address = ?", q.Addr).
+			Order("revision desc").
+			Limit(1).
+			Apply(filterPIT(q.PIT, "last_update"))
 	})
 	if err != nil {
 		if storageerrors.IsNotFoundError(err) {
-			return pointer.For(core.NewAccount(addr)), nil
+			return pointer.For(core.NewAccount(q.Addr)), nil
 		}
 		return nil, err
 	}
@@ -70,19 +92,21 @@ func (s *Store) CountAccounts(ctx context.Context, q AccountsQuery) (uint64, err
 	return count(s, ctx, s.accountQueryBuilder(q))
 }
 
-type AccountsQuery paginate.OffsetPaginatedQuery[AccountsQueryFilters]
+type AccountsQuery paginate.OffsetPaginatedQuery[AccountsQueryOptions]
 
-type AccountsQueryFilters struct {
+type AccountsQueryOptions struct {
 	AfterAddress string            `json:"after"`
 	Address      string            `json:"address"`
 	Metadata     metadata.Metadata `json:"metadata"`
+
+	PIT core.Time `json:"pit"`
 }
 
 func NewAccountsQuery() AccountsQuery {
 	return AccountsQuery{
 		PageSize: paginate.QueryDefaultPageSize,
 		Order:    paginate.OrderAsc,
-		Filters: AccountsQueryFilters{
+		Options: AccountsQueryOptions{
 			Metadata: metadata.Metadata{},
 		},
 	}
@@ -97,19 +121,25 @@ func (a AccountsQuery) WithPageSize(pageSize uint64) AccountsQuery {
 }
 
 func (a AccountsQuery) WithAfterAddress(after string) AccountsQuery {
-	a.Filters.AfterAddress = after
+	a.Options.AfterAddress = after
 
 	return a
 }
 
 func (a AccountsQuery) WithAddressFilter(address string) AccountsQuery {
-	a.Filters.Address = address
+	a.Options.Address = address
 
 	return a
 }
 
 func (a AccountsQuery) WithMetadataFilter(metadata metadata.Metadata) AccountsQuery {
-	a.Filters.Metadata = metadata
+	a.Options.Metadata = metadata
+
+	return a
+}
+
+func (a AccountsQuery) WithPIT(date core.Time) AccountsQuery {
+	a.Options.PIT = date
 
 	return a
 }

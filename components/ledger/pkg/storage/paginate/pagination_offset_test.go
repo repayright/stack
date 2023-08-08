@@ -138,7 +138,7 @@ func TestOffsetPagination(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			query := db.NewSelect().Model(&models).Column("id")
-			if tc.query.Filters {
+			if tc.query.Options {
 				query = query.Where("pair = ?", true)
 			}
 			cursor, err := paginate.UsingOffset[bool, model](

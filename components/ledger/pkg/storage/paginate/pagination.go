@@ -28,25 +28,25 @@ func (o Order) Reverse() Order {
 	return (o + 1) % 2
 }
 
-type ColumnPaginatedQuery[FILTERS any] struct {
+type ColumnPaginatedQuery[OPTIONS any] struct {
 	PageSize     uint64  `json:"pageSize"`
 	Bottom       *uint64 `json:"bottom"`
 	Column       string  `json:"column"`
 	PaginationID *uint64 `json:"paginationID"`
-	Order        Order   `json:"order"`
-	Filters      FILTERS `json:"filters"`
-	Reverse      bool    `json:"reverse"`
+	Order   Order   `json:"order"`
+	Options OPTIONS `json:"filters"`
+	Reverse bool    `json:"reverse"`
 }
 
 func (q *ColumnPaginatedQuery[PAYLOAD]) EncodeAsCursor() string {
 	return encodeCursor(q)
 }
 
-type OffsetPaginatedQuery[FILTERS any] struct {
+type OffsetPaginatedQuery[OPTIONS any] struct {
 	Offset   uint64  `json:"offset"`
 	Order    Order   `json:"order"`
 	PageSize uint64  `json:"pageSize"`
-	Filters  FILTERS `json:"filters"`
+	Options  OPTIONS `json:"filters"`
 }
 
 func (q *OffsetPaginatedQuery[PAYLOAD]) EncodeAsCursor() string {
