@@ -55,7 +55,7 @@ func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[c
 			query = query.
 				ColumnExpr("distinct on (moves.account_address) jsonb_build_object(moves.account_address, aggregate_objects(volumes_to_jsonb)) as aggregated").
 				Table("moves").
-				TableExpr(`get_account_volumes_for_asset(moves.account_address, moves.asset) v`).
+				TableExpr(`get_account_volumes_for_asset(moves.account_address, moves.asset) v`). // TODO: use ensure_move_completed ?
 				TableExpr("volumes_to_jsonb(v)").
 				Group("moves.account_address", "moves.asset").
 				Order("moves.account_address", "moves.asset").
