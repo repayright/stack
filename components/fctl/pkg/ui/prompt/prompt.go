@@ -27,7 +27,7 @@ type Prompt struct {
 
 func NewPrompt(cmd *cobra.Command) *Prompt {
 	return &Prompt{
-		style: lipgloss.NewStyle().Border(lipgloss.NormalBorder()),
+		style: lipgloss.NewStyle().Border(lipgloss.NormalBorder()).UnsetPadding().UnsetMargins(),
 		keyMapAction: config.NewKeyMapHandler().AddNewKeyBinding(
 			key.NewBinding(
 				key.WithKeys("enter"),
@@ -79,7 +79,6 @@ func (p *Prompt) Init() tea.Cmd {
 	p.model = textinput.New()
 	p.model.Placeholder = "Typing..."
 	p.model.CharLimit = 60
-
 	return nil
 }
 

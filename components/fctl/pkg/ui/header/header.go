@@ -41,7 +41,7 @@ func (h *Header) AddModel(model *list.PointList) *Header {
 	return h
 }
 
-func (h *Header) GetMaxPossibleHeight() int {
+func (h *Header) GetMaxPossibleHeight() int { // Actually always return always 6
 	return h.logo.GetMaxPossibleHeight()
 }
 

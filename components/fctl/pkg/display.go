@@ -117,11 +117,6 @@ func (d *Display) Init() tea.Cmd {
 		panic(err)
 	}
 
-	d.lastTermSize = tea.WindowSizeMsg{
-		Width:  w,
-		Height: h,
-	}
-
 	d.addControllerPromptKeyBinding(d.controller)
 	d.addPromptExitKeyBinding()
 	d.GenerateKeyMapAction()
@@ -170,7 +165,10 @@ func (d *Display) Init() tea.Cmd {
 
 	// This is needed to set the width of the prompt
 	d.prompt.SetWidth(msg.Width)
-
+	d.lastTermSize = tea.WindowSizeMsg{
+		Width:  w,
+		Height: h,
+	}
 	return tea.Sequence(
 		d.header.Init(),
 		d.prompt.Init(),
@@ -183,7 +181,9 @@ func (d *Display) Init() tea.Cmd {
 
 func (d *Display) HeadersHeight() int {
 	if d.prompt.IsFocused() {
-		return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight()
+		Log := helpers.NewLogger("Display")
+		Log.Log(fmt.Sprintf("Header Height: %d", d.header.GetMaxPossibleHeight()+d.prompt.GetHeight()+1))
+		return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight() + 1
 
 	}
 	return d.header.GetMaxPossibleHeight()
@@ -203,26 +203,29 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.Render()
 		return d, nil
 	case modelutils.ResizeMsg:
+		header, cmd := d.header.Update(d.lastTermSize)
+		d.header = header
+		d.prompt.SetWidth(msg.Width)
+
 		bodyMsg := d.newBodyWindowMsg(msg)
 		d.lastBodySize = bodyMsg
 		log := helpers.NewLogger("Display")
 		log.Log("Body width", strconv.Itoa(d.lastBodySize.Width), "heigth", strconv.Itoa(d.lastBodySize.Height))
 		log.Log("Term width", strconv.Itoa(d.lastTermSize.Width), "heigth", strconv.Itoa(d.lastTermSize.Height))
-		m, cmd := d.renderer.Update(bodyMsg)
+		m, rCmd := d.renderer.Update(bodyMsg)
 		d.renderer = m
-		return d, tea.Sequence(cmd, func() tea.Msg {
+		return d, tea.Sequence(cmd, rCmd, func() tea.Msg {
 			return modelutils.RenderMsg{}
 		})
 	case tea.WindowSizeMsg:
-		header, cmd := d.header.Update(msg)
-		d.header = header
-		d.prompt.SetWidth(msg.Width)
-		return d, tea.Sequence(cmd, func() tea.Msg {
+		d.lastTermSize = msg
+
+		return d, func() tea.Msg {
 			return modelutils.ResizeMsg{
 				Width:  msg.Width,
 				Height: msg.Height,
 			}
-		})
+		}
 	case modelutils.ChangeViewMsg:
 		d.controller = msg.Controller
 		renderer, err := d.controller.Run()
@@ -246,20 +249,22 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return modelutils.RenderMsg{}
 			})
 	case modelutils.OpenPromptMsg:
-		return d, tea.Sequence(d.prompt.SwitchFocus(), func() tea.Msg {
-			d.GenerateKeyMapAction()
-			return func() tea.Msg {
-				return modelutils.ResizeMsg{
-					Width:  d.lastTermSize.Width,
-					Height: d.lastTermSize.Height,
-				}
+		d.prompt.SwitchFocus()
+		d.GenerateKeyMapAction()
+		return d, func() tea.Msg {
+			return modelutils.ResizeMsg{
+				Width:  d.lastTermSize.Width,
+				Height: d.lastTermSize.Height,
 			}
-		})
+		}
 	case modelutils.ClosePromptMsg:
 		d.GenerateKeyMapAction()
 		d.suggestions = nil
 		return d, func() tea.Msg {
-			return modelutils.RenderMsg{}
+			return modelutils.ResizeMsg{
+				Width:  d.lastTermSize.Width,
+				Height: d.lastTermSize.Height,
+			}
 		}
 	case prompt.UpdateSuggestionMsg:
 		// Prompt Suggestions
@@ -272,33 +277,23 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			)
 			d.suggestions = prompt.NewSuggestions(model)
 		}
-	case modelutils.UpdateRendererMsg:
-		// Always rerender the view
-		// This is needed to update the key bindings
-		// All sub views are rerendered
-		// FIXME: This is not efficient
-		// Each vue should trigger the msg when needed
-		renderer, cmd := d.renderer.Update(msg.Msg)
-		d.renderer = renderer
-		return d, tea.Sequence(cmd, func() tea.Msg {
-			return modelutils.RenderMsg{}
-		})
 	case tea.KeyMsg:
 		if d.prompt.IsFocused() {
+
 			m, cmd := d.prompt.Update(msg)
 			d.prompt = m
 			return d, tea.Sequence(cmd, func() tea.Msg {
 				return modelutils.RenderMsg{}
 			})
 		}
+		renderer, cmd := d.renderer.Update(msg)
+		d.renderer = renderer
 
 		// Check for action key binding
 		// It migth change to a specific tea.Msg
-		var postCmd tea.Cmd = func() tea.Msg {
-			return modelutils.UpdateRendererMsg{
-				Msg: msg,
-			}
-		}
+		var postCmd tea.Cmd = tea.Sequence(cmd, func() tea.Msg {
+			return modelutils.RenderMsg{}
+		})
 
 		keyMapHandler := d.controller.GetKeyMapAction()
 

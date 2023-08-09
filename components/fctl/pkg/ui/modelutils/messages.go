@@ -1,7 +1,6 @@
 package modelutils
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
 )
 
@@ -34,8 +33,4 @@ type WindowSizeMsg struct {
 type ResizeMsg struct {
 	Width  int
 	Height int
-}
-
-type UpdateRendererMsg struct {
-	Msg tea.Msg
 }

@@ -131,7 +131,7 @@ func (t Table) View() string {
 			t.renderRows(),
 		}
 
-	border := t.style.Wrapper.Width(t.terminalSize.Width - 2)
+	border := t.style.Wrapper.Width(t.terminalSize.Width - 2).Height(t.terminalSize.Height - 3)
 	innerBox := t.style.Body.MaxWidth(t.terminalSize.Width - 3).Height(t.terminalSize.Height - 2)
 
 	return border.Render(lipgloss.PlaceHorizontal(innerBox.GetWidth(), 0, lipgloss.JoinVertical(lipgloss.Top, render...)))

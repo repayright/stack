@@ -68,57 +68,26 @@ func (r Rows) GetScopeRows(c Cursor, t tea.WindowSizeMsg) (rows Rows) {
 	Log.Log(fmt.Sprintf("%d", t.Height-4))
 	height := t.Height - 4
 	cursorY := c.y
-	if cursorY == 0 || cursorY == 1 {
-		if height == len(rows) {
-			Log.Log(fmt.Sprintf("Cursor ==0 && Cursor == 1:%d", len(r[0:])))
-			return r[0:]
-		}
 
-		// Log.Log(fmt.Sprintf("Cursor ==0 && Cursor == 1:%d", len(r[0:height])))
-		return r[0:height]
+	if cursorY <= 0 {
+		return r[0:int(math.Min(float64(len(r)), float64(height)))]
 	}
 
-	if cursorY > 1 {
-		// if cursorY == len(rows) {
-		// 	rows = r.Reverse()
-		// 	rows = rows[cursorY-height : cursorY]
-		// 	rows = rows.Reverse()
-		// 	return rows
-		// }
-
-		norme := cursorY - height
-		Log.Log(fmt.Sprintf("Vec1: %t", norme > 0))
-		Log.Log(fmt.Sprintf("Vec2: %t", norme < 0))
-		Log.Log(fmt.Sprintf("Vec1 == Vec2: %t", norme == 0))
-		if norme > 0 { // Vec1: je monte
-			norme = int(math.Abs(float64(norme)))
-			rows = r.Reverse()
-			rows = rows[height : len(rows)-cursorY]
-			rows = rows.Reverse()
-
-			return
-		}
-
-		if norme == 0 { // Vec1 == Vec2, je suis au milieu
-			mid := height / 2
-			rows = rows[cursorY-mid : cursorY+mid]
-			// rows = rows.Reverse()
-			return rows
-		}
-
-		if norme < 0 { // Vec2: je descend, c'est monté à l'envers :) ??
-			rows = r.Reverse()
-			if height < len(rows) {
-				rows = rows[:height]
-			}
-			rows = rows.Reverse()
-			return rows
-		}
-
-		return rows
+	mid := height / 2
+	if cursorY+mid >= len(r) { // Ne renvoi que les derniers
+		max := int(math.Min(float64(len(r)), float64(cursorY+mid)))
+		// min := int(math.Min(float64(height), float64(cursorY-mid)))
+		r = r[int(math.Max(float64(len(r)-height), 0)):max]
+		return r
+	}
+	if cursorY-mid <= 0 { // Ne renvoi que les premiers
+		return r[0:int(math.Min(float64(len(r)), float64(height)))]
 	}
 
-	return rows
+	// Centre
+
+	return r[cursorY-mid : int(math.Min(float64(cursorY+mid+1), float64(len(r))))]
+
 }
 
 func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
