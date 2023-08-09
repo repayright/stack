@@ -1,6 +1,9 @@
 package modelutils
 
-import "github.com/formancehq/fctl/pkg/config"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/formancehq/fctl/pkg/config"
+)
 
 type OpenPromptMsg struct{}
 type ClosePromptMsg struct{}
@@ -33,4 +36,6 @@ type ResizeMsg struct {
 	Height int
 }
 
-type UpdateRendererMsg struct{}
+type UpdateRendererMsg struct {
+	Msg tea.Msg
+}

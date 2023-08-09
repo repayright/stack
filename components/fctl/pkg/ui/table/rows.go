@@ -69,11 +69,12 @@ func (r Rows) GetScopeRows(c Cursor, t tea.WindowSizeMsg) (rows Rows) {
 	height := t.Height - 4
 	cursorY := c.y
 	if cursorY == 0 || cursorY == 1 {
-		Log.Log(fmt.Sprintf("Cursor ==0 && Cursor == 1:%d", len(r[0:height])))
 		if height == len(rows) {
+			Log.Log(fmt.Sprintf("Cursor ==0 && Cursor == 1:%d", len(r[0:])))
 			return r[0:]
 		}
 
+		// Log.Log(fmt.Sprintf("Cursor ==0 && Cursor == 1:%d", len(r[0:height])))
 		return r[0:height]
 	}
 

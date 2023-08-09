@@ -278,7 +278,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// All sub views are rerendered
 		// FIXME: This is not efficient
 		// Each vue should trigger the msg when needed
-		renderer, cmd := d.renderer.Update(msg)
+		renderer, cmd := d.renderer.Update(msg.Msg)
 		d.renderer = renderer
 		return d, tea.Sequence(cmd, func() tea.Msg {
 			return modelutils.RenderMsg{}
@@ -295,7 +295,9 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Check for action key binding
 		// It migth change to a specific tea.Msg
 		var postCmd tea.Cmd = func() tea.Msg {
-			return modelutils.UpdateRendererMsg{}
+			return modelutils.UpdateRendererMsg{
+				Msg: msg,
+			}
 		}
 
 		keyMapHandler := d.controller.GetKeyMapAction()
