@@ -12,14 +12,6 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type txOption func(options *sql.TxOptions)
-
-func withReadOnly() txOption {
-	return func(options *sql.TxOptions) {
-		options.ReadOnly = true
-	}
-}
-
 type Store struct {
 	db       *bun.DB
 	onDelete func(ctx context.Context) error
@@ -50,11 +42,8 @@ func (s *Store) IsInitialized() bool {
 	return s.isInitialized
 }
 
-func (s *Store) prepareTransaction(ctx context.Context, opts ...txOption) (bun.Tx, error) {
+func (s *Store) prepareTransaction(ctx context.Context) (bun.Tx, error) {
 	txOptions := &sql.TxOptions{}
-	for _, opt := range opts {
-		opt(txOptions)
-	}
 
 	tx, err := s.db.BeginTx(ctx, txOptions)
 	if err != nil {
@@ -66,8 +55,8 @@ func (s *Store) prepareTransaction(ctx context.Context, opts ...txOption) (bun.T
 	return tx, nil
 }
 
-func (s *Store) withTransaction(ctx context.Context, callback func(tx bun.Tx) error, opts ...txOption) error {
-	tx, err := s.prepareTransaction(ctx, opts...)
+func (s *Store) withTransaction(ctx context.Context, callback func(tx bun.Tx) error) error {
+	tx, err := s.prepareTransaction(ctx)
 	if err != nil {
 		return err
 	}

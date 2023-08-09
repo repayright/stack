@@ -27,7 +27,7 @@ func fetch[T any](s *Store, ctx context.Context, builders ...func(query *bun.Sel
 		}
 
 		return storage.PostgresError(query.Scan(ctx, ret))
-	}, withReadOnly())
+	})
 	return ret, err
 }
 
@@ -44,7 +44,7 @@ func fetchAndMap[T any, TO any](s *Store, ctx context.Context,
 
 func paginateWithOffset[FILTERS any, RETURN any](s *Store, ctx context.Context,
 	q paginate.OffsetPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
-	tx, err := s.prepareTransaction(ctx, withReadOnly())
+	tx, err := s.prepareTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func paginateWithOffset[FILTERS any, RETURN any](s *Store, ctx context.Context,
 }
 
 func paginateWithColumn[FILTERS any, RETURN any](s *Store, ctx context.Context, q paginate.ColumnPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
-	tx, err := s.prepareTransaction(ctx, withReadOnly())
+	tx, err := s.prepareTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func count(s *Store, ctx context.Context, builders ...func(query *bun.SelectQuer
 		}
 		count, err = query.Conn(tx).Count(ctx)
 		return err
-	}, withReadOnly()); err != nil {
+	}); err != nil {
 		return 0, err
 	}
 	return uint64(count), nil
