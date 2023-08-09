@@ -34,7 +34,7 @@ func (pc *periodic) Run(ctx context.Context) error {
 		select {
 		case <-pc.sem:
 			select {
-			case <-time.After(2 * time.Second):
+			case <-time.After(500 * time.Millisecond):
 			case ch := <-pc.stopChan:
 				close(ch)
 				return nil

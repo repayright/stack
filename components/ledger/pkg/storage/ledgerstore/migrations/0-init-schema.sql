@@ -127,7 +127,8 @@ create index moves_account_address_array_length on moves (jsonb_array_length(acc
 create index moves_date on moves (effective_date);
 create index moves_asset on moves(asset);
 create index moves_seq_post_commit_volumes_null on moves(seq) where post_commit_volumes is null;
-create index moves_post_commit_volumes_undefined on moves(account_address, asset, seq) where post_commit_volumes is null;
+create index moves_post_commit_volumes_undefined_with_post_commit_volumes on moves(account_address, asset, seq) where post_commit_volumes is null;
+create index moves_post_commit_volumes_undefined on moves(account_address, asset, seq);
 create index moves_post_commit_volumes_defined on moves(seq, account_address, asset) where post_commit_volumes is not null;
 
 create unique index accounts_revisions on accounts(address asc, revision desc);
@@ -560,6 +561,7 @@ create procedure update_moves_volumes(_limit numeric default 100)
 as $$
     declare
         move moves;
+        last_computed_move record;
     begin
         while true loop
             select * into move
@@ -571,36 +573,40 @@ as $$
                 exit;
             end if;
 
-            with last_computed_move as (
-                    (
-                        select moves.effective_date, moves.seq, moves.post_commit_volumes, moves.is_source, moves.amount
-                        from moves
-                        where account_address = move.account_address and
-                            asset = move.asset and
-                            post_commit_volumes is not null and
-                            seq < move.seq
-                        order by seq desc
-                    ) union all (
-                        select '-Infinity', -1, (0, 0)::volumes, false, 0
-                    )
-                    limit 1
-                ),
-                computed_moves as (
-                    select moves.seq, moves.amount, moves.is_source,
-                        (last_computed_move.post_commit_volumes).outputs + sum(case when moves.is_source then moves.amount else 0 end) over (order by moves.seq asc) as outputs,
-                        (last_computed_move.post_commit_volumes).inputs + sum(case when not moves.is_source then moves.amount else 0 end) over (order by moves.seq asc) as inputs
-                    from moves
-                    join last_computed_move on true
-                    where moves.account_address = move.account_address and
-                          moves.asset = move.asset and
-                          moves.seq > last_computed_move.seq
-                    order by moves.seq asc
-                    limit _limit
-                )
-                update moves
-                set post_commit_volumes = (computed_moves.inputs, computed_moves.outputs)::volumes
-                from computed_moves
-                where moves.seq = computed_moves.seq;
+            select * into last_computed_move
+            from (
+                 (
+                     select moves.seq, moves.post_commit_volumes, moves.is_source, moves.amount
+                     from moves
+                     where
+                         account_address = move.account_address and
+                         asset = move.asset and
+                         post_commit_volumes is not null and
+                         seq < move.seq
+                     order by seq desc
+                     limit 1
+                 ) union all (
+                     select -1, (0, 0)::volumes, false, 0
+                 )
+                 limit 1
+            ) v;
+
+            --raise notice 'process % % % %', move.seq, clock_timestamp(), move.account_address, move.asset;
+            with computed_moves as (
+                select moves.seq, moves.amount, moves.is_source,
+                    (last_computed_move.post_commit_volumes).outputs + sum(case when moves.is_source then moves.amount else 0 end) over (order by moves.seq asc) as outputs,
+                    (last_computed_move.post_commit_volumes).inputs + sum(case when not moves.is_source then moves.amount else 0 end) over (order by moves.seq asc) as inputs
+                from moves
+                where moves.account_address = move.account_address and
+                      moves.asset = move.asset and
+                      moves.seq > last_computed_move.seq
+                order by moves.seq asc
+                limit _limit
+            )
+            update moves
+            set post_commit_volumes = (computed_moves.inputs, computed_moves.outputs)::volumes
+            from computed_moves
+            where moves.seq = computed_moves.seq;
 
             commit;
         end loop;
