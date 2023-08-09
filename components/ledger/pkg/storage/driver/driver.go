@@ -39,6 +39,7 @@ func init() {
 	pgxSqlDriver.driverName = "pgx"
 }
 
+// todo: since se use pq, this is probably useless
 func InstrumentalizeSQLDriver() {
 	// otelsql has a function Register which wrap the underlying driver, but does not mirror driver.NamedValuedChecker interface of the underlying driver
 	// pgx implements this interface and just return nil

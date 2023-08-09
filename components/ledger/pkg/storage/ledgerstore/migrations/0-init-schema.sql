@@ -132,6 +132,8 @@ create index moves_post_commit_volumes_undefined on moves(account_address, asset
 create index moves_post_commit_volumes_defined on moves(seq, account_address, asset) where post_commit_volumes is not null;
 
 create unique index accounts_revisions on accounts(address asc, revision desc);
+create index accounts_address_array on accounts using gin (address_array jsonb_ops);
+create index accounts_address_array_length on accounts (jsonb_array_length(address_array));
 
 /** Define write functions **/
 create function insert_new_account(_address varchar, _date timestamp)

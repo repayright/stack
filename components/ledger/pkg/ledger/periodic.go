@@ -23,7 +23,7 @@ func (pc *periodic) Trigger(ctx context.Context) error {
 	}()
 	err := pc.fn(ctx)
 	if err != nil {
-		logging.FromContext(ctx).Error("Error with procedure: %s", err)
+		logging.FromContext(ctx).Errorf("Error with procedure: %s", err)
 	}
 	return err
 }

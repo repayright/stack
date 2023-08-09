@@ -38,8 +38,10 @@ type ModuleConfig struct {
 func CLIModule(v *viper.Viper, output io.Writer, debug bool) fx.Option {
 
 	options := make([]fx.Option, 0)
-	options = append(options, fx.Provide(func() (*bun.DB, error) {
-		return storage.OpenSQLDB(storage.ConnectionOptionsFromFlags(v, output, debug))
+	options = append(options, fx.Provide(func(logger logging.Logger) (*bun.DB, error) {
+		configuration := storage.ConnectionOptionsFromFlags(v, output, debug)
+		logger.WithField("config", configuration).Infof("Opening connection to database...")
+		return storage.OpenSQLDB(configuration)
 	}))
 	options = append(options, fx.Provide(func(db *bun.DB) (*Driver, error) {
 		return New(db), nil

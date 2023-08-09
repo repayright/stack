@@ -16,7 +16,7 @@ func (s *Store) accountQueryBuilder(q AccountsQuery) func(query *bun.SelectQuery
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		selectAccounts := s.db.NewSelect().
 			DistinctOn("address").
-			Table("accounts").
+			Table(`accounts`).
 			Apply(filterMetadata(q.Options.Metadata)).
 			Apply(filterAccountAddress(q.Options.Address, "address")).
 			Order("address", "revision desc").

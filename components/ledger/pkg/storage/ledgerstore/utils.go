@@ -27,7 +27,7 @@ func fetch[T any](s *Store, ctx context.Context, builders ...func(query *bun.Sel
 		}
 
 		return storage.PostgresError(query.Scan(ctx, ret))
-	})
+	}, withReadOnly())
 	return ret, err
 }
 
@@ -44,7 +44,7 @@ func fetchAndMap[T any, TO any](s *Store, ctx context.Context,
 
 func paginateWithOffset[FILTERS any, RETURN any](s *Store, ctx context.Context,
 	q paginate.OffsetPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
-	tx, err := s.prepareTransaction(ctx)
+	tx, err := s.prepareTransaction(ctx, withReadOnly())
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func paginateWithOffset[FILTERS any, RETURN any](s *Store, ctx context.Context,
 }
 
 func paginateWithColumn[FILTERS any, RETURN any](s *Store, ctx context.Context, q paginate.ColumnPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
-	tx, err := s.prepareTransaction(ctx)
+	tx, err := s.prepareTransaction(ctx, withReadOnly())
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func count(s *Store, ctx context.Context, builders ...func(query *bun.SelectQuer
 		}
 		count, err = query.Conn(tx).Count(ctx)
 		return err
-	}); err != nil {
+	}, withReadOnly()); err != nil {
 		return 0, err
 	}
 	return uint64(count), nil
@@ -110,16 +110,30 @@ func filterMetadata(metadata metadata.Metadata) func(query *bun.SelectQuery) *bu
 
 func filterAccountAddress(address, key string) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
+
 		// todo: add check if we really need to filter on segments
 		if address != "" {
 			src := strings.Split(address, ":")
-			query.Where(fmt.Sprintf("jsonb_array_length(%s_array) = %d", key, len(src)))
 
-			for i, segment := range src {
-				if len(segment) == 0 {
-					continue
+			needSegmentCheck := false
+			for _, segment := range src {
+				needSegmentCheck = segment == ""
+				if needSegmentCheck {
+					break
 				}
-				query.Where(fmt.Sprintf("%s_array @@ ('$[%d] == \"' || ?::text || '\"')::jsonpath", key, i), segment)
+			}
+
+			if needSegmentCheck {
+				query = query.Where(fmt.Sprintf("jsonb_array_length(%s_array) = %d", key, len(src)))
+
+				for i, segment := range src {
+					if len(segment) == 0 {
+						continue
+					}
+					query.Where(fmt.Sprintf("%s_array @@ ('$[%d] == \"' || ?::text || '\"')::jsonpath", key, i), segment)
+				}
+			} else {
+				query = query.Where(key+" = ?", address)
 			}
 		}
 		return query

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"os"
 	"time"
@@ -20,6 +21,11 @@ type ConnectionOptions struct {
 	MaxIdleConns       int
 	MaxOpenConns       int
 	ConnMaxIdleTime    time.Duration
+}
+
+func (opts ConnectionOptions) String() string {
+	return fmt.Sprintf("dsn=%s, debug=%v, trace=%v, max-idle-conns=%d, max-open-conns=%d, conn-max-idle-time=%s",
+		opts.DatabaseSourceName, opts.Debug, opts.Trace, opts.MaxIdleConns, opts.MaxOpenConns, opts.ConnMaxIdleTime)
 }
 
 func OpenSQLDB(options ConnectionOptions, hooks ...bun.QueryHook) (*bun.DB, error) {
