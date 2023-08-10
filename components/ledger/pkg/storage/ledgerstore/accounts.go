@@ -14,20 +14,21 @@ import (
 
 func (s *Store) accountQueryBuilder(q AccountsQuery) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
-		// TODO: CTE is evaluated completely before limit is applied by the pagination component, we nee to use a simple subquery
-		selectAccounts := s.db.NewSelect().
-			DistinctOn("address").
-			Table(`accounts`).
+		query = query.DistinctOn("address").
+			Column("address").
+			Table("accounts").
 			Apply(filterMetadata(q.Options.Metadata)).
 			Apply(filterAccountAddress(q.Options.Address, "address")).
-			Order("address", "revision desc").
-			Apply(filterPIT(q.Options.PIT, "last_update"))
+			Apply(filterPIT(q.Options.PIT, "last_update")).
+			Order("address", "revision desc")
 
-		return query.
-			With("cte1", selectAccounts).
-			ColumnExpr("cte1.address").
-			ColumnExpr("cte1.metadata").
-			Table("cte1")
+		if q.Options.ExpandVolumes {
+			query = query.
+				ColumnExpr("volumes.*").
+				TableExpr("get_account_aggregated_volumes(accounts.address) volumes")
+		}
+
+		return query
 	}
 }
 
@@ -118,7 +119,9 @@ type AccountsQueryOptions struct {
 	Address      string            `json:"address"`
 	Metadata     metadata.Metadata `json:"metadata"`
 
-	PIT core.Time `json:"pit"`
+	PIT                    core.Time `json:"pit"`
+	ExpandVolumes          bool      `json:"volumes"`
+	ExpandEffectiveVolumes bool      `json:"effectiveVolumes"`
 }
 
 func NewAccountsQuery() AccountsQuery {

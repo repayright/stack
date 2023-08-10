@@ -700,35 +700,18 @@ as $$
     from refreshed_moves
 $$;
 
-create function get_all_account_volumes(_account varchar, _before timestamp default null)
+create or replace function get_all_account_volumes(_account varchar, _before timestamp default null)
     returns setof volumes_with_asset
     language sql
     stable
 as $$
-    with
-        all_assets as (
-            select v.v as asset
-            from get_all_assets() v
-        ),
-        moves as (
-            select m.*
-            from all_assets, get_latest_move_for_account_and_asset(_account, all_assets.asset, _before := _before) m
-        ),
-        fresh_moves as (
-            select moves.asset, moves.post_commit_volumes
-            from moves
-            where post_commit_volumes is not null
-        ),
-        refreshed_moves as (
-            select refreshed_move.asset, refreshed_move.post_commit_volumes
-            from moves, compute_move_volumes(moves) as refreshed_move
-            where moves.post_commit_volumes is null
-        )
-    select *
-    from fresh_moves
-    union
-    select *
-    from refreshed_moves
+with
+    all_assets as (
+        select v.v as asset
+        from get_all_assets() v
+    )
+    select m.asset, m.post_commit_volumes
+    from all_assets, get_latest_move_for_account_and_asset(_account, all_assets.asset, _before := _before) potentially_staled, ensure_move_volumes_computed(potentially_staled) m
 $$;
 
 create function volumes_to_jsonb(v volumes_with_asset)
