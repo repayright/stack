@@ -13,6 +13,7 @@ import (
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/ui/prompt"
+	"github.com/formancehq/fctl/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -182,7 +183,7 @@ func (d *Display) HeadersHeight() int {
 func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) {
 	d.lastBodySize = tea.WindowSizeMsg{
 		Width:  msg.Width,
-		Height: msg.Height - d.HeadersHeight() - 4, // This is due to style rendering, i need to retrive and the y space
+		Height: utils.Max(msg.Height-d.HeadersHeight()-4, 0), // This is due to style rendering, i need to retrive and the y space
 	}
 }
 

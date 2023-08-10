@@ -35,7 +35,7 @@ func (t Table) renderRow(r *Row) string {
 func (t Table) renderRows() string {
 	return t.rows.Render(*t.cursor, tea.WindowSizeMsg{
 		Width:  t.style.Body.GetHorizontalFrameSize(),
-		Height: t.terminalSize.Height - 1,
+		Height: t.terminalSize.Height,
 	})
 }
 
@@ -81,7 +81,9 @@ func (t *Table) Init() tea.Cmd {
 	if t.fullScreen {
 		t.terminalSize = tea.WindowSizeMsg{Width: w, Height: h}
 	} else {
-		t.terminalSize = tea.WindowSizeMsg{Width: t.header.style.GetMaxWidth(), Height: len(t.rows.rows) + 1} //Rows + header
+		// Rows + headerRow
+		// Default heigth is equal to rows + header
+		t.terminalSize = tea.WindowSizeMsg{Width: t.header.style.GetMaxWidth(), Height: len(t.rows.rows) + 1}
 	}
 
 	cmd = tea.Batch(cmd, t.rows.Init(), func() tea.Msg {

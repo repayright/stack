@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/formancehq/fctl/pkg/ui/modelutils"
 	"github.com/formancehq/fctl/pkg/utils"
 )
 
@@ -50,7 +51,9 @@ func (r Row) Update(msg tea.Msg) (Row, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		r.termWidth = msg.Width
-
+	case modelutils.ResizeMsg:
+		r.termWidth = msg.Width
+		// r.style = r.style.MaxWidth(r.termWidth)
 	}
 	return r, nil
 }
@@ -99,7 +102,7 @@ func (r Row) Render(c Cursor) string {
 			//Just want to break the first for loop in a magic case
 			break
 		}
-		width := c.style.GetMaxWidth() + c.style.GetHorizontalPadding() + c.style.GetHorizontalMargins()
+		width := c.style.GetMaxWidth() - c.style.GetHorizontalPadding() - c.style.GetHorizontalMargins()
 
 		//Reset hidden cells
 		c.hidden = false

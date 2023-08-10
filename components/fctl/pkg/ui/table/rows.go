@@ -61,37 +61,41 @@ func (r StyleRows) Update(msg tea.Msg) (StyleRows, tea.Cmd) {
 	return r, tea.Batch(cmds...)
 }
 
-func (r Rows) GetScopeRows(c Cursor, height int) (rows Rows) {
+func (r Rows) GetScopeY(c Cursor, height int) (rows Rows) {
 	cursorY := c.y
 	if cursorY <= 0 {
 		return r[0:int(math.Min(float64(len(r)), float64(height)))]
 	}
-
 	mid := height / 2
-	if cursorY+mid >= len(r) { // Ne renvoi que les derniers
+	// Return lasts
+	if cursorY+mid >= len(r) {
 		max := int(math.Min(float64(len(r)), float64(cursorY+mid)))
 		r = r[int(math.Max(float64(len(r)-height), 0)):max]
 		return r
 	}
-	if cursorY-mid <= 0 { // Ne renvoi que les premiers
+
+	// Return firsts
+	if cursorY-mid <= 0 {
 		return r[0:int(math.Min(float64(len(r)), float64(height)))]
 	}
 
-	// Centre
-	return r[cursorY-mid : int(math.Min(float64(cursorY+mid+1), float64(len(r))))]
+	// Return others
+	// cursorY+mid+1 <=> mid + 1, it fix an int overflow about mid division
+	// Thougth if 5/2 = 2.5
+	// For, a = b × q + r
+	// a = 5
+	// q = 2
+	// r = 1
+	// r <=> 5%2 <=> 1
+	return r[cursorY-mid : int(math.Min(float64(cursorY+height%2), float64(len(r))))]
 
 }
 func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 	out := []string{}
-	// The selection start a cursorY + 1
 	cursorY := c.y
 
 	// Switch selection
 	for j, row := range r.rows {
-		// (i,j) is for the cursor selection,
-		// (j+1) is for the header selection,
-		// we should consider the header as a row in order to be able to sort columns
-
 		if cursorY == 0 {
 			row.style = r.rawStyle
 		} else if j+1 == cursorY {
@@ -101,18 +105,10 @@ func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 		}
 	}
 
-	rows := r.rows.GetScopeRows(c, t.Height)
-	// Handle display scope
+	// Render only scoped rows
+	rows := r.rows.GetScopeY(c, t.Height)
 	for _, row := range rows {
-
-		// // We should consider the cursor here
-		// // and hidden columns wich mean hidden cells
-		// // We should use TrimLeft and TrimRight
-		// if t.cursor.x > len(r.cells)-1 {
-		// 	continue
-		// }
-
-		style := row.style.MaxWidth(t.Width - 3)
+		style := row.style.MaxWidth(t.Width - row.style.GetHorizontalMargins() - row.style.GetHorizontalPadding())
 		row.style = style
 		out = append(out, row.Render(c))
 	}
