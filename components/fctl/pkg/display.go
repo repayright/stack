@@ -111,12 +111,6 @@ func (d *Display) addPromptExitKeyBinding() {
 }
 
 func (d *Display) Init() tea.Cmd {
-
-	w, h, err := modelutils.GetTerminalSize()
-	if err != nil {
-		panic(err)
-	}
-
 	d.addControllerPromptKeyBinding(d.controller)
 	d.addPromptExitKeyBinding()
 	d.GenerateKeyMapAction()
@@ -126,7 +120,6 @@ func (d *Display) Init() tea.Cmd {
 	if err != nil {
 		panic(err)
 	}
-
 	profiles := GetCurrentProfile(flags, conf)
 	d.header.GetContext().SetFctlVersion(Version)
 	d.header.GetContext().SetOrg(profiles.defaultOrganization)
@@ -143,57 +136,59 @@ func (d *Display) Init() tea.Cmd {
 		return tea.Quit
 	}
 
+	// Get the first rendered body
 	body, err := renderer.Render()
 	if err != nil {
 		return tea.Quit
-	}
 
+	}
 	d.renderer = body
 
-	w, h, err = modelutils.GetTerminalSize()
-	if err != nil {
-		return tea.Quit
-	}
-
-	msg := d.newBodyWindowMsg(modelutils.ResizeMsg{
-		Width:  w,
-		Height: h,
-	})
-	if err != nil {
-		return tea.Quit
-	}
-
-	// This is needed to set the width of the prompt
-	d.prompt.SetWidth(msg.Width)
-	d.lastTermSize = tea.WindowSizeMsg{
-		Width:  w,
-		Height: h,
-	}
 	return tea.Sequence(
 		d.header.Init(),
 		d.prompt.Init(),
 		d.renderer.Init(),
-		func() tea.Msg {
-			return d.lastTermSize
-		},
+		d.initTermSize(),
 	)
+}
+
+func (d *Display) initTermSize() tea.Cmd {
+	// Init sizes
+	w, h, err := modelutils.GetTerminalSize()
+	if err != nil {
+		return func() tea.Msg {
+			return tea.QuitMsg{}
+		}
+	}
+
+	d.lastTermSize = tea.WindowSizeMsg{
+		Width:  w,
+		Height: h,
+	}
+	d.newBodyWindowMsg(modelutils.ResizeMsg{
+		Width:  w,
+		Height: h,
+	})
+
+	return func() tea.Msg {
+		d.prompt.SetWidth(d.lastBodySize.Width)
+		return d.lastTermSize
+	}
 }
 
 func (d *Display) HeadersHeight() int {
 	if d.prompt.IsFocused() {
 		Log := helpers.NewLogger("Display")
 		Log.Log(fmt.Sprintf("Header Height: %d", d.header.GetMaxPossibleHeight()+d.prompt.GetHeight()+1))
-		return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight() + 1
-
+		return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight()
 	}
 	return d.header.GetMaxPossibleHeight()
-
 }
 
-func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) tea.WindowSizeMsg {
-	return tea.WindowSizeMsg{
+func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) {
+	d.lastBodySize = tea.WindowSizeMsg{
 		Width:  msg.Width,
-		Height: msg.Height - d.HeadersHeight(),
+		Height: msg.Height - d.HeadersHeight() - 4, // This is due to style rendering, i need to retrive and the y space
 	}
 }
 
@@ -207,12 +202,11 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.header = header
 		d.prompt.SetWidth(msg.Width)
 
-		bodyMsg := d.newBodyWindowMsg(msg)
-		d.lastBodySize = bodyMsg
+		d.newBodyWindowMsg(msg)
 		log := helpers.NewLogger("Display")
 		log.Log("Body width", strconv.Itoa(d.lastBodySize.Width), "heigth", strconv.Itoa(d.lastBodySize.Height))
 		log.Log("Term width", strconv.Itoa(d.lastTermSize.Width), "heigth", strconv.Itoa(d.lastTermSize.Height))
-		m, rCmd := d.renderer.Update(bodyMsg)
+		m, rCmd := d.renderer.Update(d.lastBodySize)
 		d.renderer = m
 		return d, tea.Sequence(cmd, rCmd, func() tea.Msg {
 			return modelutils.RenderMsg{}
@@ -279,7 +273,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.KeyMsg:
 		if d.prompt.IsFocused() {
-
 			m, cmd := d.prompt.Update(msg)
 			d.prompt = m
 			return d, tea.Sequence(cmd, func() tea.Msg {
@@ -335,7 +328,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return d, cmd
 		}
 	}
-
 	return d, nil
 }
 
@@ -372,44 +364,58 @@ func (d *Display) GetKeyMapAction() *config.KeyMapHandler {
 }
 
 func (d *Display) Render() {
-	var s = []string{
-		d.header.View(),
-	}
+	d.rendered = ""
+	d.addRenderHeaderView()     //1 <=> Ordered List
+	d.addPromptView()           //2 <=> Maybe i can add an Renderer(map[rule]tea.Model, outString string)
+	d.addRenderControllerView() //3 <=> Where rule coul
+	d.addRenderSuggestionView() //4 <=> And out the output,
+	d.addRenderConfirmView()    //5 <=> In some case the output is a string, a rendered view
+}
 
+func (d *Display) addPromptView() {
 	if d.prompt.IsFocused() {
-		s = append(s, d.prompt.View())
+		d.rendered = lipgloss.JoinHorizontal(lipgloss.Top, d.rendered, d.prompt.View())
 	}
+}
 
-	if d.controller != nil {
-		log := helpers.NewLogger("Display")
-		log.Log(strconv.Itoa(d.lastTermSize.Height))
-		s = append(s, d.renderer.View())
-	}
+func (d *Display) addRenderHeaderView() {
+	d.rendered = lipgloss.JoinHorizontal(lipgloss.Top, d.rendered, d.header.View())
+}
 
-	screen := lipgloss.JoinVertical(lipgloss.Top, s...)
-	d.rendered = screen
-
-	// Prompt Suggestions
-	if d.suggestions != nil {
-		d.rendered = helpers.PlaceOverlay(d.prompt.GetCursorPosition()+4, d.header.GetMaxPossibleHeight()+3, d.suggestions.View(), d.rendered, false)
-	}
-
-	// Confirm View
-	if d.confirm == nil {
+func (d *Display) addRenderControllerView() {
+	if d.controller == nil {
 		return
 	}
 
+	d.rendered = lipgloss.JoinVertical(lipgloss.Top, d.rendered, d.renderer.View())
+}
+
+func (d *Display) addRenderSuggestionView() {
+	if d.suggestions == nil {
+		return
+	}
+
+	d.rendered = helpers.PlaceOverlay(
+		d.prompt.GetCursorPosition(),
+		d.header.GetMaxPossibleHeight()+3,
+		d.suggestions.View(),
+		d.rendered,
+		false,
+	)
+
+}
+
+func (d *Display) addRenderConfirmView() {
+	if d.confirm == nil {
+		return
+	}
 	confirmView := d.confirm.View()
 	box := lipgloss.Place(20, 10, lipgloss.Center, lipgloss.Center, confirmView)
 
-	w, h, err := modelutils.GetTerminalSize()
-	if err != nil {
-		panic(err)
-	}
-	str := helpers.PlaceOverlay(w/2-10, h/2-5, box, screen, false)
-
+	width := d.lastTermSize.Width/2 - 10
+	heigth := d.lastTermSize.Height/2 - 5
+	str := helpers.PlaceOverlay(width, heigth, box, d.rendered, false)
 	d.rendered = fmt.Sprint(str)
-
 }
 
 func (d *Display) View() string {

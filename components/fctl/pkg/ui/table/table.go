@@ -33,8 +33,12 @@ func (t Table) renderRow(r *Row) string {
 }
 
 func (t Table) renderRows() string {
-	return t.rows.Render(*t.cursor, t.terminalSize)
+	return t.rows.Render(*t.cursor, tea.WindowSizeMsg{
+		Width:  t.style.Body.GetHorizontalFrameSize(),
+		Height: t.terminalSize.Height - 1,
+	})
 }
+
 func (t Table) renderHeader() string {
 	var style lipgloss.Style
 	if t.cursor.y == 0 {
@@ -105,7 +109,12 @@ func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		t.terminalSize = msg
 		return &t, nil
-
+	case modelutils.ResizeMsg:
+		t.terminalSize = tea.WindowSizeMsg{
+			Width:  msg.Width,
+			Height: msg.Height,
+		}
+		return &t, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "left":
@@ -136,13 +145,6 @@ func (t Table) View() string {
 
 	return border.Render(lipgloss.PlaceHorizontal(innerBox.GetWidth(), 0, lipgloss.JoinVertical(lipgloss.Top, render...)))
 }
-
-// func getBoolDir(b bool) int {
-// 	if b {
-// 		return 1
-// 	}
-// 	return -1
-// }
 
 func (t *Table) SelectedRow() *Row {
 

@@ -1,12 +1,10 @@
 package table
 
 import (
-	"fmt"
 	"math"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/formancehq/fctl/pkg/ui/helpers"
 )
 
 func (r *Row) AddCell(cell *Cell) *Row {
@@ -63,12 +61,8 @@ func (r StyleRows) Update(msg tea.Msg) (StyleRows, tea.Cmd) {
 	return r, tea.Batch(cmds...)
 }
 
-func (r Rows) GetScopeRows(c Cursor, t tea.WindowSizeMsg) (rows Rows) {
-	Log := helpers.NewLogger("SCOPE")
-	Log.Log(fmt.Sprintf("%d", t.Height-4))
-	height := t.Height - 4
+func (r Rows) GetScopeRows(c Cursor, height int) (rows Rows) {
 	cursorY := c.y
-
 	if cursorY <= 0 {
 		return r[0:int(math.Min(float64(len(r)), float64(height)))]
 	}
@@ -76,7 +70,6 @@ func (r Rows) GetScopeRows(c Cursor, t tea.WindowSizeMsg) (rows Rows) {
 	mid := height / 2
 	if cursorY+mid >= len(r) { // Ne renvoi que les derniers
 		max := int(math.Min(float64(len(r)), float64(cursorY+mid)))
-		// min := int(math.Min(float64(height), float64(cursorY-mid)))
 		r = r[int(math.Max(float64(len(r)-height), 0)):max]
 		return r
 	}
@@ -85,11 +78,9 @@ func (r Rows) GetScopeRows(c Cursor, t tea.WindowSizeMsg) (rows Rows) {
 	}
 
 	// Centre
-
 	return r[cursorY-mid : int(math.Min(float64(cursorY+mid+1), float64(len(r))))]
 
 }
-
 func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 	out := []string{}
 	// The selection start a cursorY + 1
@@ -110,7 +101,7 @@ func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 		}
 	}
 
-	rows := r.rows.GetScopeRows(c, t)
+	rows := r.rows.GetScopeRows(c, t.Height)
 	// Handle display scope
 	for _, row := range rows {
 		// log.Log("j", strconv.Itoa(j), "y", strconv.Itoa(t.cursor.y))

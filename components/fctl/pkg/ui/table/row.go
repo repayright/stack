@@ -93,16 +93,13 @@ func (r *Row) Trim(c Cursor) *Row {
 }
 
 func (r Row) Render(c Cursor) string {
-	// log := helpers.NewLogger("ROW")
 	buffer := c.x
 	for _, c := range r.cells {
 		if buffer < 0 {
 			//Just want to break the first for loop in a magic case
 			break
 		}
-
 		width := c.style.GetMaxWidth() + c.style.GetHorizontalPadding() + c.style.GetHorizontalMargins()
-		// log.Log("i", strconv.Itoa(i), "width : ", strconv.Itoa(width), ", x", strconv.Itoa(t.cursor.x))
 
 		//Reset hidden cells
 		c.hidden = false
@@ -115,13 +112,10 @@ func (r Row) Render(c Cursor) string {
 		}
 
 		if buffer < width && buffer >= 0 {
-			// log.Log("i", strconv.Itoa(i), "buffer", strconv.Itoa(buffer))
 			c.TrimLeft(buffer)
 			buffer -= width
 		}
 
-		// //Allign everything to header style cells
-		// r.cells[i].style = r.cells[i].style.Width(c.Width())
 	}
 
 	return r.View()

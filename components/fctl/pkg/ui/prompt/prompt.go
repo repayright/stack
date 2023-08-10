@@ -55,7 +55,7 @@ func (p *Prompt) GetSuggestions() []*list.HorizontalItem {
 }
 
 func (p *Prompt) GetCursorPosition() int {
-	return p.model.Position()
+	return p.model.Position() + p.model.Cursor.Style.GetHorizontalFrameSize() + 2
 }
 
 func (p *Prompt) SetWidth(width int) *Prompt {
