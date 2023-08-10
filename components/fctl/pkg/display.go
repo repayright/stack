@@ -1,7 +1,6 @@
 package fctl
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -127,7 +126,6 @@ func (d *Display) Init() tea.Cmd {
 	var keys = d.GetKeyMapAction()
 	if keys != nil {
 		d.header = d.header.SetKeyBinding(keys)
-
 	}
 
 	renderer, err := d.controller.Run()
@@ -139,7 +137,6 @@ func (d *Display) Init() tea.Cmd {
 	body, err := renderer.Render()
 	if err != nil {
 		return tea.Quit
-
 	}
 	d.renderer = body
 
@@ -401,13 +398,16 @@ func (d *Display) addRenderConfirmView() {
 	if d.confirm == nil {
 		return
 	}
-	confirmView := d.confirm.View()
-	box := lipgloss.Place(20, 10, lipgloss.Center, lipgloss.Center, confirmView)
+	h := d.confirm.Styles().GetHeight()
+	w := d.confirm.Styles().GetWidth()
 
-	width := d.lastTermSize.Width/2 - 10
-	heigth := d.lastTermSize.Height/2 - 5
-	str := helpers.PlaceOverlay(width, heigth, box, d.rendered, false)
-	d.rendered = fmt.Sprint(str)
+	box := lipgloss.Place(h, w, lipgloss.Center, lipgloss.Center, d.confirm.View())
+
+	// From Top Left Corner Always
+	posX := d.lastTermSize.Width/2 - w/2
+	posY := d.lastTermSize.Height/2 - h/2
+
+	d.rendered = helpers.PlaceOverlay(posX, posY, box, d.rendered, false)
 }
 
 func (d *Display) View() string {
