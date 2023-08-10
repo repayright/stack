@@ -92,7 +92,7 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 			msg.Width,
 		)
 		p.model, cmd = p.model.Update(msg)
-
+		return p, cmd
 	case tea.KeyMsg:
 		// Log := helpers.NewLogger("PROMPT")
 		switch msg.String() {
@@ -108,11 +108,11 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 		p.model, cmd = p.model.Update(msg)
 		v := p.model.Value()
 
-		if p.lastInput == v {
-			return p, nil
-		}
+		// if p.lastInput == v {
+		// 	return p, nil
+		// }
 
-		p.lastInput = v
+		// p.lastInput = v
 		p.suggestions = nil
 
 		// We might want to use a go routine here
@@ -122,18 +122,13 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 		go func() {
 			// Cosine distance OK
 			// Levenshtein distance OK
-			res, err := edlib.FuzzySearchSetThreshold(v, p.commands.commands, 4, 0.3, edlib.Levenshtein)
-			if err != nil || len(res) == 0 {
-				return
-			}
-
+			res, _ := edlib.FuzzySearchSetThreshold(v, p.commands.commands, 4, 0.3, edlib.Levenshtein)
 			var rows []*list.HorizontalItem = make([]*list.HorizontalItem, 0)
 			for _, r := range res {
 				if r == "" {
 					continue
 				}
 				rows = append(rows, list.NewHorizontalItem(r, p.commands.descmap[r]))
-
 			}
 			ready <- true
 			p.suggestions = rows
@@ -142,14 +137,23 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 			return p, func() tea.Msg {
 				return UpdateSuggestionMsg{}
 			}
-		} else {
-			return p, func() tea.Msg {
-				return UpdateSuggestionMsg{}
-			}
 		}
-
+	// case cursor.BlinkMsg:
+	// 	c, cmd := p.model.Cursor.Update(msg)
+	// 	p.model.Cursor = c
+	// 	return p, tea.Batch(func() tea.Msg {
+	// 		return modelutils.RenderMsg{}
+	// 	}, cmd)
 	default:
+		// Log := helpers.NewLogger("IN PROMPT")
+		// Log.Log("msg")
+
+		// //Get the message type with reflect
+		// msgType := reflect.TypeOf(msg)
+
+		// Log.Log(msgType.String())
 		p.model, cmd = p.model.Update(msg)
+		return p, cmd
 	}
 
 	return p, cmd

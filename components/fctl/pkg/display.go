@@ -258,13 +258,23 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case prompt.UpdateSuggestionMsg:
-		// Prompt Suggestions
+		// If the prompt is not focused, reset the suggestions
 		if !d.prompt.IsFocused() {
 			d.suggestions = nil
 		}
-		if len(d.prompt.GetSuggestions()) > 0 {
+
+		// Get the suggestions
+		suggestions := d.prompt.GetSuggestions()
+
+		// Reset model if none is provided
+		if len(suggestions) == 0 {
+			d.suggestions = nil
+		}
+
+		// Create the model for the N suggestions
+		if len(suggestions) > 0 {
 			model := list.NewPointList(
-				d.prompt.GetSuggestions()...,
+				suggestions...,
 			)
 			d.suggestions = prompt.NewSuggestions(model)
 		}
@@ -314,6 +324,8 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return d, postCmd
 	default:
 		if d.prompt.IsFocused() {
+			Log := helpers.NewLogger("default")
+			Log.Log("msg")
 			m, cmd := d.prompt.Update(msg)
 			d.prompt = m
 			return d, tea.Sequence(cmd, func() tea.Msg {
@@ -371,7 +383,7 @@ func (d *Display) Render() {
 
 func (d *Display) addPromptView() {
 	if d.prompt.IsFocused() {
-		d.rendered = lipgloss.JoinHorizontal(lipgloss.Top, d.rendered, d.prompt.View())
+		d.rendered = lipgloss.JoinVertical(lipgloss.Top, d.rendered, d.prompt.View())
 	}
 }
 
@@ -393,7 +405,7 @@ func (d *Display) addRenderSuggestionView() {
 	}
 
 	d.rendered = helpers.PlaceOverlay(
-		d.prompt.GetCursorPosition(),
+		d.prompt.GetCursorPosition()+2,
 		d.header.GetMaxPossibleHeight()+3,
 		d.suggestions.View(),
 		d.rendered,
