@@ -52,8 +52,6 @@ func NewShowControllerConfig() *config.ControllerConfig {
 	)
 }
 
-//var _ config.Controller[*ShowStore] = (*ShowController)(nil)
-
 type ShowController struct {
 	store      *ShowStore
 	config     *config.ControllerConfig

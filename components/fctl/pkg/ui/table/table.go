@@ -90,6 +90,7 @@ func (t *Table) Init() tea.Cmd {
 		return t.terminalSize
 	})
 
+	// Set default with for each rows
 	for _, r := range t.rows.rows {
 		for i, c := range r.cells {
 			WithWidth(t.header.cells[i].getMinWidth() + t.header.cells[0].style.GetHorizontalMargins())(c)
@@ -116,6 +117,13 @@ func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Width:  msg.Width,
 			Height: msg.Height,
 		}
+
+		yFrameSize := -t.style.Wrapper.GetHorizontalFrameSize()
+		t.header.style = t.style.Header.MaxWidth(t.terminalSize.Width - yFrameSize)
+		for _, r := range t.rows.rows {
+			r.style = t.style.Row.MaxWidth(t.terminalSize.Width - yFrameSize)
+		}
+
 		return &t, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -149,8 +157,15 @@ func (t Table) View() string {
 }
 
 func (t *Table) SelectedRow() *Row {
+	if t.cursor.y == 0 {
+		return t.header
+	}
 
-	return t.rows.rows[t.cursor.y]
+	if t.cursor.y == 1 {
+		return t.rows.rows[0]
+	}
+
+	return t.rows.rows[t.cursor.y-1]
 }
 
 func WithDefaultStyle() TableOption {

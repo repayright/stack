@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/ui/helpers"
 	"github.com/formancehq/fctl/pkg/ui/modelutils"
 
 	"github.com/formancehq/fctl/membershipclient"
@@ -256,14 +257,17 @@ func NewKeyMapAction() *config.KeyMapHandler {
 
 			selectedRow := t.SelectedRow()
 			id := selectedRow.Items()[1].String()
-
+			log := helpers.NewLogger("SELECTED")
+			log.Log("ID", id)
 			c := NewShowControllerConfig()
 			controller := NewShowController(c)
 			c.SetOut(os.Stdout)
 			c.SetContext(context.TODO())
 			c.SetArgs([]string{id})
 
-			return controller
+			return modelutils.ChangeViewMsg{
+				Controller: controller,
+			}
 		},
 	).AddNewKeyBinding(
 		key.NewBinding(

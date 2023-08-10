@@ -42,7 +42,7 @@ func WithWidth(width int) CellOption {
 }
 
 func (c Cell) String() string {
-	return c.content + " " + c.style.String() + "minWidth: " + string(c.minWidth)
+	return c.content
 }
 
 func (c Cell) getMinWidth() int {

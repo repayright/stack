@@ -403,6 +403,11 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *co
 
 		return nil
 	default:
+		// The default case is the text renderer "plain"
+		// We need to override the default arguments in case with used it for certain commands
+		// Either we add a validator for flags in Controller or we do it here first
+		c.GetConfig().GetPFlags().Set(config.OutputFlag, "plain")
+
 		// If the renderer returns nil,
 		// we don't want to render anything
 		m, err := r.Render()

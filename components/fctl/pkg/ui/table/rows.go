@@ -107,9 +107,9 @@ func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 
 	// Render only scoped rows
 	rows := r.rows.GetScopeY(c, t.Height)
-	for _, row := range rows {
+	for i, row := range rows {
 		style := row.style.MaxWidth(t.Width - row.style.GetHorizontalMargins() - row.style.GetHorizontalPadding())
-		row.style = style
+		rows[i].style = style
 		out = append(out, row.Render(c))
 	}
 	return lipgloss.JoinVertical(lipgloss.Top, out...)

@@ -211,9 +211,13 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case modelutils.ChangeViewMsg:
+		log := helpers.NewLogger("Change View")
+
+		log.Log("CHANGE VIEW")
 		d.controller = msg.Controller
 		renderer, err := d.controller.Run()
 		if err != nil {
+			log.Log("Error")
 			return d, tea.Quit
 		}
 
@@ -221,7 +225,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			return d, tea.Quit
 		}
-
+		log.Log("Model")
 		// At this point we are sure that the model is generated
 		d.renderer = model
 
@@ -230,7 +234,10 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return d, tea.Sequence(
 			d.renderer.Init(),
 			func() tea.Msg {
-				return modelutils.RenderMsg{}
+				return modelutils.ResizeMsg{
+					Width:  d.lastTermSize.Width,
+					Height: d.lastTermSize.Height,
+				}
 			})
 	case modelutils.OpenPromptMsg:
 		d.prompt.SwitchFocus()
