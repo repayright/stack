@@ -107,7 +107,6 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 
 		p.model, cmd = p.model.Update(msg)
 		v := p.model.Value()
-		// Log.Log(v)
 
 		if p.lastInput == v {
 			return p, nil

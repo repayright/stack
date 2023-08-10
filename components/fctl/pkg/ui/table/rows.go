@@ -104,7 +104,7 @@ func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 	rows := r.rows.GetScopeRows(c, t.Height)
 	// Handle display scope
 	for _, row := range rows {
-		// log.Log("j", strconv.Itoa(j), "y", strconv.Itoa(t.cursor.y))
+
 		// // We should consider the cursor here
 		// // and hidden columns wich mean hidden cells
 		// // We should use TrimLeft and TrimRight

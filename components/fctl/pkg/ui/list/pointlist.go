@@ -2,13 +2,11 @@ package list
 
 import (
 	"sort"
-	"strconv"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/ui/helpers"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
@@ -63,12 +61,7 @@ func (pl *PointList) View() string {
 	valueStyle := lipgloss.Color("#b3cedc")
 	desc := lipgloss.NewStyle().Foreground(valueStyle).Bold(false)
 
-	Log := helpers.NewLogger("POINTLIST")
-	Log.Log("PointList", strconv.Itoa(len(pl.list)))
-
 	for _, item := range pl.list {
-		Log.Log("PointList ITEM", strconv.FormatBool(item == nil))
-
 		str := title.Render(item.title+" ") + desc.Render(item.desc)
 		section = append(section, str)
 	}

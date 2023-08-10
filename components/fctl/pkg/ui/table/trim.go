@@ -31,9 +31,6 @@ func withTrim(width int, c *Cell) string {
 
 // It should never happen because we should not render the cell
 func withMaxWith(width int, c *Cell) int {
-	// log := helpers.NewLogger("TRIM")
-	// log.Log("width", strconv.Itoa(width), "cell", strconv.Itoa(c.style.GetWidth()+c.style.GetHorizontalMargins()+c.style.GetHorizontalPadding()))
-	// log.Log("len", strconv.Itoa(len(c.content)))
 	if width >= len(c.content) {
 		dif := c.style.GetWidth() + c.style.GetHorizontalMargins() + c.style.GetHorizontalPadding() - width
 		return dif

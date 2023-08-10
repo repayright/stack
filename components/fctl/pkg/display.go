@@ -2,7 +2,6 @@ package fctl
 
 import (
 	"fmt"
-	"strconv"
 	"sync"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -178,8 +177,6 @@ func (d *Display) initTermSize() tea.Cmd {
 
 func (d *Display) HeadersHeight() int {
 	if d.prompt.IsFocused() {
-		Log := helpers.NewLogger("Display")
-		Log.Log(fmt.Sprintf("Header Height: %d", d.header.GetMaxPossibleHeight()+d.prompt.GetHeight()+1))
 		return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight()
 	}
 	return d.header.GetMaxPossibleHeight()
@@ -201,11 +198,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		header, cmd := d.header.Update(d.lastTermSize)
 		d.header = header
 		d.prompt.SetWidth(msg.Width)
-
 		d.newBodyWindowMsg(msg)
-		log := helpers.NewLogger("Display")
-		log.Log("Body width", strconv.Itoa(d.lastBodySize.Width), "heigth", strconv.Itoa(d.lastBodySize.Height))
-		log.Log("Term width", strconv.Itoa(d.lastTermSize.Width), "heigth", strconv.Itoa(d.lastTermSize.Height))
 		m, rCmd := d.renderer.Update(d.lastBodySize)
 		d.renderer = m
 		return d, tea.Sequence(cmd, rCmd, func() tea.Msg {
@@ -213,7 +206,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 	case tea.WindowSizeMsg:
 		d.lastTermSize = msg
-
 		return d, func() tea.Msg {
 			return modelutils.ResizeMsg{
 				Width:  msg.Width,

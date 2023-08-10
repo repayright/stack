@@ -1,12 +1,10 @@
 package header
 
 import (
-	"fmt"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/formancehq/fctl/pkg/ui/helpers"
 	"github.com/formancehq/fctl/pkg/ui/theme"
 )
 
@@ -27,8 +25,6 @@ func NewLogo() *Logo {
 }
 
 func (f Logo) GetMaxPossibleHeight() int {
-	log := helpers.NewLogger("header height")
-	log.Log(fmt.Sprintf("logo content: %d", len(strings.Split(f.content, "\n"))))
 	return len(strings.Split(f.content, "\n"))
 }
 func (f Logo) GetMaxPossibleWidth() int {
