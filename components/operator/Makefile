@@ -74,7 +74,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 .PHONY: docker-build-prod
 docker-build-prod: ## Build docker image with go releaser
 	goreleaser build --skip-validate --clean
-	mv ./dist/operator_linux_amd64_v1/operator ./operator
+	mv ./dist/operator_linux_amd64_v1/operator ./
 	docker build -t ${IMG} -f ./build.Dockerfile ./  --no-cache
 
 .PHONY: docker-build
