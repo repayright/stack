@@ -2233,11 +2233,18 @@ type ApiListStacksRequest struct {
 	ApiService *DefaultApiService
 	organizationId string
 	deleted *bool
+	disabled *bool
 }
 
 // Include deleted stacks
 func (r ApiListStacksRequest) Deleted(deleted bool) ApiListStacksRequest {
 	r.deleted = &deleted
+	return r
+}
+
+// Include disabled stacks
+func (r ApiListStacksRequest) Disabled(disabled bool) ApiListStacksRequest {
+	r.disabled = &disabled
 	return r
 }
 
@@ -2284,6 +2291,9 @@ func (a *DefaultApiService) ListStacksExecute(r ApiListStacksRequest) (*ListStac
 
 	if r.deleted != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "deleted", r.deleted, "")
+	}
+	if r.disabled != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "disabled", r.disabled, "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
