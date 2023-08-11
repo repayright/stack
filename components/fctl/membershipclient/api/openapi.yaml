@@ -317,7 +317,7 @@ paths:
           description: Stack deleted
       summary: Delete stack
     get:
-      operationId: readStack
+      operationId: getStack
       parameters:
       - explode: false
         in: path
@@ -340,7 +340,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ReadStackResponse'
           description: OK
-      summary: Read stack
+      summary: Find stack
   /organizations/{organizationId}/stacks/{stackId}/disable:
     put:
       operationId: disableStack
@@ -363,6 +363,28 @@ paths:
         "204":
           description: Stack disabled
       summary: Disable stack
+  /organizations/{organizationId}/stacks/{stackId}/enable:
+    put:
+      operationId: enableStack
+      parameters:
+      - explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: stackId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Stack enabled
+      summary: Enable stack
   /organizations/{organizationId}/stacks/{stackId}/restore:
     put:
       operationId: restoreStack
