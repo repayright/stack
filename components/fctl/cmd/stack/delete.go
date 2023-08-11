@@ -73,7 +73,7 @@ func (c *StackDeleteController) Run(cmd *cobra.Command, args []string) (fctl.Ren
 			return nil, errors.New("need either an id of a name specified using --name flag")
 		}
 
-		rsp, _, err := apiClient.DefaultApi.ReadStack(cmd.Context(), organization, args[0]).Execute()
+		rsp, _, err := apiClient.DefaultApi.GetStack(cmd.Context(), organization, args[0]).Execute()
 		if err != nil {
 			return nil, err
 		}
