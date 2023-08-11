@@ -90,6 +90,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**DeleteOrganization**](docs/DefaultApi.md#deleteorganization) | **Delete** /organizations/{organizationId} | Delete organization
 *DefaultApi* | [**DeleteRegion**](docs/DefaultApi.md#deleteregion) | **Delete** /organizations/{organizationId}/regions/{regionId} | Delete region
 *DefaultApi* | [**DeleteStack**](docs/DefaultApi.md#deletestack) | **Delete** /organizations/{organizationId}/stacks/{stackId} | Delete stack
+*DefaultApi* | [**DisableStack**](docs/DefaultApi.md#disablestack) | **Put** /organizations/{organizationId}/stacks/{stackId}/disable | Disable stack
 *DefaultApi* | [**DisableStargate**](docs/DefaultApi.md#disablestargate) | **Put** /organizations/{organizationId}/stacks/{stackId}/stargate/disable | Disable stargate on a stack
 *DefaultApi* | [**EnableStargate**](docs/DefaultApi.md#enablestargate) | **Put** /organizations/{organizationId}/stacks/{stackId}/stargate/enable | Enable stargate on a stack
 *DefaultApi* | [**GetRegion**](docs/DefaultApi.md#getregion) | **Get** /organizations/{organizationId}/regions/{regionId} | Get region

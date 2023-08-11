@@ -276,7 +276,24 @@ paths:
       responses:
         204:
           description: Stack deleted
-
+  /organizations/{organizationId}/stacks/{stackId}/disable:
+    put:
+      summary: Disable stack
+      operationId: disableStack
+      parameters:
+      - name: organizationId
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: stackId
+        in: path
+        schema:
+          type: string
+        required: true
+      responses:
+        204:
+          description: Stack disabled
   /organizations/{organizationId}/stacks/{stackId}/restore:
     put:
       summary: Restore stack
@@ -299,7 +316,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadStackResponse'
-
   /organizations/{organizationId}/stacks/{stackId}/stargate/enable:
     parameters:
     - name: organizationId
@@ -318,7 +334,6 @@ paths:
       responses:
         204:
           description: OK
-
   /organizations/{organizationId}/stacks/{stackId}/stargate/disable:
     parameters:
     - name: organizationId
@@ -337,7 +352,6 @@ paths:
       responses:
         204:
           description: OK
-
   /me/invitations:
     get:
       summary: List invitations of the user
@@ -677,6 +691,7 @@ components:
         - uri
         - regionID
         - stargateEnabled
+        - status
         properties:
           id:
             type: string
@@ -692,9 +707,21 @@ components:
             description: The region where the stack is installed
           stargateEnabled:
             type: boolean
+          createdAt:
+            type: string
+            format: date-time
           deletedAt:
             type: string
             format: date-time
+          disabledAt:
+            type: string
+            format: date-time
+          status:
+            type: string
+            enum:
+            - UNKNOWN
+            - PROGRESSING
+            - READY
     UpdatableUserData:
       type: object
       properties:
