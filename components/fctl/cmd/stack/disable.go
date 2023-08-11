@@ -96,12 +96,12 @@ func (c *DisableController) Run(cmd *cobra.Command, args []string) (fctl.Rendera
 		return nil, errors.New("Stack not found")
 	}
 
-	if !fctl.CheckStackApprobation(cmd, stack, "You are about to delete stack '%s'", stack.Name) {
+	if !fctl.CheckStackApprobation(cmd, stack, "You are about to disable stack '%s'", stack.Name) {
 		return nil, fctl.ErrMissingApproval
 	}
 
 	if _, err := apiClient.DefaultApi.DisableStack(cmd.Context(), organization, stack.Id).Execute(); err != nil {
-		return nil, errors.Wrap(err, "deleting stack")
+		return nil, errors.Wrap(err, "stack disable")
 	}
 
 	c.store.Stack = stack
