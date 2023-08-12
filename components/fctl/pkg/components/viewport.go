@@ -80,7 +80,7 @@ func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		m.vp.Width = msg.Width
-		m.vp.Height = msg.Height + 1
+		m.vp.Height = msg.Height
 
 		renderer, err := glamour.NewTermRenderer(
 			glamour.WithAutoStyle(),
