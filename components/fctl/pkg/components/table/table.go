@@ -138,9 +138,19 @@ func (t Table) View() string {
 			t.renderRows(),
 		}
 
-	border := t.style.Wrapper.Width(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize()).Height(t.terminalSize.Height)
-	innerBox := t.style.Body.MaxWidth(t.terminalSize.Width - border.GetHorizontalFrameSize()).MaxHeight(t.terminalSize.Height - border.GetVerticalFrameSize())
-	content := innerBox.Render(lipgloss.PlaceHorizontal(innerBox.GetWidth(), 0, lipgloss.JoinVertical(lipgloss.Top, render...)))
+	// Border can be set at init and update
+	border := t.style.Wrapper.
+		Width(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize()).
+		Height(t.terminalSize.Height)
+	innerBox := t.style.Body.
+		MaxWidth(t.terminalSize.Width - border.GetHorizontalFrameSize()).
+		MaxHeight(t.terminalSize.Height - border.GetVerticalFrameSize())
+	content := innerBox.
+		Render(lipgloss.PlaceHorizontal(innerBox.GetWidth(),
+			0,
+			lipgloss.JoinVertical(lipgloss.Top, render...),
+		))
+
 	return border.Render(content)
 }
 
