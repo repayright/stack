@@ -270,6 +270,11 @@ as $$
         _effective_post_commit_volumes volumes;
         _seq numeric;
     begin
+        perform *
+        from accounts
+        where address = _account_address
+        for update;
+
         select (post_commit_volumes).inputs, (post_commit_volumes).outputs into _post_commit_volumes
         from moves
         where account_address = _account_address
