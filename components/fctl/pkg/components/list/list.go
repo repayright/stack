@@ -5,7 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/formancehq/fctl/pkg/ui/theme"
+	"github.com/formancehq/fctl/pkg/theme"
 )
 
 // Model TODO: This should extend list.Model from github.com/charmbracelet/bubbles/list

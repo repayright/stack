@@ -6,13 +6,12 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/formancehq/fctl/pkg/components/header"
+	"github.com/formancehq/fctl/pkg/components/list"
+	"github.com/formancehq/fctl/pkg/components/prompt"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/ui"
-	"github.com/formancehq/fctl/pkg/ui/header"
-	"github.com/formancehq/fctl/pkg/ui/helpers"
-	"github.com/formancehq/fctl/pkg/ui/list"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
-	"github.com/formancehq/fctl/pkg/ui/prompt"
+	"github.com/formancehq/fctl/pkg/helpers"
+	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/formancehq/fctl/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +26,7 @@ type Display struct {
 	controller  config.Controller
 	renderer    modelutils.Model
 
-	confirm *ui.Confirm
+	confirm *Confirm
 
 	lastBodySize tea.WindowSizeMsg
 	lastTermSize tea.WindowSizeMsg

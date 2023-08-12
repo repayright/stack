@@ -5,9 +5,9 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/formancehq/fctl/pkg/components/list"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/ui/list"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/hbollon/go-edlib"
 	"github.com/spf13/cobra"
 )

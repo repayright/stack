@@ -2,7 +2,7 @@ package table
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/formancehq/fctl/pkg/ui/theme"
+	"github.com/formancehq/fctl/pkg/theme"
 )
 
 type Style struct {

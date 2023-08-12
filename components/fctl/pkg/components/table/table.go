@@ -4,7 +4,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/formancehq/fctl/pkg/utils"
 )
 

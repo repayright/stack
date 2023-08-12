@@ -7,7 +7,7 @@ import (
 
 	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/formancehq/fctl/pkg/ui/theme"
+	"github.com/formancehq/fctl/pkg/theme"
 )
 
 type VerticalItem struct {

@@ -3,8 +3,8 @@ package prompt
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/formancehq/fctl/pkg/ui/list"
-	"github.com/formancehq/fctl/pkg/ui/theme"
+	"github.com/formancehq/fctl/pkg/components/list"
+	"github.com/formancehq/fctl/pkg/theme"
 )
 
 type Suggestions struct {
