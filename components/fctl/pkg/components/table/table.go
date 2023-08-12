@@ -138,7 +138,7 @@ func (t Table) View() string {
 			t.renderRows(),
 		}
 
-	// Border can be set at init and update
+	// TODO: Border can be set at init and update
 	border := t.style.Wrapper.
 		Width(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize()).
 		Height(t.terminalSize.Height)
