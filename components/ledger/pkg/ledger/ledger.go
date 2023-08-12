@@ -57,8 +57,8 @@ func New(
 
 func (l *Ledger) Start(ctx context.Context) {
 	go l.commander.Run(logging.ContextWithField(ctx, "component", "commander"))
-	go l.updateVolumesPeriodic.Run(logging.ContextWithField(ctx, "component", "volumes updater"))
-	go l.updateEffectiveVolumes.Run(logging.ContextWithField(ctx, "component", "effective volumes updater"))
+	//go l.updateVolumesPeriodic.Run(logging.ContextWithField(ctx, "component", "volumes updater"))
+	//go l.updateEffectiveVolumes.Run(logging.ContextWithField(ctx, "component", "effective volumes updater"))
 }
 
 func (l *Ledger) Close(ctx context.Context) {
@@ -66,10 +66,10 @@ func (l *Ledger) Close(ctx context.Context) {
 	l.commander.Close()
 
 	logging.FromContext(ctx).Debugf("Close volumes updater")
-	l.updateVolumesPeriodic.Stop()
+	//l.updateVolumesPeriodic.Stop()
 
 	logging.FromContext(ctx).Debugf("Close effective volumes updater")
-	l.updateEffectiveVolumes.Stop()
+	//l.updateEffectiveVolumes.Stop()
 }
 
 func (l *Ledger) GetTransactions(ctx context.Context, q ledgerstore.TransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {

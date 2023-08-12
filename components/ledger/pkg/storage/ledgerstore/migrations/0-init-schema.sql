@@ -84,7 +84,7 @@ create table moves (
     amount numeric not null,
     insertion_date timestamp not null,
     effective_date timestamp not null,
-    post_commit_volumes volumes default null,
+    post_commit_volumes volumes not null,
     post_commit_effective_volumes volumes default null,
     is_source boolean not null,
     stale boolean not null
@@ -107,6 +107,14 @@ create table logs (
 
 /** Define index **/
 
+create function balance_from_volumes(v volumes)
+    returns numeric
+    language sql
+    immutable
+as $$
+    select v.inputs - v.outputs
+$$;
+
 /** Index required for write part */
 -- todo: if 'where not stale' is used, logs insertion is speedup (maybe by 40%), but slow down some read query
 create index moves_range_dates on moves (account_address, asset, effective_date); -- where not stale
@@ -125,11 +133,9 @@ create index moves_account_address on moves (account_address);
 create index moves_account_address_array on moves using gin (account_address_array jsonb_ops);
 create index moves_account_address_array_length on moves (jsonb_array_length(account_address_array));
 create index moves_date on moves (effective_date);
-create index moves_asset on moves(asset);
-create index moves_seq_post_commit_volumes_null on moves(seq) where post_commit_volumes is null;
-create index moves_post_commit_volumes_undefined_with_post_commit_volumes on moves(account_address, asset, seq) where post_commit_volumes is null;
-create index moves_post_commit_volumes_undefined on moves(account_address, asset, seq);
-create index moves_post_commit_volumes_defined on moves(seq, account_address, asset) where post_commit_volumes is not null;
+create index moves_asset on moves (asset);
+create index moves_balance on moves (balance_from_volumes(post_commit_volumes));
+create index moves_post_commit_volumes on moves(account_address, asset, seq);
 
 create unique index accounts_revisions on accounts(address asc, revision desc);
 create index accounts_address_array on accounts using gin (address_array jsonb_ops);
@@ -138,11 +144,13 @@ create index accounts_address_array_length on accounts (jsonb_array_length(addre
 /** Define write functions **/
 create function insert_new_account(_address varchar, _date timestamp)
     returns void
-    language sql
+    language plpgsql
 as $$
-    insert into accounts (address, last_update, address_array, revision)
-    values (_address, _date, to_json(string_to_array(_address, ':')), 0)
-    on conflict do nothing
+    begin
+        insert into accounts (address, last_update, address_array, revision)
+        values (_address, _date, to_json(string_to_array(_address, ':')), 0)
+        on conflict do nothing;
+    end;
 $$;
 
 create function get_account(_account_address varchar, _before timestamp default null)
@@ -299,6 +307,53 @@ as $$
     from get_transaction(_id) originalTX
 $$;
 
+create or replace function insert_move(_transaction_id numeric, _index int8, _insertion_date timestamp without time zone,
+    _effective_date timestamp without time zone, _account_address varchar, _asset varchar, _amount numeric, _is_source bool)
+    returns void
+    language plpgsql
+as $$
+    begin
+        insert into moves (insertion_date, effective_date, account_address, asset, transaction_id,
+           posting_index, amount, is_source, account_address_array, stale, post_commit_volumes)
+        select _insertion_date, _effective_date, _account_address, _asset, _transaction_id,
+           _index, _amount, _is_source, (select to_json(string_to_array(_account_address, ':'))), true,
+               (
+                   (data.post_commit_volumes).inputs + case when not _is_source then _amount else 0 end,
+                    (data.post_commit_volumes).outputs + case when _is_source then _amount else 0 end
+              )::volumes
+        from (
+             (
+                 select post_commit_volumes
+                 from moves
+                 where account_address = _account_address
+                   and asset = _asset
+                 order by seq desc
+                 limit 1
+             ) union all (
+                 select (0, 0)::volumes
+             )
+        ) data
+        limit 1;
+    end;
+$$;
+
+create function insert_posting(_transaction_id numeric, _index int8, _insertion_date timestamp without time zone, _effective_date timestamp without time zone, posting jsonb)
+    returns void
+    language plpgsql
+as $$
+    begin
+        -- todo: sometimes the balance is known at commit time (for sources != world), we need to forward the value to populate the pre_commit_aggregated_input and output
+        perform insert_move(_transaction_id, _index, _insertion_date, _effective_date,
+            posting->>'source', posting->>'asset', (posting->>'amount')::numeric, true);
+        perform insert_move(_transaction_id, _index, _insertion_date, _effective_date,
+            posting->>'destination', posting->>'asset', (posting->>'amount')::numeric, false);
+
+        -- todo: we could probably avoid insertion using some kind of full join later
+        perform insert_new_account(posting->>'source', _insertion_date);
+        perform insert_new_account(posting->>'destination', _insertion_date);
+    end;
+$$;
+
 -- todo: maybe we could avoid plpgsql functions
 create function insert_transaction(data jsonb, _date timestamp without time zone)
     returns void
@@ -325,15 +380,7 @@ as $$
         index = 0;
         for posting in (select jsonb_array_elements(data->'postings')) loop
             -- todo: sometimes the balance is known at commit time (for sources != world), we need to forward the value to populate the pre_commit_aggregated_input and output
-            insert into moves (insertion_date, effective_date, account_address, asset, transaction_id, posting_index, amount, is_source, account_address_array, stale)
-            values
-                (_date, (data->>'date')::timestamp without time zone, posting->>'source', posting->>'asset', (data->>'id')::numeric, index, (posting->>'amount')::numeric, true, (select to_json(string_to_array(posting->>'source', ':'))), true),
-                (_date, (data->>'date')::timestamp without time zone, posting->>'destination', posting->>'asset', (data->>'id')::numeric, index, (posting->>'amount')::numeric, false, (select to_json(string_to_array(posting->>'destination', ':'))), true);
-
-            -- todo: we could probably avoid insertion using some kind of full join later
-            perform insert_new_account(posting->>'source', (data->>'date')::timestamp without time zone);
-            perform insert_new_account(posting->>'destination', (data->>'date')::timestamp without time zone);
-
+            perform insert_posting((data->>'id')::numeric, index, _date, (data->>'date')::timestamp without time zone, posting);
             index = index + 1;
         end loop;
 
@@ -550,63 +597,6 @@ as $$
             update moves
             set post_commit_effective_volumes = (computed_moves.inputs, computed_moves.outputs)::volumes,
                 stale = false
-            from computed_moves
-            where moves.seq = computed_moves.seq;
-
-            commit;
-        end loop;
-    end;
-$$;
-
-create procedure update_moves_volumes(_limit numeric default 100)
-    language plpgsql
-as $$
-    declare
-        move moves;
-        last_computed_move record;
-    begin
-        while true loop
-            select * into move
-            from moves where post_commit_volumes is null
-            order by seq
-            limit 1;
-
-            if move.seq is null then
-                exit;
-            end if;
-
-            select * into last_computed_move
-            from (
-                 (
-                     select moves.seq, moves.post_commit_volumes, moves.is_source, moves.amount
-                     from moves
-                     where
-                         account_address = move.account_address and
-                         asset = move.asset and
-                         post_commit_volumes is not null and
-                         seq < move.seq
-                     order by seq desc
-                     limit 1
-                 ) union all (
-                     select -1, (0, 0)::volumes, false, 0
-                 )
-                 limit 1
-            ) v;
-
-            --raise notice 'process % % % %', move.seq, clock_timestamp(), move.account_address, move.asset;
-            with computed_moves as (
-                select moves.seq, moves.amount, moves.is_source,
-                    (last_computed_move.post_commit_volumes).outputs + sum(case when moves.is_source then moves.amount else 0 end) over (order by moves.seq asc) as outputs,
-                    (last_computed_move.post_commit_volumes).inputs + sum(case when not moves.is_source then moves.amount else 0 end) over (order by moves.seq asc) as inputs
-                from moves
-                where moves.account_address = move.account_address and
-                      moves.asset = move.asset and
-                      moves.seq > last_computed_move.seq
-                order by moves.seq asc
-                limit _limit
-            )
-            update moves
-            set post_commit_volumes = (computed_moves.inputs, computed_moves.outputs)::volumes
             from computed_moves
             where moves.seq = computed_moves.seq;
 
