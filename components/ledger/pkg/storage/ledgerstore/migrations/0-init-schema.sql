@@ -138,13 +138,18 @@ create unique index accounts_metadata_revisions on accounts_metadata(address asc
 
 /** Define write functions **/
 create function insert_new_account(_address varchar, _date timestamp)
-    returns void
+    returns bool
     language plpgsql
 as $$
+    declare
+        _account accounts;
     begin
         insert into accounts(address, address_array, insertion_date)
         values (_address, to_json(string_to_array(_address, ':')), _date)
-        on conflict do nothing;
+        on conflict do nothing
+        returning * into _account;
+
+        return _account is not null;
     end;
 $$;
 
@@ -215,6 +220,7 @@ create function update_account_metadata(_address varchar, _metadata jsonb, _date
     language sql
 as $$
     select insert_new_account(_address, _date);
+
     insert into accounts_metadata (address, metadata, date, revision)
     (
         select _address, accounts_metadata.metadata || _metadata, _date, accounts_metadata.revision + 1
@@ -261,51 +267,43 @@ as $$
 $$;
 
 create or replace function insert_move(_transaction_id numeric, _index int8, _insertion_date timestamp without time zone,
-    _effective_date timestamp without time zone, _account_address varchar, _asset varchar, _amount numeric, _is_source bool)
+    _effective_date timestamp without time zone, _account_address varchar, _asset varchar, _amount numeric, _is_source bool, _new_account bool)
     returns void
     language plpgsql
 as $$
     declare
-        _post_commit_volumes volumes;
-        _effective_post_commit_volumes volumes;
+        _post_commit_volumes volumes = (0, 0)::volumes;
+        _effective_post_commit_volumes volumes = (0, 0)::volumes;
         _seq numeric;
     begin
-        perform *
-        from accounts
-        where address = _account_address
-        for update;
 
-        select (post_commit_volumes).inputs, (post_commit_volumes).outputs into _post_commit_volumes
-        from moves
-        where account_address = _account_address
-            and asset = _asset
-        order by seq desc
-        limit 1;
+        -- todo: lock if we enable parallelism
+        -- perform *
+        -- from accounts
+        -- where address = _account_address
+        -- for update;
 
-        if _post_commit_volumes.inputs is null then
-            _post_commit_volumes = (0, 0)::volumes;
+        if not _new_account then
+            select (post_commit_volumes).inputs, (post_commit_volumes).outputs into _post_commit_volumes
+            from moves
+            where account_address = _account_address
+                and asset = _asset
+            order by seq desc
+            limit 1;
+
+            select (post_commit_effective_volumes).inputs, (post_commit_effective_volumes).outputs into _effective_post_commit_volumes
+            from moves
+            where account_address = _account_address
+                and asset = _asset and effective_date <= _effective_date
+            order by effective_date desc, seq desc
+            limit 1;
         end if;
 
         if _is_source then
             _post_commit_volumes.outputs = _post_commit_volumes.outputs + _amount;
-        else
-            _post_commit_volumes.inputs = _post_commit_volumes.inputs + _amount;
-        end if;
-
-        select (post_commit_effective_volumes).inputs, (post_commit_effective_volumes).outputs into _effective_post_commit_volumes
-        from moves
-        where account_address = _account_address
-            and asset = _asset and effective_date <= _effective_date
-        order by effective_date desc, seq desc
-        limit 1;
-
-        if _effective_post_commit_volumes.inputs is null then
-            _effective_post_commit_volumes = (0, 0)::volumes;
-        end if;
-
-        if _is_source then
             _effective_post_commit_volumes.outputs = _effective_post_commit_volumes.outputs + _amount;
         else
+            _post_commit_volumes.inputs = _post_commit_volumes.inputs + _amount;
             _effective_post_commit_volumes.inputs = _effective_post_commit_volumes.inputs + _amount;
         end if;
 
@@ -326,19 +324,21 @@ as $$
                   _post_commit_volumes, _effective_post_commit_volumes)
         returning seq into _seq;
 
-        update moves
-        set post_commit_effective_volumes = (
-            (post_commit_effective_volumes).inputs + case when _is_source then 0 else _amount end,
-            (post_commit_effective_volumes).outputs + case when _is_source then _amount else 0 end
-        )
-        where account_address = _account_address and asset = _asset and effective_date > _effective_date;
+        if not _new_account then
+            update moves
+            set post_commit_effective_volumes = (
+                (post_commit_effective_volumes).inputs + case when _is_source then 0 else _amount end,
+                (post_commit_effective_volumes).outputs + case when _is_source then _amount else 0 end
+            )
+            where account_address = _account_address and asset = _asset and effective_date > _effective_date;
 
-        update moves
-        set post_commit_effective_volumes = (
-            (post_commit_effective_volumes).inputs + case when _is_source then 0 else _amount end,
-            (post_commit_effective_volumes).outputs + case when _is_source then _amount else 0 end
-        )
-        where account_address = _account_address and asset = _asset and effective_date = _effective_date and seq > _seq;
+            update moves
+            set post_commit_effective_volumes = (
+                (post_commit_effective_volumes).inputs + case when _is_source then 0 else _amount end,
+                (post_commit_effective_volumes).outputs + case when _is_source then _amount else 0 end
+            )
+            where account_address = _account_address and asset = _asset and effective_date = _effective_date and seq > _seq;
+        end if;
     end;
 $$;
 
@@ -346,16 +346,18 @@ create function insert_posting(_transaction_id numeric, _index int8, _insertion_
     returns void
     language plpgsql
 as $$
+    declare
+        source_created bool;
+        destination_created bool;
     begin
+        select insert_new_account(posting->>'source', _insertion_date) into source_created;
+        select insert_new_account(posting->>'destination', _insertion_date) into destination_created;
+
         -- todo: sometimes the balance is known at commit time (for sources != world), we need to forward the value to populate the pre_commit_aggregated_input and output
         perform insert_move(_transaction_id, _index, _insertion_date, _effective_date,
-            posting->>'source', posting->>'asset', (posting->>'amount')::numeric, true);
+            posting->>'source', posting->>'asset', (posting->>'amount')::numeric, true, source_created);
         perform insert_move(_transaction_id, _index, _insertion_date, _effective_date,
-            posting->>'destination', posting->>'asset', (posting->>'amount')::numeric, false);
-
-        -- todo: we could probably avoid insertion using some kind of full join later
-        perform insert_new_account(posting->>'source', _insertion_date);
-        perform insert_new_account(posting->>'destination', _insertion_date);
+            posting->>'destination', posting->>'asset', (posting->>'amount')::numeric, false, destination_created);
     end;
 $$;
 
