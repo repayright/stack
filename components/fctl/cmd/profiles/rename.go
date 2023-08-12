@@ -71,7 +71,7 @@ func (c *RenameController) Run() (config.Renderer, error) {
 	oldName := args[0]
 	newName := args[1]
 
-	config, err := fctl.GetConfig(flags)
+	config, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}

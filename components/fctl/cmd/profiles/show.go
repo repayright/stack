@@ -77,7 +77,7 @@ func (c *ShowController) Run() (config.Renderer, error) {
 		return nil, errors.New("Profile: invalid number of arguments")
 	}
 
-	config, err := fctl.GetConfig(c.config.GetAllFLags())
+	config, err := config.GetConfig(c.config.GetAllFLags())
 	if err != nil {
 		return nil, err
 	}

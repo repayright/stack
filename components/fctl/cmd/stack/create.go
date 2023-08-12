@@ -60,7 +60,7 @@ var _ config.Controller = (*CreateController)(nil)
 
 type CreateController struct {
 	store   *CreateStore
-	profile *fctl.Profile
+	profile *config.Profile
 	config  *config.ControllerConfig
 }
 
@@ -87,7 +87,7 @@ func (c *CreateController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (c *CreateController) Run() (config.Renderer, error) {
 		return nil, errors.Wrap(err, "creating stack")
 	}
 
-	profile := fctl.GetCurrentProfile(flags, cfg)
+	profile := config.GetCurrentProfile(flags, cfg)
 
 	if !config.GetBool(flags, nowaitFlag) {
 		var spinner *pterm.SpinnerPrinter

@@ -1,4 +1,4 @@
-package fctl
+package display
 
 import (
 	"sync"
@@ -115,14 +115,14 @@ func (d *Display) Init() tea.Cmd {
 	d.GenerateKeyMapAction()
 
 	flags := d.controller.GetConfig().GetAllFLags()
-	conf, err := GetConfig(flags)
+	conf, err := config.GetConfig(flags)
 	if err != nil {
 		panic(err)
 	}
-	profiles := GetCurrentProfile(flags, conf)
-	d.header.GetContext().SetFctlVersion(Version)
-	d.header.GetContext().SetOrg(profiles.defaultOrganization)
-	d.header.GetContext().SetProfile(conf.currentProfile)
+	profiles := config.GetCurrentProfile(flags, conf)
+	d.header.GetContext().SetFctlVersion(config.Version)
+	d.header.GetContext().SetOrg(profiles.DefaultOrganization())
+	d.header.GetContext().SetProfile(conf.GetCurrentProfileName())
 
 	var keys = d.GetKeyMapAction()
 	if keys != nil {

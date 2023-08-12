@@ -47,8 +47,8 @@ func (t Table) renderHeader() string {
 		style = t.style.Header
 	}
 
-	// -3 is for the border, margins and padding
-	style = style.MaxWidth(t.terminalSize.Width - style.GetHorizontalMargins() - style.GetHorizontalPadding() - 1)
+	// // -3 is for the border, margins and padding
+	// style = style.MaxWidth(t.terminalSize.Width - style.GetHorizontalMargins() - style.GetHorizontalPadding() - 1)
 
 	t.header.style = style
 
@@ -78,6 +78,7 @@ func (t *Table) Init() tea.Cmd {
 		panic(err)
 	}
 
+	// When table is a root model
 	if t.fullScreen {
 		t.terminalSize = tea.WindowSizeMsg{Width: w, Height: h}
 	} else {

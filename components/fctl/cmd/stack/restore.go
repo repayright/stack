@@ -3,9 +3,10 @@ package stack
 import (
 	"flag"
 	"fmt"
+	"net/http"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"net/http"
 
 	"github.com/formancehq/fctl/cmd/stack/internal"
 	"github.com/formancehq/fctl/membershipclient"
@@ -54,7 +55,7 @@ func NewRestoreConfig() *config.ControllerConfig {
 type RestoreController struct {
 	store      *RestoreStore
 	config     *config.ControllerConfig
-	fctlConfig *fctl.Config
+	fctlConfig *config.Config
 }
 
 func (c *RestoreController) GetKeyMapAction() *config.KeyMapHandler {
@@ -80,7 +81,7 @@ func (c *RestoreController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func (c *RestoreController) Run() (config.Renderer, error) {
 		return nil, err
 	}
 
-	profile := fctl.GetCurrentProfile(flags, cfg)
+	profile := config.GetCurrentProfile(flags, cfg)
 
 	if err := waitStackReady(ctx, c.config.GetOut(), flags, profile, response.Data); err != nil {
 		return nil, err
@@ -134,7 +135,7 @@ func (c *RestoreController) Run() (config.Renderer, error) {
 }
 
 func (c *RestoreController) Render() (tea.Model, error) {
-	model, err := internal.PrintStackInformation(c.config.GetOut(), c.config.GetAllFLags(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+	model, err := internal.PrintStackInformation(c.config.GetOut(), c.config.GetAllFLags(), config.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 	if err != nil {
 		return nil, err
 	}

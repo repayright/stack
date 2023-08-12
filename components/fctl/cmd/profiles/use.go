@@ -77,7 +77,7 @@ func (c *UseController) Run() (config.Renderer, error) {
 		return nil, errors.New("No profile name provided")
 	}
 
-	config, err := fctl.GetConfig(flags)
+	config, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}

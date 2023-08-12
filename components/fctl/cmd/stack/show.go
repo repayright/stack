@@ -55,7 +55,7 @@ func NewShowControllerConfig() *config.ControllerConfig {
 type ShowController struct {
 	store      *ShowStore
 	config     *config.ControllerConfig
-	fctlConfig *fctl.Config
+	fctlConfig *config.Config
 
 	keymap *config.KeyMapHandler
 }
@@ -83,7 +83,7 @@ func (c *ShowController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 	out := c.config.GetOut()
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (c *ShowController) Run() (config.Renderer, error) {
 }
 
 func (c *ShowController) Render() (tea.Model, error) {
-	model, err := internal.PrintStackInformation(c.config.GetOut(), c.config.GetAllFLags(), fctl.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
+	model, err := internal.PrintStackInformation(c.config.GetOut(), c.config.GetAllFLags(), config.GetCurrentProfile(c.config.GetAllFLags(), c.fctlConfig), c.store.Stack, c.store.Versions)
 	if err != nil {
 		return nil, err
 	}

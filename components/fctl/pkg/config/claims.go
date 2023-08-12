@@ -1,4 +1,4 @@
-package fctl
+package config
 
 type stackClaim struct {
 	ID          string `json:"id"`

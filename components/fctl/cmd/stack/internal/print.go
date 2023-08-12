@@ -3,17 +3,17 @@ package internal
 import (
 	"flag"
 	"fmt"
+	"io"
+
 	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
-	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/ui"
 	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/iancoleman/strcase"
 	"github.com/pterm/pterm"
-	"io"
 )
 
 func getContent(out io.Writer, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (string, error) {
@@ -35,7 +35,7 @@ func getContent(out io.Writer, stack *membershipclient.Stack, versions *shared.G
 	return uiInfo.View() + uiVersion.View() + uiMetadata.View(), nil
 }
 
-func PrintStackInformation(out io.Writer, flags *flag.FlagSet, profile *fctl.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (tea.Model, error) {
+func PrintStackInformation(out io.Writer, flags *flag.FlagSet, profile *config.Profile, stack *membershipclient.Stack, versions *shared.GetVersionsResponse) (tea.Model, error) {
 	content, err := getContent(out, stack, versions)
 	if err != nil {
 		return nil, err

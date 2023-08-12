@@ -75,7 +75,7 @@ var _ config.Controller = (*ListController)(nil)
 
 type ListController struct {
 	store        *ListStore
-	profile      *fctl.Profile
+	profile      *config.Profile
 	config       *config.ControllerConfig
 	organization string
 	keyMapAction *config.KeyMapHandler
@@ -101,12 +101,12 @@ func (c *ListController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	profile := fctl.GetCurrentProfile(flags, cfg)
+	profile := config.GetCurrentProfile(flags, cfg)
 
 	organization, err := fctl.ResolveOrganizationID(flags, ctx, cfg, c.config.GetOut())
 	if err != nil {

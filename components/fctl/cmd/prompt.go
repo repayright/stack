@@ -61,7 +61,7 @@ func (p *prompt) completionsFromCommand(subCommand *cobra.Command, completionsAr
 	}), d.GetWordBeforeCursor(), true)
 }
 
-func (p *prompt) completions(cfg *fctl.Config, d goprompt.Document) []goprompt.Suggest {
+func (p *prompt) completions(cfg *config.Config, d goprompt.Document) []goprompt.Suggest {
 	suggestions := make([]goprompt.Suggest, 0)
 	switch {
 	case strings.HasPrefix(d.Text, ":set "+config.ProfileFlag):
@@ -103,7 +103,7 @@ func (p *prompt) completions(cfg *fctl.Config, d goprompt.Document) []goprompt.S
 	return goprompt.FilterHasPrefix(suggestions, d.GetWordBeforeCursor(), true)
 }
 
-func (p *prompt) startPrompt(prompt string, cfg *fctl.Config, opts ...goprompt.Option) string {
+func (p *prompt) startPrompt(prompt string, cfg *config.Config, opts ...goprompt.Option) string {
 	return goprompt.Input(prompt, func(d goprompt.Document) []goprompt.Suggest {
 		subCommand := NewRootCommand()
 
@@ -166,8 +166,8 @@ func (p *prompt) executePromptCommand(cmd *cobra.Command, t string) error {
 	return nil
 }
 
-func (p *prompt) refreshUserEmail(flags *flag.FlagSet, cfg *fctl.Config) error {
-	profile := fctl.GetCurrentProfile(flags, cfg)
+func (p *prompt) refreshUserEmail(flags *flag.FlagSet, cfg *config.Config) error {
+	profile := config.GetCurrentProfile(flags, cfg)
 	if !profile.IsConnected() {
 		p.userEmail = ""
 		return nil
@@ -181,11 +181,11 @@ func (p *prompt) refreshUserEmail(flags *flag.FlagSet, cfg *fctl.Config) error {
 	return nil
 }
 
-func (p *prompt) displayHeader(flags *flag.FlagSet, cfg *fctl.Config, out io.Writer) error {
-	header := fctl.GetCurrentProfileName(flags, cfg)
+func (p *prompt) displayHeader(flags *flag.FlagSet, cfg *config.Config, out io.Writer) error {
+	header := config.GetCurrentProfileName(flags, cfg)
 	if p.userEmail != "" {
 		header += " / " + p.userEmail
-		if organizationID := fctl.GetCurrentProfile(flags, cfg).GetDefaultOrganization(); organizationID != "" {
+		if organizationID := config.GetCurrentProfile(flags, cfg).GetDefaultOrganization(); organizationID != "" {
 			header += " / " + organizationID
 		}
 	}
@@ -197,12 +197,12 @@ func (p *prompt) displayHeader(flags *flag.FlagSet, cfg *fctl.Config, out io.Wri
 func (p *prompt) nextCommand(cmd *cobra.Command) error {
 	flags := config.ConvertPFlagSetToFlagSet(cmd.Flags())
 
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return err
 	}
 
-	currentProfileName := fctl.GetCurrentProfileName(flags, cfg)
+	currentProfileName := config.GetCurrentProfileName(flags, cfg)
 	if currentProfileName != p.actualProfile || p.userEmail == "" {
 		if err := p.refreshUserEmail(flags, cfg); err != nil {
 			return err

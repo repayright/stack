@@ -80,12 +80,12 @@ func (c *SetOrgController) Run() (config.Renderer, error) {
 		return nil, errors.New("Please provide a profile name")
 	}
 
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	fctl.GetCurrentProfile(flags, cfg).SetDefaultOrganization(args[0])
+	config.GetCurrentProfile(flags, cfg).SetDefaultOrganization(args[0])
 
 	if err := cfg.Persist(); err != nil {
 		return nil, errors.Wrap(err, "Updating config")

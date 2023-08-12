@@ -25,11 +25,7 @@ type ConfirmMsg struct {
 
 type RenderMsg struct{}
 
-type WindowSizeMsg struct {
-	Width  int
-	Height int
-}
-
+// This is used to propagate the window size from a parent to a child and sub childs
 type ResizeMsg struct {
 	Width  int
 	Height int

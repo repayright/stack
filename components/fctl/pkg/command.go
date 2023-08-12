@@ -10,6 +10,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/ui/display"
 
 	"github.com/TylerBrock/colorjson"
 	"github.com/formancehq/fctl/membershipclient"
@@ -32,11 +33,11 @@ var (
 type StackOrganizationConfig struct {
 	OrganizationID string
 	Stack          *membershipclient.Stack
-	Config         *Config
+	Config         *config.Config
 }
 
 func GetStackOrganizationConfig(flags *flag.FlagSet, ctx context.Context, out io.Writer) (*StackOrganizationConfig, error) {
-	cfg, err := GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
@@ -75,18 +76,18 @@ func GetSelectedOrganization(flags *flag.FlagSet) string {
 	return config.GetString(flags, config.OrganizationFlag)
 }
 
-func RetrieveOrganizationIDFromFlagOrProfile(flags *flag.FlagSet, cfg *Config) (string, error) {
+func RetrieveOrganizationIDFromFlagOrProfile(flags *flag.FlagSet, cfg *config.Config) (string, error) {
 	if id := GetSelectedOrganization(flags); id != "" {
 		return id, nil
 	}
 
-	if defaultOrganization := GetCurrentProfile(flags, cfg).GetDefaultOrganization(); defaultOrganization != "" {
+	if defaultOrganization := config.GetCurrentProfile(flags, cfg).GetDefaultOrganization(); defaultOrganization != "" {
 		return defaultOrganization, nil
 	}
 	return "", ErrOrganizationNotSpecified
 }
 
-func ResolveOrganizationID(flags *flag.FlagSet, ctx context.Context, cfg *Config, out io.Writer) (string, error) {
+func ResolveOrganizationID(flags *flag.FlagSet, ctx context.Context, cfg *config.Config, out io.Writer) (string, error) {
 	if id, err := RetrieveOrganizationIDFromFlagOrProfile(flags, cfg); err == nil {
 		return id, nil
 	}
@@ -116,7 +117,7 @@ func GetSelectedStackID(flags *flag.FlagSet) string {
 	return config.GetString(flags, config.StackFlag)
 }
 
-func ResolveStack(flags *flag.FlagSet, ctx context.Context, cfg *Config, organizationID string, out io.Writer) (*membershipclient.Stack, error) {
+func ResolveStack(flags *flag.FlagSet, ctx context.Context, cfg *config.Config, organizationID string, out io.Writer) (*membershipclient.Stack, error) {
 	client, err := NewMembershipClient(flags, ctx, cfg, out)
 	if err != nil {
 		return nil, err
@@ -218,11 +219,11 @@ func withOrganizationCompletion() CommandOptionFn {
 	return func(cmd *cobra.Command) {
 		err := cmd.RegisterFlagCompletionFunc(config.OrganizationFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			flags := config.ConvertPFlagSetToFlagSet(cmd.PersistentFlags())
-			cfg, err := GetConfig(flags)
+			cfg, err := config.GetConfig(flags)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveError
 			}
-			profile := GetCurrentProfile(flags, cfg)
+			profile := config.GetCurrentProfile(flags, cfg)
 
 			claims, err := profile.GetUserInfo()
 			if err != nil {
@@ -248,11 +249,11 @@ func withStackCompletion() CommandOptionFn {
 		err := cmd.RegisterFlagCompletionFunc("stack", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			flags := config.ConvertPFlagSetToFlagSet(cmd.Flags())
 
-			cfg, err := GetConfig(flags)
+			cfg, err := config.GetConfig(flags)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveError
 			}
-			profile := GetCurrentProfile(flags, cfg)
+			profile := config.GetCurrentProfile(flags, cfg)
 
 			claims, err := profile.GetUserInfo()
 			if err != nil {
@@ -261,7 +262,7 @@ func withStackCompletion() CommandOptionFn {
 
 			selectedOrganization := GetSelectedOrganization(flags)
 			if selectedOrganization == "" {
-				selectedOrganization = profile.defaultOrganization
+				selectedOrganization = profile.DefaultOrganization()
 			}
 
 			ret := make([]string, 0)
@@ -390,7 +391,7 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *co
 		}
 	case "dynamic":
 
-		d := NewDisplay(cmd.Root())
+		d := display.NewDisplay(cmd.Root())
 		d.SetController(c)
 
 		if _, err := tea.NewProgram(
@@ -492,7 +493,7 @@ func NewCommand(use string, opts ...CommandOption) *cobra.Command {
 			flags := config.ConvertPFlagSetToFlagSet(cmd.Flags())
 
 			if config.GetBool(flags, config.TelemetryFlag) {
-				cfg, err := GetConfig(flags)
+				cfg, err := config.GetConfig(flags)
 				if err != nil {
 					return
 				}

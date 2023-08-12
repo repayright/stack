@@ -3,6 +3,7 @@ package login
 import (
 	"flag"
 	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
 
@@ -77,18 +78,18 @@ func (c *LoginController) Run() (config.Renderer, error) {
 	flags := c.config.GetAllFLags()
 	ctx := c.config.GetContext()
 
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
 
-	profile := fctl.GetCurrentProfile(flags, cfg)
+	profile := config.GetCurrentProfile(flags, cfg)
 	membershipUri := config.GetString(flags, config.MembershipURIFlag)
 	if membershipUri == "" {
 		membershipUri = profile.GetMembershipURI()
 	}
 
-	relyingParty, err := fctl.GetAuthRelyingParty(fctl.GetHttpClient(flags, map[string][]string{}, c.config.GetOut()), membershipUri)
+	relyingParty, err := config.GetAuthRelyingParty(fctl.GetHttpClient(flags, map[string][]string{}, c.config.GetOut()), membershipUri)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +112,7 @@ func (c *LoginController) Run() (config.Renderer, error) {
 	profile.SetMembershipURI(membershipUri)
 	profile.UpdateToken(ret)
 
-	currentProfileName := fctl.GetCurrentProfileName(flags, cfg)
+	currentProfileName := config.GetCurrentProfileName(flags, cfg)
 
 	cfg.SetCurrentProfile(currentProfileName, profile)
 

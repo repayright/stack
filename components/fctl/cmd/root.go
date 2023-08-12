@@ -51,7 +51,7 @@ func NewRootCommand() *cobra.Command {
 	err := cmd.RegisterFlagCompletionFunc(config.ProfileFlag, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		flags := config.ConvertPFlagSetToFlagSet(cmd.Flags())
 
-		cfg, err := fctl.GetConfig(flags)
+		cfg, err := config.GetConfig(flags)
 		if err != nil {
 			return []string{}, cobra.ShellCompDirectiveError
 		}
@@ -85,7 +85,7 @@ func Execute() {
 		case errors.Is(err, fctl.ErrMissingApproval):
 			pterm.Error.WithWriter(os.Stderr).Printfln("Command aborted as you didn't approve.")
 			os.Exit(1)
-		case fctl.IsInvalidAuthentication(err):
+		case config.IsInvalidAuthentication(err):
 			pterm.Error.WithWriter(os.Stderr).Printfln("Your authentication is invalid, please login :)")
 		case extractOpenAPIErrorMessage(err) != nil:
 			pterm.Error.WithWriter(os.Stderr).Printfln(extractOpenAPIErrorMessage(err).Error())

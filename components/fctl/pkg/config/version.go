@@ -1,4 +1,4 @@
-package fctl
+package config
 
 var (
 	Version   = "develop"

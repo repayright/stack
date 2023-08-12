@@ -76,7 +76,7 @@ func (c *DeleteController) Run() (config.Renderer, error) {
 		return nil, errors.New("Profile(delete): invalid number of arguments")
 	}
 
-	config, err := fctl.GetConfig(flags)
+	config, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}

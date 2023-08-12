@@ -1,4 +1,4 @@
-package fctl
+package config
 
 import (
 	"bytes"
@@ -62,6 +62,10 @@ type Profile struct {
 	token               *oidc.AccessTokenResponse
 	defaultOrganization string
 	config              *Config
+}
+
+func (p *Profile) DefaultOrganization() string {
+	return p.defaultOrganization
 }
 
 func (p *Profile) ServicesBaseUrl(stack *membershipclient.Stack) *url.URL {

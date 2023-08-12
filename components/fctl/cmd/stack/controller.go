@@ -10,9 +10,10 @@ import (
 
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
+	"github.com/formancehq/fctl/pkg/config"
 )
 
-func waitStackReady(ctx context.Context, out io.Writer, flags *flag.FlagSet, profile *fctl.Profile, stack *membershipclient.Stack) error {
+func waitStackReady(ctx context.Context, out io.Writer, flags *flag.FlagSet, profile *config.Profile, stack *membershipclient.Stack) error {
 	baseUrlStr := profile.ServicesBaseUrl(stack).String()
 	authServerUrl := fmt.Sprintf("%s/api/auth", baseUrlStr)
 	for {

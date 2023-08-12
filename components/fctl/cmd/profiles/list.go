@@ -74,7 +74,7 @@ func (c *ListController) Run() (config.Renderer, error) {
 
 	flags := c.config.GetAllFLags()
 
-	cfg, err := fctl.GetConfig(flags)
+	cfg, err := config.GetConfig(flags)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (c *ListController) Run() (config.Renderer, error) {
 	profiles := cfg.GetProfiles()
 	p := fctl.MapKeys(profiles)
 
-	currentProfileName := fctl.GetCurrentProfileName(flags, cfg)
+	currentProfileName := config.GetCurrentProfileName(flags, cfg)
 
 	c.store.Profiles = make([]*Profile, len(p))
 	for i, k := range p {
