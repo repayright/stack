@@ -8,9 +8,10 @@ import (
 	blist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/membershipclient"
+	"github.com/formancehq/fctl/pkg/components"
+	ui "github.com/formancehq/fctl/pkg/components"
+	"github.com/formancehq/fctl/pkg/components/list"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/ui"
-	"github.com/formancehq/fctl/pkg/ui/list"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/iancoleman/strcase"
 	"github.com/pterm/pterm"
@@ -43,7 +44,7 @@ func PrintStackInformation(out io.Writer, flags *flag.FlagSet, profile *config.P
 
 	// Plain
 	if flag := config.GetString(flags, config.OutputFlag); flag == "plain" {
-		return ui.NewPlainOutput(content), nil
+		return components.NewPlainOutput(content), nil
 	}
 
 	// Dynamic

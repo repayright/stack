@@ -4,8 +4,8 @@ import (
 	"flag"
 
 	tea "github.com/charmbracelet/bubbletea"
+	uitable "github.com/formancehq/fctl/pkg/components/table"
 	"github.com/formancehq/fctl/pkg/config"
-	uitable "github.com/formancehq/fctl/pkg/ui/table"
 
 	fctl "github.com/formancehq/fctl/pkg"
 	"github.com/spf13/cobra"

@@ -1,4 +1,4 @@
-package ui
+package components
 
 import (
 	"io"
@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
-	"github.com/formancehq/fctl/pkg/ui/theme"
+	"github.com/formancehq/fctl/pkg/theme"
 )
 
 // https://github.com/charmbracelet/bubbletea/blob/master/examples/pager/main.go#L92

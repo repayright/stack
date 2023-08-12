@@ -9,12 +9,12 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/ui/helpers"
-	"github.com/formancehq/fctl/pkg/ui/modelutils"
+	"github.com/formancehq/fctl/pkg/helpers"
+	"github.com/formancehq/fctl/pkg/modelutils"
 
 	"github.com/formancehq/fctl/membershipclient"
 	fctl "github.com/formancehq/fctl/pkg"
-	uitable "github.com/formancehq/fctl/pkg/ui/table"
+	uitable "github.com/formancehq/fctl/pkg/components/table"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
