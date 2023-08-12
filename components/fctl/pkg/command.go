@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/components/display"
 	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/modelutils"
 
 	"github.com/TylerBrock/colorjson"
 	"github.com/formancehq/fctl/membershipclient"
@@ -307,6 +308,7 @@ func configureCobraWithControllerConfig(cmd *cobra.Command, c *config.Controller
 	if cmd.Flags().Lookup(config.OrganizationFlag) != nil {
 		withOrganizationCompletion()(cmd)
 	}
+
 	//Hide Specific flags
 	if cmd.Flags().Lookup("metadata") != nil {
 		err := cmd.Flags().MarkHidden("metadata")
@@ -420,10 +422,20 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *co
 			return nil
 		}
 
+		w, h, err := modelutils.GetTerminalSize()
+		if err != nil {
+			return err
+		}
 		// Then we want to run the update function once
 		// to get the initial message
 		// and resolve all subcommands
 		var teaCmd tea.Cmd = m.Init()
+		tea.Batch(func() tea.Msg {
+			return tea.WindowSizeMsg{
+				Width:  w,
+				Height: h,
+			}
+		}, teaCmd)
 		if teaCmd != nil {
 			var teaMsg = teaCmd()
 			for teaMsg != nil {

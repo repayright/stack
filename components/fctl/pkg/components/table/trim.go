@@ -19,19 +19,19 @@ func NewTrim(left int, c *Cell) *Trim {
 }
 
 func withTrim(width int, c *Cell) string {
-	if width >= len(c.content) {
+	if width >= len(c.String()) {
 		dif := c.style.GetWidth() - width
 		if dif < 0 {
 			return ""
 		}
 		return strings.Repeat(" ", dif)
 	}
-	return c.content[width:]
+	return c.String()[width:]
 }
 
 // It should never happen because we should not render the cell
 func withMaxWith(width int, c *Cell) int {
-	if width >= len(c.content) {
+	if width >= len(c.String()) {
 		dif := c.style.GetWidth() + c.style.GetHorizontalMargins() + c.style.GetHorizontalPadding() - width
 		return dif
 	}

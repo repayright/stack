@@ -138,20 +138,7 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 				return UpdateSuggestionMsg{}
 			}
 		}
-	// case cursor.BlinkMsg:
-	// 	c, cmd := p.model.Cursor.Update(msg)
-	// 	p.model.Cursor = c
-	// 	return p, tea.Batch(func() tea.Msg {
-	// 		return modelutils.RenderMsg{}
-	// 	}, cmd)
 	default:
-		// Log := helpers.NewLogger("IN PROMPT")
-		// Log.Log("msg")
-
-		// //Get the message type with reflect
-		// msgType := reflect.TypeOf(msg)
-
-		// Log.Log(msgType.String())
 		p.model, cmd = p.model.Update(msg)
 		return p, cmd
 	}

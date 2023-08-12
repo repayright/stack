@@ -62,6 +62,7 @@ func (r StyleRows) Update(msg tea.Msg) (StyleRows, tea.Cmd) {
 }
 
 func (r Rows) GetScopeY(c Cursor, height int) (rows Rows) {
+
 	cursorY := c.y
 	if cursorY <= 0 {
 		return r[0:int(math.Min(float64(len(r)), float64(height)))]
@@ -69,7 +70,7 @@ func (r Rows) GetScopeY(c Cursor, height int) (rows Rows) {
 	mid := height / 2
 	// Return lasts
 	if cursorY+mid >= len(r) {
-		max := int(math.Min(float64(len(r)), float64(cursorY+mid)))
+		max := int(math.Min(float64(len(r)), float64(cursorY+mid+height%2)))
 		r = r[int(math.Max(float64(len(r)-height), 0)):max]
 		return r
 	}
@@ -87,7 +88,7 @@ func (r Rows) GetScopeY(c Cursor, height int) (rows Rows) {
 	// q = 2
 	// r = 1
 	// r <=> 5%2 <=> 1
-	return r[cursorY-mid : int(math.Min(float64(cursorY+height%2), float64(len(r))))]
+	return r[cursorY-mid : int(math.Min(float64(cursorY+mid+height%2), float64(len(r))))]
 
 }
 func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
@@ -104,9 +105,9 @@ func (r StyleRows) Render(c Cursor, t tea.WindowSizeMsg) string {
 			row.style = r.rawStyle
 		}
 	}
-
 	// Render only scoped rows
 	rows := r.rows.GetScopeY(c, t.Height)
+
 	for i, row := range rows {
 		style := row.style.MaxWidth(t.Width - row.style.GetHorizontalMargins() - row.style.GetHorizontalPadding())
 		rows[i].style = style

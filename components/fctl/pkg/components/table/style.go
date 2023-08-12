@@ -32,7 +32,7 @@ func NewStyle() *Style {
 			PaddingTop(0).
 			MarginTop(0).
 			MarginLeft(1).
-			MarginRight(1).
+			// MarginRight(1).
 			Background(theme.SelectedHeaderForegroundBackground),
 		Row: lipgloss.NewStyle().
 			Foreground(theme.GreyColor).

@@ -144,32 +144,7 @@ func (d *Display) Init() tea.Cmd {
 		d.header.Init(),
 		d.prompt.Init(),
 		d.renderer.Init(),
-		d.initTermSize(),
 	)
-}
-
-func (d *Display) initTermSize() tea.Cmd {
-	// Init sizes
-	w, h, err := modelutils.GetTerminalSize()
-	if err != nil {
-		return func() tea.Msg {
-			return tea.QuitMsg{}
-		}
-	}
-
-	d.lastTermSize = tea.WindowSizeMsg{
-		Width:  w,
-		Height: h,
-	}
-	d.newBodyWindowMsg(modelutils.ResizeMsg{
-		Width:  w,
-		Height: h,
-	})
-
-	return func() tea.Msg {
-		d.prompt.SetWidth(d.lastBodySize.Width)
-		return d.lastTermSize
-	}
 }
 
 func (d *Display) HeadersHeight() int {
@@ -182,11 +157,13 @@ func (d *Display) HeadersHeight() int {
 func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) {
 	d.lastBodySize = tea.WindowSizeMsg{
 		Width:  msg.Width,
-		Height: utils.Max(msg.Height-d.HeadersHeight()-4, 0), // This is due to style rendering, i need to retrive and the y space
+		Height: utils.Max(msg.Height-d.HeadersHeight()-4, 0), // This is due to style rendering, i need to retrive and the y space from the body styles
 	}
 }
 
 func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	Log := helpers.NewLogger("display")
+	Log.Log("update")
 	switch msg := msg.(type) {
 	case modelutils.RenderMsg:
 		d.Render()
@@ -196,8 +173,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.header = header
 		d.prompt.SetWidth(msg.Width)
 		d.newBodyWindowMsg(msg)
-		Log := helpers.NewLogger("DISPLAY RESIZE")
-		Log.Log("RESIZING")
 		m, rCmd := d.renderer.Update(d.lastBodySize)
 		d.renderer = m
 		return d, tea.Sequence(cmd, rCmd, func() tea.Msg {
@@ -205,6 +180,10 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 	case tea.WindowSizeMsg:
 		d.lastTermSize = msg
+		d.newBodyWindowMsg(modelutils.ResizeMsg{
+			Width:  msg.Width,
+			Height: msg.Height,
+		})
 		return d, func() tea.Msg {
 			return modelutils.ResizeMsg{
 				Width:  msg.Width,
@@ -212,13 +191,9 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case modelutils.ChangeViewMsg:
-		log := helpers.NewLogger("Change View")
-
-		log.Log("CHANGE VIEW")
 		d.controller = msg.Controller
 		renderer, err := d.controller.Run()
 		if err != nil {
-			log.Log("Error")
 			return d, tea.Quit
 		}
 
@@ -226,7 +201,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			return d, tea.Quit
 		}
-		log.Log("Model")
 		// At this point we are sure that the model is generated
 		d.renderer = model
 
@@ -325,8 +299,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return d, postCmd
 	default:
 		if d.prompt.IsFocused() {
-			Log := helpers.NewLogger("default")
-			Log.Log("msg")
 			m, cmd := d.prompt.Update(msg)
 			d.prompt = m
 			return d, tea.Sequence(cmd, func() tea.Msg {

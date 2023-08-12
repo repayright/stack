@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/helpers"
 	"github.com/formancehq/fctl/pkg/modelutils"
 
 	"github.com/formancehq/fctl/membershipclient"
@@ -205,7 +204,6 @@ func (c *ListController) Render() (tea.Model, error) {
 			row,
 			rows,
 			uitable.WithDefaultStyle(),
-			uitable.WithFullScreen(false),
 		), nil
 	}
 
@@ -213,7 +211,6 @@ func (c *ListController) Render() (tea.Model, error) {
 		row,
 		rows,
 		uitable.WithDefaultStyle(),
-		uitable.WithFullScreen(true),
 	), nil
 }
 
@@ -257,8 +254,6 @@ func NewKeyMapAction() *config.KeyMapHandler {
 
 			selectedRow := t.SelectedRow()
 			id := selectedRow.Items()[1].String()
-			log := helpers.NewLogger("SELECTED")
-			log.Log("ID", id)
 			c := NewShowControllerConfig()
 			controller := NewShowController(c)
 			c.SetOut(os.Stdout)

@@ -4,7 +4,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/formancehq/fctl/pkg/utils"
 )
 
@@ -14,14 +13,15 @@ type Table struct {
 	// Column
 	options []TableOption
 
+	// Should never mutate this value
+	minHeaderWidth int
+
 	// Row
 	header *Row
 	rows   StyleRows
 
 	style *Style
 
-	// For full screen table
-	fullScreen   bool
 	terminalSize tea.WindowSizeMsg
 
 	// Column Cursor
@@ -34,8 +34,8 @@ func (t Table) renderRow(r *Row) string {
 
 func (t Table) renderRows() string {
 	return t.rows.Render(*t.cursor, tea.WindowSizeMsg{
-		Width:  t.style.Body.GetHorizontalFrameSize(),
-		Height: t.terminalSize.Height,
+		Width:  t.style.Body.GetMaxWidth(),
+		Height: t.style.Body.GetMaxHeight() - 1,
 	})
 }
 
@@ -47,10 +47,7 @@ func (t Table) renderHeader() string {
 		style = t.style.Header
 	}
 
-	// // -3 is for the border, margins and padding
-	// style = style.MaxWidth(t.terminalSize.Width - style.GetHorizontalMargins() - style.GetHorizontalPadding() - 1)
-
-	t.header.style = style
+	t.header.style = style.MaxWidth(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize() - 1)
 
 	return t.renderRow(t.header)
 }
@@ -64,34 +61,7 @@ func (t *Table) Init() tea.Cmd {
 
 	t.header.style = t.style.Header
 	cmd = t.header.Init()
-
-	// This is a hack to fix the header width
-	// TODO: Find a better way to do this
-	// Shit happen between Header Cells n
-	for _, c := range t.header.cells {
-		c.content += " "
-		// c.style.MarginRight(1)
-	}
-
-	w, h, err := modelutils.GetTerminalSize()
-	if err != nil {
-		panic(err)
-	}
-
-	// When table is a root model
-	if t.fullScreen {
-		t.terminalSize = tea.WindowSizeMsg{Width: w, Height: h}
-	} else {
-		// Rows + headerRow
-		// Default heigth is equal to rows + header
-		t.terminalSize = tea.WindowSizeMsg{Width: t.header.style.GetMaxWidth(), Height: len(t.rows.rows) + 1}
-	}
-
-	cmd = tea.Batch(cmd, t.rows.Init(), func() tea.Msg {
-		return t.terminalSize
-	})
-
-	// Set default with for each rows
+	t.minHeaderWidth = t.getHeaderSize()
 	for _, r := range t.rows.rows {
 		for i, c := range r.cells {
 			WithWidth(t.header.cells[i].getMinWidth() + t.header.cells[0].style.GetHorizontalMargins())(c)
@@ -101,9 +71,13 @@ func (t *Table) Init() tea.Cmd {
 	return cmd
 }
 
-func (t Table) ResetCursor() {
-	t.cursor.x = 0
-	t.cursor.y = 0
+func (t Table) getHeaderSize() int {
+	size := 0
+	for _, cell := range t.header.Items() {
+		size += cell.Width()
+	}
+
+	return size
 }
 
 func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -111,14 +85,53 @@ func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		t.cursor.x = 0
 		t.terminalSize = msg
+		t.style.Wrapper = t.style.Wrapper.Width(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize()).
+			Height(t.terminalSize.Height)
+		t.style.Body = t.style.Body.MaxWidth(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize()).
+			MaxHeight(t.style.Wrapper.GetHeight())
+
+		actualHeaderSize := t.getHeaderSize()
+		if actualHeaderSize > t.style.Body.GetMaxWidth() && actualHeaderSize >= t.minHeaderWidth {
+			for _, c := range t.header.cells {
+				c.SetFill(0)
+				c.UnTrimLeft()
+			}
+			for _, r := range t.rows.rows {
+				for _, c := range r.cells {
+					c.SetFill(0)
+					c.UnTrimLeft()
+				}
+			}
+		}
+
+		actualHeaderSize = t.getHeaderSize()
+		if actualHeaderSize < t.style.Body.GetMaxWidth() &&
+			actualHeaderSize >= t.minHeaderWidth {
+
+			bodyWidth := t.style.Body.GetMaxWidth()
+			toFill := bodyWidth - actualHeaderSize
+
+			for i := 0; i < toFill; i++ {
+				c := t.header.cells[i%len(t.header.cells)]
+				c.SetFill(c.GetFill() + 1)
+				t.header.cells[i%len(t.header.cells)] = c
+			}
+			for _, r := range t.rows.rows {
+				for i, c := range r.cells {
+					c.SetFill(t.header.cells[i].GetFill())
+				}
+			}
+		}
+
 		return &t, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "left":
-			t.cursor.x = utils.Max(t.cursor.x-1, 0)
+			t.cursor.x = utils.Max(t.cursor.x-2, 0)
 		case "right":
-			t.cursor.x = utils.Min(t.cursor.x+1, t.terminalSize.Width-3)
+			t.cursor.x = utils.Min(t.cursor.x+2, t.getHeaderSize()-t.style.Body.GetMaxWidth()-t.style.Body.GetHorizontalFrameSize()+t.header.style.GetHorizontalFrameSize()+4) //
 		case "down":
 			t.cursor.y = utils.Min(t.cursor.y+1, len(t.rows.rows))
 		case "up":
@@ -138,20 +151,13 @@ func (t Table) View() string {
 			t.renderRows(),
 		}
 
-	// TODO: Border can be set at init and update
-	border := t.style.Wrapper.
-		Width(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize()).
-		Height(t.terminalSize.Height)
-	innerBox := t.style.Body.
-		MaxWidth(t.terminalSize.Width - border.GetHorizontalFrameSize()).
-		MaxHeight(t.terminalSize.Height - border.GetVerticalFrameSize())
-	content := innerBox.
-		Render(lipgloss.PlaceHorizontal(innerBox.GetWidth(),
+	content := t.style.Body.
+		Render(lipgloss.PlaceHorizontal(t.style.Body.GetWidth(),
 			0,
 			lipgloss.JoinVertical(lipgloss.Top, render...),
 		))
 
-	return border.Render(content)
+	return t.style.Wrapper.Render(content)
 }
 
 func (t *Table) SelectedRow() *Row {
@@ -178,9 +184,9 @@ func WithDefaultStyle() TableOption {
 	}
 }
 
-func WithFullScreen(fullScreen bool) TableOption {
+func WithSize(msg tea.WindowSizeMsg) TableOption {
 	return func(t *Table) *Table {
-		t.fullScreen = fullScreen
+		t.terminalSize = msg
 		return t
 	}
 }
@@ -203,24 +209,4 @@ func NewTable(header *Row, rows []*Row, tableOptions ...TableOption) *Table {
 	}
 
 	return t
-}
-
-func CalculateColumnWidths(buffer []int, tabWidth int) []int {
-
-	minWidthBuffer := minWidthIntList(buffer)
-	Tofill := tabWidth - minWidthBuffer
-	each := Tofill / len(buffer)
-	for i := range buffer {
-		buffer[i] = buffer[i] + each
-	}
-
-	return buffer
-}
-
-func minWidthIntList(list []int) int {
-	count := 0
-	for _, str := range list {
-		count += str
-	}
-	return count
 }
