@@ -53,7 +53,6 @@ func (r Row) Update(msg tea.Msg) (Row, tea.Cmd) {
 		r.termWidth = msg.Width
 	case modelutils.ResizeMsg:
 		r.termWidth = msg.Width
-		// r.style = r.style.MaxWidth(r.termWidth)
 	}
 	return r, nil
 }
@@ -98,10 +97,6 @@ func (r *Row) Trim(c Cursor) *Row {
 func (r Row) Render(c Cursor) string {
 	buffer := c.x
 	for _, c := range r.cells {
-		if buffer < 0 {
-			//Just want to break the first for loop in a magic case
-			break
-		}
 		width := c.style.GetMaxWidth() - c.style.GetHorizontalPadding() - c.style.GetHorizontalMargins()
 
 		//Reset hidden cells

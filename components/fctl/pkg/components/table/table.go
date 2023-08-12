@@ -113,19 +113,6 @@ func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		t.terminalSize = msg
 		return &t, nil
-	case modelutils.ResizeMsg:
-		t.terminalSize = tea.WindowSizeMsg{
-			Width:  msg.Width,
-			Height: msg.Height,
-		}
-
-		yFrameSize := -t.style.Wrapper.GetHorizontalFrameSize()
-		t.header.style = t.style.Header.MaxWidth(t.terminalSize.Width - yFrameSize)
-		for _, r := range t.rows.rows {
-			r.style = t.style.Row.MaxWidth(t.terminalSize.Width - yFrameSize)
-		}
-
-		return &t, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "left":
@@ -151,10 +138,10 @@ func (t Table) View() string {
 			t.renderRows(),
 		}
 
-	border := t.style.Wrapper.Width(t.terminalSize.Width - 2).Height(t.terminalSize.Height - 3)
-	innerBox := t.style.Body.MaxWidth(t.terminalSize.Width - 3).Height(t.terminalSize.Height - 2)
-
-	return border.Render(lipgloss.PlaceHorizontal(innerBox.GetWidth(), 0, lipgloss.JoinVertical(lipgloss.Top, render...)))
+	border := t.style.Wrapper.Width(t.terminalSize.Width - t.style.Wrapper.GetHorizontalFrameSize()).Height(t.terminalSize.Height)
+	innerBox := t.style.Body.MaxWidth(t.terminalSize.Width - border.GetHorizontalFrameSize()).MaxHeight(t.terminalSize.Height - border.GetVerticalFrameSize())
+	content := innerBox.Render(lipgloss.PlaceHorizontal(innerBox.GetWidth(), 0, lipgloss.JoinVertical(lipgloss.Top, render...)))
+	return border.Render(content)
 }
 
 func (t *Table) SelectedRow() *Row {

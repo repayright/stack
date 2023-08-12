@@ -176,7 +176,7 @@ func (d *Display) HeadersHeight() int {
 	if d.prompt.IsFocused() {
 		return d.header.GetMaxPossibleHeight() + d.prompt.GetHeight()
 	}
-	return d.header.GetMaxPossibleHeight()
+	return d.header.GetMaxPossibleHeight() - 1
 }
 
 func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) {
@@ -196,6 +196,8 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.header = header
 		d.prompt.SetWidth(msg.Width)
 		d.newBodyWindowMsg(msg)
+		Log := helpers.NewLogger("DISPLAY RESIZE")
+		Log.Log("RESIZING")
 		m, rCmd := d.renderer.Update(d.lastBodySize)
 		d.renderer = m
 		return d, tea.Sequence(cmd, rCmd, func() tea.Msg {
