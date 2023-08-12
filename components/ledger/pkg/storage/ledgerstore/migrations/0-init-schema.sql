@@ -77,7 +77,6 @@ create table accounts_metadata (
 create table moves (
     seq serial not null primary key ,
     transaction_id numeric not null,
-    posting_index int8 not null,
     account_address varchar not null,
     account_address_array jsonb not null,
     asset varchar not null,
@@ -96,7 +95,7 @@ create type log_type as enum (
 );
 
 create table logs (
-    id numeric not null,
+    id numeric not null, -- todo: set primary key ?
     type log_type not null,
     hash bytea not null,
     date timestamp not null,
@@ -266,7 +265,7 @@ as $$
     from get_transaction(_id) originalTX
 $$;
 
-create or replace function insert_move(_transaction_id numeric, _index int8, _insertion_date timestamp without time zone,
+create or replace function insert_move(_transaction_id numeric, _insertion_date timestamp without time zone,
     _effective_date timestamp without time zone, _account_address varchar, _asset varchar, _amount numeric, _is_source bool, _new_account bool)
     returns void
     language plpgsql
@@ -313,14 +312,13 @@ as $$
             account_address,
             asset,
             transaction_id,
-            posting_index,
             amount,
             is_source,
             account_address_array,
             post_commit_volumes,
             post_commit_effective_volumes
         ) values (_insertion_date, _effective_date, _account_address, _asset, _transaction_id,
-                  _index, _amount, _is_source, (select to_json(string_to_array(_account_address, ':'))),
+                  _amount, _is_source, (select to_json(string_to_array(_account_address, ':'))),
                   _post_commit_volumes, _effective_post_commit_volumes)
         returning seq into _seq;
 
@@ -342,7 +340,7 @@ as $$
     end;
 $$;
 
-create function insert_posting(_transaction_id numeric, _index int8, _insertion_date timestamp without time zone, _effective_date timestamp without time zone, posting jsonb)
+create function insert_posting(_transaction_id numeric, _insertion_date timestamp without time zone, _effective_date timestamp without time zone, posting jsonb)
     returns void
     language plpgsql
 as $$
@@ -354,9 +352,9 @@ as $$
         select insert_new_account(posting->>'destination', _insertion_date) into destination_created;
 
         -- todo: sometimes the balance is known at commit time (for sources != world), we need to forward the value to populate the pre_commit_aggregated_input and output
-        perform insert_move(_transaction_id, _index, _insertion_date, _effective_date,
+        perform insert_move(_transaction_id, _insertion_date, _effective_date,
             posting->>'source', posting->>'asset', (posting->>'amount')::numeric, true, source_created);
-        perform insert_move(_transaction_id, _index, _insertion_date, _effective_date,
+        perform insert_move(_transaction_id, _insertion_date, _effective_date,
             posting->>'destination', posting->>'asset', (posting->>'amount')::numeric, false, destination_created);
     end;
 $$;
@@ -368,18 +366,15 @@ create function insert_transaction(data jsonb, _date timestamp without time zone
 as $$
     declare
         posting jsonb;
-        index int8 = 0;
     begin
         insert into transactions (id, metadata, date, reference, last_update, postings)
         values ((data->>'id')::numeric, coalesce(data->'metadata', '{}'::jsonb),
                 (data->>'date')::timestamp without time zone, data->>'reference',
                 (data->>'date')::timestamp without time zone, jsonb_pretty(data->'postings'));
 
-        index = 0;
         for posting in (select jsonb_array_elements(data->'postings')) loop
             -- todo: sometimes the balance is known at commit time (for sources != world), we need to forward the value to populate the pre_commit_aggregated_input and output
-            perform insert_posting((data->>'id')::numeric, index, _date, (data->>'date')::timestamp without time zone, posting);
-            index = index + 1;
+            perform insert_posting((data->>'id')::numeric, _date, (data->>'date')::timestamp without time zone, posting);
         end loop;
     end
 $$;
