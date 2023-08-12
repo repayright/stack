@@ -6,7 +6,6 @@ import (
 
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/storage/paginate"
-	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/uptrace/bun"
 )
 
@@ -20,7 +19,7 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (cor
 			return temp.Aggregated.Balances()
 		},
 		func(query *bun.SelectQuery) *bun.SelectQuery {
-			potentiallyStaledMoves := s.db.
+			moves := s.db.
 				NewSelect().
 				Table(MovesTableName).
 				ColumnExpr("distinct on (moves.account_address, moves.asset) moves.*").
@@ -28,52 +27,12 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (cor
 				Apply(filterAccountAddress(q.Options.AddressRegexp, "account_address")).
 				Apply(filterPIT(q.Options.PIT, "insertion_date")) // todo(gfyrag): expose capability to use effective_date
 
-			moves := s.db.
-				NewSelect().
-				ColumnExpr("move.*").
-				TableExpr("potentially_staled_moves").
-				TableExpr("ensure_move_volumes_computed(potentially_staled_moves) move")
-
 			return query.
-				With("potentially_staled_moves", potentiallyStaledMoves).
 				With("moves", moves).
 				TableExpr("moves").
 				ColumnExpr("volumes_to_jsonb((moves.asset, (sum((moves.post_commit_volumes).inputs), sum((moves.post_commit_volumes).outputs))::volumes)) as aggregated").
 				Group("moves.asset")
 		})
-}
-
-func (s *Store) GetBalances(ctx context.Context, q BalancesQuery) (*api.Cursor[core.BalancesByAssetsByAccounts], error) {
-
-	type Temp struct {
-		Aggregated core.AccountsAssetsVolumes `bun:"aggregated,type:jsonb"`
-	}
-
-	ret, err := paginateWithOffset[BalancesQueryOptions, *Temp](s, ctx,
-		paginate.OffsetPaginatedQuery[BalancesQueryOptions](q),
-		func(query *bun.SelectQuery) *bun.SelectQuery {
-			query = query.
-				ColumnExpr("distinct on (moves.account_address) jsonb_build_object(moves.account_address, aggregate_objects(volumes_to_jsonb)) as aggregated").
-				Table("moves").
-				TableExpr(`get_account_volumes_for_asset(moves.account_address, moves.asset) v`). // TODO: use ensure_move_completed ?
-				TableExpr("volumes_to_jsonb(v)").
-				Group("moves.account_address", "moves.asset").
-				Order("moves.account_address", "moves.asset").
-				Apply(filterAccountAddress(q.Options.AddressRegexp, "account_address")).
-				Apply(filterPIT(q.Options.PIT, "insertion_date"))
-
-			if q.Options.AfterAddress != "" {
-				query.Where("account_address > ?", q.Options.AfterAddress)
-			}
-
-			return query
-		})
-	if err != nil {
-		return nil, err
-	}
-	return api.MapCursor(ret, func(from *Temp) core.BalancesByAssetsByAccounts {
-		return from.Aggregated.Balances()
-	}), nil
 }
 
 func (s *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {

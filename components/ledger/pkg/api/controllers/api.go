@@ -20,7 +20,6 @@ type Ledger interface {
 	GetAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (*api.Cursor[core.Account], error)
 	CountAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (uint64, error)
 	GetBalancesAggregated(ctx context.Context, q ledgerstore.BalancesQuery) (core.BalancesByAssets, error)
-	GetBalances(ctx context.Context, q ledgerstore.BalancesQuery) (*api.Cursor[core.BalancesByAssetsByAccounts], error)
 	GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error)
 	Stats(ctx context.Context) (ledger.Stats, error)
 	GetLogs(ctx context.Context, query ledgerstore.LogsQuery) (*api.Cursor[core.ChainedLog], error)

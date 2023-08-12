@@ -4,12 +4,8 @@ import (
 	"net/http"
 
 	"github.com/formancehq/ledger/pkg/api/apierrors"
-	"github.com/formancehq/ledger/pkg/ledger/command"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
-	"github.com/formancehq/ledger/pkg/storage/paginate"
 	sharedapi "github.com/formancehq/stack/libs/go-libs/api"
-	"github.com/formancehq/stack/libs/go-libs/errorsutil"
-	"github.com/pkg/errors"
 )
 
 func GetBalancesAggregated(w http.ResponseWriter, r *http.Request) {
@@ -23,47 +19,4 @@ func GetBalancesAggregated(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sharedapi.Ok(w, balances)
-}
-
-func GetBalances(w http.ResponseWriter, r *http.Request) {
-	l := LedgerFromContext(r.Context())
-
-	balancesQuery := ledgerstore.NewBalancesQuery()
-
-	if r.URL.Query().Get(QueryKeyCursor) != "" {
-		if r.URL.Query().Get("after") != "" ||
-			r.URL.Query().Get("address") != "" ||
-			r.URL.Query().Get(QueryKeyPageSize) != "" {
-			apierrors.ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
-				errors.Errorf("no other query params can be set with '%s'", QueryKeyCursor)))
-			return
-		}
-
-		err := paginate.UnmarshalCursor(r.URL.Query().Get(QueryKeyCursor), &balancesQuery)
-		if err != nil {
-			apierrors.ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
-				errors.Errorf("invalid '%s' query param", QueryKeyCursor)))
-			return
-		}
-
-	} else {
-		pageSize, err := getPageSize(r)
-		if err != nil {
-			apierrors.ResponseError(w, r, err)
-			return
-		}
-
-		balancesQuery = balancesQuery.
-			WithAfterAddress(r.URL.Query().Get("after")).
-			WithAddressFilter(r.URL.Query().Get("address")).
-			WithPageSize(pageSize)
-	}
-
-	cursor, err := l.GetBalances(r.Context(), balancesQuery)
-	if err != nil {
-		apierrors.ResponseError(w, r, err)
-		return
-	}
-
-	sharedapi.RenderCursor(w, *cursor)
 }

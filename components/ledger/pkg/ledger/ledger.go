@@ -49,27 +49,17 @@ func New(
 			compiler,
 			command.NewReferencer(),
 		),
-		store:                  store,
-		updateVolumesPeriodic:  newPeriodic(store.UpdateVolumes),
-		updateEffectiveVolumes: newPeriodic(store.UpdateEffectiveVolumes),
+		store: store,
 	}
 }
 
 func (l *Ledger) Start(ctx context.Context) {
 	go l.commander.Run(logging.ContextWithField(ctx, "component", "commander"))
-	//go l.updateVolumesPeriodic.Run(logging.ContextWithField(ctx, "component", "volumes updater"))
-	//go l.updateEffectiveVolumes.Run(logging.ContextWithField(ctx, "component", "effective volumes updater"))
 }
 
 func (l *Ledger) Close(ctx context.Context) {
 	logging.FromContext(ctx).Debugf("Close commander")
 	l.commander.Close()
-
-	logging.FromContext(ctx).Debugf("Close volumes updater")
-	//l.updateVolumesPeriodic.Stop()
-
-	logging.FromContext(ctx).Debugf("Close effective volumes updater")
-	//l.updateEffectiveVolumes.Stop()
 }
 
 func (l *Ledger) GetTransactions(ctx context.Context, q ledgerstore.TransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {
@@ -100,11 +90,6 @@ func (l *Ledger) GetAccounts(ctx context.Context, a ledgerstore.AccountsQuery) (
 func (l *Ledger) GetAccountWithVolumes(ctx context.Context, address string, expandVolumes, expandEffectiveVolumes bool) (*core.AccountWithVolumes, error) {
 	accounts, err := l.store.GetAccountWithVolumes(ctx, address, expandVolumes, expandEffectiveVolumes)
 	return accounts, errors.Wrap(err, "getting account")
-}
-
-func (l *Ledger) GetBalances(ctx context.Context, q ledgerstore.BalancesQuery) (*api.Cursor[core.BalancesByAssetsByAccounts], error) {
-	balances, err := l.store.GetBalances(ctx, q)
-	return balances, errors.Wrap(err, "getting balances")
 }
 
 func (l *Ledger) GetBalancesAggregated(ctx context.Context, q ledgerstore.BalancesQuery) (core.BalancesByAssets, error) {

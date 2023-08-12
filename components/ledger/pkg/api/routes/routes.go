@@ -66,8 +66,6 @@ func NewRouter(
 			router.Post("/transactions/{txid}/revert", controllers.RevertTransaction)
 			router.Post("/transactions/{txid}/metadata", controllers.PostTransactionMetadata)
 
-			// BalanceController
-			router.Get("/balances", controllers.GetBalances)
 			// TODO: Rename to /aggregatedBalances
 			router.Get("/aggregate/balances", controllers.GetBalancesAggregated)
 		})
