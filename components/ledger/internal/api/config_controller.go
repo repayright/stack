@@ -8,7 +8,7 @@ import (
 )
 
 type ConfigInfo struct {
-	Server  string  `json:"server"`
+	Server  string        `json:"server"`
 	Version string        `json:"version"`
 	Config  *LedgerConfig `json:"config"`
 }

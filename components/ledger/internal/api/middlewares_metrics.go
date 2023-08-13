@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/opentelemetry/metrics"
 	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/otel/attribute"

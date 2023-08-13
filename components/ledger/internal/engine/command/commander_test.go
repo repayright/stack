@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	storageerrors "github.com/formancehq/ledger/internal/storage"
 	internaltesting "github.com/formancehq/ledger/internal/testing"
 	"github.com/formancehq/stack/libs/go-libs/logging"

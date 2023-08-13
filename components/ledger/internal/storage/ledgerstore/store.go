@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sync"
 
 	"github.com/formancehq/ledger/internal/storage"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -15,8 +14,6 @@ import (
 type Store struct {
 	db       *bun.DB
 	onDelete func(ctx context.Context) error
-
-	once sync.Once
 
 	isInitialized bool
 	name          string

@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/machine/script/compiler"
 	vm2 "github.com/formancehq/ledger/internal/machine/vm"
 	"github.com/formancehq/stack/libs/go-libs/metadata"

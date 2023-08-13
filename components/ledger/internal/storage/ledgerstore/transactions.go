@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	paginate2 "github.com/formancehq/ledger/internal/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
@@ -112,7 +112,9 @@ func (store *Store) transactionQuery(p PITFilter) func(query *bun.SelectQuery) *
 			ColumnExpr("transactions.reference").
 			ColumnExpr("transactions.metadata").
 			ColumnExpr("transactions.postings").
-			ColumnExpr("transactions.date")
+			ColumnExpr("transactions.date").
+			Apply(filterPIT(p.PIT, "transactions.date")).
+			OrderExpr("transactions.id desc, revision desc")
 
 		if p.ExpandEffectiveVolumes {
 			query = query.ColumnExpr("get_aggregated_effective_volumes_for_transaction(transactions) as post_commit_effective_volumes")

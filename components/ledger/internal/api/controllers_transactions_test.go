@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/api"
 	"github.com/formancehq/ledger/internal/engine/command"
 	"github.com/formancehq/ledger/internal/opentelemetry/metrics"

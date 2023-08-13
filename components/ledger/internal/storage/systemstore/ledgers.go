@@ -3,7 +3,7 @@ package systemstore
 import (
 	"context"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	storageerrors "github.com/formancehq/ledger/internal/storage"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"

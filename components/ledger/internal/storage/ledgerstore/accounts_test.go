@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/stretchr/testify/require"

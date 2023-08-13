@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/storage"
 	"github.com/formancehq/ledger/internal/storage/ledgerstore"
 	"github.com/formancehq/ledger/internal/storage/paginate"

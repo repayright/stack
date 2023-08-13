@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/engine/utils/batching"
 	"github.com/formancehq/ledger/internal/machine"
 	"github.com/formancehq/ledger/internal/machine/vm"

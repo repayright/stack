@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/storage/paginate"
 	"github.com/uptrace/bun"
 )

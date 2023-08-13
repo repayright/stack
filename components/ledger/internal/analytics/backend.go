@@ -5,7 +5,7 @@ import (
 
 	storageerrors "github.com/formancehq/ledger/internal/storage"
 	"github.com/formancehq/ledger/internal/storage/driver"
-	ledgerstore2 "github.com/formancehq/ledger/internal/storage/ledgerstore"
+	ledgerstore "github.com/formancehq/ledger/internal/storage/ledgerstore"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
@@ -18,15 +18,15 @@ type Ledger interface {
 }
 
 type defaultLedger struct {
-	store *ledgerstore2.Store
+	store *ledgerstore.Store
 }
 
 func (d defaultLedger) CountTransactions(ctx context.Context) (uint64, error) {
-	return d.store.CountTransactions(ctx, ledgerstore2.NewTransactionsQuery())
+	return d.store.CountTransactions(ctx, ledgerstore.NewTransactionsQuery())
 }
 
 func (d defaultLedger) CountAccounts(ctx context.Context) (uint64, error) {
-	return d.store.CountAccounts(ctx, ledgerstore2.NewGetAccountsQuery())
+	return d.store.CountAccounts(ctx, ledgerstore.NewGetAccountsQuery())
 }
 
 var _ Ledger = (*defaultLedger)(nil)

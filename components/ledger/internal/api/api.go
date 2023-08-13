@@ -3,11 +3,11 @@ package api
 import (
 	"context"
 
-	"github.com/formancehq/ledger/internal"
-	ledger2 "github.com/formancehq/ledger/internal/engine"
+	ledger "github.com/formancehq/ledger/internal"
+	"github.com/formancehq/ledger/internal/engine"
 	"github.com/formancehq/ledger/internal/engine/command"
 	"github.com/formancehq/ledger/internal/storage/driver"
-	ledgerstore2 "github.com/formancehq/ledger/internal/storage/ledgerstore"
+	"github.com/formancehq/ledger/internal/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/formancehq/stack/libs/go-libs/migrations"
@@ -16,16 +16,16 @@ import (
 //go:generate mockgen -source api.go -destination api_test.go -package controllers_test . Ledger
 
 type Ledger interface {
-	GetAccountWithVolumes(ctx context.Context, query ledgerstore2.GetAccountQuery) (*ledger.ExpandedAccount, error)
-	GetAccountsWithVolumes(ctx context.Context, query ledgerstore2.GetAccountsQuery) (*api.Cursor[ledger.ExpandedAccount], error)
-	CountAccounts(ctx context.Context, query ledgerstore2.GetAccountsQuery) (uint64, error)
-	GetAggregatedBalances(ctx context.Context, q ledgerstore2.GetAggregatedBalancesQuery) (ledger.BalancesByAssets, error)
+	GetAccountWithVolumes(ctx context.Context, query ledgerstore.GetAccountQuery) (*ledger.ExpandedAccount, error)
+	GetAccountsWithVolumes(ctx context.Context, query ledgerstore.GetAccountsQuery) (*api.Cursor[ledger.ExpandedAccount], error)
+	CountAccounts(ctx context.Context, query ledgerstore.GetAccountsQuery) (uint64, error)
+	GetAggregatedBalances(ctx context.Context, q ledgerstore.GetAggregatedBalancesQuery) (ledger.BalancesByAssets, error)
 	GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error)
-	Stats(ctx context.Context) (ledger2.Stats, error)
-	GetLogs(ctx context.Context, query ledgerstore2.GetLogsQuery) (*api.Cursor[ledger.ChainedLog], error)
-	CountTransactions(ctx context.Context, query ledgerstore2.GetTransactionsQuery) (uint64, error)
-	GetTransactions(ctx context.Context, query ledgerstore2.GetTransactionsQuery) (*api.Cursor[ledger.ExpandedTransaction], error)
-	GetTransactionWithVolumes(ctx context.Context, query ledgerstore2.GetTransactionQuery) (*ledger.ExpandedTransaction, error)
+	Stats(ctx context.Context) (engine.Stats, error)
+	GetLogs(ctx context.Context, query ledgerstore.GetLogsQuery) (*api.Cursor[ledger.ChainedLog], error)
+	CountTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (uint64, error)
+	GetTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (*api.Cursor[ledger.ExpandedTransaction], error)
+	GetTransactionWithVolumes(ctx context.Context, query ledgerstore.GetTransactionQuery) (*ledger.ExpandedTransaction, error)
 
 	CreateTransaction(ctx context.Context, parameters command.Parameters, data ledger.RunScript) (*ledger.Transaction, error)
 	RevertTransaction(ctx context.Context, parameters command.Parameters, id uint64) (*ledger.Transaction, error)
@@ -40,7 +40,7 @@ type Backend interface {
 
 type DefaultBackend struct {
 	storageDriver *driver.Driver
-	resolver      *ledger2.Resolver
+	resolver      *engine.Resolver
 	version       string
 }
 
@@ -58,7 +58,7 @@ func (d DefaultBackend) GetVersion() string {
 
 var _ Backend = (*DefaultBackend)(nil)
 
-func NewDefaultBackend(driver *driver.Driver, version string, resolver *ledger2.Resolver) *DefaultBackend {
+func NewDefaultBackend(driver *driver.Driver, version string, resolver *engine.Resolver) *DefaultBackend {
 	return &DefaultBackend{
 		storageDriver: driver,
 		resolver:      resolver,

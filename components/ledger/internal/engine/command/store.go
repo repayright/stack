@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/machine/vm"
 )
 

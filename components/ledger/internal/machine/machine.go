@@ -3,7 +3,7 @@ package machine
 import (
 	"math/big"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	vm2 "github.com/formancehq/ledger/internal/machine/vm"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"
 	"github.com/formancehq/stack/libs/go-libs/metadata"

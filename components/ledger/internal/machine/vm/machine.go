@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	internal2 "github.com/formancehq/ledger/internal/machine/internal"
 	program2 "github.com/formancehq/ledger/internal/machine/vm/program"
 	"github.com/formancehq/stack/libs/go-libs/errorsutil"

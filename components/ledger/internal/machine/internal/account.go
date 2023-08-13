@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 )
 
 type AccountAddress string

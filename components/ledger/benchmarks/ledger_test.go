@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	api2 "github.com/formancehq/ledger/internal/api"
 	"github.com/formancehq/ledger/internal/engine"
 	"github.com/formancehq/ledger/internal/opentelemetry/metrics"

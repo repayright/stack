@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 
-	"github.com/formancehq/ledger/internal"
+	ledger "github.com/formancehq/ledger/internal"
 	storageerrors "github.com/formancehq/ledger/internal/storage"
 	"github.com/formancehq/stack/libs/go-libs/logging"
 )
