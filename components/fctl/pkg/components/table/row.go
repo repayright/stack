@@ -14,17 +14,36 @@ type Row struct {
 
 	activable bool
 	hidden    bool
-	selected  bool
 
 	termWidth int
 	style     lipgloss.Style
 }
 
-func NewRow(items ...*Cell) *Row {
-	return &Row{
-		cells: items,
+type RowOpts func(*Row) *Row
+
+func WithRowStyle(style lipgloss.Style) RowOpts {
+	return func(r *Row) *Row {
+		r.style = style
+		return r
 	}
 }
+
+func NewRow(items []*Cell, opts ...RowOpts) *Row {
+	r := &Row{
+		cells: items,
+	}
+
+	for _, opt := range opts {
+		r = opt(r)
+	}
+
+	return r
+}
+
+func (r *Row) GetWidth() int {
+	return r.style.GetWidth()
+}
+
 func (r Row) String() string {
 	mapCell := utils.Map(r.cells, func(c *Cell) string {
 		return c.String()
@@ -66,10 +85,6 @@ func (r Row) View() string {
 		cells[i] = c.View()
 	}
 
-	if r.selected {
-		return r.style.Render(cells...)
-	}
-
 	return r.style.Render(cells...)
 }
 
@@ -79,11 +94,6 @@ func (r Row) View() string {
 func (r *Row) Trim(c Cursor) *Row {
 	x := c.x
 	for i, cell := range r.cells {
-		if x == 0 { // We would need to set a max width to termsize
-
-			break
-		}
-
 		cellWidth := cell.Width()
 		if i*x >= cellWidth {
 			cell.hidden = true
@@ -94,7 +104,7 @@ func (r *Row) Trim(c Cursor) *Row {
 	return r
 }
 
-func (r Row) Render(c Cursor) string {
+func (r Row) Render(c *Cursor) string {
 	buffer := c.x
 	for _, c := range r.cells {
 		width := c.style.GetMaxWidth() - c.style.GetHorizontalPadding() - c.style.GetHorizontalMargins()
@@ -117,4 +127,8 @@ func (r Row) Render(c Cursor) string {
 	}
 
 	return r.View()
+}
+func (r *Row) AddCell(cell *Cell) *Row {
+	r.cells = append(r.cells, cell)
+	return r
 }

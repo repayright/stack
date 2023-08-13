@@ -37,6 +37,13 @@ func NewCell(content string, opts ...CellOption) *Cell {
 
 type CellOption func(*Cell) *Cell
 
+func WithStyle(style lipgloss.Style) CellOption {
+	return func(c *Cell) *Cell {
+		c.style = style
+		return c
+	}
+}
+
 func WithWidth(width int) CellOption {
 	return func(c *Cell) *Cell {
 		c.minWidth = width
@@ -79,16 +86,6 @@ func (c *Cell) TrimLeft(width int) *Cell {
 
 func (c *Cell) UnTrimLeft() *Cell {
 	c.Trim = nil
-	return c
-}
-
-func (c Cell) TrimRight(width int) Cell {
-	c.style.MaxWidth(width)
-	return c
-}
-
-func (c Cell) UnTrimRight() Cell {
-	c.style.UnsetMaxWidth()
 	return c
 }
 

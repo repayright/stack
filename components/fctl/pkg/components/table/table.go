@@ -29,13 +29,16 @@ type Table struct {
 }
 
 func (t Table) renderRow(r *Row) string {
-	return r.Render(*t.cursor)
+	return r.Render(t.cursor)
 }
 
 func (t Table) renderRows() string {
-	return t.rows.Render(*t.cursor, tea.WindowSizeMsg{
+	// Cursor for rows table start at 1
+	cursor := NewCursor(WithY(t.cursor.y-1), WithX(t.cursor.x))
+
+	return t.rows.Render(cursor, tea.WindowSizeMsg{
 		Width:  t.style.Body.GetMaxWidth(),
-		Height: t.style.Body.GetMaxHeight() - 1,
+		Height: utils.Max(t.style.Body.GetMaxHeight()-1, 0),
 	})
 }
 

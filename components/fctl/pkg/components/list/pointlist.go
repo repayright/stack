@@ -10,15 +10,32 @@ import (
 	"github.com/formancehq/fctl/pkg/theme"
 )
 
+type PointListOpts func(*PointList) *PointList
 type PointList struct {
+	style lipgloss.Style
+
 	list []*HorizontalItem
 }
 
-func NewPointList(list ...*HorizontalItem) *PointList {
-	return &PointList{
+func NewPointList(list []*HorizontalItem, opts ...PointListOpts) *PointList {
+	pl := &PointList{
 		list: list,
 	}
+
+	for _, opt := range opts {
+		pl = opt(pl)
+	}
+
+	return pl
 }
+
+func WithPointListStyle(style lipgloss.Style) PointListOpts {
+	return func(pl *PointList) *PointList {
+		pl.style = style
+		return pl
+	}
+}
+
 func (pl *PointList) GetListKeyMapHandler() *config.KeyMapHandler {
 	return nil
 }

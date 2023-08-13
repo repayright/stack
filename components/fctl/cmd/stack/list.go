@@ -182,16 +182,16 @@ func (c *ListController) Render() (tea.Model, error) {
 			return uitable.NewCell(s)
 		})
 
-		return uitable.NewRow(cells...)
+		return uitable.NewRow(cells)
 	})
 
 	row := uitable.NewRow(
-		uitable.NewCell("Organization Id", uitable.WithWidth(minLengthOrganizationId)),
-		uitable.NewCell("Stack Id", uitable.WithWidth(minLengthStackId)),
-		uitable.NewCell("Name", uitable.WithWidth(minLengthStackName)),
-		uitable.NewCell("API URL", uitable.WithWidth(minLengthApiUrl)),
-		uitable.NewCell("Region", uitable.WithWidth(minLengthStackRegion)),
-		uitable.NewCell("Created At", uitable.WithWidth(minLengthStackCreatedAt)),
+		uitable.NewCells(uitable.NewCell("Organization Id", uitable.WithWidth(minLengthOrganizationId)),
+			uitable.NewCell("Stack Id", uitable.WithWidth(minLengthStackId)),
+			uitable.NewCell("Name", uitable.WithWidth(minLengthStackName)),
+			uitable.NewCell("API URL", uitable.WithWidth(minLengthApiUrl)),
+			uitable.NewCell("Region", uitable.WithWidth(minLengthStackRegion)),
+			uitable.NewCell("Created At", uitable.WithWidth(minLengthStackCreatedAt))),
 	)
 
 	if config.GetBool(flags, deletedFlag) {

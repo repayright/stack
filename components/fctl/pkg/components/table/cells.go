@@ -13,3 +13,7 @@ func (c Cells) Reverse() Cells {
 	}
 	return cells
 }
+
+func NewCells(cells ...*Cell) Cells {
+	return Cells(cells)
+}

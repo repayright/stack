@@ -113,12 +113,12 @@ func (c *ListController) Render() (tea.Model, error) {
 			return uitable.NewCell(d)
 		})
 
-		return uitable.NewRow(cells...)
+		return uitable.NewRow(uitable.NewCells(cells...))
 	})
 
 	header := uitable.NewRow(
-		uitable.NewCell("Name", uitable.WithWidth(20)),
-		uitable.NewCell("Active", uitable.WithWidth(20)),
+		uitable.NewCells(uitable.NewCell("Name", uitable.WithWidth(20)),
+			uitable.NewCell("Active", uitable.WithWidth(20))),
 	)
 
 	if config.GetString(flags, config.OutputFlag) == "plain" {

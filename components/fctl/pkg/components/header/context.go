@@ -48,11 +48,6 @@ func (c *Context) SetFctlVersion(fctlversion string) {
 	c.fctlversion = fctlversion
 }
 
-func (c *Context) InitModel() {
-	c.model = c.GeneratePointList()
-	c.model.SortDir(true)
-}
-
 func (c *Context) GeneratePointList() *list.PointList {
 	maxWidth := modelutils.GetMaxCharPosXinCharList([]string{
 		Regions,
@@ -66,12 +61,14 @@ func (c *Context) GeneratePointList() *list.PointList {
 	FctlVersion = modelutils.FillCharBeforeChar(FctlVersion, " ", ":", maxWidth)
 	Profile = modelutils.FillCharBeforeChar(Profile, " ", ":", maxWidth)
 
-	return list.NewPointList(
+	l := []*list.HorizontalItem{
 		list.NewHorizontalItem(Regions, c.regions),
 		list.NewHorizontalItem(Org, c.org),
 		list.NewHorizontalItem(Profile, c.profile),
 		list.NewHorizontalItem(FctlVersion, c.fctlversion),
-	)
+	}
+
+	return list.NewPointList(l)
 }
 
 func (c *Context) GetMaxPossibleHeight() int {
@@ -87,7 +84,8 @@ func (c *Context) GetListKeyMapHandler() *config.KeyMapHandler {
 }
 
 func (c *Context) Init() tea.Cmd {
-	c.InitModel()
+	c.model = c.GeneratePointList()
+	c.model.SortDir(true)
 	return nil
 }
 

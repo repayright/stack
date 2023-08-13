@@ -163,7 +163,7 @@ func (h *Header) SetKeyBinding(keys ...*config.KeyMapHandler) *Header {
 
 	h.modelAction = make([]*list.PointList, 0)
 	for _, o := range out {
-		pl := list.NewPointList(o...)
+		pl := list.NewPointList(o)
 		h.AddModel(pl)
 	}
 	return h

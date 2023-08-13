@@ -30,3 +30,7 @@ type ResizeMsg struct {
 	Width  int
 	Height int
 }
+
+type ErrorMsg struct {
+	Error error
+}

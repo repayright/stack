@@ -392,8 +392,17 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *co
 			return nil
 		}
 	case "dynamic":
+		node := cmd.Context().Value("node")
+		if node == nil {
+			return errors.New("node is not set")
+		}
 
-		d := display.NewDisplay(cmd.Root())
+		nod, ok := node.(*config.Node)
+		if !ok {
+			return errors.New("node is not a config.Node")
+		}
+
+		d := display.NewDisplay(nod)
 		d.SetController(c)
 
 		if _, err := tea.NewProgram(

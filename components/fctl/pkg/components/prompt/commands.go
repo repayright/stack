@@ -1,34 +1,79 @@
 package prompt
 
 import (
-	"github.com/spf13/cobra"
+	"reflect"
+
+	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/helpers"
 )
 
 type Commands struct {
-	commands []string
-	descmap  map[string]string
+	node          *config.Node
+	commands      []string
+	descmap       map[string]string
+	controllerMap map[string]config.Controller
 }
 
-func NewCommands(cmd *cobra.Command) *Commands {
+func NewCommands(node *config.Node) *Commands {
+	Log := helpers.NewLogger("prompt")
+	Log.Log("NewCommands")
 	var commands []string
 	var description map[string]string = make(map[string]string)
-	for _, c := range cmd.Commands() {
-		commands = append(commands, c.Use)
-		description[c.Use] = c.Short
-		if c.HasSubCommands() {
-			subCommands := NewCommands(c)
-			// Prefix sub tree with parent command
-			for i, sub := range subCommands.commands {
-				subCommands.commands[i] = c.Use + " " + sub
-				description[subCommands.commands[i]] = subCommands.descmap[sub]
-			}
+	var controllerMap map[string]config.Controller = make(map[string]config.Controller)
 
-			commands = append(commands, subCommands.commands...)
+	childs := node.GetChilds()
+
+	if childs == nil {
+		return &Commands{
+			commands: commands,
+			descmap:  description,
 		}
 	}
 
+	typ := reflect.TypeOf(childs).String()
+	Log.Log(typ)
+
+	switch c := childs.(type) {
+	case []*config.Node:
+		for _, child := range c {
+			childsCommand := NewCommands(child)
+			commands = append(commands, childsCommand.commands...)
+			for k, v := range childsCommand.descmap {
+				description[k] = v
+			}
+
+			for k, v := range childsCommand.controllerMap {
+				controllerMap[k] = v
+			}
+		}
+	case *config.ConfigNode:
+		conf := c.Config
+		for _, child := range c.Controllers {
+			node := config.NewControllerNode(child)
+			newCommands := NewCommands(node)
+
+			for _, command := range newCommands.commands {
+				key := conf.GetUse() + " " + command
+				commands = append(commands, key)
+				description[key] = newCommands.descmap[command]
+				controllerMap[key] = child
+			}
+
+		}
+	case []config.Controller:
+		for _, child := range c {
+			config := child.GetConfig()
+			commands = append(commands, config.GetUse())
+			description[config.GetUse()] = config.GetShortDescription()
+			controllerMap[config.GetUse()] = child
+		}
+	}
+
+	Log.Log(commands...)
 	return &Commands{
-		commands: commands,
-		descmap:  description,
+		node:          node,
+		commands:      commands,
+		descmap:       description,
+		controllerMap: controllerMap,
 	}
 }

@@ -6,6 +6,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func NewNodeController() *config.Node {
+	return config.NewConfigNode(*config.NewControllerConfig(
+		"stack",
+		"Manage your stack",
+		"stacks",
+		[]string{"stack", "stacks", "st"},
+		nil,
+	),
+		NewListController(NewListControllerConfig()),
+	)
+}
+
 func NewCommand() *cobra.Command {
 	return fctl.NewCommand("stack",
 		fctl.WithShortDescription("Manage your stack"),

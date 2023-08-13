@@ -3,14 +3,58 @@ package config
 import (
 	"context"
 	"flag"
-	tea "github.com/charmbracelet/bubbletea"
 	"io"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
+
+type ConfigNode struct {
+	Config      ControllerConfig
+	Controllers []Controller
+}
+
+type Node struct {
+	childs interface{}
+}
+
+func (n *Node) GetChilds() interface{} {
+	return n.childs
+}
+
+func (n *Node) HasChilds() bool {
+	return n.childs != nil
+}
+
+func NewControllerNode(controllers ...Controller) *Node {
+	return &Node{
+		childs: controllers,
+	}
+}
+
+func NewConfigNode(config ControllerConfig, controllers ...Controller) *Node {
+	return &Node{
+		childs: &ConfigNode{
+			Config:      config,
+			Controllers: controllers,
+		},
+	}
+}
+
+func NewNode(childs ...*Node) *Node {
+	return &Node{
+		childs: childs,
+	}
+}
+
+type Controllers []Controller
+
+func NewControllers(controllers ...Controller) Controllers {
+	return controllers
+}
 
 type Renderer interface {
 	Render() (tea.Model, error)
 }
-
 type Controller interface {
 	GetStore() any
 

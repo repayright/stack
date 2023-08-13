@@ -49,9 +49,9 @@ func NewViewPortManager(content string, out io.Writer) (*ModelManager, error) {
 		return nil, err
 	}
 	vp.SetContent(str)
-
 	return &ModelManager{
-		vp:      vp,
+		vp: vp,
+
 		content: content,
 	}, nil
 
@@ -62,7 +62,6 @@ func (m ModelManager) View() string {
 }
 
 func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd

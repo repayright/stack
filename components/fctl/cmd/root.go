@@ -21,6 +21,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func NewChildsNode() *config.Node {
+	return config.NewNode(
+		stack.NewNodeController(),
+		profiles.NewNodeController(),
+	)
+}
+
 func NewRootCommand() *cobra.Command {
 	cmd := fctl.NewCommand("fctl",
 		fctl.WithSilenceError(),
@@ -78,8 +85,9 @@ func Execute() {
 	}()
 
 	ctx, _ := signal.NotifyContext(context.TODO(), os.Interrupt)
-
+	ctx = context.WithValue(ctx, "node", NewChildsNode())
 	err := NewRootCommand().ExecuteContext(ctx)
+
 	if err != nil {
 		switch {
 		case errors.Is(err, fctl.ErrMissingApproval):

@@ -7,13 +7,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/components/header"
-	"github.com/formancehq/fctl/pkg/components/list"
 	"github.com/formancehq/fctl/pkg/components/prompt"
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/helpers"
 	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/formancehq/fctl/pkg/utils"
-	"github.com/spf13/cobra"
 )
 
 var lock = &sync.Mutex{}
@@ -34,7 +32,7 @@ type Display struct {
 	rendered string
 }
 
-func NewDisplay(cmd *cobra.Command) *Display {
+func NewDisplay(node *config.Node) *Display {
 	if instance == nil {
 		lock.Lock()
 		defer lock.Unlock()
@@ -43,7 +41,7 @@ func NewDisplay(cmd *cobra.Command) *Display {
 				header:     header.NewHeader(),
 				controller: nil,
 				renderer:   nil,
-				prompt:     prompt.NewPrompt(cmd),
+				prompt:     prompt.NewPrompt(node),
 			}
 		}
 	}
@@ -238,21 +236,8 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			d.suggestions = nil
 		}
 
-		// Get the suggestions
-		suggestions := d.prompt.GetSuggestions()
-
 		// Reset model if none is provided
-		if len(suggestions) == 0 {
-			d.suggestions = nil
-		}
-
-		// Create the model for the N suggestions
-		if len(suggestions) > 0 {
-			model := list.NewPointList(
-				suggestions...,
-			)
-			d.suggestions = prompt.NewSuggestions(model)
-		}
+		d.suggestions = d.prompt.GetSuggestions()
 	case tea.KeyMsg:
 		if d.prompt.IsFocused() {
 			m, cmd := d.prompt.Update(msg)
@@ -374,6 +359,10 @@ func (d *Display) addRenderControllerView() {
 
 func (d *Display) addRenderSuggestionView() {
 	if d.suggestions == nil {
+		return
+	}
+
+	if d.suggestions.IsEmpty() {
 		return
 	}
 
