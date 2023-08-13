@@ -3,12 +3,12 @@ package paginate
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"reflect"
 	"strings"
 
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/api"
-	"github.com/formancehq/stack/libs/go-libs/pointer"
 	"github.com/uptrace/bun"
 )
 
@@ -59,14 +59,14 @@ func UsingColumn[FILTERS any, ENTITY any](ctx context.Context,
 	}
 
 	var (
-		paginationIDs = make([]uint64, 0)
+		paginationIDs = make([]*BigInt, 0)
 	)
 	for _, t := range ret {
 		paginationID := reflect.ValueOf(t).
 			Field(paginatedColumnIndex).
-			Interface().(uint64)
+			Interface().(*BigInt)
 		if query.Bottom == nil {
-			query.Bottom = &paginationID
+			query.Bottom = (*big.Int)(paginationID)
 		}
 		paginationIDs = append(paginationIDs, paginationID)
 	}
@@ -90,17 +90,17 @@ func UsingColumn[FILTERS any, ENTITY any](ctx context.Context,
 
 		if hasMore {
 			cp := query
-			cp.PaginationID = pointer.For(paginationIDs[len(paginationIDs)-2])
+			cp.PaginationID = (*big.Int)(paginationIDs[len(paginationIDs)-2])
 			previous = &cp
 		}
 	} else {
 		if hasMore {
 			cp := query
-			cp.PaginationID = pointer.For(paginationIDs[len(paginationIDs)-1])
+			cp.PaginationID = (*big.Int)(paginationIDs[len(paginationIDs)-1])
 			next = &cp
 		}
 		if query.PaginationID != nil {
-			if (query.Order == OrderAsc && *query.PaginationID > *query.Bottom) || (query.Order == OrderDesc && *query.PaginationID < *query.Bottom) {
+			if (query.Order == OrderAsc && query.PaginationID.Cmp(query.Bottom) > 0) || (query.Order == OrderDesc && query.PaginationID.Cmp(query.Bottom) < 0) {
 				cp := query
 				cp.Reverse = true
 				previous = &cp

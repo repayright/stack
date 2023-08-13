@@ -25,6 +25,7 @@ func TestGetLastLog(t *testing.T) {
 	require.Nil(t, lastLog)
 	tx1 := core.ExpandedTransaction{
 		Transaction: core.Transaction{
+			ID: big.NewInt(0),
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
@@ -108,6 +109,7 @@ func TestGetLogs(t *testing.T) {
 
 	tx1 := core.ExpandedTransaction{
 		Transaction: core.Transaction{
+			ID: big.NewInt(0),
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
@@ -152,7 +154,7 @@ func TestGetLogs(t *testing.T) {
 	}
 	tx2 := core.ExpandedTransaction{
 		Transaction: core.Transaction{
-			ID: 1,
+			ID: big.NewInt(1),
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
@@ -197,7 +199,7 @@ func TestGetLogs(t *testing.T) {
 	}
 	tx3 := core.ExpandedTransaction{
 		Transaction: core.Transaction{
-			ID: 2,
+			ID: big.NewInt(2),
 			TransactionData: core.TransactionData{
 				Postings: []core.Posting{
 					{
@@ -258,7 +260,7 @@ func TestGetLogs(t *testing.T) {
 	require.Equal(t, paginate.QueryDefaultPageSize, cursor.PageSize)
 
 	require.Equal(t, 3, len(cursor.Data))
-	require.Equal(t, uint64(2), cursor.Data[0].ID)
+	require.Equal(t, big.NewInt(2), cursor.Data[0].ID)
 	require.Equal(t, tx3.Postings, cursor.Data[0].Data.(core.NewTransactionLogPayload).Transaction.Postings)
 	require.Equal(t, tx3.Reference, cursor.Data[0].Data.(core.NewTransactionLogPayload).Transaction.Reference)
 	require.Equal(t, tx3.Date, cursor.Data[0].Data.(core.NewTransactionLogPayload).Transaction.Date)
@@ -267,7 +269,7 @@ func TestGetLogs(t *testing.T) {
 	require.NoError(t, err)
 	// Should get only the first log.
 	require.Equal(t, 1, cursor.PageSize)
-	require.Equal(t, uint64(2), cursor.Data[0].ID)
+	require.Equal(t, big.NewInt(2), cursor.Data[0].ID)
 
 	cursor, err = store.GetLogs(context.Background(), ledgerstore.NewLogsQuery().
 		WithStartTimeFilter(now.Add(-2*time.Hour)).
@@ -277,7 +279,7 @@ func TestGetLogs(t *testing.T) {
 	require.Equal(t, 10, cursor.PageSize)
 	// Should get only the second log, as StartTime is inclusive and EndTime exclusive.
 	require.Len(t, cursor.Data, 1)
-	require.Equal(t, uint64(1), cursor.Data[0].ID)
+	require.Equal(t, big.NewInt(1), cursor.Data[0].ID)
 }
 
 func TestGetBalance(t *testing.T) {
@@ -299,7 +301,7 @@ func TestGetBalance(t *testing.T) {
 				core.NewTransaction().WithPostings(
 					core.NewPosting("world", fmt.Sprintf("account:%d", j), "EUR/2", big.NewInt(input)),
 					core.NewPosting(fmt.Sprintf("account:%d", j), "starbucks", "EUR/2", big.NewInt(output)),
-				).WithID(uint64(i*batchSize+j)),
+				).WithIDUint64(uint64(i*batchSize+j)),
 				map[string]metadata.Metadata{},
 			).ChainLog(previousLog)
 			logs = append(logs, chainedLog)

@@ -35,7 +35,7 @@ func TestGetAccounts(t *testing.T) {
 			core.NewTransactionLog(
 				core.NewTransaction().
 					WithPostings(core.NewPosting("world", "account:1", "USD", big.NewInt(100))).
-					WithID(1).
+					WithIDUint64(1).
 					WithDate(now.Add(4*time.Minute)),
 				map[string]metadata.Metadata{},
 			).WithDate(now.Add(100*time.Millisecond)),
@@ -43,7 +43,7 @@ func TestGetAccounts(t *testing.T) {
 				core.NewTransaction().
 					WithPostings(core.NewPosting("account:1", "bank", "USD", big.NewInt(50))).
 					WithDate(now.Add(3*time.Minute)).
-					WithID(2),
+					WithIDUint64(2),
 				map[string]metadata.Metadata{},
 			).WithDate(now.Add(200*time.Millisecond)),
 		)...,

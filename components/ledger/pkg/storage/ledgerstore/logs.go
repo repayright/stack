@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/json"
+	"math/big"
 
 	"github.com/formancehq/ledger/pkg/core"
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
@@ -22,12 +23,12 @@ const (
 type Logs struct {
 	bun.BaseModel `bun:"logs,alias:logs"`
 
-	ID             uint64    `bun:"id,unique,type:bigint"`
-	Type           string    `bun:"type,type:log_type"`
-	Hash           []byte    `bun:"hash,type:bytea"`
-	Date           core.Time `bun:"date,type:timestamptz"`
-	Data           []byte    `bun:"data,type:jsonb"`
-	IdempotencyKey string    `bun:"idempotency_key,type:varchar(256),unique"`
+	ID             *paginate.BigInt `bun:"id,unique,type:numeric"`
+	Type           string           `bun:"type,type:log_type"`
+	Hash           []byte           `bun:"hash,type:bytea"`
+	Date           core.Time        `bun:"date,type:timestamptz"`
+	Data           []byte           `bun:"data,type:jsonb"`
+	IdempotencyKey string           `bun:"idempotency_key,type:varchar(256),unique"`
 }
 
 func (log *Logs) ToCore() *core.ChainedLog {
@@ -43,7 +44,7 @@ func (log *Logs) ToCore() *core.ChainedLog {
 			Date:           log.Date.UTC(),
 			IdempotencyKey: log.IdempotencyKey,
 		},
-		ID:   log.ID,
+		ID:   (*big.Int)(log.ID),
 		Hash: log.Hash,
 	}
 }
@@ -90,7 +91,7 @@ func (store *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedL
 			}
 
 			ls[i] = Logs{
-				ID:             chainedLogs.ID,
+				ID:             (*paginate.BigInt)(chainedLogs.ID),
 				Type:           chainedLogs.Type.String(),
 				Hash:           chainedLogs.Hash,
 				Date:           chainedLogs.Date,
@@ -171,7 +172,7 @@ func NewLogsQuery() GetLogsQuery {
 }
 
 func (a GetLogsQuery) WithPaginationID(id uint64) GetLogsQuery {
-	a.PaginationID = &id
+	a.PaginationID = big.NewInt(int64(id))
 	return a
 }
 

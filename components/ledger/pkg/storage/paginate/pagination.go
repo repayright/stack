@@ -3,6 +3,7 @@ package paginate
 import (
 	"encoding/base64"
 	"encoding/json"
+	"math/big"
 )
 
 const (
@@ -29,13 +30,13 @@ func (o Order) Reverse() Order {
 }
 
 type ColumnPaginatedQuery[OPTIONS any] struct {
-	PageSize     uint64  `json:"pageSize"`
-	Bottom       *uint64 `json:"bottom"`
-	Column       string  `json:"column"`
-	PaginationID *uint64 `json:"paginationID"`
-	Order   Order   `json:"order"`
-	Options OPTIONS `json:"filters"`
-	Reverse bool    `json:"reverse"`
+	PageSize     uint64   `json:"pageSize"`
+	Bottom       *big.Int `json:"bottom"`
+	Column       string   `json:"column"`
+	PaginationID *big.Int `json:"paginationID"`
+	Order        Order    `json:"order"`
+	Options      OPTIONS  `json:"filters"`
+	Reverse      bool     `json:"reverse"`
 }
 
 func (q *ColumnPaginatedQuery[PAYLOAD]) EncodeAsCursor() string {

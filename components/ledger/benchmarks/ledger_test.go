@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -52,7 +53,7 @@ func BenchmarkParallelWrites(b *testing.B) {
 	startOfBench := time.Now()
 	counter := atomic.NewInt64(0)
 	longestTxLock := sync.Mutex{}
-	longestTransactionID := uint64(0)
+	longestTransactionID := big.NewInt(0)
 	longestTransactionDuration := time.Duration(0)
 	b.RunParallel(func(pb *testing.PB) {
 		buf := bytes.NewBufferString("")

@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
 	"strconv"
 
@@ -230,8 +231,8 @@ func PostTransaction(w http.ResponseWriter, r *http.Request) {
 func GetTransaction(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	txId, err := strconv.ParseUint(chi.URLParam(r, "txid"), 10, 64)
-	if err != nil {
+	txId, ok := big.NewInt(0).SetString(chi.URLParam(r, "txid"), 10)
+	if !ok {
 		apierrors.ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
 			errors.New("invalid transaction ID")))
 		return

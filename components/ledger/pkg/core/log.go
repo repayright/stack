@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/json"
+	"math/big"
 	"reflect"
 	"sort"
 	"strconv"
@@ -82,13 +83,13 @@ type hashable interface {
 
 type ChainedLog struct {
 	Log
-	ID        uint64 `json:"id"`
-	Projected bool   `json:"-"`
-	Hash      []byte `json:"hash"`
+	ID        *big.Int `json:"id"`
+	Projected bool     `json:"-"`
+	Hash      []byte   `json:"hash"`
 }
 
 func (l *ChainedLog) WithID(id uint64) *ChainedLog {
-	l.ID = id
+	l.ID = big.NewInt(int64(id))
 	return l
 }
 
@@ -120,7 +121,7 @@ func (l *ChainedLog) ComputeHash(previous *ChainedLog) {
 		bufferPool.Put(buf)
 	}()
 	hashLog := func(l *ChainedLog) {
-		buf.writeUInt64(l.ID)
+		buf.writeUInt64(l.ID.Uint64())
 		buf.writeUInt16(uint16(l.Type))
 		buf.writeUInt64(uint64(l.Date.UnixNano()))
 		buf.writeString(l.IdempotencyKey)
@@ -159,11 +160,13 @@ func (l *Log) WithIdempotencyKey(key string) *Log {
 }
 
 func (l *Log) ChainLog(previous *ChainedLog) *ChainedLog {
-	ret := &ChainedLog{}
-	ret.Log = *l
+	ret := &ChainedLog{
+		Log: *l,
+		ID:  big.NewInt(0),
+	}
 	ret.ComputeHash(previous)
 	if previous != nil {
-		ret.ID = previous.ID + 1
+		ret.ID = ret.ID.Add(previous.ID, big.NewInt(1))
 	}
 	return ret
 }
@@ -297,16 +300,16 @@ func NewSetMetadataOnTransactionLog(at Time, txID uint64, metadata metadata.Meta
 }
 
 type RevertedTransactionLogPayload struct {
-	RevertedTransactionID uint64       `json:"revertedTransactionID"`
+	RevertedTransactionID *big.Int     `json:"revertedTransactionID"`
 	RevertTransaction     *Transaction `json:"transaction"`
 }
 
 func (r RevertedTransactionLogPayload) hashString(buf *buffer) {
-	buf.writeUInt64(r.RevertedTransactionID)
+	buf.writeUInt64(r.RevertedTransactionID.Uint64())
 	r.RevertTransaction.hashString(buf)
 }
 
-func NewRevertedTransactionLog(at Time, revertedTxID uint64, tx *Transaction) *Log {
+func NewRevertedTransactionLog(at Time, revertedTxID *big.Int, tx *Transaction) *Log {
 	return &Log{
 		Type: RevertedTransactionLogType,
 		Date: at,

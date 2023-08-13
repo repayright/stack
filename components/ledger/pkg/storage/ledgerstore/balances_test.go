@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	internaltesting "github.com/formancehq/ledger/internal/testing"
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
@@ -25,7 +26,7 @@ func TestGetBalancesAggregated(t *testing.T) {
 	tx2 := core.NewTransaction().WithPostings(
 		core.NewPosting("world", "users:1", "USD", big.NewInt(1)),
 		core.NewPosting("world", "users:2", "USD", big.NewInt(199)),
-	).WithDate(now.Add(time.Minute)).WithID(1)
+	).WithDate(now.Add(time.Minute)).WithIDUint64(1)
 
 	require.NoError(t, store.InsertLogs(context.Background(),
 		core.ChainLogs(
@@ -37,7 +38,7 @@ func TestGetBalancesAggregated(t *testing.T) {
 		q := ledgerstore.NewGetAggregatedBalancesQuery().WithPageSize(10)
 		cursor, err := store.GetAggregatedBalances(context.Background(), q)
 		require.NoError(t, err)
-		RequireEqual(t, core.BalancesByAssets{
+		internaltesting.RequireEqual(t, core.BalancesByAssets{
 			"USD": big.NewInt(0),
 		}, cursor)
 	})

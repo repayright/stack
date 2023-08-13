@@ -21,7 +21,7 @@ const (
 type Transaction struct {
 	bun.BaseModel `bun:"transactions,alias:transactions"`
 
-	ID                         uint64                     `bun:"id,type:bigint"`
+	ID                         *paginate.BigInt                   `bun:"id,type:numeric"`
 	Timestamp                  core.Time                  `bun:"date,type:timestamp without time zone"`
 	Reference                  string                     `bun:"reference,type:varchar,unique,nullzero"`
 	Postings                   []core.Posting             `bun:"postings,type:jsonb"`
@@ -57,7 +57,7 @@ func (t *Transaction) toCore() *core.ExpandedTransaction {
 				Date:      t.Timestamp,
 				Postings:  t.Postings,
 			},
-			ID: t.ID,
+			ID: (*big.Int)(t.ID),
 		},
 		PreCommitEffectiveVolumes:  preCommitEffectiveVolumes,
 		PostCommitEffectiveVolumes: t.PostCommitEffectiveVolumes,
@@ -311,7 +311,7 @@ func (a GetTransactionsQuery) WithExpandVolumes(v bool) GetTransactionsQuery {
 
 type GetTransactionQuery struct {
 	PITFilter
-	ID uint64
+	ID *big.Int
 }
 
 func (q GetTransactionQuery) WithExpandVolumes() GetTransactionQuery {
@@ -326,7 +326,7 @@ func (q GetTransactionQuery) WithExpandEffectiveVolumes() GetTransactionQuery {
 	return q
 }
 
-func NewGetTransactionQuery(id uint64) GetTransactionQuery {
+func NewGetTransactionQuery(id *big.Int) GetTransactionQuery {
 	return GetTransactionQuery{
 		PITFilter: PITFilter{},
 		ID:        id,

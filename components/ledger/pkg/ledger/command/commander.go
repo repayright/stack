@@ -3,8 +3,8 @@ package command
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"sync"
-	"sync/atomic"
 
 	"github.com/formancehq/ledger/pkg/core"
 	"github.com/formancehq/ledger/pkg/ledger/utils/batching"
@@ -29,7 +29,7 @@ type Commander struct {
 	locker     Locker
 	compiler   *Compiler
 	running    sync.WaitGroup
-	lastTXID   *atomic.Int64
+	lastTXID   *big.Int
 	referencer *Referencer
 	mu         sync.Mutex
 
@@ -47,22 +47,18 @@ func New(
 		panic(err)
 	}
 
-	var lastTxID *uint64
+	lastTxID := big.NewInt(-1)
 	if err == nil {
 		switch payload := log.Data.(type) {
 		case core.NewTransactionLogPayload:
-			lastTxID = &payload.Transaction.ID
+			lastTxID = payload.Transaction.ID
 		case core.RevertedTransactionLogPayload:
-			lastTxID = &payload.RevertTransaction.ID
+			lastTxID = payload.RevertTransaction.ID
 		default:
 			panic(fmt.Sprintf("unhandled payload type: %T", payload))
 		}
-	}
-	lastTXID := &atomic.Int64{}
-	if lastTxID != nil {
-		lastTXID.Add(int64(*lastTxID))
 	} else {
-		lastTXID.Add(-1)
+
 	}
 
 	lastLog, err := store.GetLastLog(context.Background())
@@ -75,7 +71,7 @@ func New(
 		locker:     locker,
 		compiler:   compiler,
 		referencer: referencer,
-		lastTXID:   lastTXID,
+		lastTXID:   lastTxID,
 		lastLog:    lastLog,
 		Batcher:    batching.NewBatcher(store.InsertLogs, 1, 4096),
 	}
@@ -162,7 +158,7 @@ func (commander *Commander) exec(ctx context.Context, parameters Parameters, scr
 			WithPostings(result.Postings...).
 			WithMetadata(result.Metadata).
 			WithDate(script.Timestamp).
-			WithID(uint64(commander.lastTXID.Add(1))).
+			WithID(commander.nextTXID()).
 			WithReference(script.Reference)
 
 		log := logComputer(tx, result.AccountMetadata)
@@ -281,4 +277,14 @@ func (commander *Commander) chainLog(log *core.Log) *core.ChainedLog {
 
 	commander.lastLog = log.ChainLog(commander.lastLog)
 	return commander.lastLog
+}
+
+func (commander *Commander) nextTXID() *big.Int {
+	commander.mu.Lock()
+	defer commander.mu.Unlock()
+
+	ret := big.NewInt(0).Add(commander.lastTXID, big.NewInt(1))
+	commander.lastTXID = ret
+
+	return ret
 }

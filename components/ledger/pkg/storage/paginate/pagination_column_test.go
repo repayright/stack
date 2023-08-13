@@ -2,12 +2,12 @@ package paginate_test
 
 import (
 	"context"
+	"math/big"
 	"testing"
 
 	"github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/ledger/pkg/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/pgtesting"
-	"github.com/formancehq/stack/libs/go-libs/pointer"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,14 +28,14 @@ func TestColumnPagination(t *testing.T) {
 	require.NoError(t, err)
 
 	type model struct {
-		ID   uint64 `bun:"id"`
-		Pair bool   `bun:"pair"`
+		ID   *paginate.BigInt `bun:"id,type:numeric"`
+		Pair bool             `bun:"pair"`
 	}
 
 	models := make([]model, 0)
 	for i := 0; i < 100; i++ {
 		models = append(models, model{
-			ID:   uint64(i),
+			ID:   (*paginate.BigInt)(big.NewInt(int64(i))),
 			Pair: i%2 == 0,
 		})
 	}
@@ -50,7 +50,7 @@ func TestColumnPagination(t *testing.T) {
 		query                 paginate.ColumnPaginatedQuery[bool]
 		expectedNext          *paginate.ColumnPaginatedQuery[bool]
 		expectedPrevious      *paginate.ColumnPaginatedQuery[bool]
-		expectedNumberOfItems uint64
+		expectedNumberOfItems int64
 	}
 	testCases := []testCase{
 		{
@@ -63,9 +63,9 @@ func TestColumnPagination(t *testing.T) {
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(10)),
+				PaginationID: big.NewInt(int64(10)),
 				Order:        paginate.OrderAsc,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 			},
 			expectedNumberOfItems: 10,
 		},
@@ -74,24 +74,24 @@ func TestColumnPagination(t *testing.T) {
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(10)),
+				PaginationID: big.NewInt(int64(10)),
 				Order:        paginate.OrderAsc,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 			},
 			expectedPrevious: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
 				Order:        paginate.OrderAsc,
-				Bottom:       pointer.For(uint64(0)),
-				PaginationID: pointer.For(uint64(10)),
+				Bottom:       big.NewInt(int64(0)),
+				PaginationID: big.NewInt(int64(10)),
 				Reverse:      true,
 			},
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(20)),
+				PaginationID: big.NewInt(int64(20)),
 				Order:        paginate.OrderAsc,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 			},
 			expectedNumberOfItems: 10,
 		},
@@ -100,16 +100,16 @@ func TestColumnPagination(t *testing.T) {
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(90)),
+				PaginationID: big.NewInt(int64(90)),
 				Order:        paginate.OrderAsc,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 			},
 			expectedPrevious: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
 				Order:        paginate.OrderAsc,
-				PaginationID: pointer.For(uint64(90)),
-				Bottom:       pointer.For(uint64(0)),
+				PaginationID: big.NewInt(int64(90)),
+				Bottom:       big.NewInt(int64(0)),
 				Reverse:      true,
 			},
 			expectedNumberOfItems: 10,
@@ -123,9 +123,9 @@ func TestColumnPagination(t *testing.T) {
 			},
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(89)),
+				PaginationID: big.NewInt(int64(89)),
 				Order:        paginate.OrderDesc,
 			},
 			expectedNumberOfItems: 10,
@@ -134,24 +134,24 @@ func TestColumnPagination(t *testing.T) {
 			name: "desc second page using next cursor",
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(89)),
+				PaginationID: big.NewInt(int64(89)),
 				Order:        paginate.OrderDesc,
 			},
 			expectedPrevious: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(89)),
+				PaginationID: big.NewInt(int64(89)),
 				Order:        paginate.OrderDesc,
 				Reverse:      true,
 			},
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(79)),
+				PaginationID: big.NewInt(int64(79)),
 				Order:        paginate.OrderDesc,
 			},
 			expectedNumberOfItems: 10,
@@ -160,16 +160,16 @@ func TestColumnPagination(t *testing.T) {
 			name: "desc last page using next cursor",
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(9)),
+				PaginationID: big.NewInt(int64(9)),
 				Order:        paginate.OrderDesc,
 			},
 			expectedPrevious: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(9)),
+				PaginationID: big.NewInt(int64(9)),
 				Order:        paginate.OrderDesc,
 				Reverse:      true,
 			},
@@ -179,17 +179,17 @@ func TestColumnPagination(t *testing.T) {
 			name: "asc first page using previous cursor",
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(10)),
+				PaginationID: big.NewInt(int64(10)),
 				Order:        paginate.OrderAsc,
 				Reverse:      true,
 			},
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(10)),
+				PaginationID: big.NewInt(int64(10)),
 				Order:        paginate.OrderAsc,
 			},
 			expectedNumberOfItems: 10,
@@ -198,17 +198,17 @@ func TestColumnPagination(t *testing.T) {
 			name: "desc first page using previous cursor",
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(89)),
+				PaginationID: big.NewInt(int64(89)),
 				Order:        paginate.OrderDesc,
 				Reverse:      true,
 			},
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
-				Bottom:       pointer.For(uint64(99)),
+				Bottom:       big.NewInt(int64(99)),
 				Column:       "id",
-				PaginationID: pointer.For(uint64(89)),
+				PaginationID: big.NewInt(int64(89)),
 				Order:        paginate.OrderDesc,
 			},
 			expectedNumberOfItems: 10,
@@ -224,10 +224,10 @@ func TestColumnPagination(t *testing.T) {
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(20)),
+				PaginationID: big.NewInt(int64(20)),
 				Order:        paginate.OrderAsc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 			},
 			expectedNumberOfItems: 10,
 		},
@@ -236,26 +236,26 @@ func TestColumnPagination(t *testing.T) {
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(20)),
+				PaginationID: big.NewInt(int64(20)),
 				Order:        paginate.OrderAsc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 			},
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(40)),
+				PaginationID: big.NewInt(int64(40)),
 				Order:        paginate.OrderAsc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 			},
 			expectedPrevious: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(20)),
+				PaginationID: big.NewInt(int64(20)),
 				Order:        paginate.OrderAsc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(0)),
+				Bottom:       big.NewInt(int64(0)),
 				Reverse:      true,
 			},
 			expectedNumberOfItems: 10,
@@ -271,10 +271,10 @@ func TestColumnPagination(t *testing.T) {
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(78)),
+				PaginationID: big.NewInt(int64(78)),
 				Order:        paginate.OrderDesc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(98)),
+				Bottom:       big.NewInt(int64(98)),
 			},
 			expectedNumberOfItems: 10,
 		},
@@ -283,26 +283,26 @@ func TestColumnPagination(t *testing.T) {
 			query: paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(78)),
+				PaginationID: big.NewInt(int64(78)),
 				Order:        paginate.OrderDesc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(98)),
+				Bottom:       big.NewInt(int64(98)),
 			},
 			expectedNext: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(58)),
+				PaginationID: big.NewInt(int64(58)),
 				Order:        paginate.OrderDesc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(98)),
+				Bottom:       big.NewInt(int64(98)),
 			},
 			expectedPrevious: &paginate.ColumnPaginatedQuery[bool]{
 				PageSize:     10,
 				Column:       "id",
-				PaginationID: pointer.For(uint64(78)),
+				PaginationID: big.NewInt(int64(78)),
 				Order:        paginate.OrderDesc,
 				Options:      true,
-				Bottom:       pointer.For(uint64(98)),
+				Bottom:       big.NewInt(int64(98)),
 				Reverse:      true,
 			},
 			expectedNumberOfItems: 10,

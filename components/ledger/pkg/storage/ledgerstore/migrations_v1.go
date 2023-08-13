@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
 
 	"github.com/formancehq/ledger/pkg/core"
+	"github.com/formancehq/ledger/pkg/storage/paginate"
 	"github.com/lib/pq"
 	"github.com/uptrace/bun"
 )
@@ -84,7 +86,7 @@ func (l *LogV1) ToLogsV2() (Logs, error) {
 	}
 
 	return Logs{
-		ID:   l.ID,
+		ID:   (*paginate.BigInt)(big.NewInt(int64(l.ID))),
 		Type: logType.String(),
 		Hash: []byte(l.Hash),
 		Date: l.Date,

@@ -1,4 +1,4 @@
-package ledgerstore
+package paginate
 
 import (
 	"database/sql"
@@ -82,6 +82,10 @@ func (b *BigInt) Scan(value interface{}) error {
 
 func (b *BigInt) ToMathBig() *big.Int {
 	return (*big.Int)(b)
+}
+
+func (i *BigInt) Cmp(bottom *BigInt) int {
+	return (*big.Int)(i).Cmp((*big.Int)(bottom))
 }
 
 var _ json.Unmarshaler = (*BigInt)(nil)

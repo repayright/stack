@@ -27,7 +27,7 @@ func (m *InMemoryStore) GetTransactionByReference(ctx context.Context, ref strin
 
 func (m *InMemoryStore) GetTransaction(ctx context.Context, txID uint64) (*core.Transaction, error) {
 	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
-		return transaction.ID == txID
+		return transaction.ID.Cmp(big.NewInt(int64(txID))) == 0
 	})
 	if len(filtered) == 0 {
 		return nil, ErrNotFound
@@ -110,7 +110,7 @@ func (m *InMemoryStore) InsertLogs(ctx context.Context, logs ...*core.ChainedLog
 			})
 		case core.RevertedTransactionLogPayload:
 			tx := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
-				return transaction.ID == payload.RevertedTransactionID
+				return transaction.ID.Cmp(payload.RevertedTransactionID) == 0
 			})[0]
 			tx.Reverted = true
 		case core.SetMetadataLogPayload:

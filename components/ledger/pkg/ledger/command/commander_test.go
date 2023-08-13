@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	internaltesting "github.com/formancehq/ledger/internal/testing"
 	"github.com/formancehq/ledger/pkg/core"
 	storageerrors "github.com/formancehq/ledger/pkg/storage"
 	"github.com/formancehq/stack/libs/go-libs/logging"
@@ -169,7 +170,7 @@ func TestCreateTransaction(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, ret)
 				tc.expectedTx.Date = now
-				require.Equal(t, tc.expectedTx, ret)
+				internaltesting.RequireEqual(t, tc.expectedTx, ret)
 
 				for ind := range tc.expectedLogs {
 					expectedLog := tc.expectedLogs[ind]
@@ -217,7 +218,7 @@ func TestRevertWithAlreadyReverted(t *testing.T) {
 			core.NewTransaction().WithPostings(core.NewPosting("world", "bank", "USD", big.NewInt(100))),
 			map[string]metadata.Metadata{},
 		).ChainLog(nil),
-		core.NewRevertedTransactionLog(core.Now(), 0, core.NewTransaction()).ChainLog(nil),
+		core.NewRevertedTransactionLog(core.Now(), big.NewInt(0), core.NewTransaction()).ChainLog(nil),
 	)
 	require.NoError(t, err)
 

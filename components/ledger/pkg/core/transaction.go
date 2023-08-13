@@ -1,6 +1,8 @@
 package core
 
 import (
+	"math/big"
+
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 )
 
@@ -53,13 +55,8 @@ func (d TransactionData) WithDate(now Time) TransactionData {
 
 type Transaction struct {
 	TransactionData
-	ID       uint64 `json:"id"`
-	Reverted bool   `json:"reverted"`
-}
-
-type TransactionWithMetadata struct {
-	ID       uint64
-	Metadata metadata.Metadata
+	ID       *big.Int `json:"id"`
+	Reverted bool     `json:"reverted"`
 }
 
 func (t *Transaction) WithPostings(postings ...Posting) *Transaction {
@@ -77,7 +74,12 @@ func (t *Transaction) WithDate(ts Time) *Transaction {
 	return t
 }
 
-func (t *Transaction) WithID(id uint64) *Transaction {
+func (t *Transaction) WithIDUint64(id uint64) *Transaction {
+	t.ID = big.NewInt(int64(id))
+	return t
+}
+
+func (t *Transaction) WithID(id *big.Int) *Transaction {
 	t.ID = id
 	return t
 }
@@ -87,36 +89,14 @@ func (t *Transaction) WithMetadata(m metadata.Metadata) *Transaction {
 	return t
 }
 
-func (t Transaction) GetMoves() []*Move {
-	ret := make([]*Move, 0)
-	for ind, posting := range t.Postings {
-		ret = append(ret, &Move{
-			TransactionID: t.ID,
-			Amount:        posting.Amount,
-			Asset:         posting.Asset,
-			Account:       posting.Source,
-			PostingIndex:  uint8(ind),
-			IsSource:      true,
-			Timestamp:     t.Date,
-		}, &Move{
-			TransactionID: t.ID,
-			Amount:        posting.Amount,
-			Asset:         posting.Asset,
-			Account:       posting.Destination,
-			PostingIndex:  uint8(ind),
-			Timestamp:     t.Date,
-		})
-	}
-	return ret
-}
-
 func (t *Transaction) hashString(buf *buffer) {
-	buf.writeUInt64(t.ID)
+	buf.writeUInt64(t.ID.Uint64())
 	t.TransactionData.hashString(buf)
 }
 
 func NewTransaction() *Transaction {
 	return &Transaction{
+		ID: big.NewInt(0),
 		TransactionData: NewTransactionData().
 			WithDate(Now()),
 	}
