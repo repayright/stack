@@ -290,12 +290,17 @@ as $$
             order by seq desc
             limit 1;
 
-            select (post_commit_effective_volumes).inputs, (post_commit_effective_volumes).outputs into _effective_post_commit_volumes
-            from moves
-            where account_address = _account_address
-                and asset = _asset and effective_date <= _effective_date
-            order by effective_date desc, seq desc
-            limit 1;
+            if not found then
+                _post_commit_volumes = (0, 0)::volumes;
+                _effective_post_commit_volumes = (0, 0)::volumes;
+            else
+                select (post_commit_effective_volumes).inputs, (post_commit_effective_volumes).outputs into _effective_post_commit_volumes
+                from moves
+                where account_address = _account_address
+                    and asset = _asset and effective_date <= _effective_date
+                order by effective_date desc, seq desc
+                limit 1;
+            end if;
         end if;
 
         if _is_source then
