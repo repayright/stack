@@ -237,10 +237,15 @@ func GetTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := l.GetTransactionWithVolumes(r.Context(), txId,
-		collectionutils.Contains(r.URL.Query()["expand"], "volumes"),
-		collectionutils.Contains(r.URL.Query()["expand"], "effectiveVolumes"),
-	)
+	query := ledgerstore.NewGetTransactionQuery(txId)
+	if collectionutils.Contains(r.URL.Query()["expand"], "volumes") {
+		query = query.WithExpandVolumes()
+	}
+	if collectionutils.Contains(r.URL.Query()["expand"], "effectiveVolumes") {
+		query = query.WithExpandEffectiveVolumes()
+	}
+
+	tx, err := l.GetTransactionWithVolumes(r.Context(), query)
 	if err != nil {
 		apierrors.ResponseError(w, r, err)
 		return

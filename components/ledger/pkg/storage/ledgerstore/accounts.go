@@ -12,14 +12,13 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (s *Store) accountQueryBuilder(q AccountFilter) func(query *bun.SelectQuery) *bun.SelectQuery {
+func (store *Store) accountQueryBuilder(q PITFilter) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		query = query.
 			DistinctOn("accounts.address").
 			Column("accounts.address").
 			ColumnExpr("coalesce(metadata, '{}'::jsonb) as metadata").
 			Table("accounts").
-			Apply(filterMetadata(q.Metadata)).
 			Apply(filterPIT(q.PIT, "insertion_date")).
 			Order("accounts.address", "revision desc")
 
@@ -45,19 +44,20 @@ func (s *Store) accountQueryBuilder(q AccountFilter) func(query *bun.SelectQuery
 	}
 }
 
-func (s *Store) GetAccountsWithVolumes(ctx context.Context, q GetAccountsQuery) (*api.Cursor[core.ExpandedAccount], error) {
-	return paginateWithOffset[GetAccountsOptions, core.ExpandedAccount](s, ctx,
+func (store *Store) GetAccountsWithVolumes(ctx context.Context, q GetAccountsQuery) (*api.Cursor[core.ExpandedAccount], error) {
+	return paginateWithOffset[GetAccountsOptions, core.ExpandedAccount](store, ctx,
 		paginate.OffsetPaginatedQuery[GetAccountsOptions](q),
 		func(query *bun.SelectQuery) *bun.SelectQuery {
-			return s.
-				accountQueryBuilder(q.Options.AccountFilter)(query).
-				Apply(filterAccountAddress(q.Options.Address, "accounts.address"))
+			return store.
+				accountQueryBuilder(q.Options.PITFilter)(query).
+				Apply(filterAccountAddress(q.Options.Address, "accounts.address")).
+				Apply(filterMetadata(q.Options.Metadata))
 		},
 	)
 }
 
 type GetAccountQuery struct {
-	AccountFilter
+	PITFilter
 	Addr string
 }
 
@@ -85,8 +85,8 @@ func NewGetAccountQuery(addr string) GetAccountQuery {
 	}
 }
 
-func (s *Store) GetAccount(ctx context.Context, address string) (*core.Account, error) {
-	account, err := fetch[*core.Account](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
+func (store *Store) GetAccount(ctx context.Context, address string) (*core.Account, error) {
+	account, err := fetch[*core.Account](store, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.
 			ColumnExpr("accounts.address").
 			ColumnExpr("coalesce(metadata, '{}'::jsonb) as metadata").
@@ -104,9 +104,9 @@ func (s *Store) GetAccount(ctx context.Context, address string) (*core.Account, 
 	return account, nil
 }
 
-func (s *Store) GetAccountWithVolumes(ctx context.Context, q GetAccountQuery) (*core.ExpandedAccount, error) {
-	account, err := fetch[*core.ExpandedAccount](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
-		query = s.accountQueryBuilder(q.AccountFilter)(query).
+func (store *Store) GetAccountWithVolumes(ctx context.Context, q GetAccountQuery) (*core.ExpandedAccount, error) {
+	account, err := fetch[*core.ExpandedAccount](store, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
+		query = store.accountQueryBuilder(q.PITFilter)(query).
 			Where("accounts.address = ?", q.Addr).
 			Limit(1)
 
@@ -121,27 +121,28 @@ func (s *Store) GetAccountWithVolumes(ctx context.Context, q GetAccountQuery) (*
 	return account, nil
 }
 
-func (s *Store) CountAccounts(ctx context.Context, q GetAccountsQuery) (uint64, error) {
-	return count(s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
-		return s.
-			accountQueryBuilder(q.Options.AccountFilter)(query).
-			Apply(filterAccountAddress(q.Options.Address, "accounts.address"))
+func (store *Store) CountAccounts(ctx context.Context, q GetAccountsQuery) (uint64, error) {
+	return count(store, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
+		return store.
+			accountQueryBuilder(q.Options.PITFilter)(query).
+			Apply(filterAccountAddress(q.Options.Address, "accounts.address")).
+			Apply(filterMetadata(q.Options.Metadata))
 	})
 }
 
 type GetAccountsQuery paginate.OffsetPaginatedQuery[GetAccountsOptions]
 
-type AccountFilter struct {
-	PIT                    *core.Time        `json:"pit"`
-	ExpandVolumes          bool              `json:"volumes"`
-	ExpandEffectiveVolumes bool              `json:"effectiveVolumes"`
-	Metadata               metadata.Metadata `json:"metadata"`
+type PITFilter struct {
+	PIT                    *core.Time `json:"pit"`
+	ExpandVolumes          bool       `json:"volumes"`
+	ExpandEffectiveVolumes bool       `json:"effectiveVolumes"`
 }
 
 type GetAccountsOptions struct {
-	AccountFilter
+	PITFilter
 	AfterAddress string `json:"after"`
 	Address      string `json:"address"`
+	Metadata     metadata.Metadata
 }
 
 func NewGetAccountsQuery() GetAccountsQuery {
@@ -149,9 +150,7 @@ func NewGetAccountsQuery() GetAccountsQuery {
 		PageSize: paginate.QueryDefaultPageSize,
 		Order:    paginate.OrderAsc,
 		Options: GetAccountsOptions{
-			AccountFilter: AccountFilter{
-				Metadata: metadata.Metadata{},
-			},
+			Metadata: metadata.Metadata{},
 		},
 	}
 }

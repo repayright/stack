@@ -28,14 +28,14 @@ func TestGetBalancesAggregated(t *testing.T) {
 	testCases := []testCase{
 		{
 			name:        "nominal",
-			expectQuery: ledgerstore.NewBalancesQuery(),
+			expectQuery: ledgerstore.NewGetAggregatedBalancesQuery(),
 		},
 		{
 			name: "using address",
 			queryParams: url.Values{
 				"address": []string{"foo"},
 			},
-			expectQuery: ledgerstore.NewBalancesQuery().WithAddressFilter("foo"),
+			expectQuery: ledgerstore.NewGetAggregatedBalancesQuery().WithAddressFilter("foo"),
 		},
 	}
 	for _, testCase := range testCases {

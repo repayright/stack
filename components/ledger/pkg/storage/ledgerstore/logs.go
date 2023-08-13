@@ -57,7 +57,7 @@ func (j RawMessage) Value() (driver.Value, error) {
 	return string(j), nil
 }
 
-func (s *Store) logsQueryBuilder(q LogsQueryOptions) func(*bun.SelectQuery) *bun.SelectQuery {
+func (store *Store) logsQueryBuilder(q LogsQueryOptions) func(*bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		query = query.Table(LogTableName)
 		if !q.StartTime.IsZero() {
@@ -70,11 +70,11 @@ func (s *Store) logsQueryBuilder(q LogsQueryOptions) func(*bun.SelectQuery) *bun
 	}
 }
 
-func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedLog) error {
-	return s.withTransaction(ctx, func(tx bun.Tx) error {
+func (store *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedLog) error {
+	return store.withTransaction(ctx, func(tx bun.Tx) error {
 		// Beware: COPY query is not supported by bun if the pgx driver is used.
 		stmt, err := tx.Prepare(pq.CopyInSchema(
-			s.name,
+			store.name,
 			LogTableName,
 			"id", "type", "hash", "date", "data", "idempotency_key",
 		))
@@ -113,17 +113,17 @@ func (s *Store) InsertLogs(ctx context.Context, activeLogs ...*core.ChainedLog) 
 	})
 }
 
-func (s *Store) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
-	return fetchAndMap[*Logs, *core.ChainedLog](s, ctx, (*Logs).ToCore,
+func (store *Store) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
+	return fetchAndMap[*Logs, *core.ChainedLog](store, ctx, (*Logs).ToCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.OrderExpr("id desc").Limit(1)
 		})
 }
 
-func (s *Store) GetLogs(ctx context.Context, q GetLogsQuery) (*api.Cursor[core.ChainedLog], error) {
-	logs, err := paginateWithColumn[LogsQueryOptions, Logs](s, ctx,
+func (store *Store) GetLogs(ctx context.Context, q GetLogsQuery) (*api.Cursor[core.ChainedLog], error) {
+	logs, err := paginateWithColumn[LogsQueryOptions, Logs](store, ctx,
 		paginate.ColumnPaginatedQuery[LogsQueryOptions](q),
-		s.logsQueryBuilder(q.Options),
+		store.logsQueryBuilder(q.Options),
 	)
 	if err != nil {
 		return nil, err
@@ -134,8 +134,8 @@ func (s *Store) GetLogs(ctx context.Context, q GetLogsQuery) (*api.Cursor[core.C
 	}), nil
 }
 
-func (s *Store) ReadLastLogWithType(ctx context.Context, logTypes ...core.LogType) (*core.ChainedLog, error) {
-	return fetchAndMap[*Logs](s, ctx, (*Logs).ToCore,
+func (store *Store) ReadLastLogWithType(ctx context.Context, logTypes ...core.LogType) (*core.ChainedLog, error) {
+	return fetchAndMap[*Logs](store, ctx, (*Logs).ToCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
 				Where("type IN (?)", bun.In(collectionutils.Map(logTypes, core.LogType.String))).
@@ -144,8 +144,8 @@ func (s *Store) ReadLastLogWithType(ctx context.Context, logTypes ...core.LogTyp
 		})
 }
 
-func (s *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error) {
-	return fetchAndMap[*Logs, *core.ChainedLog](s, ctx, (*Logs).ToCore,
+func (store *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (*core.ChainedLog, error) {
+	return fetchAndMap[*Logs, *core.ChainedLog](store, ctx, (*Logs).ToCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
 				OrderExpr("id desc").

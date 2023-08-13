@@ -163,18 +163,18 @@ func (mr *MockLedgerMockRecorder) GetMigrationsInfo(ctx interface{}) *gomock.Cal
 }
 
 // GetTransactionWithVolumes mocks base method.
-func (m *MockLedger) GetTransactionWithVolumes(ctx context.Context, id uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error) {
+func (m *MockLedger) GetTransactionWithVolumes(ctx context.Context, query ledgerstore.GetTransactionQuery) (*core.ExpandedTransaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransactionWithVolumes", ctx, id, expandVolumes, expandEffectiveVolumes)
+	ret := m.ctrl.Call(m, "GetTransactionWithVolumes", ctx, query)
 	ret0, _ := ret[0].(*core.ExpandedTransaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTransactionWithVolumes indicates an expected call of GetTransactionWithVolumes.
-func (mr *MockLedgerMockRecorder) GetTransactionWithVolumes(ctx, id, expandVolumes, expandEffectiveVolumes interface{}) *gomock.Call {
+func (mr *MockLedgerMockRecorder) GetTransactionWithVolumes(ctx, query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionWithVolumes", reflect.TypeOf((*MockLedger)(nil).GetTransactionWithVolumes), ctx, id, expandVolumes, expandEffectiveVolumes)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionWithVolumes", reflect.TypeOf((*MockLedger)(nil).GetTransactionWithVolumes), ctx, query)
 }
 
 // GetTransactions mocks base method.

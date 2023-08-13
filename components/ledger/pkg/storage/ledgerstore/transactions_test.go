@@ -150,7 +150,9 @@ func TestGetTransaction(t *testing.T) {
 
 	require.NoError(t, insertTransactions(context.Background(), store, tx1.Transaction, tx2.Transaction))
 
-	tx, err := store.GetTransactionWithVolumes(context.Background(), tx1.ID, true, true)
+	tx, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx1.ID).
+		WithExpandVolumes().
+		WithExpandEffectiveVolumes())
 	require.NoError(t, err)
 	require.Equal(t, tx1.Postings, tx.Postings)
 	require.Equal(t, tx1.Reference, tx.Reference)
@@ -184,7 +186,9 @@ func TestGetTransaction(t *testing.T) {
 		},
 	}, tx.PreCommitVolumes)
 
-	tx, err = store.GetTransactionWithVolumes(context.Background(), tx2.ID, true, true)
+	tx, err = store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx2.ID).
+		WithExpandVolumes().
+		WithExpandEffectiveVolumes())
 	require.Equal(t, tx2.Postings, tx.Postings)
 	require.Equal(t, tx2.Reference, tx.Reference)
 	require.Equal(t, tx2.Date, tx.Date)
@@ -261,7 +265,8 @@ func TestInsertTransactions(t *testing.T) {
 		err := insertTransactions(context.Background(), store, tx1.Transaction)
 		require.NoError(t, err, "inserting transaction should not fail")
 
-		tx, err := store.GetTransactionWithVolumes(context.Background(), 0, true, false)
+		tx, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(0).
+			WithExpandVolumes())
 		RequireEqual(t, tx1, *tx)
 	})
 
@@ -337,11 +342,11 @@ func TestInsertTransactions(t *testing.T) {
 		err := insertTransactions(context.Background(), store, tx2.Transaction, tx3.Transaction)
 		require.NoError(t, err, "inserting multiple transactions should not fail")
 
-		tx, err := store.GetTransactionWithVolumes(context.Background(), 1, true, false)
+		tx, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(1).WithExpandVolumes())
 		require.NoError(t, err, "getting transaction should not fail")
 		RequireEqual(t, tx2, *tx)
 
-		tx, err = store.GetTransactionWithVolumes(context.Background(), 2, true, false)
+		tx, err = store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(2).WithExpandVolumes())
 		require.NoError(t, err, "getting transaction should not fail")
 		RequireEqual(t, tx3, *tx)
 	})
@@ -542,11 +547,11 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 	)
 	require.NoError(t, err, "updating multiple transaction metadata should not fail")
 
-	tx, err := store.GetTransactionWithVolumes(context.Background(), 0, true, true)
+	tx, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(0).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err, "getting transaction should not fail")
 	require.Equal(t, tx.Metadata, metadata.Metadata{"foo1": "bar2"}, "metadata should be equal")
 
-	tx, err = store.GetTransactionWithVolumes(context.Background(), 1, true, true)
+	tx, err = store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(1).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err, "getting transaction should not fail")
 	require.Equal(t, tx.Metadata, metadata.Metadata{"foo2": "bar2"}, "metadata should be equal")
 }
@@ -572,7 +577,7 @@ func TestInsertTransactionInPast(t *testing.T) {
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2))
 	require.NoError(t, insertTransactions(context.Background(), store, *tx3))
 
-	tx2FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), tx2.ID, true, true)
+	tx2FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx2.ID).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err)
 
 	RequireEqual(t, core.AccountsAssetsVolumes{
@@ -613,7 +618,7 @@ func TestInsertTransactionInPastInOneBatch(t *testing.T) {
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2, *tx3))
 
-	tx2FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), tx2.ID, true, true)
+	tx2FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx2.ID).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err)
 
 	RequireEqual(t, core.AccountsAssetsVolumes{
@@ -653,7 +658,7 @@ func TestInsertTwoTransactionAtSameDateInSameBatch(t *testing.T) {
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2, *tx3))
 
-	tx2FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), tx2.ID, true, true)
+	tx2FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx2.ID).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err)
 
 	RequireEqual(t, core.AccountsAssetsVolumes{
@@ -673,7 +678,7 @@ func TestInsertTwoTransactionAtSameDateInSameBatch(t *testing.T) {
 		},
 	}, tx2FromDatabase.PreCommitVolumes)
 
-	tx3FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), tx3.ID, true, true)
+	tx3FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx3.ID).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err)
 
 	RequireEqual(t, core.AccountsAssetsVolumes{
@@ -715,7 +720,7 @@ func TestInsertTwoTransactionAtSameDateInTwoBatch(t *testing.T) {
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx3))
 
-	tx3FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), tx3.ID, true, true)
+	tx3FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx3.ID).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err)
 
 	RequireEqual(t, core.AccountsAssetsVolumes{

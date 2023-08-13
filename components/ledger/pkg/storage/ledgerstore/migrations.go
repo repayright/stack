@@ -10,16 +10,16 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (s *Store) getMigrator() *migrations.Migrator {
-	migrator := migrations.NewMigrator(migrations.WithSchema(s.Name(), true))
-	registerMigrations(migrator, s.name, s.db)
+func (store *Store) getMigrator() *migrations.Migrator {
+	migrator := migrations.NewMigrator(migrations.WithSchema(store.Name(), true))
+	registerMigrations(migrator, store.name, store.db)
 	return migrator
 }
 
-func (s *Store) Migrate(ctx context.Context) (bool, error) {
-	migrator := s.getMigrator()
+func (store *Store) Migrate(ctx context.Context) (bool, error) {
+	migrator := store.getMigrator()
 
-	if err := migrator.Up(ctx, s.db); err != nil {
+	if err := migrator.Up(ctx, store.db); err != nil {
 		return false, err
 	}
 
@@ -27,8 +27,8 @@ func (s *Store) Migrate(ctx context.Context) (bool, error) {
 	return false, nil
 }
 
-func (s *Store) GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error) {
-	return s.getMigrator().GetMigrations(ctx, s.db)
+func (store *Store) GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error) {
+	return store.getMigrator().GetMigrations(ctx, store.db)
 }
 
 //go:embed migrations/0-init-schema.sql

@@ -104,7 +104,7 @@ func (m1 *account) Scan(value interface{}) error {
 	return nil
 }
 
-func (s *Store) listTransactionsBuilder(p TransactionsQueryOptions) func(query *bun.SelectQuery) *bun.SelectQuery {
+func (store *Store) transactionQuery(p PITFilter) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		query = query.
 			Table("transactions").
@@ -112,37 +112,8 @@ func (s *Store) listTransactionsBuilder(p TransactionsQueryOptions) func(query *
 			ColumnExpr("transactions.reference").
 			ColumnExpr("transactions.metadata").
 			ColumnExpr("transactions.postings").
-			ColumnExpr("transactions.date").
-			Apply(filterMetadata(p.Metadata))
-		if p.Reference != "" {
-			query.Where("transactions.reference = ?", p.Reference)
-		}
-		if !p.StartTime.IsZero() {
-			query.Where("transactions.date >= ?", p.StartTime)
-		}
-		if !p.EndTime.IsZero() {
-			query.Where("transactions.date < ?", p.EndTime)
-		}
-		if p.AfterTxID != 0 {
-			query.Where("transactions.id > ?", p.AfterTxID)
-		}
-		if p.Source != "" || p.Destination != "" || p.Account != "" {
-			query.Join("join moves m on transactions.id = m.transaction_id")
-			if p.Source != "" {
-				query = query.
-					Where("m.is_source").
-					Apply(filterAccountAddress(p.Source, "account_address"))
+			ColumnExpr("transactions.date")
 
-			}
-			if p.Destination != "" {
-				query = query.
-					Where("not m.is_source").
-					Apply(filterAccountAddress(p.Destination, "account_address"))
-			}
-			if p.Account != "" {
-				query = query.Apply(filterAccountAddress(p.Account, "account_address"))
-			}
-		}
 		if p.ExpandEffectiveVolumes {
 			query = query.ColumnExpr("get_aggregated_effective_volumes_for_transaction(transactions) as post_commit_effective_volumes")
 		}
@@ -153,10 +124,48 @@ func (s *Store) listTransactionsBuilder(p TransactionsQueryOptions) func(query *
 	}
 }
 
-func (s *Store) GetTransactions(ctx context.Context, q GetTransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {
-	transactions, err := paginateWithColumn[TransactionsQueryOptions, Transaction](s, ctx,
+func (store *Store) transactionListBuilder(p GetTransactionsQuery) func(query *bun.SelectQuery) *bun.SelectQuery {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		query = store.transactionQuery(p.Options.PITFilter)(query).
+			Apply(filterMetadata(p.Options.Metadata))
+
+		if p.Options.Reference != "" {
+			query.Where("transactions.reference = ?", p.Options.Reference)
+		}
+		if !p.Options.StartTime.IsZero() {
+			query.Where("transactions.date >= ?", p.Options.StartTime)
+		}
+		if !p.Options.EndTime.IsZero() {
+			query.Where("transactions.date < ?", p.Options.EndTime)
+		}
+		if p.Options.AfterTxID != 0 {
+			query.Where("transactions.id > ?", p.Options.AfterTxID)
+		}
+		if p.Options.Source != "" || p.Options.Destination != "" || p.Options.Account != "" {
+			query.Join("join moves m on transactions.id = m.transaction_id")
+			if p.Options.Source != "" {
+				query = query.
+					Where("m.is_source").
+					Apply(filterAccountAddress(p.Options.Source, "account_address"))
+
+			}
+			if p.Options.Destination != "" {
+				query = query.
+					Where("not m.is_source").
+					Apply(filterAccountAddress(p.Options.Destination, "account_address"))
+			}
+			if p.Options.Account != "" {
+				query = query.Apply(filterAccountAddress(p.Options.Account, "account_address"))
+			}
+		}
+		return query
+	}
+}
+
+func (store *Store) GetTransactions(ctx context.Context, q GetTransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {
+	transactions, err := paginateWithColumn[TransactionsQueryOptions, Transaction](store, ctx,
 		paginate.ColumnPaginatedQuery[TransactionsQueryOptions](q),
-		s.listTransactionsBuilder(q.Options),
+		store.transactionListBuilder(q),
 	)
 	if err != nil {
 		return nil, err
@@ -166,32 +175,22 @@ func (s *Store) GetTransactions(ctx context.Context, q GetTransactionsQuery) (*a
 	}), nil
 }
 
-func (s *Store) CountTransactions(ctx context.Context, q GetTransactionsQuery) (uint64, error) {
-	return count(s, ctx, s.listTransactionsBuilder(q.Options))
+func (store *Store) CountTransactions(ctx context.Context, q GetTransactionsQuery) (uint64, error) {
+	return count(store, ctx, store.transactionListBuilder(q))
 }
 
-func (s *Store) GetTransactionWithVolumes(ctx context.Context, txId uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error) {
-	return fetchAndMap[*Transaction, *core.ExpandedTransaction](s, ctx,
+func (store *Store) GetTransactionWithVolumes(ctx context.Context, filter GetTransactionQuery) (*core.ExpandedTransaction, error) {
+	return fetchAndMap[*Transaction, *core.ExpandedTransaction](store, ctx,
 		(*Transaction).toCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
-			query = query.
-				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.date`).
-				Where("id = ?", txId).
-				Order("revision desc").
+			return store.transactionQuery(filter.PITFilter)(query).
+				Where("id = ?", filter.ID).
 				Limit(1)
-			if expandEffectiveVolumes {
-				query = query.ColumnExpr(`get_aggregated_effective_volumes_for_transaction(transactions) as post_commit_effective_volumes`)
-			}
-			if expandVolumes {
-				query = query.ColumnExpr(`get_aggregated_volumes_for_transaction(transactions) as post_commit_volumes`)
-			}
-			return query
 		})
 }
 
-func (s *Store) GetTransaction(ctx context.Context, txId uint64) (*core.ExpandedTransaction, error) {
-	return fetchAndMap[*Transaction, *core.ExpandedTransaction](s, ctx,
-		(*Transaction).toCore,
+func (store *Store) GetTransaction(ctx context.Context, txId uint64) (*core.Transaction, error) {
+	return fetch[*core.Transaction](store, ctx,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
 				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.date`).
@@ -201,8 +200,8 @@ func (s *Store) GetTransaction(ctx context.Context, txId uint64) (*core.Expanded
 		})
 }
 
-func (s *Store) GetTransactionByReference(ctx context.Context, ref string) (*core.ExpandedTransaction, error) {
-	return fetchAndMap[*Transaction, *core.ExpandedTransaction](s, ctx,
+func (store *Store) GetTransactionByReference(ctx context.Context, ref string) (*core.ExpandedTransaction, error) {
+	return fetchAndMap[*Transaction, *core.ExpandedTransaction](store, ctx,
 		(*Transaction).toCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
@@ -227,16 +226,15 @@ func NewTransactionsQuery() GetTransactionsQuery {
 }
 
 type TransactionsQueryOptions struct {
-	AfterTxID              uint64            `json:"afterTxID,omitempty"`
-	Reference              string            `json:"reference,omitempty"`
-	Destination            string            `json:"destination,omitempty"`
-	Source                 string            `json:"source,omitempty"`
-	Account                string            `json:"account,omitempty"`
-	EndTime                core.Time         `json:"endTime,omitempty"`
-	StartTime              core.Time         `json:"startTime,omitempty"`
-	Metadata               metadata.Metadata `json:"metadata,omitempty"`
-	ExpandVolumes          bool              `json:"expandVolumes"`
-	ExpandEffectiveVolumes bool              `json:"expandEffectiveVolumes"`
+	PITFilter
+	AfterTxID   uint64            `json:"afterTxID,omitempty"`
+	Reference   string            `json:"reference,omitempty"`
+	Destination string            `json:"destination,omitempty"`
+	Source      string            `json:"source,omitempty"`
+	Account     string            `json:"account,omitempty"`
+	EndTime     core.Time         `json:"endTime,omitempty"`
+	StartTime   core.Time         `json:"startTime,omitempty"`
+	Metadata    metadata.Metadata `json:"metadata,omitempty"`
 }
 
 func (a GetTransactionsQuery) WithPageSize(pageSize uint64) GetTransactionsQuery {
@@ -309,4 +307,28 @@ func (a GetTransactionsQuery) WithExpandVolumes(v bool) GetTransactionsQuery {
 	a.Options.ExpandVolumes = v
 
 	return a
+}
+
+type GetTransactionQuery struct {
+	PITFilter
+	ID uint64
+}
+
+func (q GetTransactionQuery) WithExpandVolumes() GetTransactionQuery {
+	q.ExpandVolumes = true
+
+	return q
+}
+
+func (q GetTransactionQuery) WithExpandEffectiveVolumes() GetTransactionQuery {
+	q.ExpandEffectiveVolumes = true
+
+	return q
+}
+
+func NewGetTransactionQuery(id uint64) GetTransactionQuery {
+	return GetTransactionQuery{
+		PITFilter: PITFilter{},
+		ID:        id,
+	}
 }

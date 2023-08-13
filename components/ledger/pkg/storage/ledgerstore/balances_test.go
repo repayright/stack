@@ -34,7 +34,7 @@ func TestGetBalancesAggregated(t *testing.T) {
 		)...))
 
 	t.Run("aggregate on all", func(t *testing.T) {
-		q := ledgerstore.NewBalancesQuery().WithPageSize(10)
+		q := ledgerstore.NewGetAggregatedBalancesQuery().WithPageSize(10)
 		cursor, err := store.GetAggregatedBalances(context.Background(), q)
 		require.NoError(t, err)
 		RequireEqual(t, core.BalancesByAssets{
@@ -42,14 +42,14 @@ func TestGetBalancesAggregated(t *testing.T) {
 		}, cursor)
 	})
 	t.Run("filter on address", func(t *testing.T) {
-		ret, err := store.GetAggregatedBalances(context.Background(), ledgerstore.NewBalancesQuery().WithPageSize(10).WithAddressFilter("users:"))
+		ret, err := store.GetAggregatedBalances(context.Background(), ledgerstore.NewGetAggregatedBalancesQuery().WithPageSize(10).WithAddressFilter("users:"))
 		require.NoError(t, err)
 		require.Equal(t, core.BalancesByAssets{
 			"USD": big.NewInt(400),
 		}, ret)
 	})
 	t.Run("using pit", func(t *testing.T) {
-		ret, err := store.GetAggregatedBalances(context.Background(), ledgerstore.NewBalancesQuery().
+		ret, err := store.GetAggregatedBalances(context.Background(), ledgerstore.NewGetAggregatedBalancesQuery().
 			WithPageSize(10).WithAddressFilter("users:").WithPIT(now))
 		require.NoError(t, err)
 		require.Equal(t, core.BalancesByAssets{

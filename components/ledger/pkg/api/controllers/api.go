@@ -25,7 +25,7 @@ type Ledger interface {
 	GetLogs(ctx context.Context, query ledgerstore.GetLogsQuery) (*api.Cursor[core.ChainedLog], error)
 	CountTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (uint64, error)
 	GetTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error)
-	GetTransactionWithVolumes(ctx context.Context, id uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error)
+	GetTransactionWithVolumes(ctx context.Context, query ledgerstore.GetTransactionQuery) (*core.ExpandedTransaction, error)
 
 	CreateTransaction(ctx context.Context, parameters command.Parameters, data core.RunScript) (*core.Transaction, error)
 	RevertTransaction(ctx context.Context, parameters command.Parameters, id uint64) (*core.Transaction, error)

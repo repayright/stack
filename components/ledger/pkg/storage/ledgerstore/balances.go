@@ -9,17 +9,17 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (s *Store) GetAggregatedBalances(ctx context.Context, q GetAggregatedBalancesQuery) (core.BalancesByAssets, error) {
+func (store *Store) GetAggregatedBalances(ctx context.Context, q GetAggregatedBalancesQuery) (core.BalancesByAssets, error) {
 
 	type Temp struct {
 		Aggregated core.VolumesByAssets `bun:"aggregated,type:jsonb"`
 	}
-	return fetchAndMap[*Temp, core.BalancesByAssets](s, ctx,
+	return fetchAndMap[*Temp, core.BalancesByAssets](store, ctx,
 		func(temp *Temp) core.BalancesByAssets {
 			return temp.Aggregated.Balances()
 		},
 		func(query *bun.SelectQuery) *bun.SelectQuery {
-			moves := s.db.
+			moves := store.db.
 				NewSelect().
 				Table(MovesTableName).
 				ColumnExpr("distinct on (moves.account_address, moves.asset) moves.*").
@@ -35,11 +35,11 @@ func (s *Store) GetAggregatedBalances(ctx context.Context, q GetAggregatedBalanc
 		})
 }
 
-func (s *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
+func (store *Store) GetBalance(ctx context.Context, address, asset string) (*big.Int, error) {
 	type Temp struct {
 		Balance *big.Int `bun:"balance,type:numeric"`
 	}
-	return fetchAndMap[*Temp, *big.Int](s, ctx, func(temp *Temp) *big.Int {
+	return fetchAndMap[*Temp, *big.Int](store, ctx, func(temp *Temp) *big.Int {
 		return temp.Balance
 	}, func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.TableExpr("get_account_balance(?, ?) as balance", address, asset)
@@ -55,7 +55,7 @@ type BalancesQueryOptions struct {
 
 type GetAggregatedBalancesQuery paginate.OffsetPaginatedQuery[BalancesQueryOptions]
 
-func NewBalancesQuery() GetAggregatedBalancesQuery {
+func NewGetAggregatedBalancesQuery() GetAggregatedBalancesQuery {
 	return GetAggregatedBalancesQuery{
 		PageSize: paginate.QueryDefaultPageSize,
 		Order:    paginate.OrderAsc,

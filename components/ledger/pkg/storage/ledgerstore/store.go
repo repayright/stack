@@ -22,41 +22,41 @@ type Store struct {
 	name          string
 }
 
-func (s *Store) Name() string {
-	return s.name
+func (store *Store) Name() string {
+	return store.name
 }
 
-func (d *Store) GetDatabase() *bun.DB {
-	return d.db
+func (store *Store) GetDatabase() *bun.DB {
+	return store.db
 }
 
-func (s *Store) Delete(ctx context.Context) error {
-	_, err := s.db.ExecContext(ctx, "delete schema ? cascade", s.name)
+func (store *Store) Delete(ctx context.Context) error {
+	_, err := store.db.ExecContext(ctx, "delete schema ? cascade", store.name)
 	if err != nil {
 		return err
 	}
-	return errors.Wrap(s.onDelete(ctx), "deleting ledger store")
+	return errors.Wrap(store.onDelete(ctx), "deleting ledger store")
 }
 
-func (s *Store) IsInitialized() bool {
-	return s.isInitialized
+func (store *Store) IsInitialized() bool {
+	return store.isInitialized
 }
 
-func (s *Store) prepareTransaction(ctx context.Context) (bun.Tx, error) {
+func (store *Store) prepareTransaction(ctx context.Context) (bun.Tx, error) {
 	txOptions := &sql.TxOptions{}
 
-	tx, err := s.db.BeginTx(ctx, txOptions)
+	tx, err := store.db.BeginTx(ctx, txOptions)
 	if err != nil {
 		return tx, err
 	}
-	if _, err := tx.Exec(fmt.Sprintf(`set search_path = "%s"`, s.Name())); err != nil {
+	if _, err := tx.Exec(fmt.Sprintf(`set search_path = "%s"`, store.Name())); err != nil {
 		return tx, err
 	}
 	return tx, nil
 }
 
-func (s *Store) withTransaction(ctx context.Context, callback func(tx bun.Tx) error) error {
-	tx, err := s.prepareTransaction(ctx)
+func (store *Store) withTransaction(ctx context.Context, callback func(tx bun.Tx) error) error {
+	tx, err := store.prepareTransaction(ctx)
 	if err != nil {
 		return err
 	}

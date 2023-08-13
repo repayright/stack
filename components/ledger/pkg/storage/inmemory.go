@@ -25,14 +25,14 @@ func (m *InMemoryStore) GetTransactionByReference(ctx context.Context, ref strin
 	return filtered[0], nil
 }
 
-func (m *InMemoryStore) GetTransaction(ctx context.Context, txID uint64) (*core.ExpandedTransaction, error) {
+func (m *InMemoryStore) GetTransaction(ctx context.Context, txID uint64) (*core.Transaction, error) {
 	filtered := collectionutils.Filter(m.transactions, func(transaction *core.ExpandedTransaction) bool {
 		return transaction.ID == txID
 	})
 	if len(filtered) == 0 {
 		return nil, ErrNotFound
 	}
-	return filtered[0], nil
+	return &filtered[0].Transaction, nil
 }
 
 func (m *InMemoryStore) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
