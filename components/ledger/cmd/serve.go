@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"net/http"
+	"time"
 
-	"github.com/formancehq/ledger/pkg/api/middlewares"
+	"github.com/formancehq/ledger/internal"
 	"github.com/formancehq/stack/libs/go-libs/ballast"
 	"github.com/formancehq/stack/libs/go-libs/httpserver"
 	"github.com/formancehq/stack/libs/go-libs/logging"
@@ -35,7 +36,7 @@ func NewServe() *cobra.Command {
 							handler.ServeHTTP(w, r)
 						})
 					})
-					wrappedRouter.Use(middlewares.Log())
+					wrappedRouter.Use(Log())
 					wrappedRouter.Mount("/", h)
 
 					lc.Append(httpserver.NewHook(viper.GetString(bindFlag), wrappedRouter))
@@ -46,4 +47,21 @@ func NewServe() *cobra.Command {
 	cmd.Flags().Uint(ballastSizeInBytesFlag, 0, "Ballast size in bytes, default to 0")
 	cmd.Flags().Int(numscriptCacheMaxCount, 1024, "Numscript cache max count")
 	return cmd
+}
+
+func Log() func(h http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := ledger.Now()
+			h.ServeHTTP(w, r)
+			latency := time.Since(start.Time)
+			logging.FromContext(r.Context()).WithFields(map[string]interface{}{
+				"method":     r.Method,
+				"path":       r.URL.Path,
+				"latency":    latency,
+				"user_agent": r.UserAgent(),
+				"params":     r.URL.Query().Encode(),
+			}).Debug("Request")
+		})
+	}
 }

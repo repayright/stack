@@ -7,7 +7,7 @@ import (
 
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
-	"github.com/formancehq/ledger/pkg/bus"
+	"github.com/formancehq/ledger/internal/bus"
 	"github.com/formancehq/stack/libs/events"
 	. "github.com/formancehq/stack/tests/integration/internal"
 	"github.com/nats-io/nats.go"
