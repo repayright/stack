@@ -100,7 +100,7 @@ func TestGetLogs(t *testing.T) {
 	type testCase struct {
 		name              string
 		queryParams       url.Values
-		expectQuery       ledgerstore.LogsQuery
+		expectQuery       ledgerstore.GetLogsQuery
 		expectStatusCode  int
 		expectedErrorCode string
 	}

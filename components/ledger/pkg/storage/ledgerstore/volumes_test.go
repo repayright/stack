@@ -20,19 +20,19 @@ func TestGetAssetsVolumes(t *testing.T) {
 		WithPostings(
 			core.NewPosting("world", "alice", "USD", big.NewInt(100)),
 		).
-		WithTimestamp(now.Add(-3 * time.Hour))
+		WithDate(now.Add(-3 * time.Hour))
 	tx2 := core.NewTransaction().
 		WithID(1).
 		WithPostings(
 			core.NewPosting("world", "bob", "USD", big.NewInt(100)),
 		).
-		WithTimestamp(now.Add(-2 * time.Hour))
+		WithDate(now.Add(-2 * time.Hour))
 	tx3 := core.NewTransaction().
 		WithID(2).
 		WithPostings(
 			core.NewPosting("world", "users:marley", "USD", big.NewInt(100)),
 		).
-		WithTimestamp(now.Add(-time.Hour))
+		WithDate(now.Add(-time.Hour))
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2, *tx3))
 

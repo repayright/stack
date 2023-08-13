@@ -16,15 +16,15 @@ import (
 //go:generate mockgen -source api.go -destination api_test.go -package controllers_test . Ledger
 
 type Ledger interface {
-	GetAccountWithVolumes(ctx context.Context, param string, expandVolumes, expandEffectiveVolumes bool) (*core.AccountWithVolumes, error)
-	GetAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (*api.Cursor[core.Account], error)
-	CountAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (uint64, error)
-	GetBalancesAggregated(ctx context.Context, q ledgerstore.BalancesQuery) (core.BalancesByAssets, error)
+	GetAccountWithVolumes(ctx context.Context, query ledgerstore.GetAccountQuery) (*core.ExpandedAccount, error)
+	GetAccountsWithVolumes(ctx context.Context, query ledgerstore.GetAccountsQuery) (*api.Cursor[core.ExpandedAccount], error)
+	CountAccounts(ctx context.Context, query ledgerstore.GetAccountsQuery) (uint64, error)
+	GetAggregatedBalances(ctx context.Context, q ledgerstore.GetAggregatedBalancesQuery) (core.BalancesByAssets, error)
 	GetMigrationsInfo(ctx context.Context) ([]migrations.Info, error)
 	Stats(ctx context.Context) (ledger.Stats, error)
-	GetLogs(ctx context.Context, query ledgerstore.LogsQuery) (*api.Cursor[core.ChainedLog], error)
-	CountTransactions(ctx context.Context, query ledgerstore.TransactionsQuery) (uint64, error)
-	GetTransactions(ctx context.Context, query ledgerstore.TransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error)
+	GetLogs(ctx context.Context, query ledgerstore.GetLogsQuery) (*api.Cursor[core.ChainedLog], error)
+	CountTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (uint64, error)
+	GetTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error)
 	GetTransactionWithVolumes(ctx context.Context, id uint64, expandVolumes, expandEffectiveVolumes bool) (*core.ExpandedTransaction, error)
 
 	CreateTransaction(ctx context.Context, parameters command.Parameters, data core.RunScript) (*core.Transaction, error)

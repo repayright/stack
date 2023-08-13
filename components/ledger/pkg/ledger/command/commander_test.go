@@ -126,7 +126,7 @@ var testCases = []testCase{
 					WithPostings(
 						core.NewPosting("world", "mint", "GEM", big.NewInt(100)),
 					).
-					WithTimestamp(now),
+					WithDate(now),
 				map[string]metadata.Metadata{},
 			).WithIdempotencyKey("testing")
 			err := r.InsertLogs(context.Background(), log.ChainLog(nil))

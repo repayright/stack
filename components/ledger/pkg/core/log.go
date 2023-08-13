@@ -209,7 +209,7 @@ func NewTransactionLogWithDate(tx *Transaction, accountMetadata map[string]metad
 }
 
 func NewTransactionLog(tx *Transaction, accountMetadata map[string]metadata.Metadata) *Log {
-	return NewTransactionLogWithDate(tx, accountMetadata, tx.Date)
+	return NewTransactionLogWithDate(tx, accountMetadata, Now())
 }
 
 type SetMetadataLogPayload struct {

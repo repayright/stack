@@ -246,7 +246,9 @@ func TestGetLogs(t *testing.T) {
 
 	var previousLog *core.ChainedLog
 	for _, tx := range []core.ExpandedTransaction{tx1, tx2, tx3} {
-		newLog := core.NewTransactionLog(&tx.Transaction, map[string]metadata.Metadata{}).ChainLog(previousLog)
+		newLog := core.NewTransactionLog(&tx.Transaction, map[string]metadata.Metadata{}).
+			WithDate(tx.Date).
+			ChainLog(previousLog)
 		appendLog(t, store, newLog)
 		previousLog = newLog
 	}

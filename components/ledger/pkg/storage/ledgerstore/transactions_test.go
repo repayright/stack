@@ -456,7 +456,7 @@ func TestCountTransactions(t *testing.T) {
 	err := insertTransactions(context.Background(), store, tx1.Transaction, tx2.Transaction, tx3.Transaction)
 	require.NoError(t, err, "inserting transaction should not fail")
 
-	count, err := store.CountTransactions(context.Background(), ledgerstore.TransactionsQuery{})
+	count, err := store.CountTransactions(context.Background(), ledgerstore.GetTransactionsQuery{})
 	require.NoError(t, err, "counting transactions should not fail")
 	require.Equal(t, uint64(3), count, "count should be equal")
 }
@@ -558,16 +558,16 @@ func TestInsertTransactionInPast(t *testing.T) {
 
 	tx1 := core.NewTransaction().WithPostings(
 		core.NewPosting("world", "bank", "USD/2", big.NewInt(100)),
-	).WithTimestamp(now)
+	).WithDate(now)
 
 	tx2 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user1", "USD/2", big.NewInt(50)),
-	).WithTimestamp(now.Add(time.Hour)).WithID(1)
+	).WithDate(now.Add(time.Hour)).WithID(1)
 
 	// Insert in past must modify pre/post commit volumes of tx2
 	tx3 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user2", "USD/2", big.NewInt(50)),
-	).WithTimestamp(now.Add(30 * time.Minute)).WithID(2)
+	).WithDate(now.Add(30 * time.Minute)).WithID(2)
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2))
 	require.NoError(t, insertTransactions(context.Background(), store, *tx3))
@@ -600,16 +600,16 @@ func TestInsertTransactionInPastInOneBatch(t *testing.T) {
 
 	tx1 := core.NewTransaction().WithPostings(
 		core.NewPosting("world", "bank", "USD/2", big.NewInt(100)),
-	).WithTimestamp(now)
+	).WithDate(now)
 
 	tx2 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user1", "USD/2", big.NewInt(50)),
-	).WithTimestamp(now.Add(time.Hour)).WithID(1)
+	).WithDate(now.Add(time.Hour)).WithID(1)
 
 	// Insert in past must modify pre/post commit volumes of tx2
 	tx3 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user2", "USD/2", big.NewInt(50)),
-	).WithTimestamp(now.Add(30 * time.Minute)).WithID(2)
+	).WithDate(now.Add(30 * time.Minute)).WithID(2)
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2, *tx3))
 
@@ -641,15 +641,15 @@ func TestInsertTwoTransactionAtSameDateInSameBatch(t *testing.T) {
 
 	tx1 := core.NewTransaction().WithPostings(
 		core.NewPosting("world", "bank", "USD/2", big.NewInt(100)),
-	).WithTimestamp(now.Add(-time.Hour))
+	).WithDate(now.Add(-time.Hour))
 
 	tx2 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user1", "USD/2", big.NewInt(10)),
-	).WithTimestamp(now).WithID(1)
+	).WithDate(now).WithID(1)
 
 	tx3 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user2", "USD/2", big.NewInt(10)),
-	).WithTimestamp(now).WithID(2)
+	).WithDate(now).WithID(2)
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2, *tx3))
 
@@ -701,17 +701,17 @@ func TestInsertTwoTransactionAtSameDateInTwoBatch(t *testing.T) {
 
 	tx1 := core.NewTransaction().WithPostings(
 		core.NewPosting("world", "bank", "USD/2", big.NewInt(100)),
-	).WithTimestamp(now.Add(-time.Hour))
+	).WithDate(now.Add(-time.Hour))
 
 	tx2 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user1", "USD/2", big.NewInt(10)),
-	).WithTimestamp(now).WithID(1)
+	).WithDate(now).WithID(1)
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2))
 
 	tx3 := core.NewTransaction().WithPostings(
 		core.NewPosting("bank", "user2", "USD/2", big.NewInt(10)),
-	).WithTimestamp(now).WithID(2)
+	).WithDate(now).WithID(2)
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx3))
 
@@ -747,27 +747,27 @@ func TestListTransactions(t *testing.T) {
 			core.NewPosting("world", "alice", "USD", big.NewInt(100)),
 		).
 		WithMetadata(metadata.Metadata{"category": "1"}).
-		WithTimestamp(now.Add(-3 * time.Hour))
+		WithDate(now.Add(-3 * time.Hour))
 	tx2 := core.NewTransaction().
 		WithID(1).
 		WithPostings(
 			core.NewPosting("world", "bob", "USD", big.NewInt(100)),
 		).
 		WithMetadata(metadata.Metadata{"category": "2"}).
-		WithTimestamp(now.Add(-2 * time.Hour))
+		WithDate(now.Add(-2 * time.Hour))
 	tx3 := core.NewTransaction().
 		WithID(2).
 		WithPostings(
 			core.NewPosting("world", "users:marley", "USD", big.NewInt(100)),
 		).
 		WithMetadata(metadata.Metadata{"category": "3"}).
-		WithTimestamp(now.Add(-time.Hour))
+		WithDate(now.Add(-time.Hour))
 
 	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2, *tx3))
 
 	type testCase struct {
 		name     string
-		query    ledgerstore.TransactionsQuery
+		query    ledgerstore.GetTransactionsQuery
 		expected *api.Cursor[core.ExpandedTransaction]
 	}
 	testCases := []testCase{

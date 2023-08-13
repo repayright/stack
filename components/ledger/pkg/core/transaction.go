@@ -45,6 +45,12 @@ func (d TransactionData) hashString(buf *buffer) {
 	}
 }
 
+func (d TransactionData) WithDate(now Time) TransactionData {
+	d.Date = now
+
+	return d
+}
+
 type Transaction struct {
 	TransactionData
 	ID       uint64 `json:"id"`
@@ -66,7 +72,7 @@ func (t *Transaction) WithReference(ref string) *Transaction {
 	return t
 }
 
-func (t *Transaction) WithTimestamp(ts Time) *Transaction {
+func (t *Transaction) WithDate(ts Time) *Transaction {
 	t.Date = ts
 	return t
 }
@@ -111,14 +117,15 @@ func (t *Transaction) hashString(buf *buffer) {
 
 func NewTransaction() *Transaction {
 	return &Transaction{
-		TransactionData: NewTransactionData(),
+		TransactionData: NewTransactionData().
+			WithDate(Now()),
 	}
 }
 
 type ExpandedTransaction struct {
 	Transaction
-	PreCommitVolumes  AccountsAssetsVolumes `json:"preCommitVolumes,omitempty"`
-	PostCommitVolumes AccountsAssetsVolumes `json:"postCommitVolumes,omitempty"`
+	PreCommitVolumes           AccountsAssetsVolumes `json:"preCommitVolumes,omitempty"`
+	PostCommitVolumes          AccountsAssetsVolumes `json:"postCommitVolumes,omitempty"`
 	PreCommitEffectiveVolumes  AccountsAssetsVolumes `json:"preCommitEffectiveVolumes,omitempty"`
 	PostCommitEffectiveVolumes AccountsAssetsVolumes `json:"postCommitEffectiveVolumes,omitempty"`
 }

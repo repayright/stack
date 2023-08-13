@@ -12,57 +12,134 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestGetAccounts(t *testing.T) {
+	t.Parallel()
+	store := newLedgerStore(t)
+	now := core.Now()
+
+	require.NoError(t, store.InsertLogs(context.Background(),
+		core.ChainLogs(
+			core.NewTransactionLog(
+				core.NewTransaction().
+					WithPostings(core.NewPosting("world", "account:1", "USD", big.NewInt(100))).
+					WithDate(now),
+				map[string]metadata.Metadata{
+					"account:1": {
+						"category": "4",
+					},
+				},
+			).WithDate(now),
+			core.NewSetMetadataOnAccountLog(core.Now(), "account:1", metadata.Metadata{"category": "1"}).WithDate(now.Add(time.Minute)),
+			core.NewSetMetadataOnAccountLog(core.Now(), "account:2", metadata.Metadata{"category": "2"}).WithDate(now.Add(2*time.Minute)),
+			core.NewSetMetadataOnAccountLog(core.Now(), "account:3", metadata.Metadata{"category": "3"}).WithDate(now.Add(3*time.Minute)),
+			core.NewTransactionLog(
+				core.NewTransaction().
+					WithPostings(core.NewPosting("world", "account:1", "USD", big.NewInt(100))).
+					WithID(1).
+					WithDate(now.Add(4*time.Minute)),
+				map[string]metadata.Metadata{},
+			).WithDate(now.Add(100*time.Millisecond)),
+			core.NewTransactionLog(
+				core.NewTransaction().
+					WithPostings(core.NewPosting("account:1", "bank", "USD", big.NewInt(50))).
+					WithDate(now.Add(3*time.Minute)).
+					WithID(2),
+				map[string]metadata.Metadata{},
+			).WithDate(now.Add(200*time.Millisecond)),
+		)...,
+	))
+
+	t.Run("list all", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery())
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 5)
+	})
+
+	t.Run("list using metadata", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().WithMetadataFilter(metadata.Metadata{
+			"category": "1",
+		}))
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 1)
+	})
+
+	t.Run("list before date", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().WithPIT(now))
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 2)
+	})
+
+	t.Run("list with volumes", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
+			WithAddress("account:1").
+			WithExpandVolumes())
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 1)
+		require.Equal(t, core.VolumesByAssets{
+			"USD": core.NewVolumesInt64(200, 50),
+		}, accounts.Data[0].Volumes)
+	})
+
+	t.Run("list with volumes using PIT", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
+			WithPIT(now).
+			WithAddress("account:1").
+			WithExpandVolumes())
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 1)
+		require.Equal(t, core.VolumesByAssets{
+			"USD": core.NewVolumesInt64(100, 0),
+		}, accounts.Data[0].Volumes)
+	})
+
+	t.Run("list with effective volumes", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
+			WithAddress("account:1").
+			WithExpandEffectiveVolumes())
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 1)
+		require.Equal(t, core.VolumesByAssets{
+			"USD": core.NewVolumesInt64(200, 50),
+		}, accounts.Data[0].EffectiveVolumes)
+	})
+
+	t.Run("list with effective volumes using PIT", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
+			WithAddress("account:1").
+			WithPIT(now).
+			WithExpandEffectiveVolumes())
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 1)
+		require.Equal(t, core.VolumesByAssets{
+			"USD": core.NewVolumesInt64(100, 0),
+		}, accounts.Data[0].EffectiveVolumes)
+	})
+
+	t.Run("list using filter on address", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
+			WithAddress("account:"))
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 3)
+	})
+}
+
 func TestUpdateAccountsMetadata(t *testing.T) {
 	t.Parallel()
 	store := newLedgerStore(t)
 
-	t.Run("update metadata", func(t *testing.T) {
-		metadata := metadata.Metadata{
-			"foo": "bar",
-		}
+	metadata := metadata.Metadata{
+		"foo": "bar",
+	}
 
-		require.NoError(t, store.InsertLogs(context.Background(),
-			core.NewSetMetadataOnAccountLog(core.Now(), "bank", metadata).ChainLog(nil),
-		), "account insertion should not fail")
+	require.NoError(t, store.InsertLogs(context.Background(),
+		core.NewSetMetadataOnAccountLog(core.Now(), "bank", metadata).ChainLog(nil),
+	), "account insertion should not fail")
 
-		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("bank"))
-		require.NoError(t, err, "account retrieval should not fail")
+	account, err := store.GetAccountWithVolumes(context.Background(), ledgerstore.NewGetAccountQuery("bank"))
+	require.NoError(t, err, "account retrieval should not fail")
 
-		require.Equal(t, "bank", account.Address, "account address should match")
-		require.Equal(t, metadata, account.Metadata, "account metadata should match")
-	})
-
-	t.Run("success updating multiple account metadata", func(t *testing.T) {
-		accounts := []core.Account{
-			{
-				Address:  "test:account1",
-				Metadata: metadata.Metadata{"foo1": "bar1"},
-			},
-			{
-				Address:  "test:account2",
-				Metadata: metadata.Metadata{"foo2": "bar2"},
-			},
-			{
-				Address:  "test:account3",
-				Metadata: metadata.Metadata{"foo3": "bar3"},
-			},
-		}
-
-		err := store.InsertLogs(context.Background(),
-			core.NewSetMetadataOnAccountLog(core.Now(), "test:account1", metadata.Metadata{"foo1": "bar1"}).ChainLog(nil),
-			core.NewSetMetadataOnAccountLog(core.Now(), "test:account2", metadata.Metadata{"foo2": "bar2"}).ChainLog(nil),
-			core.NewSetMetadataOnAccountLog(core.Now(), "test:account3", metadata.Metadata{"foo3": "bar3"}).ChainLog(nil),
-		)
-		require.NoError(t, err, "account insertion should not fail")
-
-		for _, account := range accounts {
-			acc, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery(account.Address))
-			require.NoError(t, err, "account retrieval should not fail")
-
-			require.Equal(t, account.Address, acc.Address, "account address should match")
-			require.Equal(t, account.Metadata, acc.Metadata, "account metadata should match")
-		}
-	})
+	require.Equal(t, "bank", account.Address, "account address should match")
+	require.Equal(t, metadata, account.Metadata, "account metadata should match")
 }
 
 func TestGetAccount(t *testing.T) {
@@ -74,7 +151,7 @@ func TestGetAccount(t *testing.T) {
 		core.ChainLogs(
 			core.NewTransactionLog(core.NewTransaction().WithPostings(
 				core.NewPosting("world", "multi", "USD/2", big.NewInt(100)),
-			).WithTimestamp(now), map[string]metadata.Metadata{}),
+			).WithDate(now), map[string]metadata.Metadata{}),
 			core.NewSetMetadataLog(now.Add(time.Minute), core.SetMetadataLogPayload{
 				TargetType: core.MetaTargetTypeAccount,
 				TargetID:   "multi",
@@ -86,71 +163,70 @@ func TestGetAccount(t *testing.T) {
 	))
 
 	t.Run("find account", func(t *testing.T) {
-		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("multi"))
+		account, err := store.GetAccountWithVolumes(context.Background(), ledgerstore.NewGetAccountQuery("multi"))
 		require.NoError(t, err)
-		require.Equal(t, core.Account{
-			Address: "multi",
-			Metadata: metadata.Metadata{
-				"category": "gold",
+		require.Equal(t, core.ExpandedAccount{
+			Account: core.Account{
+				Address: "multi",
+				Metadata: metadata.Metadata{
+					"category": "gold",
+				},
+			},
+		}, *account)
+	})
+
+	t.Run("find account with volumes", func(t *testing.T) {
+		account, err := store.GetAccountWithVolumes(context.Background(), ledgerstore.
+			NewGetAccountQuery("multi").
+			WithExpandVolumes())
+		require.NoError(t, err)
+		require.Equal(t, core.ExpandedAccount{
+			Account: core.Account{
+				Address: "multi",
+				Metadata: metadata.Metadata{
+					"category": "gold",
+				},
+			},
+			Volumes: core.VolumesByAssets{
+				"USD/2": core.NewVolumesInt64(100, 0),
+			},
+		}, *account)
+	})
+
+	t.Run("find account with effective volumes", func(t *testing.T) {
+		account, err := store.GetAccountWithVolumes(context.Background(), ledgerstore.
+			NewGetAccountQuery("multi").
+			WithExpandEffectiveVolumes())
+		require.NoError(t, err)
+		require.Equal(t, core.ExpandedAccount{
+			Account: core.Account{
+				Address: "multi",
+				Metadata: metadata.Metadata{
+					"category": "gold",
+				},
+			},
+			EffectiveVolumes: core.VolumesByAssets{
+				"USD/2": core.NewVolumesInt64(100, 0),
 			},
 		}, *account)
 	})
 
 	t.Run("find account using pit", func(t *testing.T) {
-		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("multi").WithPIT(now))
+		account, err := store.GetAccountWithVolumes(context.Background(), ledgerstore.NewGetAccountQuery("multi").WithPIT(now))
 		require.NoError(t, err)
-		require.Equal(t, core.Account{
-			Address:  "multi",
-			Metadata: metadata.Metadata{},
+		require.Equal(t, core.ExpandedAccount{
+			Account: core.Account{
+				Address:  "multi",
+				Metadata: metadata.Metadata{},
+			},
+			Volumes: core.VolumesByAssets{},
 		}, *account)
 	})
 
 	t.Run("not existent account", func(t *testing.T) {
-		account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("account_not_existing"))
+		account, err := store.GetAccountWithVolumes(context.Background(), ledgerstore.NewGetAccountQuery("account_not_existing"))
 		require.NoError(t, err)
 		require.NotNil(t, account)
-	})
-}
-
-func TestGetAccounts(t *testing.T) {
-	t.Parallel()
-	store := newLedgerStore(t)
-	now := core.Now()
-
-	require.NoError(t, store.InsertLogs(context.Background(),
-		core.ChainLogs(
-			core.NewTransactionLog(
-				core.NewTransaction().WithPostings(core.NewPosting("world", "account1", "USD", big.NewInt(100))),
-				map[string]metadata.Metadata{
-					"account1": {
-						"category": "4",
-					},
-				},
-			).WithDate(now),
-			core.NewSetMetadataOnAccountLog(core.Now(), "account1", metadata.Metadata{"category": "1"}).WithDate(now.Add(time.Minute)),
-			core.NewSetMetadataOnAccountLog(core.Now(), "account2", metadata.Metadata{"category": "2"}).WithDate(now.Add(2*time.Minute)),
-			core.NewSetMetadataOnAccountLog(core.Now(), "account3", metadata.Metadata{"category": "3"}).WithDate(now.Add(3*time.Minute)),
-		)...,
-	))
-
-	t.Run("list all", func(t *testing.T) {
-		accounts, err := store.GetAccounts(context.Background(), ledgerstore.NewAccountsQuery())
-		require.NoError(t, err)
-		require.Len(t, accounts.Data, 4)
-	})
-
-	t.Run("list using metadata", func(t *testing.T) {
-		accounts, err := store.GetAccounts(context.Background(), ledgerstore.NewAccountsQuery().WithMetadataFilter(metadata.Metadata{
-			"category": "1",
-		}))
-		require.NoError(t, err)
-		require.Len(t, accounts.Data, 1)
-	})
-
-	t.Run("list before date", func(t *testing.T) {
-		accounts, err := store.GetAccounts(context.Background(), ledgerstore.NewAccountsQuery().WithPIT(now))
-		require.NoError(t, err)
-		require.Len(t, accounts.Data, 2)
 	})
 }
 
@@ -164,9 +240,10 @@ func TestGetAccountWithVolumes(t *testing.T) {
 		),
 	))
 
-	accountWithVolumes, err := store.GetAccountWithVolumes(context.Background(), "multi", true, false)
+	accountWithVolumes, err := store.GetAccountWithVolumes(context.Background(),
+		ledgerstore.NewGetAccountQuery("multi").WithExpandVolumes())
 	require.NoError(t, err)
-	require.Equal(t, &core.AccountWithVolumes{
+	require.Equal(t, &core.ExpandedAccount{
 		Account: core.Account{
 			Address:  "multi",
 			Metadata: metadata.Metadata{},
@@ -187,7 +264,7 @@ func TestUpdateAccountMetadata(t *testing.T) {
 		}).ChainLog(nil),
 	))
 
-	account, err := store.GetAccountWithQuery(context.Background(), ledgerstore.NewGetAccountQuery("central_bank"))
+	account, err := store.GetAccountWithVolumes(context.Background(), ledgerstore.NewGetAccountQuery("central_bank"))
 	require.NoError(t, err)
 	require.EqualValues(t, "bar", account.Metadata["foo"])
 }
@@ -202,7 +279,7 @@ func TestCountAccounts(t *testing.T) {
 		),
 	))
 
-	countAccounts, err := store.CountAccounts(context.Background(), ledgerstore.AccountsQuery{})
+	countAccounts, err := store.CountAccounts(context.Background(), ledgerstore.GetAccountsQuery{})
 	require.NoError(t, err)
 	require.EqualValues(t, 2, countAccounts) // world + central_bank
 }

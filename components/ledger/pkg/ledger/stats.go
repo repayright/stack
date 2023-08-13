@@ -15,12 +15,12 @@ type Stats struct {
 func (l *Ledger) Stats(ctx context.Context) (Stats, error) {
 	var stats Stats
 
-	transactions, err := l.store.CountTransactions(ctx, ledgerstore.TransactionsQuery{})
+	transactions, err := l.store.CountTransactions(ctx, ledgerstore.GetTransactionsQuery{})
 	if err != nil {
 		return stats, errors.Wrap(err, "counting transactions")
 	}
 
-	accounts, err := l.store.CountAccounts(ctx, ledgerstore.AccountsQuery{})
+	accounts, err := l.store.CountAccounts(ctx, ledgerstore.GetAccountsQuery{})
 	if err != nil {
 		return stats, errors.Wrap(err, "counting accounts")
 	}

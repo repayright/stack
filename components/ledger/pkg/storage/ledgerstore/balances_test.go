@@ -20,17 +20,17 @@ func TestGetBalancesAggregated(t *testing.T) {
 	tx1 := core.NewTransaction().WithPostings(
 		core.NewPosting("world", "users:1", "USD", big.NewInt(1)),
 		core.NewPosting("world", "users:2", "USD", big.NewInt(199)),
-	).WithTimestamp(now)
+	).WithDate(now)
 
 	tx2 := core.NewTransaction().WithPostings(
 		core.NewPosting("world", "users:1", "USD", big.NewInt(1)),
 		core.NewPosting("world", "users:2", "USD", big.NewInt(199)),
-	).WithTimestamp(now.Add(time.Minute)).WithID(1)
+	).WithDate(now.Add(time.Minute)).WithID(1)
 
 	require.NoError(t, store.InsertLogs(context.Background(),
 		core.ChainLogs(
-			core.NewTransactionLog(tx1, map[string]metadata.Metadata{}),
-			core.NewTransactionLog(tx2, map[string]metadata.Metadata{}),
+			core.NewTransactionLog(tx1, map[string]metadata.Metadata{}).WithDate(tx1.Date),
+			core.NewTransactionLog(tx2, map[string]metadata.Metadata{}).WithDate(tx2.Date),
 		)...))
 
 	t.Run("aggregate on all", func(t *testing.T) {

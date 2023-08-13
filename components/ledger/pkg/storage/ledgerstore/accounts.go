@@ -12,43 +12,69 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (s *Store) accountQueryBuilder(q AccountsQuery) func(query *bun.SelectQuery) *bun.SelectQuery {
+func (s *Store) accountQueryBuilder(q AccountFilter) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		query = query.
 			DistinctOn("accounts.address").
 			Column("accounts.address").
 			ColumnExpr("coalesce(metadata, '{}'::jsonb) as metadata").
 			Table("accounts").
-			Join("left join accounts_metadata on accounts_metadata.address = accounts.address").
-			Apply(filterMetadata(q.Options.Metadata)).
-			Apply(filterAccountAddress(q.Options.Address, "accounts.address")).
-			Apply(filterPIT(q.Options.PIT, "coalesce(accounts_metadata.date, accounts.insertion_date)")).
+			Apply(filterMetadata(q.Metadata)).
+			Apply(filterPIT(q.PIT, "insertion_date")).
 			Order("accounts.address", "revision desc")
 
-		if q.Options.ExpandVolumes {
+		if q.PIT == nil {
+			query = query.Join("left join accounts_metadata on accounts_metadata.address = accounts.address")
+		} else {
+			query = query.Join("left join accounts_metadata on accounts_metadata.address = accounts.address and accounts_metadata.date < ?", q.PIT)
+		}
+
+		if q.ExpandVolumes {
 			query = query.
 				ColumnExpr("volumes.*").
-				TableExpr("get_account_aggregated_volumes(accounts.address) volumes")
+				Join("join get_account_aggregated_volumes(accounts.address, ?) volumes on true", q.PIT)
+		}
+
+		if q.ExpandEffectiveVolumes {
+			query = query.
+				ColumnExpr("effective_volumes.*").
+				Join("join get_account_aggregated_effective_volumes(accounts.address, ?) effective_volumes on true", q.PIT)
 		}
 
 		return query
 	}
 }
 
-func (s *Store) GetAccounts(ctx context.Context, q AccountsQuery) (*api.Cursor[core.Account], error) {
-	return paginateWithOffset[AccountsQueryOptions, core.Account](s, ctx,
-		paginate.OffsetPaginatedQuery[AccountsQueryOptions](q),
-		s.accountQueryBuilder(q),
+func (s *Store) GetAccountsWithVolumes(ctx context.Context, q GetAccountsQuery) (*api.Cursor[core.ExpandedAccount], error) {
+	return paginateWithOffset[GetAccountsOptions, core.ExpandedAccount](s, ctx,
+		paginate.OffsetPaginatedQuery[GetAccountsOptions](q),
+		func(query *bun.SelectQuery) *bun.SelectQuery {
+			return s.
+				accountQueryBuilder(q.Options.AccountFilter)(query).
+				Apply(filterAccountAddress(q.Options.Address, "accounts.address"))
+		},
 	)
 }
 
 type GetAccountQuery struct {
+	AccountFilter
 	Addr string
-	PIT  core.Time
 }
 
 func (q GetAccountQuery) WithPIT(pit core.Time) GetAccountQuery {
-	q.PIT = pit
+	q.PIT = &pit
+
+	return q
+}
+
+func (q GetAccountQuery) WithExpandVolumes() GetAccountQuery {
+	q.ExpandVolumes = true
+
+	return q
+}
+
+func (q GetAccountQuery) WithExpandEffectiveVolumes() GetAccountQuery {
+	q.ExpandEffectiveVolumes = true
 
 	return q
 }
@@ -78,74 +104,59 @@ func (s *Store) GetAccount(ctx context.Context, address string) (*core.Account, 
 	return account, nil
 }
 
-// TODO: Find another name for this method
-func (s *Store) GetAccountWithQuery(ctx context.Context, q GetAccountQuery) (*core.Account, error) {
-	account, err := fetch[*core.Account](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
-		return query.
-			ColumnExpr("accounts.address").
-			ColumnExpr("coalesce(metadata, '{}'::jsonb) as metadata").
+func (s *Store) GetAccountWithVolumes(ctx context.Context, q GetAccountQuery) (*core.ExpandedAccount, error) {
+	account, err := fetch[*core.ExpandedAccount](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
+		query = s.accountQueryBuilder(q.AccountFilter)(query).
 			Where("accounts.address = ?", q.Addr).
-			Join("left join accounts_metadata on accounts_metadata.address = accounts.address").
-			Order("revision desc").
-			Apply(filterPIT(q.PIT, "coalesce(accounts_metadata.date, accounts.insertion_date)")).
 			Limit(1)
+
+		return query
 	})
 	if err != nil {
 		if storageerrors.IsNotFoundError(err) {
-			return pointer.For(core.NewAccount(q.Addr)), nil
+			return pointer.For(core.NewExpandedAccount(q.Addr)), nil
 		}
 		return nil, err
 	}
 	return account, nil
 }
 
-// TODO: Add PIT
-func (s *Store) GetAccountWithVolumes(ctx context.Context, account string, volumes, effectiveVolumes bool) (*core.AccountWithVolumes, error) {
-	return fetch[*core.AccountWithVolumes](s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
-		query = query.
-			Column("accounts.address").
-			ColumnExpr("coalesce(accounts_metadata.metadata, '{}'::jsonb) as metadata").
-			Join("left join accounts_metadata on accounts_metadata.address = accounts.address").
-			Where("accounts.address = ?", account).
-			Order("revision desc").
-			Limit(1)
-		if volumes {
-			query = query.ColumnExpr("get_account_aggregated_volumes(accounts.address) as volumes")
-		}
-		if effectiveVolumes {
-			query = query.ColumnExpr("get_account_aggregated_effective_volumes(accounts.address) as effective_volumes")
-		}
-		return query
+func (s *Store) CountAccounts(ctx context.Context, q GetAccountsQuery) (uint64, error) {
+	return count(s, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
+		return s.
+			accountQueryBuilder(q.Options.AccountFilter)(query).
+			Apply(filterAccountAddress(q.Options.Address, "accounts.address"))
 	})
 }
 
-func (s *Store) CountAccounts(ctx context.Context, q AccountsQuery) (uint64, error) {
-	return count(s, ctx, s.accountQueryBuilder(q))
+type GetAccountsQuery paginate.OffsetPaginatedQuery[GetAccountsOptions]
+
+type AccountFilter struct {
+	PIT                    *core.Time        `json:"pit"`
+	ExpandVolumes          bool              `json:"volumes"`
+	ExpandEffectiveVolumes bool              `json:"effectiveVolumes"`
+	Metadata               metadata.Metadata `json:"metadata"`
 }
 
-type AccountsQuery paginate.OffsetPaginatedQuery[AccountsQueryOptions]
-
-type AccountsQueryOptions struct {
-	AfterAddress string            `json:"after"`
-	Address      string            `json:"address"`
-	Metadata     metadata.Metadata `json:"metadata"`
-
-	PIT                    core.Time `json:"pit"`
-	ExpandVolumes          bool      `json:"volumes"`
-	ExpandEffectiveVolumes bool      `json:"effectiveVolumes"`
+type GetAccountsOptions struct {
+	AccountFilter
+	AfterAddress string `json:"after"`
+	Address      string `json:"address"`
 }
 
-func NewAccountsQuery() AccountsQuery {
-	return AccountsQuery{
+func NewGetAccountsQuery() GetAccountsQuery {
+	return GetAccountsQuery{
 		PageSize: paginate.QueryDefaultPageSize,
 		Order:    paginate.OrderAsc,
-		Options: AccountsQueryOptions{
-			Metadata: metadata.Metadata{},
+		Options: GetAccountsOptions{
+			AccountFilter: AccountFilter{
+				Metadata: metadata.Metadata{},
+			},
 		},
 	}
 }
 
-func (a AccountsQuery) WithPageSize(pageSize uint64) AccountsQuery {
+func (a GetAccountsQuery) WithPageSize(pageSize uint64) GetAccountsQuery {
 	if pageSize != 0 {
 		a.PageSize = pageSize
 	}
@@ -153,26 +164,38 @@ func (a AccountsQuery) WithPageSize(pageSize uint64) AccountsQuery {
 	return a
 }
 
-func (a AccountsQuery) WithAfterAddress(after string) AccountsQuery {
+func (a GetAccountsQuery) WithAfterAddress(after string) GetAccountsQuery {
 	a.Options.AfterAddress = after
 
 	return a
 }
 
-func (a AccountsQuery) WithAddressFilter(address string) AccountsQuery {
+func (a GetAccountsQuery) WithAddress(address string) GetAccountsQuery {
 	a.Options.Address = address
 
 	return a
 }
 
-func (a AccountsQuery) WithMetadataFilter(metadata metadata.Metadata) AccountsQuery {
+func (a GetAccountsQuery) WithMetadataFilter(metadata metadata.Metadata) GetAccountsQuery {
 	a.Options.Metadata = metadata
 
 	return a
 }
 
-func (a AccountsQuery) WithPIT(date core.Time) AccountsQuery {
-	a.Options.PIT = date
+func (a GetAccountsQuery) WithPIT(date core.Time) GetAccountsQuery {
+	a.Options.PIT = &date
+
+	return a
+}
+
+func (a GetAccountsQuery) WithExpandVolumes() GetAccountsQuery {
+	a.Options.ExpandVolumes = true
+
+	return a
+}
+
+func (a GetAccountsQuery) WithExpandEffectiveVolumes() GetAccountsQuery {
+	a.Options.ExpandEffectiveVolumes = true
 
 	return a
 }

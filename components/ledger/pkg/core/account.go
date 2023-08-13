@@ -31,14 +31,14 @@ func NewAccount(address string) Account {
 	}
 }
 
-type AccountWithVolumes struct {
-	Account `bun:",extend"`
-	Volumes VolumesByAssets `json:"volumes,omitempty" bun:"volumes,type:jsonb"`
-	EffectiveVolumes VolumesByAssets `json:"effectiveVolumes" bun:"effectiveVolumes,type:jsonb"`
+type ExpandedAccount struct {
+	Account          `bun:",extend"`
+	Volumes          VolumesByAssets `json:"volumes,omitempty" bun:"volumes,type:jsonb"`
+	EffectiveVolumes VolumesByAssets `json:"effectiveVolumes,omitempty" bun:"effective_volumes,type:jsonb"`
 }
 
-func NewAccountWithVolumes(address string) *AccountWithVolumes {
-	return &AccountWithVolumes{
+func NewExpandedAccount(address string) ExpandedAccount {
+	return ExpandedAccount{
 		Account: Account{
 			Address:  address,
 			Metadata: metadata.Metadata{},
@@ -47,8 +47,8 @@ func NewAccountWithVolumes(address string) *AccountWithVolumes {
 	}
 }
 
-func (v AccountWithVolumes) MarshalJSON() ([]byte, error) {
-	type aux AccountWithVolumes
+func (v ExpandedAccount) MarshalJSON() ([]byte, error) {
+	type aux ExpandedAccount
 	return json.Marshal(struct {
 		aux
 		Balances BalancesByAssets `json:"balances"`
@@ -58,7 +58,7 @@ func (v AccountWithVolumes) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (v AccountWithVolumes) Copy() AccountWithVolumes {
+func (v ExpandedAccount) Copy() ExpandedAccount {
 	v.Account = v.Account.copy()
 	v.Volumes = v.Volumes.copy()
 	return v

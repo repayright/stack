@@ -26,7 +26,7 @@ func TestGetAccounts(t *testing.T) {
 	type testCase struct {
 		name              string
 		queryParams       url.Values
-		expectQuery       ledgerstore.AccountsQuery
+		expectQuery       ledgerstore.GetAccountsQuery
 		expectStatusCode  int
 		expectedErrorCode string
 	}
@@ -34,14 +34,14 @@ func TestGetAccounts(t *testing.T) {
 	testCases := []testCase{
 		{
 			name:        "nominal",
-			expectQuery: ledgerstore.NewAccountsQuery(),
+			expectQuery: ledgerstore.NewGetAccountsQuery(),
 		},
 		{
 			name: "using metadata",
 			queryParams: url.Values{
 				"metadata[roles]": []string{"admin"},
 			},
-			expectQuery: ledgerstore.NewAccountsQuery().
+			expectQuery: ledgerstore.NewGetAccountsQuery().
 				WithMetadataFilter(map[string]string{
 					"roles": "admin",
 				}),
@@ -51,7 +51,7 @@ func TestGetAccounts(t *testing.T) {
 			queryParams: url.Values{
 				"metadata[a.nested.key]": []string{"hello"},
 			},
-			expectQuery: ledgerstore.NewAccountsQuery().
+			expectQuery: ledgerstore.NewGetAccountsQuery().
 				WithMetadataFilter(map[string]string{
 					"a.nested.key": "hello",
 				}),
@@ -61,7 +61,7 @@ func TestGetAccounts(t *testing.T) {
 			queryParams: url.Values{
 				"after": []string{"foo"},
 			},
-			expectQuery: ledgerstore.NewAccountsQuery().
+			expectQuery: ledgerstore.NewGetAccountsQuery().
 				WithAfterAddress("foo").
 				WithMetadataFilter(map[string]string{}),
 		},
@@ -70,21 +70,21 @@ func TestGetAccounts(t *testing.T) {
 			queryParams: url.Values{
 				"address": []string{"foo"},
 			},
-			expectQuery: ledgerstore.NewAccountsQuery().
-				WithAddressFilter("foo").
+			expectQuery: ledgerstore.NewGetAccountsQuery().
+				WithAddress("foo").
 				WithMetadataFilter(map[string]string{}),
 		},
 		{
 			name: "using empty cursor",
 			queryParams: url.Values{
-				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewAccountsQuery())},
+				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewGetAccountsQuery())},
 			},
-			expectQuery: ledgerstore.NewAccountsQuery(),
+			expectQuery: ledgerstore.NewGetAccountsQuery(),
 		},
 		{
 			name: "using cursor with other param",
 			queryParams: url.Values{
-				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewAccountsQuery())},
+				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewGetAccountsQuery())},
 				"after":  []string{"foo"},
 			},
 			expectStatusCode:  http.StatusBadRequest,
@@ -111,7 +111,7 @@ func TestGetAccounts(t *testing.T) {
 			queryParams: url.Values{
 				"pageSize": []string{"1000000"},
 			},
-			expectQuery: ledgerstore.NewAccountsQuery().
+			expectQuery: ledgerstore.NewGetAccountsQuery().
 				WithPageSize(controllers.MaxPageSize).
 				WithMetadataFilter(map[string]string{}),
 		},
@@ -124,11 +124,13 @@ func TestGetAccounts(t *testing.T) {
 				testCase.expectStatusCode = http.StatusOK
 			}
 
-			expectedCursor := sharedapi.Cursor[core.Account]{
-				Data: []core.Account{
+			expectedCursor := sharedapi.Cursor[core.ExpandedAccount]{
+				Data: []core.ExpandedAccount{
 					{
-						Address:  "world",
-						Metadata: metadata.Metadata{},
+						Account: core.Account{
+							Address:  "world",
+							Metadata: metadata.Metadata{},
+						},
 					},
 				},
 			}
@@ -136,7 +138,7 @@ func TestGetAccounts(t *testing.T) {
 			backend, mockLedger := newTestingBackend(t)
 			if testCase.expectStatusCode < 300 && testCase.expectStatusCode >= 200 {
 				mockLedger.EXPECT().
-					GetAccounts(gomock.Any(), testCase.expectQuery).
+					GetAccountsWithVolumes(gomock.Any(), testCase.expectQuery).
 					Return(&expectedCursor, nil)
 			}
 
@@ -150,7 +152,7 @@ func TestGetAccounts(t *testing.T) {
 
 			require.Equal(t, testCase.expectStatusCode, rec.Code)
 			if testCase.expectStatusCode < 300 && testCase.expectStatusCode >= 200 {
-				cursor := sharedapi.DecodeCursorResponse[core.Account](t, rec.Body)
+				cursor := sharedapi.DecodeCursorResponse[core.ExpandedAccount](t, rec.Body)
 				require.Equal(t, expectedCursor, *cursor)
 			} else {
 				err := sharedapi.ErrorResponse{}
@@ -164,7 +166,7 @@ func TestGetAccounts(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	t.Parallel()
 
-	account := core.AccountWithVolumes{
+	account := core.ExpandedAccount{
 		Account: core.Account{
 			Address:  "foo",
 			Metadata: metadata.Metadata{},
@@ -173,7 +175,7 @@ func TestGetAccount(t *testing.T) {
 
 	backend, mock := newTestingBackend(t)
 	mock.EXPECT().
-		GetAccountWithVolumes(gomock.Any(), "foo", false, false).
+		GetAccountWithVolumes(gomock.Any(), ledgerstore.NewGetAccountQuery("foo")).
 		Return(&account, nil)
 
 	router := routes.NewRouter(backend, nil, metrics.NewNoOpRegistry())
@@ -184,7 +186,7 @@ func TestGetAccount(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusOK, rec.Code)
-	response, _ := sharedapi.DecodeSingleResponse[core.AccountWithVolumes](t, rec.Body)
+	response, _ := sharedapi.DecodeSingleResponse[core.ExpandedAccount](t, rec.Body)
 	require.Equal(t, account, response)
 }
 

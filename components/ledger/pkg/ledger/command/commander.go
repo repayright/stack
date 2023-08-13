@@ -25,13 +25,13 @@ type Parameters struct {
 
 type Commander struct {
 	*batching.Batcher[*core.ChainedLog]
-	store           Store
-	locker          Locker
-	compiler        *Compiler
-	running         sync.WaitGroup
-	lastTXID        *atomic.Int64
-	referencer      *Referencer
-	mu              sync.Mutex
+	store      Store
+	locker     Locker
+	compiler   *Compiler
+	running    sync.WaitGroup
+	lastTXID   *atomic.Int64
+	referencer *Referencer
+	mu         sync.Mutex
 
 	lastLog *core.ChainedLog
 }
@@ -71,13 +71,13 @@ func New(
 	}
 
 	return &Commander{
-		store:           store,
-		locker:          locker,
-		compiler:        compiler,
-		referencer:      referencer,
-		lastTXID:        lastTXID,
-		lastLog:         lastLog,
-		Batcher:         batching.NewBatcher(store.InsertLogs, 1, 4096),
+		store:      store,
+		locker:     locker,
+		compiler:   compiler,
+		referencer: referencer,
+		lastTXID:   lastTXID,
+		lastLog:    lastLog,
+		Batcher:    batching.NewBatcher(store.InsertLogs, 1, 4096),
 	}
 }
 
@@ -161,7 +161,7 @@ func (commander *Commander) exec(ctx context.Context, parameters Parameters, scr
 		tx := core.NewTransaction().
 			WithPostings(result.Postings...).
 			WithMetadata(result.Metadata).
-			WithTimestamp(script.Timestamp).
+			WithDate(script.Timestamp).
 			WithID(uint64(commander.lastTXID.Add(1))).
 			WithReference(script.Reference)
 

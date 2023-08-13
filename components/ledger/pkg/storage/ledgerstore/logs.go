@@ -120,7 +120,7 @@ func (s *Store) GetLastLog(ctx context.Context) (*core.ChainedLog, error) {
 		})
 }
 
-func (s *Store) GetLogs(ctx context.Context, q LogsQuery) (*api.Cursor[core.ChainedLog], error) {
+func (s *Store) GetLogs(ctx context.Context, q GetLogsQuery) (*api.Cursor[core.ChainedLog], error) {
 	logs, err := paginateWithColumn[LogsQueryOptions, Logs](s, ctx,
 		paginate.ColumnPaginatedQuery[LogsQueryOptions](q),
 		s.logsQueryBuilder(q.Options),
@@ -159,10 +159,10 @@ type LogsQueryOptions struct {
 	StartTime core.Time `json:"startTime"`
 }
 
-type LogsQuery paginate.ColumnPaginatedQuery[LogsQueryOptions]
+type GetLogsQuery paginate.ColumnPaginatedQuery[LogsQueryOptions]
 
-func NewLogsQuery() LogsQuery {
-	return LogsQuery{
+func NewLogsQuery() GetLogsQuery {
+	return GetLogsQuery{
 		PageSize: paginate.QueryDefaultPageSize,
 		Column:   "id",
 		Order:    paginate.OrderDesc,
@@ -170,12 +170,12 @@ func NewLogsQuery() LogsQuery {
 	}
 }
 
-func (a LogsQuery) WithPaginationID(id uint64) LogsQuery {
+func (a GetLogsQuery) WithPaginationID(id uint64) GetLogsQuery {
 	a.PaginationID = &id
 	return a
 }
 
-func (l LogsQuery) WithPageSize(pageSize uint64) LogsQuery {
+func (l GetLogsQuery) WithPageSize(pageSize uint64) GetLogsQuery {
 	if pageSize != 0 {
 		l.PageSize = pageSize
 	}
@@ -183,7 +183,7 @@ func (l LogsQuery) WithPageSize(pageSize uint64) LogsQuery {
 	return l
 }
 
-func (l LogsQuery) WithStartTimeFilter(start core.Time) LogsQuery {
+func (l GetLogsQuery) WithStartTimeFilter(start core.Time) GetLogsQuery {
 	if !start.IsZero() {
 		l.Options.StartTime = start
 	}
@@ -191,7 +191,7 @@ func (l LogsQuery) WithStartTimeFilter(start core.Time) LogsQuery {
 	return l
 }
 
-func (l LogsQuery) WithEndTimeFilter(end core.Time) LogsQuery {
+func (l GetLogsQuery) WithEndTimeFilter(end core.Time) GetLogsQuery {
 	if !end.IsZero() {
 		l.Options.EndTime = end
 	}

@@ -140,9 +140,9 @@ func filterAccountAddress(address, key string) func(query *bun.SelectQuery) *bun
 	}
 }
 
-func filterPIT(pit core.Time, column string) func(query *bun.SelectQuery) *bun.SelectQuery {
+func filterPIT(pit *core.Time, column string) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
-		if pit.IsZero() {
+		if pit == nil || pit.IsZero() {
 			return query
 		}
 		return query.Where(fmt.Sprintf("%s <= ?", column), pit)

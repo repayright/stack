@@ -346,7 +346,7 @@ func TestGetTransactions(t *testing.T) {
 	type testCase struct {
 		name              string
 		queryParams       url.Values
-		expectQuery       ledgerstore.TransactionsQuery
+		expectQuery       ledgerstore.GetTransactionsQuery
 		expectStatusCode  int
 		expectedErrorCode string
 	}
@@ -552,7 +552,7 @@ func TestCountTransactions(t *testing.T) {
 	type testCase struct {
 		name              string
 		queryParams       url.Values
-		expectQuery       ledgerstore.TransactionsQuery
+		expectQuery       ledgerstore.GetTransactionsQuery
 		expectStatusCode  int
 		expectedErrorCode string
 	}

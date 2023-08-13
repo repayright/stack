@@ -9,7 +9,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (s *Store) GetAggregatedBalances(ctx context.Context, q BalancesQuery) (core.BalancesByAssets, error) {
+func (s *Store) GetAggregatedBalances(ctx context.Context, q GetAggregatedBalancesQuery) (core.BalancesByAssets, error) {
 
 	type Temp struct {
 		Aggregated core.VolumesByAssets `bun:"aggregated,type:jsonb"`
@@ -50,41 +50,41 @@ type BalancesQueryOptions struct {
 	AfterAddress  string `json:"afterAddress"`
 	AddressRegexp string `json:"addressRegexp"`
 
-	PIT core.Time `json:"pit"`
+	PIT *core.Time `json:"pit"`
 }
 
-type BalancesQuery paginate.OffsetPaginatedQuery[BalancesQueryOptions]
+type GetAggregatedBalancesQuery paginate.OffsetPaginatedQuery[BalancesQueryOptions]
 
-func NewBalancesQuery() BalancesQuery {
-	return BalancesQuery{
+func NewBalancesQuery() GetAggregatedBalancesQuery {
+	return GetAggregatedBalancesQuery{
 		PageSize: paginate.QueryDefaultPageSize,
 		Order:    paginate.OrderAsc,
 		Options:  BalancesQueryOptions{},
 	}
 }
 
-func (q BalancesQuery) GetPageSize() uint64 {
+func (q GetAggregatedBalancesQuery) GetPageSize() uint64 {
 	return q.PageSize
 }
 
-func (q BalancesQuery) WithAfterAddress(after string) BalancesQuery {
+func (q GetAggregatedBalancesQuery) WithAfterAddress(after string) GetAggregatedBalancesQuery {
 	q.Options.AfterAddress = after
 
 	return q
 }
 
-func (q BalancesQuery) WithAddressFilter(address string) BalancesQuery {
+func (q GetAggregatedBalancesQuery) WithAddressFilter(address string) GetAggregatedBalancesQuery {
 	q.Options.AddressRegexp = address
 
 	return q
 }
 
-func (q BalancesQuery) WithPageSize(pageSize uint64) BalancesQuery {
+func (q GetAggregatedBalancesQuery) WithPageSize(pageSize uint64) GetAggregatedBalancesQuery {
 	q.PageSize = pageSize
 	return q
 }
 
-func (q BalancesQuery) WithPIT(pit core.Time) BalancesQuery {
-	q.Options.PIT = pit
+func (q GetAggregatedBalancesQuery) WithPIT(pit core.Time) GetAggregatedBalancesQuery {
+	q.Options.PIT = &pit
 	return q
 }

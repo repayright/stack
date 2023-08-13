@@ -43,7 +43,7 @@ func (m *MockLedger) EXPECT() *MockLedgerMockRecorder {
 }
 
 // CountAccounts mocks base method.
-func (m *MockLedger) CountAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (uint64, error) {
+func (m *MockLedger) CountAccounts(ctx context.Context, query ledgerstore.GetAccountsQuery) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CountAccounts", ctx, query)
 	ret0, _ := ret[0].(uint64)
@@ -58,7 +58,7 @@ func (mr *MockLedgerMockRecorder) CountAccounts(ctx, query interface{}) *gomock.
 }
 
 // CountTransactions mocks base method.
-func (m *MockLedger) CountTransactions(ctx context.Context, query ledgerstore.TransactionsQuery) (uint64, error) {
+func (m *MockLedger) CountTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CountTransactions", ctx, query)
 	ret0, _ := ret[0].(uint64)
@@ -88,67 +88,52 @@ func (mr *MockLedgerMockRecorder) CreateTransaction(ctx, parameters, data interf
 }
 
 // GetAccountWithVolumes mocks base method.
-func (m *MockLedger) GetAccountWithVolumes(ctx context.Context, param string, expandVolumes, expandEffectiveVolumes bool) (*core.AccountWithVolumes, error) {
+func (m *MockLedger) GetAccountWithVolumes(ctx context.Context, query ledgerstore.GetAccountQuery) (*core.ExpandedAccount, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccountWithVolumes", ctx, param, expandVolumes, expandEffectiveVolumes)
-	ret0, _ := ret[0].(*core.AccountWithVolumes)
+	ret := m.ctrl.Call(m, "GetAccountWithVolumes", ctx, query)
+	ret0, _ := ret[0].(*core.ExpandedAccount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAccountWithVolumes indicates an expected call of GetAccountWithVolumes.
-func (mr *MockLedgerMockRecorder) GetAccountWithVolumes(ctx, param, expandVolumes, expandEffectiveVolumes interface{}) *gomock.Call {
+func (mr *MockLedgerMockRecorder) GetAccountWithVolumes(ctx, query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountWithVolumes", reflect.TypeOf((*MockLedger)(nil).GetAccountWithVolumes), ctx, param, expandVolumes, expandEffectiveVolumes)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountWithVolumes", reflect.TypeOf((*MockLedger)(nil).GetAccountWithVolumes), ctx, query)
 }
 
-// GetAccounts mocks base method.
-func (m *MockLedger) GetAccounts(ctx context.Context, query ledgerstore.AccountsQuery) (*api.Cursor[core.Account], error) {
+// GetAccountsWithVolumes mocks base method.
+func (m *MockLedger) GetAccountsWithVolumes(ctx context.Context, query ledgerstore.GetAccountsQuery) (*api.Cursor[core.ExpandedAccount], error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccounts", ctx, query)
-	ret0, _ := ret[0].(*api.Cursor[core.Account])
+	ret := m.ctrl.Call(m, "GetAccountsWithVolumes", ctx, query)
+	ret0, _ := ret[0].(*api.Cursor[core.ExpandedAccount])
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAccounts indicates an expected call of GetAccounts.
-func (mr *MockLedgerMockRecorder) GetAccounts(ctx, query interface{}) *gomock.Call {
+// GetAccountsWithVolumes indicates an expected call of GetAccountsWithVolumes.
+func (mr *MockLedgerMockRecorder) GetAccountsWithVolumes(ctx, query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockLedger)(nil).GetAccounts), ctx, query)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountsWithVolumes", reflect.TypeOf((*MockLedger)(nil).GetAccountsWithVolumes), ctx, query)
 }
 
-// GetBalances mocks base method.
-func (m *MockLedger) GetBalances(ctx context.Context, q ledgerstore.BalancesQuery) (*api.Cursor[core.BalancesByAssetsByAccounts], error) {
+// GetAggregatedBalances mocks base method.
+func (m *MockLedger) GetAggregatedBalances(ctx context.Context, q ledgerstore.GetAggregatedBalancesQuery) (core.BalancesByAssets, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBalances", ctx, q)
-	ret0, _ := ret[0].(*api.Cursor[core.BalancesByAssetsByAccounts])
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetBalances indicates an expected call of GetBalances.
-func (mr *MockLedgerMockRecorder) GetBalances(ctx, q interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalances", reflect.TypeOf((*MockLedger)(nil).GetBalances), ctx, q)
-}
-
-// GetBalancesAggregated mocks base method.
-func (m *MockLedger) GetBalancesAggregated(ctx context.Context, q ledgerstore.BalancesQuery) (core.BalancesByAssets, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBalancesAggregated", ctx, q)
+	ret := m.ctrl.Call(m, "GetAggregatedBalances", ctx, q)
 	ret0, _ := ret[0].(core.BalancesByAssets)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetBalancesAggregated indicates an expected call of GetBalancesAggregated.
-func (mr *MockLedgerMockRecorder) GetBalancesAggregated(ctx, q interface{}) *gomock.Call {
+// GetAggregatedBalances indicates an expected call of GetAggregatedBalances.
+func (mr *MockLedgerMockRecorder) GetAggregatedBalances(ctx, q interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalancesAggregated", reflect.TypeOf((*MockLedger)(nil).GetBalancesAggregated), ctx, q)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAggregatedBalances", reflect.TypeOf((*MockLedger)(nil).GetAggregatedBalances), ctx, q)
 }
 
 // GetLogs mocks base method.
-func (m *MockLedger) GetLogs(ctx context.Context, query ledgerstore.LogsQuery) (*api.Cursor[core.ChainedLog], error) {
+func (m *MockLedger) GetLogs(ctx context.Context, query ledgerstore.GetLogsQuery) (*api.Cursor[core.ChainedLog], error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLogs", ctx, query)
 	ret0, _ := ret[0].(*api.Cursor[core.ChainedLog])
@@ -193,7 +178,7 @@ func (mr *MockLedgerMockRecorder) GetTransactionWithVolumes(ctx, id, expandVolum
 }
 
 // GetTransactions mocks base method.
-func (m *MockLedger) GetTransactions(ctx context.Context, query ledgerstore.TransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {
+func (m *MockLedger) GetTransactions(ctx context.Context, query ledgerstore.GetTransactionsQuery) (*api.Cursor[core.ExpandedTransaction], error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransactions", ctx, query)
 	ret0, _ := ret[0].(*api.Cursor[core.ExpandedTransaction])

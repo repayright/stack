@@ -22,7 +22,7 @@ func TestGetBalancesAggregated(t *testing.T) {
 	type testCase struct {
 		name        string
 		queryParams url.Values
-		expectQuery ledgerstore.BalancesQuery
+		expectQuery ledgerstore.GetAggregatedBalancesQuery
 	}
 
 	testCases := []testCase{
@@ -47,7 +47,7 @@ func TestGetBalancesAggregated(t *testing.T) {
 			}
 			backend, mock := newTestingBackend(t)
 			mock.EXPECT().
-				GetBalancesAggregated(gomock.Any(), testCase.expectQuery).
+				GetAggregatedBalances(gomock.Any(), testCase.expectQuery).
 				Return(expectedBalances, nil)
 
 			router := routes.NewRouter(backend, nil, metrics.NewNoOpRegistry())

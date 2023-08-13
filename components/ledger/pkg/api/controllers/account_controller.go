@@ -22,8 +22,8 @@ import (
 func CountAccounts(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	accountsQuery := ledgerstore.NewAccountsQuery().
-		WithAddressFilter(r.URL.Query().Get("address")).
+	accountsQuery := ledgerstore.NewGetAccountsQuery().
+		WithAddress(r.URL.Query().Get("address")).
 		WithMetadataFilter(sharedapi.GetQueryMap(r.URL.Query(), "metadata"))
 
 	count, err := l.CountAccounts(r.Context(), accountsQuery)
@@ -39,7 +39,7 @@ func CountAccounts(w http.ResponseWriter, r *http.Request) {
 func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	accountsQuery := ledgerstore.NewAccountsQuery()
+	accountsQuery := ledgerstore.NewGetAccountsQuery()
 
 	if r.URL.Query().Get(QueryKeyCursor) != "" {
 		if r.URL.Query().Get("after") != "" ||
@@ -77,12 +77,12 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 		accountsQuery = accountsQuery.
 			WithAfterAddress(r.URL.Query().Get("after")).
-			WithAddressFilter(r.URL.Query().Get("address")).
+			WithAddress(r.URL.Query().Get("address")).
 			WithMetadataFilter(sharedapi.GetQueryMap(r.URL.Query(), "metadata")).
 			WithPageSize(pageSize)
 	}
 
-	cursor, err := l.GetAccounts(r.Context(), accountsQuery)
+	cursor, err := l.GetAccountsWithVolumes(r.Context(), accountsQuery)
 	if err != nil {
 		apierrors.ResponseError(w, r, err)
 		return
@@ -94,10 +94,15 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 func GetAccount(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	acc, err := l.GetAccountWithVolumes(r.Context(), chi.URLParam(r, "address"),
-		collectionutils.Contains(r.URL.Query()["expand"], "volumes"),
-		collectionutils.Contains(r.URL.Query()["expand"], "effectiveVolumes"),
-	)
+	query := ledgerstore.NewGetAccountQuery(chi.URLParam(r, "address"))
+	if collectionutils.Contains(r.URL.Query()["expand"], "volumes") {
+		query = query.WithExpandVolumes()
+	}
+	if collectionutils.Contains(r.URL.Query()["expand"], "effectiveVolumes") {
+		query = query.WithExpandEffectiveVolumes()
+	}
+
+	acc, err := l.GetAccountWithVolumes(r.Context(), query)
 	if err != nil {
 		apierrors.ResponseError(w, r, err)
 		return

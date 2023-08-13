@@ -26,7 +26,7 @@ func (d defaultLedger) CountTransactions(ctx context.Context) (uint64, error) {
 }
 
 func (d defaultLedger) CountAccounts(ctx context.Context) (uint64, error) {
-	return d.store.CountAccounts(ctx, ledgerstore.NewAccountsQuery())
+	return d.store.CountAccounts(ctx, ledgerstore.NewGetAccountsQuery())
 }
 
 var _ Ledger = (*defaultLedger)(nil)
