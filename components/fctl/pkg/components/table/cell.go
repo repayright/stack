@@ -52,6 +52,9 @@ func WithWidth(width int) CellOption {
 		return c
 	}
 }
+func (c *Cell) Content() string {
+	return c.content
+}
 
 func (c *Cell) String() string {
 	return c.content + strings.Repeat(" ", c.fill)

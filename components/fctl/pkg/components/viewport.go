@@ -79,12 +79,13 @@ func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		m.vp.Width = msg.Width
-		m.vp.Height = msg.Height
+		m.vp.Height = msg.Height - 1
 
 		renderer, err := glamour.NewTermRenderer(
 			glamour.WithAutoStyle(),
 			glamour.WithWordWrap(msg.Width),
 		)
+
 		if err != nil {
 			return nil, tea.Quit
 		}
@@ -93,6 +94,7 @@ func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			return nil, tea.Quit
 		}
+
 		m.vp.SetContent(str)
 
 	}

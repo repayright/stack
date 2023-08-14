@@ -56,3 +56,12 @@ func (c *Cursor) MoveUp() {
 func (c *Cursor) MoveDown() {
 	c.y++
 }
+
+func (c *Cursor) MoveTo(x, y int) {
+	c.x = x
+	c.y = y
+}
+
+func (c *Cursor) ToTop() {
+	c.y = 0
+}

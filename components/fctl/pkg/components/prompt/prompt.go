@@ -7,9 +7,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/components/table"
 	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/helpers"
 	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/hbollon/go-edlib"
 )
+
+type KeyMap struct {
+	Up key.Binding
+}
 
 type UpdateSuggestionMsg struct{}
 type Prompt struct {
@@ -105,26 +110,54 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 			return p, func() tea.Msg {
 				return modelutils.ClosePromptMsg{}
 			}
-		//Tabulation
-		case "tab":
+		case "ctrl+c":
+			return p, tea.Quit
+		case "up", "down", "tab":
+			// case "enter":
+			Log := helpers.NewLogger("PROMPT")
+			Log.Log("Enter pressed")
+
 			if p.suggestions == nil {
 				return p, nil
 			}
 
-			// if p.cursorY+1 > len-1 {
-			// 	p.cursorY = 0
-			// } else {
-			// 	p.cursorY++
-			// }
+			s, _ := p.suggestions.Update(msg)
+			p.suggestions = &s
+			return p, func() tea.Msg {
+				return UpdateSuggestionMsg{}
+			}
 		case "enter":
+			if p.suggestions == nil {
+				return p, nil
+			}
+
+			s, _ := p.suggestions.Update(msg)
+			p.suggestions = &s
+
+			if row := p.suggestions.GetSelected(); row != nil {
+				c0 := row.Items()[0].String()
+
+				// We need to find the command
+				// If c0 does not exist in the map it will lead to an error
+				// We need to check if the command exist in the map
+				controller := p.commands.controllerMap[c0]
+
+				if controller == nil {
+					return p, nil
+				}
+
+				// We need to check if the controller is a leaf
+				p.model.Blur()
+				p.model.Reset()
+				p.suggestions = nil
+				return p, func() tea.Msg {
+					return modelutils.ChangeViewMsg{
+						Controller: controller,
+					}
+				}
+			}
+
 		}
-
-		// if p.lastInput == v {
-		// 	return p, nil
-		// }
-
-		// p.lastInput = v
-		p.suggestions = nil
 
 		// We might want to use a go routine here
 		// But we need to be careful about the order of the results
@@ -143,42 +176,37 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 
 				cells := table.NewCells(
 					table.NewCell(r,
-						table.WithStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("#00ff00")).Background(lipgloss.Color("#000000"))),
 						table.WithWidth(20),
 					),
 					table.NewCell(p.commands.descmap[r],
-						table.WithStyle(
-							lipgloss.NewStyle().Foreground(lipgloss.Color("#00ff00")).Background(lipgloss.Color("#000000")),
-						),
 						table.WithWidth(40),
 					),
 				)
 
 				row := table.NewRow(
 					cells,
-					table.WithRowStyle(
-						lipgloss.NewStyle().Foreground(lipgloss.Color("#00ff00")).Background(lipgloss.Color("#000000")),
-					),
 				)
 
 				rows = append(rows, row)
 			}
-			if len(rows) >= 0 {
-				p.suggestions = NewSuggestions(rows...)
+			if len(rows) == 0 {
+				ready <- true
+				return
 			}
+
+			p.suggestions = NewSuggestions(rows...)
 			ready <- true
 		}()
 		if <-ready {
-			return p, func() tea.Msg {
+			return p, tea.Batch(cmd, func() tea.Msg {
 				return UpdateSuggestionMsg{}
-			}
+			})
 		}
 	default:
 		p.model, cmd = p.model.Update(msg)
 		return p, cmd
 	}
-
-	return p, cmd
+	return p, nil
 }
 
 func (p *Prompt) View() string {

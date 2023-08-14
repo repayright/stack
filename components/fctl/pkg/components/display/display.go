@@ -160,8 +160,8 @@ func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) {
 }
 
 func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	Log := helpers.NewLogger("display")
-	Log.Log("update")
+	// Log := helpers.NewLogger("display")
+	// Log.Log("update")
 	switch msg := msg.(type) {
 	case modelutils.RenderMsg:
 		d.Render()
@@ -189,9 +189,12 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case modelutils.ChangeViewMsg:
+		Log := helpers.NewLogger("ENTER")
+
 		d.controller = msg.Controller
 		renderer, err := d.controller.Run()
 		if err != nil {
+			Log.Logf("selected stack id: %s", err)
 			return d, tea.Quit
 		}
 
@@ -204,6 +207,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		d.addControllerPromptKeyBinding(d.controller)
 		d.GenerateKeyMapAction()
+		d.suggestions = nil
 		return d, tea.Sequence(
 			d.renderer.Init(),
 			func() tea.Msg {
@@ -212,6 +216,9 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					Height: d.lastTermSize.Height,
 				}
 			})
+	case modelutils.ConfirmActionMsg:
+		d.confirm = NewConfirm(msg)
+
 	case modelutils.OpenPromptMsg:
 		d.prompt.SwitchFocus()
 		d.GenerateKeyMapAction()

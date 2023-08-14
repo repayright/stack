@@ -1,12 +1,10 @@
 package table
 
 import (
-	"fmt"
 	"math"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/formancehq/fctl/pkg/helpers"
 )
 
 type Rows []*Row
@@ -18,6 +16,12 @@ func (r Rows) Reverse() Rows {
 	}
 	return rows
 }
+
+// FIXME: This can overflow !
+func (r Rows) GetSelected(c *Cursor) *Row {
+	return r[c.y]
+}
+
 func (r Rows) GetScopeY(c *Cursor, height int) (rows Rows) {
 
 	cursorY := c.y
@@ -94,8 +98,6 @@ func (r StyleRows) Update(msg tea.Msg) (StyleRows, tea.Cmd) {
 func (r StyleRows) Render(c *Cursor, t tea.WindowSizeMsg) string {
 	out := []string{}
 	cursorY := c.y
-	Log := helpers.NewLogger("ROWS")
-	Log.Log(fmt.Sprintf("%d", cursorY))
 
 	// Switch selection
 	for j, row := range r.rows {
@@ -109,10 +111,9 @@ func (r StyleRows) Render(c *Cursor, t tea.WindowSizeMsg) string {
 	rows := r.rows.GetScopeY(c, t.Height)
 
 	for _, row := range rows {
-		// style := row.style.Width(t.Width - row.style.GetHorizontalMargins() - row.style.GetHorizontalPadding())
-		// rows[i].style = style
 		out = append(out, row.Render(c))
 	}
+
 	return lipgloss.JoinVertical(lipgloss.Top, out...)
 }
 

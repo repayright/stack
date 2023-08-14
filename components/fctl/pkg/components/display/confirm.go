@@ -4,6 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/formancehq/fctl/pkg/theme"
 )
 
@@ -13,9 +14,10 @@ type Confirm struct {
 	keyHandler *config.KeyMapHandler
 
 	message string
+	action  tea.Cmd
 }
 
-func NewConfirm(message string) *Confirm {
+func NewConfirm(msg modelutils.ConfirmActionMsg) *Confirm {
 	return &Confirm{
 		keyHandler: config.NewKeyMapHandler(),
 		style: lipgloss.NewStyle().
@@ -25,7 +27,8 @@ func NewConfirm(message string) *Confirm {
 			Align(lipgloss.Center).
 			AlignVertical(lipgloss.Center).
 			Border(lipgloss.NormalBorder()),
-		message: message,
+		message: msg.Question,
+		action:  msg.Action,
 	}
 }
 

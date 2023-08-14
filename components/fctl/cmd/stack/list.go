@@ -3,12 +3,14 @@ package stack
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
+	"github.com/formancehq/fctl/pkg/helpers"
 	"github.com/formancehq/fctl/pkg/modelutils"
 
 	"github.com/formancehq/fctl/membershipclient"
@@ -253,12 +255,16 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			}
 
 			selectedRow := t.SelectedRow()
-			id := selectedRow.Items()[1].String()
+			Log := helpers.NewLogger("ENTER")
+			cellId := selectedRow.Items()[1].Content()
+			Log.Logf("selected stack id: %s", cellId)
+
 			c := NewShowControllerConfig()
 			controller := NewShowController(c)
 			c.SetOut(os.Stdout)
 			c.SetContext(context.TODO())
-			c.SetArgs([]string{id})
+			c.SetArgs([]string{cellId})
+			Log.Logf("args : %v", c.GetArgs())
 
 			return modelutils.ChangeViewMsg{
 				Controller: controller,
@@ -278,16 +284,34 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			}
 
 			selectedRow := t.SelectedRow()
-			id := selectedRow.Items()[1].String()
+			id := selectedRow.Items()[1].Content()
+			return modelutils.ConfirmActionMsg{
+				Question: fmt.Sprintf("Are you sure you want to delete stack %s ? ", id),
+				Action: func() tea.Msg {
 
-			c := NewShowControllerConfig()
-			controller := NewShowController(c)
-			c.SetOut(os.Stdout)
-			c.SetContext(context.TODO())
-			c.SetArgs([]string{id})
+					c := NewDeleteConfig()
+					controller := NewDeleteController(c)
+					c.SetOut(os.Stdout)
+					c.SetContext(context.TODO())
+					c.SetArgs([]string{id})
 
-			return modelutils.ChangeViewMsg{
-				Controller: controller,
+					_, err := controller.Run()
+					if err != nil {
+						return modelutils.ErrorMsg{
+							Error: err,
+						}
+					}
+
+					conf := NewListControllerConfig()
+					listController := NewListController(conf)
+					conf.SetOut(os.Stdout)
+					conf.SetContext(context.TODO())
+					// conf.SetArgs([]string{})
+
+					return modelutils.ChangeViewMsg{
+						Controller: listController,
+					}
+				},
 			}
 		},
 	)

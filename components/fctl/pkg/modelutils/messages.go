@@ -1,6 +1,7 @@
 package modelutils
 
 import (
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/config"
 )
 
@@ -15,8 +16,9 @@ type ChangeViewMsg struct {
 	Controller config.Controller
 }
 
-type ConfirmAskMsg struct {
+type ConfirmActionMsg struct {
 	Question string
+	Action   tea.Cmd
 }
 
 type ConfirmMsg struct {

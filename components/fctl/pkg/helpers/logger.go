@@ -34,3 +34,7 @@ func NewLogger(prefix string) *Logger {
 func (l *Logger) Log(msg ...string) {
 	l.file.WriteString(l.prefix + ": " + fmt.Sprintf("%s\n", strings.Join(msg, " ")))
 }
+
+func (l *Logger) Logf(msg string, args ...interface{}) {
+	l.file.WriteString(l.prefix + ": " + fmt.Sprintf(msg, args...))
+}
