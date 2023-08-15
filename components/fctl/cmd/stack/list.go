@@ -313,12 +313,30 @@ func NewKeyMapAction() *config.KeyMapHandler {
 					listController := NewListController(conf)
 					conf.SetOut(os.Stdout)
 					conf.SetContext(context.TODO())
-					// conf.SetArgs([]string{})
-
 					return modelutils.ChangeViewMsg{
 						Controller: listController,
 					}
 				},
+			}
+		},
+	).AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("d"),
+			key.WithHelp("d", "Show deleted stacks"),
+		),
+		func(m tea.Model) tea.Msg {
+			conf := NewListControllerConfig()
+			listController := NewListController(conf)
+			conf.SetOut(os.Stdout)
+			conf.SetContext(context.TODO())
+			err := conf.GetFlags().Set(deletedFlag, "true")
+			if err != nil {
+				return modelutils.ErrorMsg{
+					Error: err,
+				}
+			}
+			return modelutils.ChangeViewMsg{
+				Controller: listController,
 			}
 		},
 	)
