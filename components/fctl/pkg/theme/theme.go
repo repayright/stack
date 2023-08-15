@@ -3,6 +3,7 @@ package theme
 import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 	"github.com/pterm/pterm"
 )
 
@@ -64,4 +65,10 @@ func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
 	border.Bottom = middle
 	border.BottomRight = right
 	return border
+}
+
+func GetBackgroundColor() lipgloss.Color {
+	bgColor := termenv.BackgroundColor()
+	rgb := termenv.ConvertToRGB(bgColor).Hex()
+	return lipgloss.Color(rgb)
 }

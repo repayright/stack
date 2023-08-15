@@ -288,6 +288,9 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			}
 
 			selectedRow := t.SelectedRow()
+			if selectedRow == nil {
+				return nil
+			}
 			id := selectedRow.Items()[1].Content()
 			return modelutils.ConfirmActionMsg{
 				Question: fmt.Sprintf("Are you sure you want to delete stack %s ? ", id),

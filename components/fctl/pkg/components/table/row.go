@@ -96,7 +96,7 @@ func (r *Row) Trim(c Cursor) *Row {
 	for i, cell := range r.cells {
 		cellWidth := cell.Width()
 		if i*x >= cellWidth {
-			cell.hidden = true
+			cell.hidden = true // Hide cell, this is not handle by the row view
 			x -= cellWidth
 		}
 	}

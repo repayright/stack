@@ -21,9 +21,7 @@ type ConfirmActionMsg struct {
 	Action   tea.Cmd
 }
 
-type ConfirmMsg struct {
-	Confirm bool
-}
+type CloseConfirmMsg struct{}
 
 type RenderMsg struct{}
 

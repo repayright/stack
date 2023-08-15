@@ -394,13 +394,11 @@ func (d *Display) addRenderConfirmView() {
 	h := d.confirm.Styles().GetHeight()
 	w := d.confirm.Styles().GetWidth()
 
-	box := lipgloss.Place(h, w, lipgloss.Center, lipgloss.Center, d.confirm.View())
-
 	// From Top Left Corner Always
 	posX := d.lastTermSize.Width/2 - w/2
 	posY := d.lastTermSize.Height/2 - h/2
 
-	d.rendered = helpers.PlaceOverlay(posX, posY, box, d.rendered, false)
+	d.rendered = helpers.PlaceOverlay(posX, posY, d.confirm.View(), d.rendered, false)
 }
 
 func (d *Display) View() string {
