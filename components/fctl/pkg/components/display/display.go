@@ -258,12 +258,6 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 
 		keyMapHandler := d.getContextualMapAction()
-
-		// No key map handler
-		if keyMapHandler == nil {
-			return d, postCmd
-		}
-
 		action := keyMapHandler.GetAction(tea.Key(msg))
 
 		// No real action defined

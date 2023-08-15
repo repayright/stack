@@ -47,7 +47,7 @@ func NewConfirm(msg modelutils.ConfirmActionMsg) *Confirm {
 
 	return &Confirm{
 		cursor: table.NewCursor(
-			table.WithX(0), // start at the second cell
+			table.WithX(0),
 		),
 		style: lipgloss.NewStyle().
 			Foreground(theme.SelectedColorForegroundBackground).

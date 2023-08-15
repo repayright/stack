@@ -1,10 +1,7 @@
 package prompt
 
 import (
-	"reflect"
-
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/helpers"
 )
 
 type Commands struct {
@@ -15,8 +12,6 @@ type Commands struct {
 }
 
 func NewCommands(node *config.Node) *Commands {
-	Log := helpers.NewLogger("prompt")
-	Log.Log("NewCommands")
 	var commands []string
 	var description map[string]string = make(map[string]string)
 	var controllerMap map[string]config.Controller = make(map[string]config.Controller)
@@ -29,9 +24,6 @@ func NewCommands(node *config.Node) *Commands {
 			descmap:  description,
 		}
 	}
-
-	typ := reflect.TypeOf(childs).String()
-	Log.Log(typ)
 
 	switch c := childs.(type) {
 	case []*config.Node:
@@ -69,7 +61,6 @@ func NewCommands(node *config.Node) *Commands {
 		}
 	}
 
-	Log.Log(commands...)
 	return &Commands{
 		node:          node,
 		commands:      commands,

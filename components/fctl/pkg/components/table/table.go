@@ -139,6 +139,11 @@ func (t Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			t.cursor.y = utils.Min(t.cursor.y+1, len(t.rows.rows))
 		case "up":
 			t.cursor.y = utils.Max(t.cursor.y-1, 0)
+		case "tab":
+			t.cursor.y = t.cursor.y + 1
+			if t.cursor.y == len(t.rows.rows)+1 {
+				t.cursor.y = 0
+			}
 		}
 	}
 
