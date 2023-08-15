@@ -80,12 +80,37 @@ func (c Confirm) Init() tea.Cmd {
 	return nil
 }
 
-func (c Confirm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (c Confirm) Update(msg tea.Msg) (Confirm, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "left":
+			if c.cursor.GetX() > 0 {
+				cells := c.row.Items()
+				table.WithStyle(c.cellStyle)(cells[c.cursor.GetX()])
+				c.cursor.MoveLeft()
+				table.WithStyle(c.cellStyleSelected)(cells[c.cursor.GetX()])
+			}
+		case "right":
+			if c.cursor.GetX() < 1 {
+				cells := c.row.Items()
+				table.WithStyle(c.cellStyle)(cells[c.cursor.GetX()])
+				c.cursor.MoveRight()
+				table.WithStyle(c.cellStyleSelected)(cells[c.cursor.GetX()])
+			}
+		case "enter":
+			if c.cursor.GetX() == 0 {
+				return c, func() tea.Msg {
+					return modelutils.CloseConfirmMsg{}
+				}
+			}
+			return c, tea.Sequence(func() tea.Msg {
+				return modelutils.CloseConfirmMsg{}
+			}, c.action)
 		case "y":
-			return c, c.action
+			return c, tea.Sequence(func() tea.Msg {
+				return modelutils.CloseConfirmMsg{}
+			}, c.action)
 		case "n":
 			return c, func() tea.Msg {
 				return modelutils.CloseConfirmMsg{}

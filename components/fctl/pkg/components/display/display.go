@@ -240,7 +240,19 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Reset model if none is provided
 		d.suggestions = d.prompt.GetSuggestions()
+	case modelutils.CloseConfirmMsg:
+		d.confirm = nil
+		return d, func() tea.Msg {
+			return modelutils.RenderMsg{}
+		}
 	case tea.KeyMsg:
+		if d.confirm != nil {
+			confirm, cmd := d.confirm.Update(msg)
+			d.confirm = &confirm
+			return d, tea.Sequence(cmd, func() tea.Msg {
+				return modelutils.RenderMsg{}
+			})
+		}
 		if d.prompt.IsFocused() {
 			m, cmd := d.prompt.Update(msg)
 			d.prompt = m
