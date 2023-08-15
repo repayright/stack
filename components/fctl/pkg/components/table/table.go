@@ -164,8 +164,9 @@ func (t Table) View() string {
 }
 
 func (t *Table) SelectedRow() *Row {
+	// For the moment we don't support header selection
 	if t.cursor.y == 0 {
-		return t.header
+		return nil
 	}
 
 	if t.cursor.y == 1 {

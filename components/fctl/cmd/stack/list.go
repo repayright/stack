@@ -255,6 +255,10 @@ func NewKeyMapAction() *config.KeyMapHandler {
 			}
 
 			selectedRow := t.SelectedRow()
+			if selectedRow == nil {
+				return nil
+			}
+
 			Log := helpers.NewLogger("ENTER")
 			cellId := selectedRow.Items()[1].Content()
 			Log.Logf("selected stack id: %s", cellId)

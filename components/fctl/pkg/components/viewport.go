@@ -20,9 +20,6 @@ func (m ModelManager) Init() tea.Cmd {
 	return nil
 }
 
-//	func (m ModelManager) GetListKeyMapHandler() *config.KeyMapHandler {
-//		return m.keyMapAction
-//	}
 func NewViewPortManager(content string, out io.Writer) (*ModelManager, error) {
 	width := theme.ViewWidth
 	vp := viewport.New(width, theme.ViewHeight)
@@ -78,8 +75,9 @@ func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
+		m.vp = viewport.New(msg.Width, msg.Height)
 		m.vp.Width = msg.Width
-		m.vp.Height = msg.Height - 1
+		m.vp.Height = msg.Height
 
 		renderer, err := glamour.NewTermRenderer(
 			glamour.WithAutoStyle(),

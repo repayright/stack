@@ -160,8 +160,6 @@ func (d *Display) newBodyWindowMsg(msg modelutils.ResizeMsg) {
 }
 
 func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// Log := helpers.NewLogger("display")
-	// Log.Log("update")
 	switch msg := msg.(type) {
 	case modelutils.RenderMsg:
 		d.Render()
@@ -208,14 +206,19 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		d.addControllerPromptKeyBinding(d.controller)
 		d.GenerateKeyMapAction()
 		d.suggestions = nil
-		return d, tea.Sequence(
-			d.renderer.Init(),
-			func() tea.Msg {
+
+		cmd := d.renderer.Init()
+
+		r, rCmd := d.renderer.Update(d.lastBodySize)
+		d.renderer = r
+		return d, func() tea.Msg {
+			return tea.Sequence(cmd, rCmd, func() tea.Msg {
 				return modelutils.ResizeMsg{
 					Width:  d.lastTermSize.Width,
 					Height: d.lastTermSize.Height,
 				}
 			})
+		}
 	case modelutils.ConfirmActionMsg:
 		d.confirm = NewConfirm(msg)
 
@@ -337,6 +340,7 @@ func (d *Display) GetKeyMapAction() *config.KeyMapHandler {
 
 }
 
+// Only rerender necessary part, need to keep old state
 func (d *Display) Render() {
 	d.rendered = ""
 	d.addRenderHeaderView()     //1 <=> Ordered List
