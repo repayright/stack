@@ -75,7 +75,6 @@ func (m ModelManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		m.vp = viewport.New(msg.Width, msg.Height)
 		m.vp.Width = msg.Width
 		m.vp.Height = msg.Height
 

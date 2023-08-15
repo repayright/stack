@@ -10,6 +10,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/formancehq/fctl/pkg/components/display"
+	"github.com/formancehq/fctl/pkg/components/prompt"
 	"github.com/formancehq/fctl/pkg/config"
 	"github.com/formancehq/fctl/pkg/modelutils"
 
@@ -402,8 +403,10 @@ func render(flags *flag.FlagSet, c config.Controller, r config.Renderer, cmd *co
 			return errors.New("node is not a config.Node")
 		}
 
-		d := display.NewDisplay(nod)
-		d.SetController(c)
+		d := display.NewDisplay(
+			display.WithController(c),
+			display.WithPrompt(prompt.NewPrompt(nod)),
+		)
 
 		if _, err := tea.NewProgram(
 			d,

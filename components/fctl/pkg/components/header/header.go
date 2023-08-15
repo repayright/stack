@@ -95,9 +95,7 @@ func (h *Header) Update(msg tea.Msg) (*Header, tea.Cmd) {
 
 		text := lipgloss.NewStyle().Render(lipgloss.JoinHorizontal(lipgloss.Top, m...))
 		middleDiv := lipgloss.Place(middleDivSize, h.GetMaxPossibleHeight(), lipgloss.Center, lipgloss.Top, text)
-		// bottomDiv := lipgloss.Place(msg.Width-2, h.prompt.GetHeight(), lipgloss.Top, lipgloss.Top, h.prompt.View())
 		div := lipgloss.JoinHorizontal(lipgloss.Top, leftDiv, middleDiv, rightDiv)
-		// bloc := lipgloss.JoinVertical(lipgloss.Top, div, bottomDiv)
 		h.rendered = headerStyle.Render(div)
 		return h, tea.Batch(cmds...)
 	}
@@ -117,18 +115,18 @@ func (h *Header) ResetBinding() *Header {
 	return h
 }
 
-func (h *Header) SetKeyBinding(keys ...*config.KeyMapHandler) *Header {
+func (h *Header) SetKeyBinding(key config.KeyMapHandler) *Header {
 	var maxHeigth int = h.GetMaxPossibleHeight()
 	var maxWidth int
 	var buffer []string = []string{}
 
-	for _, key := range keys {
-		v := key.View()
-		s := strings.Split(v, "\n")
-		buffer = append(buffer, s...)
-	}
+	v := key.View()
+	s := strings.Split(v, "\n")
+	buffer = append(buffer, s...)
 
-	// sort.Strings(buffer)
+	// if len(buffer) > 0 {
+	// 	sort.Strings(buffer)
+	// }
 
 	// Get the number of list to create
 	n := math.Ceil(float64(len((buffer))) / float64(maxHeigth))

@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/formancehq/fctl/pkg/components/table"
 	"github.com/formancehq/fctl/pkg/config"
-	"github.com/formancehq/fctl/pkg/helpers"
 	"github.com/formancehq/fctl/pkg/modelutils"
 	"github.com/hbollon/go-edlib"
 )
@@ -39,6 +38,14 @@ func NewPrompt(node *config.Node) *Prompt {
 			),
 			func(model tea.Model) tea.Msg {
 				return nil
+			},
+		).AddNewKeyBinding(
+			key.NewBinding(
+				key.WithKeys("esc"),
+				key.WithHelp("esc", "Quit the prompt"),
+			),
+			func(model tea.Model) tea.Msg {
+				return modelutils.ClosePromptMsg{}
 			},
 		),
 		yPosition: 0,
@@ -113,10 +120,6 @@ func (p *Prompt) Update(msg tea.Msg) (*Prompt, tea.Cmd) {
 		case "ctrl+c":
 			return p, tea.Quit
 		case "up", "down", "tab":
-			// case "enter":
-			Log := helpers.NewLogger("PROMPT")
-			Log.Log("Enter pressed")
-
 			if p.suggestions == nil {
 				return p, nil
 			}

@@ -30,21 +30,43 @@ type Display struct {
 	lastTermSize tea.WindowSizeMsg
 
 	rendered string
+
+	//Tweak
+	knownControllers []config.Controller
 }
 
-func NewDisplay(node *config.Node) *Display {
+type DisplayOpts func(*Display) *Display
+
+func WithController(controller config.Controller) DisplayOpts {
+	return func(d *Display) *Display {
+		d.controller = controller
+		d.knownControllers = append(d.knownControllers, controller)
+		return d
+	}
+}
+
+func WithPrompt(prompt *prompt.Prompt) DisplayOpts {
+	return func(d *Display) *Display {
+		d.prompt = prompt
+		return d
+	}
+}
+
+func NewDisplay(opts ...DisplayOpts) *Display {
 	if instance == nil {
 		lock.Lock()
 		defer lock.Unlock()
 		if instance == nil {
 			instance = &Display{
-				header:     header.NewHeader(),
-				controller: nil,
-				renderer:   nil,
-				prompt:     prompt.NewPrompt(node),
+				header: header.NewHeader(),
 			}
 		}
 	}
+
+	for _, opt := range opts {
+		instance = opt(instance)
+	}
+
 	return instance
 }
 
@@ -53,49 +75,13 @@ func (d *Display) SetHeader(model *header.Header) *Display {
 	return d
 }
 
-func (d *Display) SetController(c config.Controller) *Display {
-	d.controller = c
-	return d
-}
-
 func (d *Display) ResetModels() *Display {
 	d.controller = nil
 	return d
 }
 
-func (d *Display) addControllerPromptKeyBinding(c config.Controller) {
-	c.GetKeyMapAction().AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("p"),
-			key.WithHelp("p", "Turn on the prompt"),
-		),
-		func(model tea.Model) tea.Msg {
-			if d.prompt.IsFocused() {
-				return nil
-			}
-			return modelutils.OpenPromptMsg{}
-		},
-	).AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("esc", "ctrl+c"),
-			key.WithHelp("esc", "Exit program"),
-		),
-		func(m tea.Model) tea.Msg {
-			return tea.QuitMsg{}
-		},
-	)
-}
-
-func (d *Display) addPromptExitKeyBinding() {
-	d.prompt.GetKeyMapAction().AddNewKeyBinding(
-		key.NewBinding(
-			key.WithKeys("esc"),
-			key.WithHelp("esc", "Quit the prompt"),
-		),
-		func(model tea.Model) tea.Msg {
-			return modelutils.ClosePromptMsg{}
-		},
-	).AddNewKeyBinding(
+func (d *Display) exitBinding() *config.KeyMapHandler {
+	return config.NewKeyMapHandler().AddNewKeyBinding(
 		key.NewBinding(
 			key.WithKeys("ctrl+c"),
 			key.WithHelp("ctrl+c", "Exit program"),
@@ -106,11 +92,22 @@ func (d *Display) addPromptExitKeyBinding() {
 	)
 }
 
-func (d *Display) Init() tea.Cmd {
-	d.addControllerPromptKeyBinding(d.controller)
-	d.addPromptExitKeyBinding()
-	d.GenerateKeyMapAction()
+func (d *Display) getPromptOnOpen() *config.KeyMapHandler {
+	return config.NewKeyMapHandler().AddNewKeyBinding(
+		key.NewBinding(
+			key.WithKeys("p"),
+			key.WithHelp("p", "Turn on the prompt"),
+		),
+		func(model tea.Model) tea.Msg {
+			if d.prompt.IsFocused() {
+				return nil
+			}
+			return modelutils.OpenPromptMsg{}
+		},
+	)
+}
 
+func (d *Display) Init() tea.Cmd {
 	flags := d.controller.GetConfig().GetAllFLags()
 	conf, err := config.GetConfig(flags)
 	if err != nil {
@@ -121,10 +118,7 @@ func (d *Display) Init() tea.Cmd {
 	d.header.GetContext().SetOrg(profiles.DefaultOrganization())
 	d.header.GetContext().SetProfile(conf.GetCurrentProfileName())
 
-	var keys = d.GetKeyMapAction()
-	if keys != nil {
-		d.header = d.header.SetKeyBinding(keys)
-	}
+	d.GenerateKeyMapActionHelper()
 
 	renderer, err := d.controller.Run()
 	if err != nil {
@@ -190,6 +184,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		Log := helpers.NewLogger("ENTER")
 
 		d.controller = msg.Controller
+
 		renderer, err := d.controller.Run()
 		if err != nil {
 			Log.Logf("selected stack id: %s", err)
@@ -200,31 +195,28 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			return d, tea.Quit
 		}
-		// At this point we are sure that the model is generated
 		d.renderer = model
 
-		d.addControllerPromptKeyBinding(d.controller)
-		d.GenerateKeyMapAction()
+		d.GenerateKeyMapActionHelper()
 		d.suggestions = nil
 
 		cmd := d.renderer.Init()
 
 		r, rCmd := d.renderer.Update(d.lastBodySize)
 		d.renderer = r
-		return d, func() tea.Msg {
-			return tea.Sequence(cmd, rCmd, func() tea.Msg {
-				return modelutils.ResizeMsg{
-					Width:  d.lastTermSize.Width,
-					Height: d.lastTermSize.Height,
-				}
-			})
-		}
+		return d, tea.Sequence(cmd, rCmd, func() tea.Msg {
+			return modelutils.ResizeMsg{
+				Width:  d.lastTermSize.Width,
+				Height: d.lastTermSize.Height,
+			}
+		})
+
 	case modelutils.ConfirmActionMsg:
 		d.confirm = NewConfirm(msg)
 
 	case modelutils.OpenPromptMsg:
 		d.prompt.SwitchFocus()
-		d.GenerateKeyMapAction()
+		d.GenerateKeyMapActionHelper()
 		return d, func() tea.Msg {
 			return modelutils.ResizeMsg{
 				Width:  d.lastTermSize.Width,
@@ -232,7 +224,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case modelutils.ClosePromptMsg:
-		d.GenerateKeyMapAction()
+		d.GenerateKeyMapActionHelper()
 		d.suggestions = nil
 		return d, func() tea.Msg {
 			return modelutils.ResizeMsg{
@@ -265,7 +257,7 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return modelutils.RenderMsg{}
 		})
 
-		keyMapHandler := d.controller.GetKeyMapAction()
+		keyMapHandler := d.getContextualMapAction()
 
 		// No key map handler
 		if keyMapHandler == nil {
@@ -308,24 +300,34 @@ func (d *Display) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return d, nil
 }
 
-func (d *Display) GenerateKeyMapAction() *Display {
-	if d.prompt.IsFocused() {
-		if handler := d.prompt.GetKeyMapAction(); handler != nil {
-			d.header.SetKeyBinding(handler)
-			return d
+func (d *Display) getContextualMapAction() *config.KeyMapHandler {
+	var keyMapHandler *config.KeyMapHandler = config.NewKeyMapHandler()
+
+	if d.prompt != nil {
+		if d.prompt.IsFocused() {
+			if handler := d.prompt.GetKeyMapAction(); handler != nil {
+				h := handler.Copy()
+				h.AddKeyMapHandler(d.exitBinding())
+				return h
+			}
 		}
+		keyMapHandler = keyMapHandler.AddKeyMapHandler(d.getPromptOnOpen())
 	}
 
 	if d.controller != nil {
 		if handler := d.controller.GetKeyMapAction(); handler != nil {
-			d.header.SetKeyBinding(handler)
-			return d
+			keyMapHandler = keyMapHandler.AddKeyMapHandler(handler)
 		}
-
 	}
 
+	keyMapHandler.AddKeyMapHandler(d.exitBinding())
+	return keyMapHandler
+}
+
+func (d *Display) GenerateKeyMapActionHelper() {
 	d.header.ResetBinding()
-	return d
+	var keyMapHandler *config.KeyMapHandler = d.getContextualMapAction()
+	d.header.SetKeyBinding(*keyMapHandler)
 }
 
 func (d *Display) GetKeyMapAction() *config.KeyMapHandler {

@@ -42,6 +42,26 @@ func (k *KeyMapHandler) AddNewKeyBinding(key key.Binding, action func(tea.Model)
 	return k
 }
 
+func (k *KeyMapHandler) RemoveKeyBinding(key key.Binding) *KeyMapHandler {
+	delete(k.keyMapsAction, &key)
+	return k
+}
+
+func (k *KeyMapHandler) AddKeyMapHandler(keyMapHandler *KeyMapHandler) *KeyMapHandler {
+	for keyBind, action := range keyMapHandler.GetKeyMapAction() {
+		k.AddNewKeyBinding(*keyBind, action)
+	}
+	return k
+}
+
+func (k *KeyMapHandler) Copy() *KeyMapHandler {
+	newKeyMapHandler := NewKeyMapHandler()
+	for keyBind, action := range k.keyMapsAction {
+		newKeyMapHandler.AddNewKeyBinding(*keyBind, action)
+	}
+	return newKeyMapHandler
+}
+
 func (k *KeyMapHandler) Reset() *KeyMapHandler {
 	k.keyMapsAction = make(map[*key.Binding]func(tea.Model) tea.Msg)
 	return k
