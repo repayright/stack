@@ -419,8 +419,10 @@ func TestInsertTransactions(t *testing.T) {
 			},
 		}
 
-		err := insertTransactions(context.Background(), store, tx2.Transaction, tx3.Transaction)
-		require.NoError(t, err, "inserting multiple transactions should not fail")
+		require.NoError(t, store.InsertLogs(context.Background(),
+			ledger.NewTransactionLog(&tx2.Transaction, map[string]metadata.Metadata{}).ChainLog(nil).WithID(2),
+			ledger.NewTransactionLog(&tx3.Transaction, map[string]metadata.Metadata{}).ChainLog(nil).WithID(3),
+		))
 
 		tx, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(big.NewInt(1)).WithExpandVolumes())
 		require.NoError(t, err, "getting transaction should not fail")
@@ -622,8 +624,8 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 	require.NoError(t, err, "inserting transaction should not fail")
 
 	err = store.InsertLogs(context.Background(),
-		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), 0, metadata.Metadata{"foo1": "bar2"}).ChainLog(nil),
-		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), 1, metadata.Metadata{"foo2": "bar2"}).ChainLog(nil),
+		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), 0, metadata.Metadata{"foo1": "bar2"}).ChainLog(nil).WithID(3),
+		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), 1, metadata.Metadata{"foo2": "bar2"}).ChainLog(nil).WithID(4),
 	)
 	require.NoError(t, err, "updating multiple transaction metadata should not fail")
 
@@ -654,8 +656,11 @@ func TestInsertTransactionInPast(t *testing.T) {
 		ledger.NewPosting("bank", "user2", "USD/2", big.NewInt(50)),
 	).WithDate(now.Add(30 * time.Minute)).WithIDUint64(2)
 
-	require.NoError(t, insertTransactions(context.Background(), store, *tx1, *tx2))
-	require.NoError(t, insertTransactions(context.Background(), store, *tx3))
+	require.NoError(t, store.InsertLogs(context.Background(),
+		ledger.NewTransactionLog(tx1, map[string]metadata.Metadata{}).ChainLog(nil).WithID(1),
+		ledger.NewTransactionLog(tx2, map[string]metadata.Metadata{}).ChainLog(nil).WithID(2),
+		ledger.NewTransactionLog(tx3, map[string]metadata.Metadata{}).ChainLog(nil).WithID(3),
+	))
 
 	tx2FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx2.ID).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err)
@@ -798,7 +803,9 @@ func TestInsertTwoTransactionAtSameDateInTwoBatch(t *testing.T) {
 		ledger.NewPosting("bank", "user2", "USD/2", big.NewInt(10)),
 	).WithDate(now).WithIDUint64(2)
 
-	require.NoError(t, insertTransactions(context.Background(), store, *tx3))
+	require.NoError(t, store.InsertLogs(context.Background(),
+		ledger.NewTransactionLog(tx3, map[string]metadata.Metadata{}).ChainLog(nil).WithID(3),
+	))
 
 	tx3FromDatabase, err := store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(tx3.ID).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err)

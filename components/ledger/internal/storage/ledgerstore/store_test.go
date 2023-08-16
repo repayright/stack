@@ -26,8 +26,10 @@ func TestInitializeStore(t *testing.T) {
 
 // TODO: remove that
 func insertTransactions(ctx context.Context, s *ledgerstore.Store, txs ...ledger.Transaction) error {
+	var previous *ledger.ChainedLog
 	logs := collectionutils.Map(txs, func(from ledger.Transaction) *ledger.ChainedLog {
-		return ledger.NewTransactionLog(&from, map[string]metadata.Metadata{}).ChainLog(nil)
+		previous = ledger.NewTransactionLog(&from, map[string]metadata.Metadata{}).ChainLog(previous)
+		return previous
 	})
 	return s.InsertLogs(ctx, logs...)
 }

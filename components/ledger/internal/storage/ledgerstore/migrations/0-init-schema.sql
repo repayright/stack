@@ -95,7 +95,7 @@ create type log_type as enum (
 );
 
 create table logs (
-    id numeric not null, -- todo: set primary key ?
+    id numeric not null primary key,
     type log_type not null,
     hash bytea not null,
     date timestamp not null,
