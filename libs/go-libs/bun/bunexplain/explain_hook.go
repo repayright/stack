@@ -9,10 +9,13 @@ import (
 	"github.com/uptrace/bun"
 )
 
+//nolint:unused
 type explainHook struct{}
 
+//nolint:unused
 func (h *explainHook) AfterQuery(ctx context.Context, event *bun.QueryEvent) {}
 
+//nolint:unused
 func (h *explainHook) BeforeQuery(ctx context.Context, event *bun.QueryEvent) context.Context {
 	lowerQuery := strings.ToLower(event.Query)
 	if strings.HasPrefix(lowerQuery, "explain") ||

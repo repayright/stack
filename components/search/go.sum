@@ -238,8 +238,8 @@ github.com/moby/sys/mountinfo v0.5.0/go.mod h1:3bMD3Rg+zkqx8MRYPi7Pyb0Ie97QEBmdx
 github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae h1:O4SWKdcHVCvYqyDV+9CJA1fcDN2L11Bule0iFy3YlAI=
 github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae/go.mod h1:E2VnQOmVuvZB6UYnnDB0qG5Nq/1tD9acaOpo6xmt0Kw=
 github.com/mrunalp/fileutils v0.5.0/go.mod h1:M1WthSahJixYnrXQl/DFQuteStB1weuxD2QJNHXfbSQ=
-github.com/numary/ledger v1.8.1 h1:XoFOw74R5w7SwOTVrT4omBpuGo5uQSuvhfhPPcGdAuo=
-github.com/numary/ledger v1.8.1/go.mod h1:jDWhSjPgF+3Atp4KiRev8ZjyOIlumx0KbDiU77Eh+0Q=
+github.com/formancehq/ledger v1.8.1 h1:XoFOw74R5w7SwOTVrT4omBpuGo5uQSuvhfhPPcGdAuo=
+github.com/formancehq/ledger v1.8.1/go.mod h1:jDWhSjPgF+3Atp4KiRev8ZjyOIlumx0KbDiU77Eh+0Q=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.0.2 h1:9yCKha/T5XdGtO0q9Q9a6T5NUCsTn/DrBg0D7ufOcFM=

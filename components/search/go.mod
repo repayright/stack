@@ -9,7 +9,6 @@ require (
 	github.com/formancehq/stack/libs/go-libs v0.0.0-20230221161632-e6dc6a89a85e
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
-	github.com/numary/ledger v1.8.1
 	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/pkg/errors v0.9.1
@@ -98,3 +97,4 @@ require (
 )
 
 replace github.com/formancehq/stack/libs/go-libs => ../../libs/go-libs
+replace github.com/formancehq/ledger => ../../components/ledger

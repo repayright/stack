@@ -75,7 +75,7 @@ func (c *RevertController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 
 	request := operations.RevertTransactionRequest{
 		Ledger: ledger,
-		ID:   txId,
+		ID:     txId,
 	}
 
 	profile := fctl.GetCurrentProfile(cmd, cfg)
