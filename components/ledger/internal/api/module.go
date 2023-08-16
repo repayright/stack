@@ -8,6 +8,7 @@ import (
 	"github.com/formancehq/ledger/internal/storage/driver"
 	"github.com/formancehq/stack/libs/go-libs/health"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/noop"
 	"go.uber.org/fx"
 )
 
@@ -21,7 +22,7 @@ func Module(cfg Config) fx.Option {
 		fx.Provide(func(storageDriver *driver.Driver, resolver *engine.Resolver) Backend {
 			return NewDefaultBackend(storageDriver, cfg.Version, resolver)
 		}),
-		fx.Provide(fx.Annotate(metric.NewNoopMeterProvider, fx.As(new(metric.MeterProvider)))),
+		fx.Provide(fx.Annotate(noop.NewMeterProvider, fx.As(new(metric.MeterProvider)))),
 		fx.Decorate(fx.Annotate(func(meterProvider metric.MeterProvider) (metrics.GlobalRegistry, error) {
 			return metrics.RegisterGlobalRegistry(meterProvider)
 		}, fx.As(new(metrics.GlobalRegistry)))),
