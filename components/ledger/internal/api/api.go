@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"math/big"
 
 	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/engine"
@@ -28,8 +29,9 @@ type Ledger interface {
 	GetTransactionWithVolumes(ctx context.Context, query ledgerstore.GetTransactionQuery) (*ledger.ExpandedTransaction, error)
 
 	CreateTransaction(ctx context.Context, parameters command.Parameters, data ledger.RunScript) (*ledger.Transaction, error)
-	RevertTransaction(ctx context.Context, parameters command.Parameters, id uint64) (*ledger.Transaction, error)
+	RevertTransaction(ctx context.Context, parameters command.Parameters, id *big.Int) (*ledger.Transaction, error)
 	SaveMeta(ctx context.Context, parameters command.Parameters, targetType string, targetID any, m metadata.Metadata) error
+	DeleteMetadata(ctx context.Context, parameters command.Parameters, targetType string, targetID any, key string) error
 }
 
 type Backend interface {

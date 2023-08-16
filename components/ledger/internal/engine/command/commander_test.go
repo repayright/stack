@@ -188,7 +188,7 @@ func TestCreateTransaction(t *testing.T) {
 }
 
 func TestRevert(t *testing.T) {
-	txID := uint64(0)
+	txID := big.NewInt(0)
 	store := storageerrors.NewInMemoryStore()
 	ctx := logging.TestingContext()
 
@@ -214,12 +214,10 @@ func TestRevertWithAlreadyReverted(t *testing.T) {
 	store := storageerrors.NewInMemoryStore()
 	ctx := logging.TestingContext()
 
+	tx := ledger.NewTransaction().WithPostings(ledger.NewPosting("world", "bank", "USD", big.NewInt(100)))
 	err := store.InsertLogs(context.Background(),
-		ledger.NewTransactionLog(
-			ledger.NewTransaction().WithPostings(ledger.NewPosting("world", "bank", "USD", big.NewInt(100))),
-			map[string]metadata.Metadata{},
-		).ChainLog(nil),
-		ledger.NewRevertedTransactionLog(ledger.Now(), big.NewInt(0), ledger.NewTransaction()).ChainLog(nil),
+		ledger.NewTransactionLog(tx, map[string]metadata.Metadata{}).ChainLog(nil),
+		ledger.NewRevertedTransactionLog(ledger.Now(), tx.ID, ledger.NewTransaction()).ChainLog(nil),
 	)
 	require.NoError(t, err)
 
@@ -227,7 +225,7 @@ func TestRevertWithAlreadyReverted(t *testing.T) {
 	go commander.Run(ctx)
 	defer commander.Close()
 
-	_, err = commander.RevertTransaction(context.Background(), Parameters{}, 0)
+	_, err = commander.RevertTransaction(context.Background(), Parameters{}, tx.ID)
 	require.True(t, errors.Is(err, ErrAlreadyReverted))
 }
 
@@ -236,12 +234,10 @@ func TestRevertWithRevertOccurring(t *testing.T) {
 	store := storageerrors.NewInMemoryStore()
 	ctx := logging.TestingContext()
 
-	log := ledger.NewTransactionLog(
-		ledger.NewTransaction().WithPostings(
-			ledger.NewPosting("world", "bank", "USD", big.NewInt(100)),
-		),
-		map[string]metadata.Metadata{},
+	tx := ledger.NewTransaction().WithPostings(
+		ledger.NewPosting("world", "bank", "USD", big.NewInt(100)),
 	)
+	log := ledger.NewTransactionLog(tx, map[string]metadata.Metadata{})
 	err := store.InsertLogs(ctx, log.ChainLog(nil))
 	require.NoError(t, err)
 
@@ -250,8 +246,8 @@ func TestRevertWithRevertOccurring(t *testing.T) {
 	go commander.Run(ctx)
 	defer commander.Close()
 
-	referencer.take(referenceReverts, uint64(0))
+	referencer.take(referenceReverts, big.NewInt(0))
 
-	_, err = commander.RevertTransaction(ctx, Parameters{}, 0)
+	_, err = commander.RevertTransaction(ctx, Parameters{}, tx.ID)
 	require.True(t, errors.Is(err, ErrRevertOccurring))
 }

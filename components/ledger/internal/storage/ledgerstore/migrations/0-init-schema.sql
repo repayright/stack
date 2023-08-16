@@ -91,7 +91,8 @@ create table moves (
 create type log_type as enum (
     'NEW_TRANSACTION',
     'REVERTED_TRANSACTION',
-    'SET_METADATA'
+    'SET_METADATA',
+    'DELETE_METADATA'
 );
 
 create table logs (
@@ -233,6 +234,18 @@ as $$
     limit 1;
 $$;
 
+create function delete_account_metadata(_address varchar, _key varchar, _date timestamp)
+    returns void
+    language sql
+as $$
+    insert into accounts_metadata (address, metadata, date, revision)
+    select _address, accounts_metadata.metadata - _key, _date, accounts_metadata.revision + 1
+    from accounts_metadata
+    where address = _address
+    order by revision desc
+    limit 1
+$$;
+
 create function update_transaction_metadata(_id numeric, _metadata jsonb, _date timestamp)
     returns void
     language sql
@@ -247,6 +260,22 @@ as $$
             originalTX.revision + 1,
             originalTX.postings
     from get_transaction(_id) originalTX
+$$;
+
+create function delete_transaction_metadata(_id numeric, _key varchar, _date timestamp)
+    returns void
+    language sql
+as $$
+insert into transactions (id, metadata, timestamp, reference, reverted, last_update, revision, postings)
+select originalTX.id,
+       originalTX.metadata - _key,
+       originalTX.timestamp,
+       originalTX.reference,
+       originalTX.reverted,
+       _date,
+       originalTX.revision + 1,
+       originalTX.postings
+from get_transaction(_id) originalTX
 $$;
 
 create function revert_transaction(_id numeric, _date timestamp)
@@ -407,6 +436,13 @@ as $$
             perform update_transaction_metadata((new.data->>'targetId')::numeric, new.data->'metadata', new.date);
         else
             perform update_account_metadata((new.data->>'targetId')::varchar, new.data ->'metadata', new.date);
+        end if;
+    end if;
+    if new.type = 'DELETE_METADATA' then
+        if new.data->>'targetType' = 'TRANSACTION' then
+            perform delete_transaction_metadata((new.data->>'targetId')::numeric, new.data->>'key', new.date);
+        else
+            perform delete_account_metadata((new.data->>'targetId')::varchar, new.data ->>'key', new.date);
         end if;
     end if;
 

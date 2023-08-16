@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	ledger "github.com/formancehq/ledger/internal"
@@ -17,18 +18,6 @@ import (
 type Ledger struct {
 	commander *command.Commander
 	store     *ledgerstore.Store
-}
-
-func (l *Ledger) CreateTransaction(ctx context.Context, parameters command.Parameters, data ledger.RunScript) (*ledger.Transaction, error) {
-	return l.commander.CreateTransaction(ctx, parameters, data)
-}
-
-func (l *Ledger) RevertTransaction(ctx context.Context, parameters command.Parameters, id uint64) (*ledger.Transaction, error) {
-	return l.commander.RevertTransaction(ctx, parameters, id)
-}
-
-func (l *Ledger) SaveMeta(ctx context.Context, parameters command.Parameters, targetType string, targetID any, m metadata.Metadata) error {
-	return l.commander.SaveMeta(ctx, parameters, targetType, targetID, m)
 }
 
 func New(
@@ -99,4 +88,20 @@ func (l *Ledger) GetAggregatedBalances(ctx context.Context, q ledgerstore.GetAgg
 func (l *Ledger) GetLogs(ctx context.Context, q ledgerstore.GetLogsQuery) (*api.Cursor[ledger.ChainedLog], error) {
 	logs, err := l.store.GetLogs(ctx, q)
 	return logs, errors.Wrap(err, "getting logs")
+}
+
+func (l *Ledger) CreateTransaction(ctx context.Context, parameters command.Parameters, data ledger.RunScript) (*ledger.Transaction, error) {
+	return l.commander.CreateTransaction(ctx, parameters, data)
+}
+
+func (l *Ledger) RevertTransaction(ctx context.Context, parameters command.Parameters, id *big.Int) (*ledger.Transaction, error) {
+	return l.commander.RevertTransaction(ctx, parameters, id)
+}
+
+func (l *Ledger) SaveMeta(ctx context.Context, parameters command.Parameters, targetType string, targetID any, m metadata.Metadata) error {
+	return l.commander.SaveMeta(ctx, parameters, targetType, targetID, m)
+}
+
+func (l *Ledger) DeleteMetadata(ctx context.Context, parameters command.Parameters, targetType string, targetID any, key string) error {
+	return l.commander.DeleteMetadata(ctx, parameters, targetType, targetID, key)
 }

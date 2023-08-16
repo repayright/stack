@@ -246,14 +246,13 @@ func getTransaction(w http.ResponseWriter, r *http.Request) {
 func revertTransaction(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	txId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
-			errors.New("invalid transaction ID")))
+	transactionID, ok := big.NewInt(0).SetString(chi.URLParam(r, "id"), 10)
+	if !ok {
+		sharedapi.NotFound(w)
 		return
 	}
 
-	tx, err := l.RevertTransaction(r.Context(), getCommandParameters(r), txId)
+	tx, err := l.RevertTransaction(r.Context(), getCommandParameters(r), transactionID)
 	if err != nil {
 		ResponseError(w, r, err)
 		return
@@ -280,6 +279,26 @@ func postTransactionMetadata(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := l.SaveMeta(r.Context(), getCommandParameters(r), ledger.MetaTargetTypeTransaction, txId, m); err != nil {
+		ResponseError(w, r, err)
+		return
+	}
+
+	sharedapi.NoContent(w)
+}
+
+func deleteTransactionMetadata(w http.ResponseWriter, r *http.Request) {
+	l := LedgerFromContext(r.Context())
+
+	transactionID, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
+			errors.New("invalid transaction ID")))
+		return
+	}
+
+	metadataKey := chi.URLParam(r, "key")
+
+	if err := l.DeleteMetadata(r.Context(), getCommandParameters(r), ledger.MetaTargetTypeTransaction, transactionID, metadataKey); err != nil {
 		ResponseError(w, r, err)
 		return
 	}

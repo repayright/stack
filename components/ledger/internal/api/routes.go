@@ -53,6 +53,7 @@ func NewRouter(
 			router.Head("/accounts", countAccounts)
 			router.Get("/accounts/{address}", getAccount)
 			router.Post("/accounts/{address}/metadata", postAccountMetadata)
+			router.Delete("/accounts/{address}/metadata/{key}", deleteAccountMetadata)
 
 			// TransactionController
 			router.Get("/transactions", getTransactions)
@@ -63,6 +64,7 @@ func NewRouter(
 			router.Get("/transactions/{id}", getTransaction)
 			router.Post("/transactions/{id}/revert", revertTransaction)
 			router.Post("/transactions/{id}/metadata", postTransactionMetadata)
+			router.Delete("/transactions/{id}/metadata/{key}", deleteTransactionMetadata)
 
 			// TODO: Rename to /aggregatedBalances
 			router.Get("/aggregate/balances", getBalancesAggregated)

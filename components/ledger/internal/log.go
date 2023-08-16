@@ -23,6 +23,7 @@ const (
 	SetMetadataLogType         LogType = iota // "SET_METADATA"
 	NewTransactionLogType                     // "NEW_TRANSACTION"
 	RevertedTransactionLogType                // "REVERTED_TRANSACTION"
+	DeleteMetadataLogType
 )
 
 func (l LogType) String() string {
@@ -33,6 +34,8 @@ func (l LogType) String() string {
 		return "NEW_TRANSACTION"
 	case RevertedTransactionLogType:
 		return "REVERTED_TRANSACTION"
+	case DeleteMetadataLogType:
+		return "DELETE_METADATA"
 	}
 
 	return ""
@@ -46,6 +49,8 @@ func LogTypeFromString(logType string) LogType {
 		return NewTransactionLogType
 	case "REVERTED_TRANSACTION":
 		return RevertedTransactionLogType
+	case "DELETE_METADATA":
+		return DeleteMetadataLogType
 	}
 
 	panic(errors.New("invalid log type"))
@@ -63,16 +68,7 @@ func (lt *LogType) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	switch s {
-	case "SET_METADATA":
-		*lt = SetMetadataLogType
-	case "NEW_TRANSACTION":
-		*lt = NewTransactionLogType
-	case "REVERTED_TRANSACTION":
-		*lt = RevertedTransactionLogType
-	default:
-		return errors.New("invalid log type")
-	}
+	*lt = LogTypeFromString(s)
 
 	return nil
 }
@@ -275,6 +271,33 @@ func NewSetMetadataLog(at Time, metadata SetMetadataLogPayload) *Log {
 	}
 }
 
+type DeleteMetadataLogPayload struct {
+	TargetType string `json:"targetType"`
+	TargetID   any    `json:"targetId"`
+	Key        string `json:"key"`
+}
+
+func (payload DeleteMetadataLogPayload) hashString(buf *buffer) {
+	buf.writeString(payload.TargetType)
+	switch targetID := payload.TargetID.(type) {
+	case string:
+		buf.writeString(targetID)
+	case uint64:
+		buf.writeUInt64(targetID)
+	}
+	buf.writeString(payload.Key)
+}
+
+func NewDeleteMetadataLog(at Time, payload DeleteMetadataLogPayload) *Log {
+	// Since the id is unique and the hash is a hash of the previous log, they
+	// will be filled at insertion time during the batch process.
+	return &Log{
+		Type: DeleteMetadataLogType,
+		Date: at,
+		Data: payload,
+	}
+}
+
 func NewSetMetadataOnAccountLog(at Time, account string, metadata metadata.Metadata) *Log {
 	return &Log{
 		Type: SetMetadataLogType,
@@ -287,7 +310,7 @@ func NewSetMetadataOnAccountLog(at Time, account string, metadata metadata.Metad
 	}
 }
 
-func NewSetMetadataOnTransactionLog(at Time, txID uint64, metadata metadata.Metadata) *Log {
+func NewSetMetadataOnTransactionLog(at Time, txID *big.Int, metadata metadata.Metadata) *Log {
 	return &Log{
 		Type: SetMetadataLogType,
 		Date: at,

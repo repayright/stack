@@ -25,9 +25,9 @@ func (m *InMemoryStore) GetTransactionByReference(ctx context.Context, ref strin
 	return filtered[0], nil
 }
 
-func (m *InMemoryStore) GetTransaction(ctx context.Context, txID uint64) (*ledger.Transaction, error) {
+func (m *InMemoryStore) GetTransaction(ctx context.Context, txID *big.Int) (*ledger.Transaction, error) {
 	filtered := collectionutils.Filter(m.transactions, func(transaction *ledger.ExpandedTransaction) bool {
-		return transaction.ID.Cmp(big.NewInt(int64(txID))) == 0
+		return transaction.ID.Cmp(txID) == 0
 	})
 	if len(filtered) == 0 {
 		return nil, ErrNotFound

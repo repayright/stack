@@ -6,6 +6,7 @@ package api_test
 
 import (
 	context "context"
+	big "math/big"
 	reflect "reflect"
 
 	internal "github.com/formancehq/ledger/internal"
@@ -85,6 +86,20 @@ func (m *MockLedger) CreateTransaction(ctx context.Context, parameters command.P
 func (mr *MockLedgerMockRecorder) CreateTransaction(ctx, parameters, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransaction", reflect.TypeOf((*MockLedger)(nil).CreateTransaction), ctx, parameters, data)
+}
+
+// DeleteMetadata mocks base method.
+func (m *MockLedger) DeleteMetadata(ctx context.Context, parameters command.Parameters, targetType string, targetID any, key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteMetadata", ctx, parameters, targetType, targetID, key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteMetadata indicates an expected call of DeleteMetadata.
+func (mr *MockLedgerMockRecorder) DeleteMetadata(ctx, parameters, targetType, targetID, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMetadata", reflect.TypeOf((*MockLedger)(nil).DeleteMetadata), ctx, parameters, targetType, targetID, key)
 }
 
 // GetAccountWithVolumes mocks base method.
@@ -193,7 +208,7 @@ func (mr *MockLedgerMockRecorder) GetTransactions(ctx, query interface{}) *gomoc
 }
 
 // RevertTransaction mocks base method.
-func (m *MockLedger) RevertTransaction(ctx context.Context, parameters command.Parameters, id uint64) (*internal.Transaction, error) {
+func (m *MockLedger) RevertTransaction(ctx context.Context, parameters command.Parameters, id *big.Int) (*internal.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RevertTransaction", ctx, parameters, id)
 	ret0, _ := ret[0].(*internal.Transaction)

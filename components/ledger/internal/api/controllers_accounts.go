@@ -143,3 +143,19 @@ func postAccountMetadata(w http.ResponseWriter, r *http.Request) {
 
 	sharedapi.NoContent(w)
 }
+
+func deleteAccountMetadata(w http.ResponseWriter, r *http.Request) {
+	if err := LedgerFromContext(r.Context()).
+		DeleteMetadata(
+			r.Context(),
+			getCommandParameters(r),
+			ledger.MetaTargetTypeAccount,
+			chi.URLParam(r, "address"),
+			chi.URLParam(r, "key"),
+		); err != nil {
+		ResponseError(w, r, err)
+		return
+	}
+
+	sharedapi.NoContent(w)
+}

@@ -198,7 +198,7 @@ func (commander *Commander) SaveMeta(ctx context.Context, parameters Parameters,
 		)
 		switch targetType {
 		case ledger.MetaTargetTypeTransaction:
-			_, err := commander.store.GetTransaction(ctx, targetID.(uint64))
+			_, err := commander.store.GetTransaction(ctx, targetID.(*big.Int))
 			if err != nil {
 				return nil, nil, err
 			}
@@ -227,7 +227,7 @@ func (commander *Commander) SaveMeta(ctx context.Context, parameters Parameters,
 	return nil
 }
 
-func (commander *Commander) RevertTransaction(ctx context.Context, parameters Parameters, id uint64) (*ledger.Transaction, error) {
+func (commander *Commander) RevertTransaction(ctx context.Context, parameters Parameters, id *big.Int) (*ledger.Transaction, error) {
 
 	if err := commander.referencer.take(referenceReverts, id); err != nil {
 		return nil, ErrRevertOccurring
@@ -294,4 +294,48 @@ func (commander *Commander) nextTXID() *big.Int {
 	commander.lastTXID = ret
 
 	return ret
+}
+
+func (commander *Commander) DeleteMetadata(ctx context.Context, parameters Parameters, targetType string, targetID any, key string) error {
+	if targetType == "" {
+		return errorsutil.NewError(ErrValidation, errors.New("empty target type"))
+	}
+	if targetID == "" {
+		return errorsutil.NewError(ErrValidation, errors.New("empty target id"))
+	}
+
+	execContext := newExecutionContext(commander, parameters)
+	_, err := execContext.run(ctx, func(executionContext *executionContext) (*ledger.ChainedLog, chan struct{}, error) {
+		var (
+			log *ledger.Log
+			at  = ledger.Now()
+		)
+		switch targetType {
+		case ledger.MetaTargetTypeTransaction:
+			_, err := commander.store.GetTransaction(ctx, targetID.(*big.Int))
+			if err != nil {
+				return nil, nil, err
+			}
+			log = ledger.NewDeleteMetadataLog(at, ledger.DeleteMetadataLogPayload{
+				TargetType: ledger.MetaTargetTypeTransaction,
+				TargetID:   targetID.(uint64),
+				Key:        key,
+			})
+		case ledger.MetaTargetTypeAccount:
+			log = ledger.NewDeleteMetadataLog(at, ledger.DeleteMetadataLogPayload{
+				TargetType: ledger.MetaTargetTypeAccount,
+				TargetID:   targetID.(string),
+				Key:        key,
+			})
+		default:
+			return nil, nil, errorsutil.NewError(ErrValidation, errors.Errorf("unknown target type '%s'", targetType))
+		}
+
+		return executionContext.AppendLog(ctx, log)
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

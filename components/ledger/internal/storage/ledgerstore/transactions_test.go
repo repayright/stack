@@ -250,7 +250,7 @@ func TestGetTransaction(t *testing.T) {
 
 	require.NoError(t, insertTransactions(context.Background(), store, tx1, tx2))
 
-	tx, err := store.GetTransaction(context.Background(), 0)
+	tx, err := store.GetTransaction(context.Background(), tx1.ID)
 	require.NoError(t, err)
 	require.Equal(t, tx1.Postings, tx.Postings)
 	require.Equal(t, tx1.Reference, tx.Reference)
@@ -624,8 +624,8 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 	require.NoError(t, err, "inserting transaction should not fail")
 
 	err = store.InsertLogs(context.Background(),
-		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), 0, metadata.Metadata{"foo1": "bar2"}).ChainLog(nil).WithID(3),
-		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), 1, metadata.Metadata{"foo2": "bar2"}).ChainLog(nil).WithID(4),
+		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), tx1.ID, metadata.Metadata{"foo1": "bar2"}).ChainLog(nil).WithID(3),
+		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), tx2.ID, metadata.Metadata{"foo2": "bar2"}).ChainLog(nil).WithID(4),
 	)
 	require.NoError(t, err, "updating multiple transaction metadata should not fail")
 
@@ -636,6 +636,49 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 	tx, err = store.GetTransactionWithVolumes(context.Background(), ledgerstore.NewGetTransactionQuery(big.NewInt(1)).WithExpandVolumes().WithExpandEffectiveVolumes())
 	require.NoError(t, err, "getting transaction should not fail")
 	require.Equal(t, tx.Metadata, metadata.Metadata{"foo2": "bar2"}, "metadata should be equal")
+}
+
+func TestDeleteTransactionsMetadata(t *testing.T) {
+	t.Parallel()
+	store := newLedgerStore(t)
+	now := ledger.Now()
+
+	tx1 := ledger.Transaction{
+		ID: big.NewInt(0),
+		TransactionData: ledger.TransactionData{
+			Postings: ledger.Postings{
+				{
+					Source:      "world",
+					Destination: "alice",
+					Amount:      big.NewInt(100),
+					Asset:       "USD",
+				},
+			},
+			Timestamp: now.Add(-3 * time.Hour),
+			Metadata:  metadata.Metadata{},
+		},
+	}
+
+	require.NoError(t, store.InsertLogs(context.Background(),
+		ledger.NewTransactionLog(&tx1, map[string]metadata.Metadata{}).ChainLog(nil).WithID(1),
+		ledger.NewSetMetadataOnTransactionLog(ledger.Now(), tx1.ID, metadata.Metadata{"foo1": "bar1", "foo2": "bar2"}).ChainLog(nil).WithID(2),
+	))
+
+	tx, err := store.GetTransaction(context.Background(), tx1.ID)
+	require.NoError(t, err)
+	require.Equal(t, tx.Metadata, metadata.Metadata{"foo1": "bar1", "foo2": "bar2"})
+
+	require.NoError(t, store.InsertLogs(context.Background(),
+		ledger.NewDeleteMetadataLog(ledger.Now(), ledger.DeleteMetadataLogPayload{
+			TargetType: ledger.MetaTargetTypeTransaction,
+			TargetID:   tx1.ID,
+			Key:        "foo1",
+		}).ChainLog(nil).WithID(3),
+	))
+
+	tx, err = store.GetTransaction(context.Background(), tx1.ID)
+	require.NoError(t, err)
+	require.Equal(t, metadata.Metadata{"foo2": "bar2"}, tx.Metadata)
 }
 
 func TestInsertTransactionInPast(t *testing.T) {

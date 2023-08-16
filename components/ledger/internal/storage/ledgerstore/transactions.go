@@ -194,13 +194,13 @@ func (store *Store) GetTransactionWithVolumes(ctx context.Context, filter GetTra
 		})
 }
 
-func (store *Store) GetTransaction(ctx context.Context, txId uint64) (*ledger.Transaction, error) {
+func (store *Store) GetTransaction(ctx context.Context, txId *big.Int) (*ledger.Transaction, error) {
 	return fetch[*ledger.Transaction](store, ctx,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
 				Table("transactions").
 				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.timestamp, transactions.reverted`).
-				Where("id = ?", txId).
+				Where("id = ?", (*paginate.BigInt)(txId)).
 				Order("revision desc").
 				Limit(1)
 		})
