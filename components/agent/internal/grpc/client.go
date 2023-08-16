@@ -147,6 +147,7 @@ func (client *client) createStack(stack *generated.Stack) *v1beta3.Stack {
 					StargateServerURL: stack.StargateConfig.Url,
 				}
 			}(),
+			Disabled: stack.Disabled,
 		},
 	}
 }
