@@ -153,7 +153,7 @@ func (c *ListController) Render(cmd *cobra.Command, args []string) error {
 
 	tableData := fctl.Map(c.store.Transaction.Data, func(tx shared.ExpandedTransaction) []string {
 		return []string{
-			fmt.Sprintf("%d", tx.Txid),
+			fmt.Sprintf("%d", tx.ID),
 			func() string {
 				if tx.Reference == nil {
 					return ""

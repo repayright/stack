@@ -87,7 +87,7 @@ func TransactionIDOrLastN(ctx context.Context, ledgerClient *formance.Formance, 
 		if len(response.TransactionsCursorResponse.Cursor.Data) == 0 {
 			return 0, errors.New("no transaction found")
 		}
-		return response.TransactionsCursorResponse.Cursor.Data[0].Txid + sub, nil
+		return response.TransactionsCursorResponse.Cursor.Data[0].ID + sub, nil
 	}
 
 	return strconv.ParseInt(id, 10, 64)
@@ -223,7 +223,7 @@ func CreateTransaction(client *formance.Formance, ctx context.Context, request o
 		}
 
 		t := &Transaction{
-			ID:        st.Txid,
+			ID:        st.ID,
 			Postings:  make([]*shared.Posting, len(st.Postings)),
 			Reference: st.Reference,
 			Timestamp: st.Timestamp,

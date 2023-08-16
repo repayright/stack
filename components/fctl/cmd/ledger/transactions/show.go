@@ -78,7 +78,7 @@ func (c *ShowController) Run(cmd *cobra.Command, args []string) (fctl.Renderable
 		baseUrl,
 		operations.GetTransactionRequest{
 			Ledger: ledger,
-			Txid:   txId,
+			ID:   txId,
 		},
 	)
 	if err != nil {
