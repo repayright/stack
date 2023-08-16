@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -80,15 +81,6 @@ func TestGetAccounts(t *testing.T) {
 			expectQuery: ledgerstore.NewGetAccountsQuery(),
 		},
 		{
-			name: "using cursor with other param",
-			queryParams: url.Values{
-				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewGetAccountsQuery())},
-				"after":  []string{"foo"},
-			},
-			expectStatusCode:  http.StatusBadRequest,
-			expectedErrorCode: api.ErrValidation,
-		},
-		{
 			name: "using invalid cursor",
 			queryParams: url.Values{
 				"cursor": []string{"XXX"},
@@ -111,6 +103,19 @@ func TestGetAccounts(t *testing.T) {
 			},
 			expectQuery: ledgerstore.NewGetAccountsQuery().
 				WithPageSize(api.MaxPageSize).
+				WithMetadataFilter(map[string]string{}),
+		},
+		{
+			name: "using balance filter",
+			queryParams: url.Values{
+				"balance": []string{"USD/2<100"},
+			},
+			expectQuery: ledgerstore.NewGetAccountsQuery().
+				WithBalances(map[string]map[string]*big.Int{
+					"USD/2": {
+						"<": big.NewInt(100),
+					},
+				}).
 				WithMetadataFilter(map[string]string{}),
 		},
 	}

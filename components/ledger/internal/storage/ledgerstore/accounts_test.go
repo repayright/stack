@@ -129,6 +129,16 @@ func TestGetAccounts(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, accounts.Data, 3)
 	})
+	t.Run("list using filter on balances", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
+			WithBalances(map[string]map[string]*big.Int{
+				"USD": {
+					"<": big.NewInt(0),
+				},
+			}))
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 1) // world
+	})
 }
 
 func TestUpdateAccountsMetadata(t *testing.T) {

@@ -22,8 +22,10 @@ import (
 func countTransactions(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	var startTimeParsed, endTimeParsed ledger.Time
-	var err error
+	var (
+		startTimeParsed, endTimeParsed ledger.Time
+		err error
+	)
 	if r.URL.Query().Get(QueryKeyStartTime) != "" {
 		startTimeParsed, err = ledger.ParseTime(r.URL.Query().Get(QueryKeyStartTime))
 		if err != nil {
@@ -65,19 +67,6 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 	txQuery := ledgerstore.NewTransactionsQuery()
 
 	if r.URL.Query().Get(QueryKeyCursor) != "" {
-		if r.URL.Query().Get("after") != "" ||
-			r.URL.Query().Get("reference") != "" ||
-			r.URL.Query().Get("account") != "" ||
-			r.URL.Query().Get("source") != "" ||
-			r.URL.Query().Get("destination") != "" ||
-			r.URL.Query().Get(QueryKeyStartTime) != "" ||
-			r.URL.Query().Get(QueryKeyEndTime) != "" ||
-			r.URL.Query().Get(QueryKeyPageSize) != "" {
-			ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
-				errors.Errorf("no other query params can be set with '%s'", QueryKeyCursor)))
-			return
-		}
-
 		err := paginate.UnmarshalCursor(r.URL.Query().Get(QueryKeyCursor), &txQuery)
 		if err != nil {
 			ResponseError(w, r, errorsutil.NewError(command.ErrValidation,

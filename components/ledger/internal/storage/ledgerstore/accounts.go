@@ -2,6 +2,8 @@ package ledgerstore
 
 import (
 	"context"
+	"fmt"
+	"math/big"
 	"strings"
 
 	ledger "github.com/formancehq/ledger/internal"
@@ -59,6 +61,20 @@ func (store *Store) GetAccountsWithVolumes(ctx context.Context, q GetAccountsQue
 					parts = append(parts, filterAccountAddress(address, "accounts.address"))
 				}
 				query.Where("(" + strings.Join(parts, ") or (") + ")")
+			}
+
+			if q.Options.Balances != nil {
+				for asset, balances := range q.Options.Balances {
+					for operator, value := range balances {
+						query = query.Join(fmt.Sprintf(`join lateral (
+							select balance_from_volumes(post_commit_volumes) as balance
+							from moves
+							where moves.account_address = accounts.address and moves.asset = ?
+							order by seq desc
+							limit 1
+						) m on m.balance %s ?`, operator), asset, (*paginate.BigInt)(value))
+					}
+				}
 			}
 
 			return query
@@ -138,7 +154,7 @@ func (store *Store) CountAccounts(ctx context.Context, q GetAccountsQuery) (uint
 			Apply(filterMetadata(q.Options.Metadata))
 
 		for _, address := range q.Options.Addresses {
-			query.WhereOr(filterAccountAddress(address, "address"))
+			query.WhereOr(filterAccountAddress(address, "accounts.address"))
 		}
 
 		return query
@@ -157,6 +173,7 @@ type GetAccountsOptions struct {
 	PITFilter
 	AfterAddress string   `json:"after"`
 	Addresses    []string `json:"address"`
+	Balances     map[string]map[string]*big.Int
 	Metadata     metadata.Metadata
 }
 
@@ -166,6 +183,7 @@ func NewGetAccountsQuery() GetAccountsQuery {
 		Order:    paginate.OrderAsc,
 		Options: GetAccountsOptions{
 			Metadata: metadata.Metadata{},
+			Balances: map[string]map[string]*big.Int{},
 		},
 	}
 }
@@ -210,6 +228,12 @@ func (a GetAccountsQuery) WithExpandVolumes() GetAccountsQuery {
 
 func (a GetAccountsQuery) WithExpandEffectiveVolumes() GetAccountsQuery {
 	a.Options.ExpandEffectiveVolumes = true
+
+	return a
+}
+
+func (a GetAccountsQuery) WithBalances(balances map[string]map[string]*big.Int) GetAccountsQuery {
+	a.Options.Balances = balances
 
 	return a
 }

@@ -454,15 +454,6 @@ func TestGetTransactions(t *testing.T) {
 			expectQuery: ledgerstore.NewTransactionsQuery(),
 		},
 		{
-			name: "using cursor with other param",
-			queryParams: url.Values{
-				"cursor": []string{paginate.EncodeCursor(ledgerstore.NewTransactionsQuery())},
-				"after":  []string{"foo"},
-			},
-			expectStatusCode:  http.StatusBadRequest,
-			expectedErrorCode: api.ErrValidation,
-		},
-		{
 			name: "using invalid cursor",
 			queryParams: url.Values{
 				"cursor": []string{"XXX"},

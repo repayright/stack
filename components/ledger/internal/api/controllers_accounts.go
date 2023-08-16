@@ -3,8 +3,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
-	"strconv"
+	"regexp"
 
 	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/engine/command"
@@ -16,6 +17,10 @@ import (
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/go-chi/chi/v5"
 	"github.com/pkg/errors"
+)
+
+var (
+	balanceRegexp = regexp.MustCompile("(" + ledger.AssetPattern + ")(<=|<|=|>|>=)([0-9]+)")
 )
 
 func countAccounts(w http.ResponseWriter, r *http.Request) {
@@ -41,17 +46,6 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	accountsQuery := ledgerstore.NewGetAccountsQuery()
 
 	if r.URL.Query().Get(QueryKeyCursor) != "" {
-		if r.URL.Query().Get("after") != "" ||
-			r.URL.Query().Get("address") != "" ||
-			len(sharedapi.GetQueryMap(r.URL.Query(), "metadata")) > 0 ||
-			r.URL.Query().Get("balance") != "" ||
-			r.URL.Query().Get(QueryKeyBalanceOperator) != "" ||
-			r.URL.Query().Get(QueryKeyPageSize) != "" {
-			ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
-				errors.Errorf("no other query params can be set with '%s'", QueryKeyCursor)))
-			return
-		}
-
 		err := paginate.UnmarshalCursor(r.URL.Query().Get(QueryKeyCursor), &accountsQuery)
 		if err != nil {
 			ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
@@ -59,13 +53,27 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		balance := r.URL.Query().Get("balance")
-		if balance != "" {
-			if _, err := strconv.ParseInt(balance, 10, 64); err != nil {
-				ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
-					errors.New("invalid parameter 'balance', should be a number")))
-				return
+		balances := r.URL.Query()["balance"]
+		balanceFilter := make(map[string]map[string]*big.Int)
+
+		for _, balance := range balances {
+			if !balanceRegexp.Match([]byte(balance)) {
+				panic("balance regexp does not match")
 			}
+
+			matches := balanceRegexp.FindAllStringSubmatch(balance, 3)
+
+			asset := matches[0][1]
+			operator := matches[0][3]
+			value, ok := big.NewInt(0).SetString(matches[0][4], 10)
+			if !ok {
+				panic("should not happen")
+			}
+
+			if _, ok := balanceFilter[asset]; !ok {
+				balanceFilter[asset] = map[string]*big.Int{}
+			}
+			balanceFilter[asset][operator] = value
 		}
 
 		pageSize, err := getPageSize(r)
@@ -78,6 +86,7 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 			WithAfterAddress(r.URL.Query().Get("after")).
 			WithAddress(r.URL.Query()["address"]...).
 			WithMetadataFilter(sharedapi.GetQueryMap(r.URL.Query(), "metadata")).
+			WithBalances(balanceFilter).
 			WithPageSize(pageSize)
 	}
 
