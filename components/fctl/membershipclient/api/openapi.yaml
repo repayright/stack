@@ -385,32 +385,6 @@ paths:
         "204":
           description: Stack enabled
       summary: Enable stack
-  /organizations/{organizationId}/stacks/{stackId}/restore:
-    put:
-      operationId: restoreStack
-      parameters:
-      - explode: false
-        in: path
-        name: organizationId
-        required: true
-        schema:
-          type: string
-        style: simple
-      - explode: false
-        in: path
-        name: stackId
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ReadStackResponse'
-          description: OK
-      summary: Restore stack
   /organizations/{organizationId}/stacks/{stackId}/stargate/enable:
     put:
       operationId: enableStargate
@@ -886,8 +860,6 @@ components:
           $ref: '#/components/schemas/Stack'
       type: object
     ReadStackResponse:
-      $ref: '#/components/schemas/CreateStackResponse'
-    RestoreStackResponse:
       $ref: '#/components/schemas/CreateStackResponse'
     ReadUserResponse:
       example:
