@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	formanceNamespace         = "com.formance.spec/"
-	revertKey                 = "state/reverts"
-	revertedKey               = "state/reverted"
+	formanceNamespace = "com.formance.spec/"
+	revertKey         = "state/reverts"
+
 	MetaTargetTypeAccount     = "ACCOUNT"
 	MetaTargetTypeTransaction = "TRANSACTION"
 )
@@ -22,10 +22,6 @@ func SpecMetadata(name string) string {
 
 func MarkReverts(m metadata.Metadata, txID *big.Int) metadata.Metadata {
 	return m.Merge(RevertMetadata(txID))
-}
-
-func RevertedMetadataSpecKey() string {
-	return SpecMetadata(revertedKey)
 }
 
 func RevertMetadataSpecKey() string {
@@ -40,13 +36,6 @@ func ComputeMetadata(key, value string) metadata.Metadata {
 
 func RevertMetadata(tx *big.Int) metadata.Metadata {
 	return ComputeMetadata(RevertMetadataSpecKey(), tx.String())
-}
-
-func IsReverted(m metadata.Metadata) bool {
-	if _, ok := m[RevertedMetadataSpecKey()]; ok {
-		return true
-	}
-	return false
 }
 
 func hashStringMetadata(buf *buffer, m metadata.Metadata) {

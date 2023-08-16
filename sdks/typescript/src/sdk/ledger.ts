@@ -45,7 +45,7 @@ export class Ledger {
     const baseURL: string = this._serverURL;
     const url: string = utils.generateURL(
       baseURL,
-      "/api/ledger/{ledger}/transactions/{txid}/metadata",
+      "/api/ledger/{ledger}/transactions/{id}/metadata",
       req
     );
 
@@ -436,6 +436,7 @@ export class Ledger {
     const client: AxiosInstance = this._securityClient || this._defaultClient;
 
     const headers = { ...config?.headers };
+    const queryParams: string = utils.serializeQueryParams(req);
     headers["Accept"] = "application/json;q=1, application/json;q=0";
     headers[
       "user-agent"
@@ -443,7 +444,7 @@ export class Ledger {
 
     const httpRes: AxiosResponse = await client.request({
       validateStatus: () => true,
-      url: url,
+      url: url + queryParams,
       method: "get",
       headers: headers,
       ...config,
@@ -467,75 +468,6 @@ export class Ledger {
           res.accountResponse = utils.objectToClass(
             httpRes?.data,
             shared.AccountResponse
-          );
-        }
-        break;
-      default:
-        if (utils.matchContentType(contentType, `application/json`)) {
-          res.errorResponse = utils.objectToClass(
-            httpRes?.data,
-            shared.ErrorResponse
-          );
-        }
-        break;
-    }
-
-    return res;
-  }
-
-  /**
-   * Get the balances from a ledger's account
-   */
-  async getBalances(
-    req: operations.GetBalancesRequest,
-    config?: AxiosRequestConfig
-  ): Promise<operations.GetBalancesResponse> {
-    if (!(req instanceof utils.SpeakeasyBase)) {
-      req = new operations.GetBalancesRequest(req);
-    }
-
-    const baseURL: string = this._serverURL;
-    const url: string = utils.generateURL(
-      baseURL,
-      "/api/ledger/{ledger}/balances",
-      req
-    );
-
-    const client: AxiosInstance = this._securityClient || this._defaultClient;
-
-    const headers = { ...config?.headers };
-    const queryParams: string = utils.serializeQueryParams(req);
-    headers["Accept"] = "application/json;q=1, application/json;q=0";
-    headers[
-      "user-agent"
-    ] = `speakeasy-sdk/${this._language} ${this._sdkVersion} ${this._genVersion}`;
-
-    const httpRes: AxiosResponse = await client.request({
-      validateStatus: () => true,
-      url: url + queryParams,
-      method: "get",
-      headers: headers,
-      ...config,
-    });
-
-    const contentType: string = httpRes?.headers?.["content-type"] ?? "";
-
-    if (httpRes?.status == null) {
-      throw new Error(`status code not found in response: ${httpRes}`);
-    }
-
-    const res: operations.GetBalancesResponse =
-      new operations.GetBalancesResponse({
-        statusCode: httpRes.status,
-        contentType: contentType,
-        rawResponse: httpRes,
-      });
-    switch (true) {
-      case httpRes?.status == 200:
-        if (utils.matchContentType(contentType, `application/json`)) {
-          res.balancesCursorResponse = utils.objectToClass(
-            httpRes?.data,
-            shared.BalancesCursorResponse
           );
         }
         break;
@@ -761,13 +693,14 @@ export class Ledger {
     const baseURL: string = this._serverURL;
     const url: string = utils.generateURL(
       baseURL,
-      "/api/ledger/{ledger}/transactions/{txid}",
+      "/api/ledger/{ledger}/transactions/{id}",
       req
     );
 
     const client: AxiosInstance = this._securityClient || this._defaultClient;
 
     const headers = { ...config?.headers };
+    const queryParams: string = utils.serializeQueryParams(req);
     headers["Accept"] = "application/json;q=1, application/json;q=0";
     headers[
       "user-agent"
@@ -775,7 +708,7 @@ export class Ledger {
 
     const httpRes: AxiosResponse = await client.request({
       validateStatus: () => true,
-      url: url,
+      url: url + queryParams,
       method: "get",
       headers: headers,
       ...config,
@@ -962,7 +895,7 @@ export class Ledger {
    * List transactions from a ledger
    *
    * @remarks
-   * List transactions from a ledger, sorted by txid in descending order.
+   * List transactions from a ledger, sorted by id in descending order.
    */
   async listTransactions(
     req: operations.ListTransactionsRequest,
@@ -1115,7 +1048,7 @@ export class Ledger {
     const baseURL: string = this._serverURL;
     const url: string = utils.generateURL(
       baseURL,
-      "/api/ledger/{ledger}/transactions/{txid}/revert",
+      "/api/ledger/{ledger}/transactions/{id}/revert",
       req
     );
 

@@ -53,7 +53,7 @@ create type volumes_with_asset as (
 create table transactions (
     id numeric not null,
     metadata jsonb not null default '{}'::jsonb,
-    date timestamp without time zone not null,
+    timestamp timestamp without time zone not null,
     reference varchar,
     revision numeric default 0 not null,
     last_update timestamp not null,
@@ -117,7 +117,7 @@ $$;
 create index moves_range_dates on moves (account_address, asset, effective_date);
 
 /** Index requires for read */
-create index transactions_date on transactions (date);
+create index transactions_date on transactions (timestamp);
 create index transactions_metadata on transactions using gin (metadata);
 create unique index transactions_revisions on transactions(id desc, revision desc);
 
@@ -237,10 +237,10 @@ create function update_transaction_metadata(_id numeric, _metadata jsonb, _date 
     returns void
     language sql
 as $$
-    insert into transactions (id, metadata, date, reference, reverted, last_update, revision, postings)
+    insert into transactions (id, metadata, timestamp, reference, reverted, last_update, revision, postings)
     select originalTX.id,
            originalTX.metadata || _metadata,
-           originalTX.date,
+           originalTX.timestamp,
            originalTX.reference,
            originalTX.reverted,
            _date,
@@ -253,10 +253,10 @@ create function revert_transaction(_id numeric, _date timestamp)
     returns void
     language sql
 as $$
-    insert into transactions (id, metadata, date, reference, reverted, last_update, revision, postings)
+    insert into transactions (id, metadata, timestamp, reference, reverted, last_update, revision, postings)
     select originalTX.id,
         originalTX.metadata,
-        originalTX.date,
+        originalTX.timestamp,
         originalTX.reference,
         true,
         _date,
@@ -372,14 +372,14 @@ as $$
     declare
         posting jsonb;
     begin
-        insert into transactions (id, metadata, date, reference, last_update, postings)
+        insert into transactions (id, metadata, timestamp, reference, last_update, postings)
         values ((data->>'id')::numeric, coalesce(data->'metadata', '{}'::jsonb),
-                (data->>'date')::timestamp without time zone, data->>'reference',
-                (data->>'date')::timestamp without time zone, jsonb_pretty(data->'postings'));
+                (data->>'timestamp')::timestamp without time zone, data->>'reference',
+                (data->>'timestamp')::timestamp without time zone, jsonb_pretty(data->'postings'));
 
         for posting in (select jsonb_array_elements(data->'postings')) loop
             -- todo: sometimes the balance is known at commit time (for sources != world), we need to forward the value to populate the pre_commit_aggregated_input and output
-            perform insert_posting((data->>'id')::numeric, _date, (data->>'date')::timestamp without time zone, posting);
+            perform insert_posting((data->>'id')::numeric, _date, (data->>'timestamp')::timestamp without time zone, posting);
         end loop;
     end
 $$;
@@ -395,12 +395,12 @@ as $$
     if new.type = 'NEW_TRANSACTION' then
       perform insert_transaction(new.data->'transaction', new.date);
       for _key, _value in (select * from jsonb_each_text(new.data->'accountMetadata')) loop
-          perform update_account_metadata(_key, _value, (new.data->'transaction'->>'date')::timestamp);
+          perform update_account_metadata(_key, _value, (new.data->'transaction'->>'timestamp')::timestamp);
       end loop;
     end if;
     if new.type = 'REVERTED_TRANSACTION' then
         perform insert_transaction(new.data->'transaction', new.date);
-        perform revert_transaction((new.data->>'revertedTransactionID')::numeric, (new.data->'transaction'->>'date')::timestamp);
+        perform revert_transaction((new.data->>'revertedTransactionID')::numeric, (new.data->'transaction'->>'timestamp')::timestamp);
     end if;
     if new.type = 'SET_METADATA' then
         if new.data->>'targetType' = 'TRANSACTION' then

@@ -7,11 +7,12 @@ import (
 )
 
 type ExpandedTransaction struct {
+	ID                int64                        `json:"id"`
 	Metadata          map[string]string            `json:"metadata"`
-	PostCommitVolumes map[string]map[string]Volume `json:"postCommitVolumes"`
+	PostCommitVolumes map[string]map[string]Volume `json:"postCommitVolumes,omitempty"`
 	Postings          []Posting                    `json:"postings"`
-	PreCommitVolumes  map[string]map[string]Volume `json:"preCommitVolumes"`
+	PreCommitVolumes  map[string]map[string]Volume `json:"preCommitVolumes,omitempty"`
 	Reference         *string                      `json:"reference,omitempty"`
+	Reverted          bool                         `json:"reverted"`
 	Timestamp         time.Time                    `json:"timestamp"`
-	Txid              int64                        `json:"txid"`
 }

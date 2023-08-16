@@ -48,7 +48,7 @@ class Ledger
     ): \formance\stack\Models\Operations\AddMetadataOnTransactionResponse
     {
         $baseUrl = $this->_serverUrl;
-        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/transactions/{txid}/metadata', \formance\stack\Models\Operations\AddMetadataOnTransactionRequest::class, $request);
+        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/transactions/{id}/metadata', \formance\stack\Models\Operations\AddMetadataOnTransactionRequest::class, $request);
         
         $options = ['http_errors' => false];
         $body = Utils\Utils::serializeRequestBody($request, "requestBody", "json");
@@ -278,6 +278,7 @@ class Ledger
         $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/accounts/{address}', \formance\stack\Models\Operations\GetAccountRequest::class, $request);
         
         $options = ['http_errors' => false];
+        $options = array_merge_recursive($options, Utils\Utils::getQueryParams(\formance\stack\Models\Operations\GetAccountRequest::class, $request, null));
         $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';
         $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
         
@@ -294,49 +295,6 @@ class Ledger
             if (Utils\Utils::matchContentType($contentType, 'application/json')) {
                 $serializer = Utils\JSON::createSerializer();
                 $response->accountResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\AccountResponse', 'json');
-            }
-        }
-        else {
-            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
-                $serializer = Utils\JSON::createSerializer();
-                $response->errorResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\ErrorResponse', 'json');
-            }
-        }
-
-        return $response;
-    }
-	
-    /**
-     * Get the balances from a ledger's account
-     * 
-     * @param \formance\stack\Models\Operations\GetBalancesRequest $request
-     * @return \formance\stack\Models\Operations\GetBalancesResponse
-     */
-	public function getBalances(
-        \formance\stack\Models\Operations\GetBalancesRequest $request,
-    ): \formance\stack\Models\Operations\GetBalancesResponse
-    {
-        $baseUrl = $this->_serverUrl;
-        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/balances', \formance\stack\Models\Operations\GetBalancesRequest::class, $request);
-        
-        $options = ['http_errors' => false];
-        $options = array_merge_recursive($options, Utils\Utils::getQueryParams(\formance\stack\Models\Operations\GetBalancesRequest::class, $request, null));
-        $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';
-        $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
-        
-        $httpResponse = $this->_securityClient->request('GET', $url, $options);
-        
-        $contentType = $httpResponse->getHeader('Content-Type')[0] ?? '';
-
-        $response = new \formance\stack\Models\Operations\GetBalancesResponse();
-        $response->statusCode = $httpResponse->getStatusCode();
-        $response->contentType = $contentType;
-        $response->rawResponse = $httpResponse;
-        
-        if ($httpResponse->getStatusCode() === 200) {
-            if (Utils\Utils::matchContentType($contentType, 'application/json')) {
-                $serializer = Utils\JSON::createSerializer();
-                $response->balancesCursorResponse = $serializer->deserialize((string)$httpResponse->getBody(), 'formance\stack\Models\Shared\BalancesCursorResponse', 'json');
             }
         }
         else {
@@ -485,9 +443,10 @@ class Ledger
     ): \formance\stack\Models\Operations\GetTransactionResponse
     {
         $baseUrl = $this->_serverUrl;
-        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/transactions/{txid}', \formance\stack\Models\Operations\GetTransactionRequest::class, $request);
+        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/transactions/{id}', \formance\stack\Models\Operations\GetTransactionRequest::class, $request);
         
         $options = ['http_errors' => false];
+        $options = array_merge_recursive($options, Utils\Utils::getQueryParams(\formance\stack\Models\Operations\GetTransactionRequest::class, $request, null));
         $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';
         $options['headers']['user-agent'] = sprintf('speakeasy-sdk/%s %s %s', $this->_language, $this->_sdkVersion, $this->_genVersion);
         
@@ -609,7 +568,7 @@ class Ledger
     /**
      * List transactions from a ledger
      * 
-     * List transactions from a ledger, sorted by txid in descending order.
+     * List transactions from a ledger, sorted by id in descending order.
      * 
      * @param \formance\stack\Models\Operations\ListTransactionsRequest $request
      * @return \formance\stack\Models\Operations\ListTransactionsResponse
@@ -707,7 +666,7 @@ class Ledger
     ): \formance\stack\Models\Operations\RevertTransactionResponse
     {
         $baseUrl = $this->_serverUrl;
-        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/transactions/{txid}/revert', \formance\stack\Models\Operations\RevertTransactionRequest::class, $request);
+        $url = Utils\Utils::generateUrl($baseUrl, '/api/ledger/{ledger}/transactions/{id}/revert', \formance\stack\Models\Operations\RevertTransactionRequest::class, $request);
         
         $options = ['http_errors' => false];
         $options['headers']['Accept'] = 'application/json;q=1, application/json;q=0';

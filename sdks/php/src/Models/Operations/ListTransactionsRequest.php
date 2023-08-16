@@ -51,6 +51,9 @@ class ListTransactionsRequest
 	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=endTime,dateTimeFormat=Y-m-d\TH:i:s.up')]
     public ?\DateTime $endTime = null;
     
+	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=expand')]
+    public ?string $expand = null;
+    
     /**
      * Name of the ledger.
      * 
@@ -110,6 +113,7 @@ class ListTransactionsRequest
 		$this->cursor = null;
 		$this->destination = null;
 		$this->endTime = null;
+		$this->expand = null;
 		$this->ledger = "";
 		$this->metadata = null;
 		$this->pageSize = null;

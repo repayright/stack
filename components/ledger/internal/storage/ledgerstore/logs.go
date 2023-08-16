@@ -8,7 +8,7 @@ import (
 
 	ledger "github.com/formancehq/ledger/internal"
 	storageerrors "github.com/formancehq/ledger/internal/storage"
-	paginate2 "github.com/formancehq/ledger/internal/storage/paginate"
+	"github.com/formancehq/ledger/internal/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/collectionutils"
 	"github.com/lib/pq"
@@ -23,12 +23,12 @@ const (
 type Logs struct {
 	bun.BaseModel `bun:"logs,alias:logs"`
 
-	ID             *paginate2.BigInt `bun:"id,unique,type:numeric"`
-	Type           string            `bun:"type,type:log_type"`
-	Hash           []byte            `bun:"hash,type:bytea"`
-	Date           ledger.Time       `bun:"date,type:timestamptz"`
-	Data           []byte            `bun:"data,type:jsonb"`
-	IdempotencyKey string            `bun:"idempotency_key,type:varchar(256),unique"`
+	ID             *paginate.BigInt `bun:"id,unique,type:numeric"`
+	Type           string           `bun:"type,type:log_type"`
+	Hash           []byte           `bun:"hash,type:bytea"`
+	Date           ledger.Time      `bun:"date,type:timestamptz"`
+	Data           []byte           `bun:"data,type:jsonb"`
+	IdempotencyKey string           `bun:"idempotency_key,type:varchar(256),unique"`
 }
 
 func (log *Logs) ToCore() *ledger.ChainedLog {
@@ -91,7 +91,7 @@ func (store *Store) InsertLogs(ctx context.Context, activeLogs ...*ledger.Chaine
 			}
 
 			ls[i] = Logs{
-				ID:             (*paginate2.BigInt)(chainedLogs.ID),
+				ID:             (*paginate.BigInt)(chainedLogs.ID),
 				Type:           chainedLogs.Type.String(),
 				Hash:           chainedLogs.Hash,
 				Date:           chainedLogs.Date,
@@ -117,13 +117,16 @@ func (store *Store) InsertLogs(ctx context.Context, activeLogs ...*ledger.Chaine
 func (store *Store) GetLastLog(ctx context.Context) (*ledger.ChainedLog, error) {
 	return fetchAndMap[*Logs, *ledger.ChainedLog](store, ctx, (*Logs).ToCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
-			return query.OrderExpr("id desc").Limit(1)
+			return query.
+				Table(LogTableName).
+				OrderExpr("id desc").
+				Limit(1)
 		})
 }
 
 func (store *Store) GetLogs(ctx context.Context, q GetLogsQuery) (*api.Cursor[ledger.ChainedLog], error) {
 	logs, err := paginateWithColumn[LogsQueryOptions, Logs](store, ctx,
-		paginate2.ColumnPaginatedQuery[LogsQueryOptions](q),
+		paginate.ColumnPaginatedQuery[LogsQueryOptions](q),
 		store.logsQueryBuilder(q.Options),
 	)
 	if err != nil {
@@ -139,6 +142,7 @@ func (store *Store) ReadLastLogWithType(ctx context.Context, logTypes ...ledger.
 	return fetchAndMap[*Logs](store, ctx, (*Logs).ToCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
+				Table(LogTableName).
 				Where("type IN (?)", bun.In(collectionutils.Map(logTypes, ledger.LogType.String))).
 				OrderExpr("date DESC").
 				Limit(1)
@@ -149,6 +153,7 @@ func (store *Store) ReadLogWithIdempotencyKey(ctx context.Context, key string) (
 	return fetchAndMap[*Logs, *ledger.ChainedLog](store, ctx, (*Logs).ToCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
+				Table(LogTableName).
 				OrderExpr("id desc").
 				Limit(1).
 				Where("idempotency_key = ?", key)
@@ -160,13 +165,13 @@ type LogsQueryOptions struct {
 	StartTime ledger.Time `json:"startTime"`
 }
 
-type GetLogsQuery paginate2.ColumnPaginatedQuery[LogsQueryOptions]
+type GetLogsQuery paginate.ColumnPaginatedQuery[LogsQueryOptions]
 
 func NewLogsQuery() GetLogsQuery {
 	return GetLogsQuery{
-		PageSize: paginate2.QueryDefaultPageSize,
+		PageSize: paginate.QueryDefaultPageSize,
 		Column:   "id",
-		Order:    paginate2.OrderDesc,
+		Order:    paginate.OrderDesc,
 		Options:  LogsQueryOptions{},
 	}
 }

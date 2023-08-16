@@ -8,6 +8,7 @@ import (
 	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
 	"github.com/formancehq/formance-sdk-go/pkg/models/shared"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
+	"github.com/formancehq/stack/libs/go-libs/pointer"
 	. "github.com/formancehq/stack/tests/integration/internal"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -54,7 +55,7 @@ var _ = Given("some empty environment", func() {
 						Postings:  ret.Data.Postings,
 						Reference: ret.Data.Reference,
 						Metadata:  ret.Data.Metadata,
-						Txid:      ret.Data.Txid,
+						ID:        ret.Data.ID,
 						PreCommitVolumes: map[string]map[string]shared.Volume{
 							"world": {
 								"USD": {
@@ -104,6 +105,7 @@ var _ = Given("some empty environment", func() {
 					operations.ListTransactionsRequest{
 						Ledger:   "default",
 						PageSize: ptr(pageSize),
+						Expand:   pointer.For("volumes"),
 					},
 				)
 				Expect(err).ToNot(HaveOccurred())
@@ -125,6 +127,7 @@ var _ = Given("some empty environment", func() {
 						operations.ListTransactionsRequest{
 							Cursor: rsp.Cursor.Next,
 							Ledger: "default",
+							Expand: pointer.For("volumes"),
 						},
 					)
 					Expect(err).ToNot(HaveOccurred())
@@ -144,6 +147,7 @@ var _ = Given("some empty environment", func() {
 							operations.ListTransactionsRequest{
 								Cursor: rsp.Cursor.Previous,
 								Ledger: "default",
+								Expand: pointer.For("volumes"),
 							},
 						)
 						Expect(err).ToNot(HaveOccurred())
@@ -207,7 +211,7 @@ var _ = Given("some empty environment", func() {
 				Postings:  ret.Data.Postings,
 				Reference: ret.Data.Reference,
 				Metadata:  ret.Data.Metadata,
-				Txid:      ret.Data.Txid,
+				ID:        ret.Data.ID,
 				PreCommitVolumes: map[string]map[string]shared.Volume{
 					"world": {
 						"USD": {
@@ -269,7 +273,7 @@ var _ = Given("some empty environment", func() {
 				Postings:  ret.Data.Postings,
 				Reference: ret.Data.Reference,
 				Metadata:  ret.Data.Metadata,
-				Txid:      ret.Data.Txid,
+				ID:        ret.Data.ID,
 				PreCommitVolumes: map[string]map[string]shared.Volume{
 					"world": {
 						"USD": {
@@ -331,7 +335,7 @@ var _ = Given("some empty environment", func() {
 				Postings:  ret.Data.Postings,
 				Reference: ret.Data.Reference,
 				Metadata:  ret.Data.Metadata,
-				Txid:      ret.Data.Txid,
+				ID:        ret.Data.ID,
 				PreCommitVolumes: map[string]map[string]shared.Volume{
 					"world": {
 						"USD": {
@@ -555,6 +559,7 @@ var _ = Given("some empty environment", func() {
 				TestContext(),
 				operations.ListTransactionsRequest{
 					Ledger: "default",
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -570,6 +575,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Account: ptr("foo:"),
 					Ledger:  "default",
+					Expand:  pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -585,6 +591,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Account: ptr("not_existing"),
 					Ledger:  "default",
+					Expand:  pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -597,6 +604,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Destination: ptr("foo:"),
 					Ledger:      "default",
+					Expand:      pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -612,6 +620,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Destination: ptr("not_existing"),
 					Ledger:      "default",
+					Expand:      pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -624,6 +633,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Source: ptr("foo:"),
 					Ledger: "default",
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -636,6 +646,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Source: ptr("world"),
 					Ledger: "default",
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -653,6 +664,7 @@ var _ = Given("some empty environment", func() {
 					Metadata: map[string]string{
 						"foo": "bar",
 					},
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -669,6 +681,7 @@ var _ = Given("some empty environment", func() {
 					Metadata: map[string]string{
 						"foo": "not_existing",
 					},
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -681,6 +694,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Ledger:    "default",
 					StartTime: &timestamp2,
+					Expand:    pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -695,6 +709,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Ledger:    "default",
 					StartTime: &timestamp3,
+					Expand:    pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -708,6 +723,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Ledger:    "default",
 					StartTime: ptr(time.Now().UTC()),
+					Expand:    pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -720,6 +736,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Ledger:  "default",
 					EndTime: &timestamp3,
+					Expand:  pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -734,6 +751,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Ledger:  "default",
 					EndTime: &timestamp2,
+					Expand:  pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -747,6 +765,7 @@ var _ = Given("some empty environment", func() {
 				operations.ListTransactionsRequest{
 					Ledger:  "default",
 					EndTime: ptr(time.Date(2023, 4, 9, 10, 0, 0, 0, time.UTC)),
+					Expand:  pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -754,12 +773,13 @@ var _ = Given("some empty environment", func() {
 			transactionCursorResponse = response.TransactionsCursorResponse
 			Expect(transactionCursorResponse.Cursor.Data).Should(HaveLen(0))
 		})
-		It("should be getable on api", func() {
+		It("should be gettable on api", func() {
 			response, err := Client().Ledger.GetTransaction(
 				TestContext(),
 				operations.GetTransactionRequest{
 					Ledger: "default",
-					Txid:   t1.Txid,
+					ID:     t1.ID,
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -770,7 +790,8 @@ var _ = Given("some empty environment", func() {
 				TestContext(),
 				operations.GetTransactionRequest{
 					Ledger: "default",
-					Txid:   t2.Txid,
+					ID:     t2.ID,
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -781,7 +802,8 @@ var _ = Given("some empty environment", func() {
 				TestContext(),
 				operations.GetTransactionRequest{
 					Ledger: "default",
-					Txid:   t3.Txid,
+					ID:     t3.ID,
+					Expand: pointer.For("volumes"),
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -792,7 +814,7 @@ var _ = Given("some empty environment", func() {
 				TestContext(),
 				operations.GetTransactionRequest{
 					Ledger: "default",
-					Txid:   666,
+					ID:     666,
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())

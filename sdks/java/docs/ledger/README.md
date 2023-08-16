@@ -8,7 +8,6 @@
 * [countTransactions](#counttransactions) - Count the transactions from a ledger
 * [createTransaction](#createtransaction) - Create a new transaction to a ledger
 * [getAccount](#getaccount) - Get account by its address
-* [getBalances](#getbalances) - Get the balances from a ledger's account
 * [getBalancesAggregated](#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [getInfo](#getinfo) - Show server information
 * [getLedgerInfo](#getledgerinfo) - Get information about a ledger
@@ -42,14 +41,13 @@ public class Application {
                 }})
                 .build();
 
-            AddMetadataOnTransactionRequest req = new AddMetadataOnTransactionRequest("ledger001", 1234L) {{
+            AddMetadataOnTransactionRequest req = new AddMetadataOnTransactionRequest(1234L, "ledger001") {{
                 idempotencyKey = "enim";
                 requestBody = new java.util.HashMap<String, String>() {{
                     put("nemo", "minima");
                     put("excepturi", "accusantium");
                     put("iure", "culpa");
                 }};
-                async = true;
                 dryRun = true;
             }};            
 
@@ -95,7 +93,6 @@ public class Application {
                                 put("mollitia", "occaecati");
                             }}, "users:001", "ledger001") {{
                 idempotencyKey = "numquam";
-                async = true;
                 dryRun = true;
             }};            
 
@@ -270,7 +267,6 @@ public class Application {
                                 timestamp = OffsetDateTime.parse("2021-08-05T19:50:46.898Z");
                             }};, "ledger001") {{
                 idempotencyKey = "praesentium";
-                async = true;
                 dryRun = true;
             }};            
 
@@ -309,52 +305,13 @@ public class Application {
                 }})
                 .build();
 
-            GetAccountRequest req = new GetAccountRequest("users:001", "ledger001");            
+            GetAccountRequest req = new GetAccountRequest("users:001", "ledger001") {{
+                expand = "ipsa";
+            }};            
 
             GetAccountResponse res = sdk.ledger.getAccount(req);
 
             if (res.accountResponse != null) {
-                // handle response
-            }
-        } catch (Exception e) {
-            // handle exception
-        }
-    }
-}
-```
-
-## getBalances
-
-Get the balances from a ledger's account
-
-### Example Usage
-
-```java
-package hello.world;
-
-import com.formance.formance_sdk.SDK;
-import com.formance.formance_sdk.models.operations.GetBalancesRequest;
-import com.formance.formance_sdk.models.operations.GetBalancesResponse;
-import com.formance.formance_sdk.models.shared.Security;
-
-public class Application {
-    public static void main(String[] args) {
-        try {
-            SDK sdk = SDK.builder()
-                .setSecurity(new Security("ipsa") {{
-                    authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
-                }})
-                .build();
-
-            GetBalancesRequest req = new GetBalancesRequest("ledger001") {{
-                address = "users:001";
-                cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
-                pageSize = 604846L;
-            }};            
-
-            GetBalancesResponse res = sdk.ledger.getBalances(req);
-
-            if (res.balancesCursorResponse != null) {
                 // handle response
             }
         } catch (Exception e) {
@@ -382,7 +339,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("voluptate") {{
+                .setSecurity(new Security("omnis") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -420,7 +377,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("cum") {{
+                .setSecurity(new Security("voluptate") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -455,7 +412,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("perferendis") {{
+                .setSecurity(new Security("cum") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -492,12 +449,14 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("doloremque") {{
+                .setSecurity(new Security("perferendis") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
-            GetTransactionRequest req = new GetTransactionRequest("ledger001", 1234L);            
+            GetTransactionRequest req = new GetTransactionRequest(1234L, "ledger001") {{
+                expand = "doloremque";
+            }};            
 
             GetTransactionResponse res = sdk.ledger.getTransaction(req);
 
@@ -537,11 +496,14 @@ public class Application {
             ListAccountsRequest req = new ListAccountsRequest("ledger001") {{
                 address = "users:.+";
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
+                expand = "ut";
                 metadata = new java.util.HashMap<String, String>() {{
-                    put("maiores", "dicta");
-                    put("corporis", "dolore");
+                    put("dicta", "corporis");
+                    put("dolore", "iusto");
+                    put("dicta", "harum");
+                    put("enim", "accusamus");
                 }};
-                pageSize = 480894L;
+                pageSize = 414263L;
             }};            
 
             ListAccountsResponse res = sdk.ledger.listAccounts(req);
@@ -575,16 +537,16 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("dicta") {{
+                .setSecurity(new Security("repudiandae") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
             ListLogsRequest req = new ListLogsRequest("ledger001") {{
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
-                endTime = OffsetDateTime.parse("2022-05-13T20:56:04.612Z");
-                pageSize = 880476L;
-                startTime = OffsetDateTime.parse("2022-01-30T20:15:26.045Z");
+                endTime = OffsetDateTime.parse("2022-10-13T20:38:16.426Z");
+                pageSize = 692472L;
+                startTime = OffsetDateTime.parse("2021-11-13T09:08:33.009Z");
             }};            
 
             ListLogsResponse res = sdk.ledger.listLogs(req);
@@ -601,7 +563,7 @@ public class Application {
 
 ## listTransactions
 
-List transactions from a ledger, sorted by txid in descending order.
+List transactions from a ledger, sorted by id in descending order.
 
 ### Example Usage
 
@@ -618,7 +580,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("quae") {{
+                .setSecurity(new Security("pariatur") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -627,16 +589,18 @@ public class Application {
                 account = "users:001";
                 cursor = "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==";
                 destination = "users:001";
-                endTime = OffsetDateTime.parse("2022-04-23T05:56:38.936Z");
+                endTime = OffsetDateTime.parse("2022-06-29T05:25:54.356Z");
+                expand = "rem";
                 metadata = new java.util.HashMap<String, String>() {{
-                    put("excepturi", "pariatur");
-                    put("modi", "praesentium");
-                    put("rem", "voluptates");
+                    put("quasi", "repudiandae");
+                    put("sint", "veritatis");
+                    put("itaque", "incidunt");
+                    put("enim", "consequatur");
                 }};
-                pageSize = 93940L;
+                pageSize = 667411L;
                 reference = "ref:001";
                 source = "users:001";
-                startTime = OffsetDateTime.parse("2021-04-10T08:07:33.561Z");
+                startTime = OffsetDateTime.parse("2022-08-09T16:21:07.003Z");
             }};            
 
             ListTransactionsResponse res = sdk.ledger.listTransactions(req);
@@ -670,7 +634,7 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("veritatis") {{
+                .setSecurity(new Security("deserunt") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
@@ -707,12 +671,12 @@ public class Application {
     public static void main(String[] args) {
         try {
             SDK sdk = SDK.builder()
-                .setSecurity(new Security("itaque") {{
+                .setSecurity(new Security("distinctio") {{
                     authorization = "Bearer YOUR_ACCESS_TOKEN_HERE";
                 }})
                 .build();
 
-            RevertTransactionRequest req = new RevertTransactionRequest("ledger001", 1234L);            
+            RevertTransactionRequest req = new RevertTransactionRequest(1234L, "ledger001");            
 
             RevertTransactionResponse res = sdk.ledger.revertTransaction(req);
 

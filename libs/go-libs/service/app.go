@@ -20,7 +20,7 @@ type App struct {
 func (a *App) Run(ctx context.Context) error {
 	logger := GetDefaultLogger(a.output, viper.GetBool(DebugFlag), viper.GetBool(JsonFormattingLoggerFlag))
 	app := a.newFxApp(logger)
-	if err := app.Start(logging.ContextWithLogger(context.Background(), logger)); err != nil {
+	if err := app.Start(logging.ContextWithLogger(ctx, logger)); err != nil {
 		return err
 	}
 

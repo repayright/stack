@@ -42,9 +42,10 @@ sdk.payments.connectorsStripeTransfer({
   asset: "USD",
   destination: "acct_1Gqj58KZcSIg2N2q",
   metadata: {
-    "labore": "delectus",
-    "eum": "non",
-    "eligendi": "sint",
+    "sint": "aliquid",
+    "provident": "necessitatibus",
+    "sint": "officia",
+    "dolor": "debitis",
   },
 }).then((res: ConnectorsStripeTransferResponse) => {
   if (res.statusCode == 200) {
@@ -77,7 +78,7 @@ sdk.payments.connectorsTransfer({
     destination: "acct_1Gqj58KZcSIg2N2q",
     source: "acct_1Gqj58KZcSIg2N2q",
   },
-  connector: Connector.Modulr,
+  connector: Connector.Moneycorp,
 }).then((res: ConnectorsTransferResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -102,19 +103,16 @@ const sdk = new SDK({
 });
 
 sdk.payments.getAccountBalances({
-  accountId: "provident",
-  asset: "necessitatibus",
+  accountId: "dolorum",
+  asset: "in",
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  from: new Date("2021-09-21T14:06:09.271Z"),
-  limit: 223081,
-  pageSize: 891555,
+  from: new Date("2022-02-26T01:27:36.152Z"),
+  limit: 978571,
+  pageSize: 699479,
   sort: [
-    "dolorum",
-    "in",
-    "in",
-    "illum",
+    "magnam",
   ],
-  to: new Date("2020-11-26T01:41:04.216Z"),
+  to: new Date("2020-07-23T21:23:35.691Z"),
 }).then((res: GetAccountBalancesResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -140,8 +138,8 @@ const sdk = new SDK({
 });
 
 sdk.payments.getConnectorTask({
-  connector: Connector.Stripe,
-  taskId: "magnam",
+  connector: Connector.Modulr,
+  taskId: "aliquid",
 }).then((res: GetConnectorTaskResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -167,7 +165,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.getPayment({
-  paymentId: "cumque",
+  paymentId: "laborum",
 }).then((res: GetPaymentResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -199,7 +197,7 @@ sdk.payments.installConnector({
     endpoint: "XXX",
     pollingPeriod: "60s",
   },
-  connector: Connector.Modulr,
+  connector: Connector.DummyPay,
 }).then((res: InstallConnectorResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -272,9 +270,9 @@ const sdk = new SDK({
 });
 
 sdk.payments.listConnectorTasks({
-  connector: Connector.Modulr,
+  connector: Connector.CurrencyCloud,
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 675439,
+  pageSize: 313218,
 }).then((res: ListConnectorTasksResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -327,11 +325,11 @@ const sdk = new SDK({
 
 sdk.payments.listPayments({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 249796,
+  pageSize: 965417,
   sort: [
-    "enim",
-    "accusamus",
-    "delectus",
+    "provident",
+    "nam",
+    "id",
   ],
 }).then((res: ListPaymentsResponse) => {
   if (res.statusCode == 200) {
@@ -358,7 +356,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.paymentsgetAccount({
-  accountId: "quidem",
+  accountId: "blanditiis",
 }).then((res: PaymentsgetAccountResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -408,11 +406,12 @@ const sdk = new SDK({
 
 sdk.payments.paymentslistAccounts({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 588465,
+  pageSize: 533206,
   sort: [
-    "id",
-    "blanditiis",
-    "deleniti",
+    "amet",
+    "deserunt",
+    "nisi",
+    "vel",
   ],
 }).then((res: PaymentslistAccountsResponse) => {
   if (res.statusCode == 200) {
@@ -439,7 +438,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.readConnectorConfig({
-  connector: Connector.Moneycorp,
+  connector: Connector.CurrencyCloud,
 }).then((res: ReadConnectorConfigResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -467,7 +466,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.resetConnector({
-  connector: Connector.DummyPay,
+  connector: Connector.CurrencyCloud,
 }).then((res: ResetConnectorResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -493,7 +492,7 @@ const sdk = new SDK({
 });
 
 sdk.payments.uninstallConnector({
-  connector: Connector.BankingCircle,
+  connector: Connector.Modulr,
 }).then((res: UninstallConnectorResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -519,9 +518,9 @@ const sdk = new SDK({
 
 sdk.payments.updateMetadata({
   paymentMetadata: {
-    key: "nisi",
+    key: "perferendis",
   },
-  paymentId: "vel",
+  paymentId: "nihil",
 }).then((res: UpdateMetadataResponse) => {
   if (res.statusCode == 200) {
     // handle response

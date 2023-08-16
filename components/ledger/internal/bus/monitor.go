@@ -5,18 +5,39 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	ledger "github.com/formancehq/ledger/internal"
-	"github.com/formancehq/ledger/internal/engine"
+	"github.com/formancehq/ledger/pkg/events"
 	"github.com/formancehq/stack/libs/go-libs/logging"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/formancehq/stack/libs/go-libs/publish"
 )
+
+type Monitor interface {
+	CommittedTransactions(ctx context.Context, res ...ledger.Transaction)
+	SavedMetadata(ctx context.Context, targetType, id string, metadata metadata.Metadata)
+	RevertedTransaction(ctx context.Context, reverted, revert *ledger.Transaction)
+}
+
+type noOpMonitor struct{}
+
+func (n noOpMonitor) CommittedTransactions(ctx context.Context, res ...ledger.Transaction) {
+}
+func (n noOpMonitor) SavedMetadata(ctx context.Context, targetType string, id string, metadata metadata.Metadata) {
+}
+func (n noOpMonitor) RevertedTransaction(ctx context.Context, reverted, revert *ledger.Transaction) {
+}
+
+var _ Monitor = &noOpMonitor{}
+
+func NewNoOpMonitor() *noOpMonitor {
+	return &noOpMonitor{}
+}
 
 type ledgerMonitor struct {
 	publisher  message.Publisher
 	ledgerName string
 }
 
-var _ engine.Monitor = &ledgerMonitor{}
+var _ Monitor = &ledgerMonitor{}
 
 func NewLedgerMonitor(publisher message.Publisher, ledgerName string) *ledgerMonitor {
 	m := &ledgerMonitor{
@@ -27,7 +48,7 @@ func NewLedgerMonitor(publisher message.Publisher, ledgerName string) *ledgerMon
 }
 
 func (l *ledgerMonitor) CommittedTransactions(ctx context.Context, txs ...ledger.Transaction) {
-	l.publish(ctx, EventTypeCommittedTransactions,
+	l.publish(ctx, events.EventTypeCommittedTransactions,
 		newEventCommittedTransactions(CommittedTransactions{
 			Ledger:       l.ledgerName,
 			Transactions: txs,
@@ -35,7 +56,7 @@ func (l *ledgerMonitor) CommittedTransactions(ctx context.Context, txs ...ledger
 }
 
 func (l *ledgerMonitor) SavedMetadata(ctx context.Context, targetType, targetID string, metadata metadata.Metadata) {
-	l.publish(ctx, EventTypeSavedMetadata,
+	l.publish(ctx, events.EventTypeSavedMetadata,
 		newEventSavedMetadata(SavedMetadata{
 			Ledger:     l.ledgerName,
 			TargetType: targetType,
@@ -45,7 +66,7 @@ func (l *ledgerMonitor) SavedMetadata(ctx context.Context, targetType, targetID 
 }
 
 func (l *ledgerMonitor) RevertedTransaction(ctx context.Context, reverted, revert *ledger.Transaction) {
-	l.publish(ctx, EventTypeRevertedTransaction,
+	l.publish(ctx, events.TypeRevertedTransaction,
 		newEventRevertedTransaction(RevertedTransaction{
 			Ledger:              l.ledgerName,
 			RevertedTransaction: *reverted,

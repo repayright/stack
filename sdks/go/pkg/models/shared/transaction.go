@@ -7,9 +7,10 @@ import (
 )
 
 type Transaction struct {
+	ID        int64             `json:"id"`
 	Metadata  map[string]string `json:"metadata"`
 	Postings  []Posting         `json:"postings"`
 	Reference *string           `json:"reference,omitempty"`
+	Reverted  bool              `json:"reverted"`
 	Timestamp time.Time         `json:"timestamp"`
-	Txid      int64             `json:"txid"`
 }

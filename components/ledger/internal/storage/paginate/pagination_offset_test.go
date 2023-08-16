@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/formancehq/ledger/internal/storage"
-	paginate2 "github.com/formancehq/ledger/internal/storage/paginate"
+	"github.com/formancehq/ledger/internal/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/pgtesting"
 	"github.com/stretchr/testify/require"
 )
@@ -46,87 +46,87 @@ func TestOffsetPagination(t *testing.T) {
 
 	type testCase struct {
 		name                  string
-		query                 paginate2.OffsetPaginatedQuery[bool]
-		expectedNext          *paginate2.OffsetPaginatedQuery[bool]
-		expectedPrevious      *paginate2.OffsetPaginatedQuery[bool]
+		query                 paginate.OffsetPaginatedQuery[bool]
+		expectedNext          *paginate.OffsetPaginatedQuery[bool]
+		expectedPrevious      *paginate.OffsetPaginatedQuery[bool]
 		expectedNumberOfItems uint64
 	}
 	testCases := []testCase{
 		{
 			name: "asc first page",
-			query: paginate2.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedNext: &paginate2.OffsetPaginatedQuery[bool]{
+			expectedNext: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc second page using next cursor",
-			query: paginate2.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &paginate2.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   0,
 			},
-			expectedNext: &paginate2.OffsetPaginatedQuery[bool]{
+			expectedNext: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   20,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc last page using next cursor",
-			query: paginate2.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   90,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &paginate2.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   80,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc last page partial",
-			query: paginate2.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   95,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &paginate2.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   85,
 			},
 			expectedNumberOfItems: 10,
 		},
 		{
 			name: "asc fist page partial",
-			query: paginate2.OffsetPaginatedQuery[bool]{
+			query: paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
 				Offset:   5,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 			},
-			expectedPrevious: &paginate2.OffsetPaginatedQuery[bool]{
+			expectedPrevious: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   0,
 			},
-			expectedNext: &paginate2.OffsetPaginatedQuery[bool]{
+			expectedNext: &paginate.OffsetPaginatedQuery[bool]{
 				PageSize: 10,
-				Order:    paginate2.OrderAsc,
+				Order:    paginate.OrderAsc,
 				Offset:   15,
 			},
 			expectedNumberOfItems: 10,
@@ -141,7 +141,7 @@ func TestOffsetPagination(t *testing.T) {
 			if tc.query.Options {
 				query = query.Where("pair = ?", true)
 			}
-			cursor, err := paginate2.UsingOffset[bool, model](
+			cursor, err := paginate.UsingOffset[bool, model](
 				context.Background(),
 				query,
 				tc.query)
@@ -152,8 +152,8 @@ func TestOffsetPagination(t *testing.T) {
 			} else {
 				require.NotEmpty(t, cursor.Next)
 
-				q := paginate2.OffsetPaginatedQuery[bool]{}
-				require.NoError(t, paginate2.UnmarshalCursor(cursor.Next, &q))
+				q := paginate.OffsetPaginatedQuery[bool]{}
+				require.NoError(t, paginate.UnmarshalCursor(cursor.Next, &q))
 				require.EqualValues(t, *tc.expectedNext, q)
 			}
 
@@ -162,8 +162,8 @@ func TestOffsetPagination(t *testing.T) {
 			} else {
 				require.NotEmpty(t, cursor.Previous)
 
-				q := paginate2.OffsetPaginatedQuery[bool]{}
-				require.NoError(t, paginate2.UnmarshalCursor(cursor.Previous, &q))
+				q := paginate.OffsetPaginatedQuery[bool]{}
+				require.NoError(t, paginate.UnmarshalCursor(cursor.Previous, &q))
 				require.EqualValues(t, *tc.expectedPrevious, q)
 			}
 		})

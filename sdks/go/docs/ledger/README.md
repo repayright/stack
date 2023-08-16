@@ -8,7 +8,6 @@
 * [CountTransactions](#counttransactions) - Count the transactions from a ledger
 * [CreateTransaction](#createtransaction) - Create a new transaction to a ledger
 * [GetAccount](#getaccount) - Get account by its address
-* [GetBalances](#getbalances) - Get the balances from a ledger's account
 * [GetBalancesAggregated](#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [GetInfo](#getinfo) - Show server information
 * [GetLedgerInfo](#getledgerinfo) - Get information about a ledger
@@ -49,10 +48,9 @@ func main() {
             "explicabo": "nobis",
             "enim": "omnis",
         },
-        Async: formance.Bool(true),
         DryRun: formance.Bool(true),
+        ID: 1234,
         Ledger: "ledger001",
-        Txid: 1234,
     })
     if err != nil {
         log.Fatal(err)
@@ -95,7 +93,6 @@ func main() {
             "iure": "culpa",
         },
         Address: "users:001",
-        Async: formance.Bool(true),
         DryRun: formance.Bool(true),
         Ledger: "ledger001",
     })
@@ -268,7 +265,6 @@ func main() {
             },
             Timestamp: types.MustTimeFromString("2022-01-11T05:45:42.485Z"),
         },
-        Async: formance.Bool(true),
         DryRun: formance.Bool(true),
         Ledger: "ledger001",
     })
@@ -308,6 +304,7 @@ func main() {
     ctx := context.Background()
     res, err := s.Ledger.GetAccount(ctx, operations.GetAccountRequest{
         Address: "users:001",
+        Expand: formance.String("voluptatibus"),
         Ledger: "ledger001",
     })
     if err != nil {
@@ -315,46 +312,6 @@ func main() {
     }
 
     if res.AccountResponse != nil {
-        // handle response
-    }
-}
-```
-
-## GetBalances
-
-Get the balances from a ledger's account
-
-### Example Usage
-
-```go
-package main
-
-import(
-	"context"
-	"log"
-	"github.com/formancehq/formance-sdk-go"
-	"github.com/formancehq/formance-sdk-go/pkg/models/operations"
-)
-
-func main() {
-    s := formance.New(
-        formance.WithSecurity(shared.Security{
-            Authorization: "Bearer YOUR_ACCESS_TOKEN_HERE",
-        }),
-    )
-
-    ctx := context.Background()
-    res, err := s.Ledger.GetBalances(ctx, operations.GetBalancesRequest{
-        Address: formance.String("users:001"),
-        Cursor: formance.String("aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ=="),
-        Ledger: "ledger001",
-        PageSize: formance.Int64(976460),
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    if res.BalancesCursorResponse != nil {
         // handle response
     }
 }
@@ -494,8 +451,9 @@ func main() {
 
     ctx := context.Background()
     res, err := s.Ledger.GetTransaction(ctx, operations.GetTransactionRequest{
+        Expand: formance.String("vero"),
+        ID: 1234,
         Ledger: "ledger001",
-        Txid: 1234,
     })
     if err != nil {
         log.Fatal(err)
@@ -534,9 +492,9 @@ func main() {
     res, err := s.Ledger.ListAccounts(ctx, operations.ListAccountsRequest{
         Address: formance.String("users:.+"),
         Cursor: formance.String("aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ=="),
+        Expand: formance.String("nihil"),
         Ledger: "ledger001",
         Metadata: map[string]string{
-            "nihil": "praesentium",
             "voluptatibus": "ipsa",
             "omnis": "voluptate",
             "cum": "perferendis",
@@ -597,7 +555,7 @@ func main() {
 
 ## ListTransactions
 
-List transactions from a ledger, sorted by txid in descending order.
+List transactions from a ledger, sorted by id in descending order.
 
 ### Example Usage
 
@@ -625,14 +583,17 @@ func main() {
         Cursor: formance.String("aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ=="),
         Destination: formance.String("users:001"),
         EndTime: types.MustTimeFromString("2022-07-09T11:22:20.922Z"),
+        Expand: formance.String("dicta"),
         Ledger: "ledger001",
         Metadata: map[string]string{
-            "harum": "enim",
+            "enim": "accusamus",
+            "commodi": "repudiandae",
+            "quae": "ipsum",
         },
-        PageSize: formance.Int64(880476),
+        PageSize: formance.Int64(692472),
         Reference: formance.String("ref:001"),
         Source: formance.String("users:001"),
-        StartTime: types.MustTimeFromString("2022-01-30T20:15:26.045Z"),
+        StartTime: types.MustTimeFromString("2021-11-13T09:08:33.009Z"),
     })
     if err != nil {
         log.Fatal(err)
@@ -707,8 +668,8 @@ func main() {
 
     ctx := context.Background()
     res, err := s.Ledger.RevertTransaction(ctx, operations.RevertTransactionRequest{
+        ID: 1234,
         Ledger: "ledger001",
-        Txid: 1234,
     })
     if err != nil {
         log.Fatal(err)

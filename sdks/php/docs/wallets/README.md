@@ -44,7 +44,7 @@ try {
     $request->confirmHoldRequest = new ConfirmHoldRequest();
     $request->confirmHoldRequest->amount = 100;
     $request->confirmHoldRequest->final = true;
-    $request->holdId = 'labore';
+    $request->holdId = 'aspernatur';
 
     $response = $sdk->wallets->confirmHold($request);
 
@@ -79,10 +79,10 @@ $sdk = SDK::builder()
 try {
     $request = new CreateBalanceRequest();
     $request->createBalanceRequest = new CreateBalanceRequest();
-    $request->createBalanceRequest->expiresAt = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-08-14T00:52:14.624Z');
-    $request->createBalanceRequest->name = 'Robin Keebler';
-    $request->createBalanceRequest->priority = 102863;
-    $request->id = '41959890-afa5-463e-a516-fe4c8b711e5b';
+    $request->createBalanceRequest->expiresAt = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-09-14T03:02:47.808Z');
+    $request->createBalanceRequest->name = 'Miriam Hermann';
+    $request->createBalanceRequest->priority = 574325;
+    $request->id = '0afa563e-2516-4fe4-88b7-11e5b7fd2ed0';
 
     $response = $sdk->wallets->createBalance($request);
 
@@ -116,10 +116,9 @@ $sdk = SDK::builder()
 try {
     $request = new CreateWalletRequest();
     $request->metadata = [
-        'repellat' => 'quibusdam',
-        'sed' => 'saepe',
+        'praesentium' => 'natus',
     ];
-    $request->name = 'Edward Crooks';
+    $request->name = 'Joan Satterfield';
 
     $response = $sdk->wallets->createWallet($request);
 
@@ -156,17 +155,15 @@ try {
     $request = new CreditWalletRequest();
     $request->creditWalletRequest = new CreditWalletRequest();
     $request->creditWalletRequest->amount = new Monetary();
-    $request->creditWalletRequest->amount->amount = 166847;
-    $request->creditWalletRequest->amount->asset = 'sunt';
-    $request->creditWalletRequest->balance = 'quo';
+    $request->creditWalletRequest->amount->amount = 807319;
+    $request->creditWalletRequest->amount->asset = 'ea';
+    $request->creditWalletRequest->balance = 'excepturi';
     $request->creditWalletRequest->metadata = [
-        'pariatur' => 'maxime',
-        'ea' => 'excepturi',
-        'odit' => 'ea',
-        'accusantium' => 'ab',
+        'ea' => 'accusantium',
     ];
-    $request->creditWalletRequest->reference = 'maiores';
+    $request->creditWalletRequest->reference = 'ab';
     $request->creditWalletRequest->sources = [
+        new WalletSubject(),
         new LedgerAccountSubject(),
         new LedgerAccountSubject(),
         new LedgerAccountSubject(),

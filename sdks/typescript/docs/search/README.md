@@ -25,7 +25,6 @@ sdk.search.search({
   after: [
     "users:002",
     "users:002",
-    "users:002",
   ],
   cursor: "YXVsdCBhbmQgYSBtYXhpbXVtIG1heF9yZXN1bHRzLol=",
   ledgers: [
@@ -33,14 +32,16 @@ sdk.search.search({
     "quickstart",
     "quickstart",
   ],
-  pageSize: 474867,
+  pageSize: 660174,
   policy: "OR",
   raw: {
-    "nihil": "magnam",
+    "labore": "suscipit",
+    "natus": "nobis",
   },
-  sort: "txid:asc",
-  target: "distinctio",
+  sort: "id:asc",
+  target: "eum",
   terms: [
+    "destination=central_bank1",
     "destination=central_bank1",
     "destination=central_bank1",
     "destination=central_bank1",

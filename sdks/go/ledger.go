@@ -35,7 +35,7 @@ func newLedger(defaultClient, securityClient HTTPClient, serverURL, language, sd
 // AddMetadataOnTransaction - Set the metadata of a transaction by its ID
 func (s *ledger) AddMetadataOnTransaction(ctx context.Context, request operations.AddMetadataOnTransactionRequest) (*operations.AddMetadataOnTransactionResponse, error) {
 	baseURL := s.serverURL
-	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/transactions/{txid}/metadata", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/transactions/{id}/metadata", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -363,6 +363,10 @@ func (s *ledger) GetAccount(ctx context.Context, request operations.GetAccountRe
 	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s", s.language, s.sdkVersion, s.genVersion))
 
+	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
+		return nil, fmt.Errorf("error populating query params: %w", err)
+	}
+
 	client := s.securityClient
 
 	httpRes, err := client.Do(req)
@@ -391,69 +395,6 @@ func (s *ledger) GetAccount(ctx context.Context, request operations.GetAccountRe
 			}
 
 			res.AccountResponse = out
-		}
-	default:
-		switch {
-		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.ErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(httpRes.Body, &out); err != nil {
-				return nil, err
-			}
-
-			res.ErrorResponse = out
-		}
-	}
-
-	return res, nil
-}
-
-// GetBalances - Get the balances from a ledger's account
-func (s *ledger) GetBalances(ctx context.Context, request operations.GetBalancesRequest) (*operations.GetBalancesResponse, error) {
-	baseURL := s.serverURL
-	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/balances", request, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error generating URL: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
-	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s", s.language, s.sdkVersion, s.genVersion))
-
-	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
-		return nil, fmt.Errorf("error populating query params: %w", err)
-	}
-
-	client := s.securityClient
-
-	httpRes, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("error sending request: %w", err)
-	}
-	if httpRes == nil {
-		return nil, fmt.Errorf("error sending request: no response")
-	}
-	defer httpRes.Body.Close()
-
-	contentType := httpRes.Header.Get("Content-Type")
-
-	res := &operations.GetBalancesResponse{
-		StatusCode:  httpRes.StatusCode,
-		ContentType: contentType,
-		RawResponse: httpRes,
-	}
-	switch {
-	case httpRes.StatusCode == 200:
-		switch {
-		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.BalancesCursorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(httpRes.Body, &out); err != nil {
-				return nil, err
-			}
-
-			res.BalancesCursorResponse = out
 		}
 	default:
 		switch {
@@ -651,7 +592,7 @@ func (s *ledger) GetLedgerInfo(ctx context.Context, request operations.GetLedger
 // GetTransaction - Get transaction from a ledger by its ID
 func (s *ledger) GetTransaction(ctx context.Context, request operations.GetTransactionRequest) (*operations.GetTransactionResponse, error) {
 	baseURL := s.serverURL
-	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/transactions/{txid}", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/transactions/{id}", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -662,6 +603,10 @@ func (s *ledger) GetTransaction(ctx context.Context, request operations.GetTrans
 	}
 	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s", s.language, s.sdkVersion, s.genVersion))
+
+	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
+		return nil, fmt.Errorf("error populating query params: %w", err)
+	}
 
 	client := s.securityClient
 
@@ -836,7 +781,7 @@ func (s *ledger) ListLogs(ctx context.Context, request operations.ListLogsReques
 }
 
 // ListTransactions - List transactions from a ledger
-// List transactions from a ledger, sorted by txid in descending order.
+// List transactions from a ledger, sorted by id in descending order.
 func (s *ledger) ListTransactions(ctx context.Context, request operations.ListTransactionsRequest) (*operations.ListTransactionsResponse, error) {
 	baseURL := s.serverURL
 	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/transactions", request, nil)
@@ -962,7 +907,7 @@ func (s *ledger) ReadStats(ctx context.Context, request operations.ReadStatsRequ
 // RevertTransaction - Revert a ledger transaction by its ID
 func (s *ledger) RevertTransaction(ctx context.Context, request operations.RevertTransactionRequest) (*operations.RevertTransactionResponse, error) {
 	baseURL := s.serverURL
-	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/transactions/{txid}/revert", request, nil)
+	url, err := utils.GenerateURL(ctx, baseURL, "/api/ledger/{ledger}/transactions/{id}/revert", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}

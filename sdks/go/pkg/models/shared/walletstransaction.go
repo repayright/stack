@@ -7,6 +7,7 @@ import (
 )
 
 type WalletsTransaction struct {
+	ID     *int64  `json:"id,omitempty"`
 	Ledger *string `json:"ledger,omitempty"`
 	// Metadata associated with the wallet.
 	Metadata          map[string]string                   `json:"metadata"`
@@ -15,5 +16,4 @@ type WalletsTransaction struct {
 	PreCommitVolumes  map[string]map[string]WalletsVolume `json:"preCommitVolumes,omitempty"`
 	Reference         *string                             `json:"reference,omitempty"`
 	Timestamp         time.Time                           `json:"timestamp"`
-	Txid              int64                               `json:"txid"`
 }

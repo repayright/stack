@@ -24,7 +24,7 @@ func countTransactions(w http.ResponseWriter, r *http.Request) {
 
 	var (
 		startTimeParsed, endTimeParsed ledger.Time
-		err error
+		err                            error
 	)
 	if r.URL.Query().Get(QueryKeyStartTime) != "" {
 		startTimeParsed, err = ledger.ParseTime(r.URL.Query().Get(QueryKeyStartTime))
@@ -185,7 +185,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 		}
 		txData := ledger.TransactionData{
 			Postings:  payload.Postings,
-			Date:      payload.Timestamp,
+			Timestamp: payload.Timestamp,
 			Reference: payload.Reference,
 			Metadata:  payload.Metadata,
 		}
@@ -219,7 +219,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 func getTransaction(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	txId, ok := big.NewInt(0).SetString(chi.URLParam(r, "txid"), 10)
+	txId, ok := big.NewInt(0).SetString(chi.URLParam(r, "id"), 10)
 	if !ok {
 		ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
 			errors.New("invalid transaction ID")))
@@ -246,7 +246,7 @@ func getTransaction(w http.ResponseWriter, r *http.Request) {
 func revertTransaction(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
-	txId, err := strconv.ParseUint(chi.URLParam(r, "txid"), 10, 64)
+	txId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
 			errors.New("invalid transaction ID")))
@@ -272,7 +272,7 @@ func postTransactionMetadata(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txId, err := strconv.ParseUint(chi.URLParam(r, "txid"), 10, 64)
+	txId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		ResponseError(w, r, errorsutil.NewError(command.ErrValidation,
 			errors.New("invalid transaction ID")))

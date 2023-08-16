@@ -8,10 +8,11 @@ import (
 )
 
 type GetTransactionRequest struct {
+	Expand *string `queryParam:"style=form,explode=true,name=expand"`
+	// Transaction ID.
+	ID int64 `pathParam:"style=simple,explode=false,name=id"`
 	// Name of the ledger.
 	Ledger string `pathParam:"style=simple,explode=false,name=ledger"`
-	// Transaction ID.
-	Txid int64 `pathParam:"style=simple,explode=false,name=txid"`
 }
 
 type GetTransactionResponse struct {

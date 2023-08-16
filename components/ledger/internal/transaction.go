@@ -13,7 +13,7 @@ type Transactions struct {
 type TransactionData struct {
 	Postings  Postings          `json:"postings"`
 	Metadata  metadata.Metadata `json:"metadata"`
-	Date      Time              `json:"date"`
+	Timestamp Time              `json:"timestamp"`
 	Reference string            `json:"reference"`
 }
 
@@ -40,7 +40,7 @@ func (t *TransactionData) Reverse() TransactionData {
 
 func (d TransactionData) hashString(buf *buffer) {
 	buf.writeString(d.Reference)
-	buf.writeUInt64(uint64(d.Date.UnixNano()))
+	buf.writeUInt64(uint64(d.Timestamp.UnixNano()))
 	hashStringMetadata(buf, d.Metadata)
 	for _, posting := range d.Postings {
 		posting.hashString(buf)
@@ -48,7 +48,7 @@ func (d TransactionData) hashString(buf *buffer) {
 }
 
 func (d TransactionData) WithDate(now Time) TransactionData {
-	d.Date = now
+	d.Timestamp = now
 
 	return d
 }
@@ -70,7 +70,7 @@ func (t *Transaction) WithReference(ref string) *Transaction {
 }
 
 func (t *Transaction) WithDate(ts Time) *Transaction {
-	t.Date = ts
+	t.Timestamp = ts
 	return t
 }
 
@@ -112,10 +112,6 @@ type ExpandedTransaction struct {
 
 func (t *ExpandedTransaction) AppendPosting(p Posting) {
 	t.Postings = append(t.Postings, p)
-}
-
-func (t *ExpandedTransaction) IsReverted() bool {
-	return IsReverted(t.Metadata)
 }
 
 func ExpandTransaction(tx *Transaction, preCommitVolumes AccountsAssetsVolumes) ExpandedTransaction {

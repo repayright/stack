@@ -29,7 +29,6 @@ try {
     $request->after = [
         'users:002',
         'users:002',
-        'users:002',
     ];
     $request->cursor = 'YXVsdCBhbmQgYSBtYXhpbXVtIG1heF9yZXN1bHRzLol=';
     $request->ledgers = [
@@ -37,14 +36,16 @@ try {
         'quickstart',
         'quickstart',
     ];
-    $request->pageSize = 474867;
+    $request->pageSize = 660174;
     $request->policy = 'OR';
     $request->raw = [
-        'nihil' => 'magnam',
+        'labore' => 'suscipit',
+        'natus' => 'nobis',
     ];
-    $request->sort = 'txid:asc';
-    $request->target = 'distinctio';
+    $request->sort = 'id:asc';
+    $request->target = 'eum';
     $request->terms = [
+        'destination=central_bank1',
         'destination=central_bank1',
         'destination=central_bank1',
         'destination=central_bank1',

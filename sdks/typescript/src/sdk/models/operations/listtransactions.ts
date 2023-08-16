@@ -49,6 +49,11 @@ export class ListTransactionsRequest extends SpeakeasyBase {
   })
   endTime?: Date;
 
+  @SpeakeasyMetadata({
+    data: "queryParam, style=form;explode=true;name=expand",
+  })
+  expand?: string;
+
   /**
    * Name of the ledger.
    */

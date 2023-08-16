@@ -59,6 +59,14 @@ public class ListTransactionsRequest {
         return this;
     }
     
+    @SpeakeasyMetadata("queryParam:style=form,explode=true,name=expand")
+    public String expand;
+
+    public ListTransactionsRequest withExpand(String expand) {
+        this.expand = expand;
+        return this;
+    }
+    
     /**
      * Name of the ledger.
      */

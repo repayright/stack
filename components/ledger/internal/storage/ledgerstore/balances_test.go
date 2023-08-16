@@ -30,8 +30,8 @@ func TestGetBalancesAggregated(t *testing.T) {
 
 	require.NoError(t, store.InsertLogs(context.Background(),
 		ledger.ChainLogs(
-			ledger.NewTransactionLog(tx1, map[string]metadata.Metadata{}).WithDate(tx1.Date),
-			ledger.NewTransactionLog(tx2, map[string]metadata.Metadata{}).WithDate(tx2.Date),
+			ledger.NewTransactionLog(tx1, map[string]metadata.Metadata{}).WithDate(tx1.Timestamp),
+			ledger.NewTransactionLog(tx2, map[string]metadata.Metadata{}).WithDate(tx2.Timestamp),
 		)...))
 
 	t.Run("aggregate on all", func(t *testing.T) {

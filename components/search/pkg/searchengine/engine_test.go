@@ -85,7 +85,7 @@ func testSort(t *testing.T) {
 	q := NewSingleDocTypeSearch("TRANSACTION")
 	q.WithLedgers("quickstart")
 	q.WithPageSize(20)
-	q.WithSort("txid", esquery.OrderAsc)
+	q.WithSort("id", esquery.OrderAsc)
 
 	_, err := openSearchClient.Indices.GetMapping()
 	require.NoError(t, err)

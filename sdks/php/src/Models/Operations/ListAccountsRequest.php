@@ -32,6 +32,9 @@ class ListAccountsRequest
 	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=cursor')]
     public ?string $cursor = null;
     
+	#[SpeakeasyMetadata('queryParam:style=form,explode=true,name=expand')]
+    public ?string $expand = null;
+    
     /**
      * Name of the ledger.
      * 
@@ -62,6 +65,7 @@ class ListAccountsRequest
 	{
 		$this->address = null;
 		$this->cursor = null;
+		$this->expand = null;
 		$this->ledger = "";
 		$this->metadata = null;
 		$this->pageSize = null;

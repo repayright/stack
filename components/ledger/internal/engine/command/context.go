@@ -42,7 +42,7 @@ func (e *executionContext) run(ctx context.Context, executor func(e *executionCo
 		if err == nil {
 			return chainedLog, nil
 		}
-		if err != storageerrors.ErrNotFound && err != nil {
+		if err != nil && !storageerrors.IsNotFoundError(err) {
 			return nil, err
 		}
 	}

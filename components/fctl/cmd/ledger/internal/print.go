@@ -57,7 +57,7 @@ func PrintExpandedTransaction(out io.Writer, transaction ExpandedTransaction) er
 
 	if err := printCommonInformation(
 		out,
-		transaction.Txid,
+		transaction.ID,
 		*transaction.Reference,
 		transaction.Postings,
 		transaction.Timestamp,
@@ -100,7 +100,7 @@ func PrintTransaction(out io.Writer, transaction Transaction) error {
 
 	if err := printCommonInformation(
 		out,
-		transaction.Txid,
+		transaction.ID,
 		*transaction.Reference,
 		transaction.Postings,
 		transaction.Timestamp,

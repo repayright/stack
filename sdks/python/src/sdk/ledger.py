@@ -26,7 +26,7 @@ class Ledger:
         r"""Set the metadata of a transaction by its ID"""
         base_url = self._server_url
         
-        url = utils.generate_url(operations.AddMetadataOnTransactionRequest, base_url, '/api/ledger/{ledger}/transactions/{txid}/metadata', request)
+        url = utils.generate_url(operations.AddMetadataOnTransactionRequest, base_url, '/api/ledger/{ledger}/transactions/{id}/metadata', request)
         headers = utils.get_headers(request)
         req_content_type, data, form = utils.serialize_request_body(request, "request_body", 'json')
         if req_content_type not in ('multipart/form-data', 'multipart/mixed'):
@@ -180,35 +180,7 @@ class Ledger:
         
         url = utils.generate_url(operations.GetAccountRequest, base_url, '/api/ledger/{ledger}/accounts/{address}', request)
         headers = {}
-        headers['Accept'] = 'application/json;q=1, application/json;q=0'
-        headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
-        
-        client = self._security_client
-        
-        http_res = client.request('GET', url, headers=headers)
-        content_type = http_res.headers.get('Content-Type')
-
-        res = operations.GetAccountResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
-        
-        if http_res.status_code == 200:
-            if utils.match_content_type(content_type, 'application/json'):
-                out = utils.unmarshal_json(http_res.text, Optional[shared.AccountResponse])
-                res.account_response = out
-        else:
-            if utils.match_content_type(content_type, 'application/json'):
-                out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])
-                res.error_response = out
-
-        return res
-
-    
-    def get_balances(self, request: operations.GetBalancesRequest) -> operations.GetBalancesResponse:
-        r"""Get the balances from a ledger's account"""
-        base_url = self._server_url
-        
-        url = utils.generate_url(operations.GetBalancesRequest, base_url, '/api/ledger/{ledger}/balances', request)
-        headers = {}
-        query_params = utils.get_query_params(operations.GetBalancesRequest, request)
+        query_params = utils.get_query_params(operations.GetAccountRequest, request)
         headers['Accept'] = 'application/json;q=1, application/json;q=0'
         headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
         
@@ -217,12 +189,12 @@ class Ledger:
         http_res = client.request('GET', url, params=query_params, headers=headers)
         content_type = http_res.headers.get('Content-Type')
 
-        res = operations.GetBalancesResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
+        res = operations.GetAccountResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
         
         if http_res.status_code == 200:
             if utils.match_content_type(content_type, 'application/json'):
-                out = utils.unmarshal_json(http_res.text, Optional[shared.BalancesCursorResponse])
-                res.balances_cursor_response = out
+                out = utils.unmarshal_json(http_res.text, Optional[shared.AccountResponse])
+                res.account_response = out
         else:
             if utils.match_content_type(content_type, 'application/json'):
                 out = utils.unmarshal_json(http_res.text, Optional[shared.ErrorResponse])
@@ -320,14 +292,15 @@ class Ledger:
         r"""Get transaction from a ledger by its ID"""
         base_url = self._server_url
         
-        url = utils.generate_url(operations.GetTransactionRequest, base_url, '/api/ledger/{ledger}/transactions/{txid}', request)
+        url = utils.generate_url(operations.GetTransactionRequest, base_url, '/api/ledger/{ledger}/transactions/{id}', request)
         headers = {}
+        query_params = utils.get_query_params(operations.GetTransactionRequest, request)
         headers['Accept'] = 'application/json;q=1, application/json;q=0'
         headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'
         
         client = self._security_client
         
-        http_res = client.request('GET', url, headers=headers)
+        http_res = client.request('GET', url, params=query_params, headers=headers)
         content_type = http_res.headers.get('Content-Type')
 
         res = operations.GetTransactionResponse(status_code=http_res.status_code, content_type=content_type, raw_response=http_res)
@@ -408,7 +381,7 @@ class Ledger:
     
     def list_transactions(self, request: operations.ListTransactionsRequest) -> operations.ListTransactionsResponse:
         r"""List transactions from a ledger
-        List transactions from a ledger, sorted by txid in descending order.
+        List transactions from a ledger, sorted by id in descending order.
         """
         base_url = self._server_url
         
@@ -471,7 +444,7 @@ class Ledger:
         r"""Revert a ledger transaction by its ID"""
         base_url = self._server_url
         
-        url = utils.generate_url(operations.RevertTransactionRequest, base_url, '/api/ledger/{ledger}/transactions/{txid}/revert', request)
+        url = utils.generate_url(operations.RevertTransactionRequest, base_url, '/api/ledger/{ledger}/transactions/{id}/revert', request)
         headers = {}
         headers['Accept'] = 'application/json;q=1, application/json;q=0'
         headers['user-agent'] = f'speakeasy-sdk/{self._language} {self._sdk_version} {self._gen_version}'

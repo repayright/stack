@@ -2,16 +2,8 @@ package bus
 
 import (
 	ledger "github.com/formancehq/ledger/internal"
+	"github.com/formancehq/ledger/pkg/events"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
-)
-
-const (
-	EventVersion = "v1"
-	EventApp     = "ledger"
-
-	EventTypeCommittedTransactions = "COMMITTED_TRANSACTIONS"
-	EventTypeSavedMetadata         = "SAVED_METADATA"
-	EventTypeRevertedTransaction   = "REVERTED_TRANSACTION"
 )
 
 type EventMessage struct {
@@ -30,9 +22,9 @@ type CommittedTransactions struct {
 func newEventCommittedTransactions(txs CommittedTransactions) EventMessage {
 	return EventMessage{
 		Date:    ledger.Now(),
-		App:     EventApp,
-		Version: EventVersion,
-		Type:    EventTypeCommittedTransactions,
+		App:     events.EventApp,
+		Version: events.EventVersion,
+		Type:    events.EventTypeCommittedTransactions,
 		Payload: txs,
 	}
 }
@@ -47,9 +39,9 @@ type SavedMetadata struct {
 func newEventSavedMetadata(metadata SavedMetadata) EventMessage {
 	return EventMessage{
 		Date:    ledger.Now(),
-		App:     EventApp,
-		Version: EventVersion,
-		Type:    EventTypeSavedMetadata,
+		App:     events.EventApp,
+		Version: events.EventVersion,
+		Type:    events.EventTypeSavedMetadata,
 		Payload: metadata,
 	}
 }
@@ -63,9 +55,9 @@ type RevertedTransaction struct {
 func newEventRevertedTransaction(tx RevertedTransaction) EventMessage {
 	return EventMessage{
 		Date:    ledger.Now(),
-		App:     EventApp,
-		Version: EventVersion,
-		Type:    EventTypeRevertedTransaction,
+		App:     events.EventApp,
+		Version: events.EventVersion,
+		Type:    events.TypeRevertedTransaction,
 		Payload: tx,
 	}
 }

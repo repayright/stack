@@ -41,7 +41,7 @@ sdk.wallets.confirmHold({
     amount: 100,
     final: true,
   },
-  holdId: "labore",
+  holdId: "aspernatur",
 }).then((res: ConfirmHoldResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -68,11 +68,11 @@ const sdk = new SDK({
 
 sdk.wallets.createBalance({
   createBalanceRequest: {
-    expiresAt: new Date("2022-08-14T00:52:14.624Z"),
-    name: "Robin Keebler",
-    priority: 102863,
+    expiresAt: new Date("2022-09-14T03:02:47.808Z"),
+    name: "Miriam Hermann",
+    priority: 574325,
   },
-  id: "41959890-afa5-463e-a516-fe4c8b711e5b",
+  id: "0afa563e-2516-4fe4-88b7-11e5b7fd2ed0",
 }).then((res: CreateBalanceResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -99,10 +99,9 @@ const sdk = new SDK({
 
 sdk.wallets.createWallet({
   metadata: {
-    "repellat": "quibusdam",
-    "sed": "saepe",
+    "praesentium": "natus",
   },
-  name: "Edward Crooks",
+  name: "Joan Satterfield",
 }).then((res: CreateWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -130,19 +129,17 @@ const sdk = new SDK({
 sdk.wallets.creditWallet({
   creditWalletRequest: {
     amount: {
-      amount: 166847,
-      asset: "sunt",
+      amount: 807319,
+      asset: "ea",
     },
-    balance: "quo",
+    balance: "excepturi",
     metadata: {
-      "pariatur": "maxime",
-      "ea": "excepturi",
-      "odit": "ea",
-      "accusantium": "ab",
+      "ea": "accusantium",
     },
-    reference: "maiores",
+    reference: "ab",
     sources: [
       {
+        balance: "ipsam",
         identifier: "voluptate",
         type: "autem",
       },
@@ -156,9 +153,13 @@ sdk.wallets.creditWallet({
         identifier: "fugiat",
         type: "amet",
       },
+      {
+        identifier: "cumque",
+        type: "corporis",
+      },
     ],
   },
-  id: "0c5fbb25-8705-4320-ac73-d5fe9b90c289",
+  id: "fbb25870-5320-42c7-bd5f-e9b90c28909b",
 }).then((res: CreditWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -186,28 +187,28 @@ const sdk = new SDK({
 sdk.wallets.debitWallet({
   debitWalletRequest: {
     amount: {
-      amount: 50370,
-      asset: "occaecati",
+      amount: 237893,
+      asset: "asperiores",
     },
     balances: [
-      "adipisci",
-      "asperiores",
-      "earum",
+      "modi",
+      "iste",
+      "dolorum",
+      "deleniti",
     ],
-    description: "modi",
+    description: "pariatur",
     destination: {
-      balance: "dolorum",
-      identifier: "deleniti",
-      type: "pariatur",
+      balance: "nobis",
+      identifier: "libero",
+      type: "delectus",
     },
     metadata: {
-      "nobis": "libero",
-      "delectus": "quaerat",
       "quos": "aliquid",
+      "dolorem": "dolorem",
     },
     pending: false,
   },
-  id: "33323f9b-77f3-4a41-8067-4ebf69280d1b",
+  id: "323f9b77-f3a4-4100-a74e-bf69280d1ba7",
 }).then((res: DebitWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -233,8 +234,8 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getBalance({
-  balanceName: "dolorum",
-  id: "77a89ebf-737a-4e42-83ce-5e6a95d8a0d4",
+  balanceName: "voluptate",
+  id: "a89ebf73-7ae4-4203-8e5e-6a95d8a0d446",
 }).then((res: GetBalanceResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -260,7 +261,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getHold({
-  holdID: "tempora",
+  holdID: "quod",
 }).then((res: GetHoldResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -288,11 +289,13 @@ const sdk = new SDK({
 sdk.wallets.getHolds({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   metadata: {
-    "quod": "officiis",
     "qui": "dolorum",
+    "a": "esse",
+    "harum": "iusto",
+    "ipsum": "quisquam",
   },
-  pageSize: 952792,
-  walletID: "esse",
+  pageSize: 947371,
+  walletID: "amet",
 }).then((res: GetHoldsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -317,8 +320,8 @@ const sdk = new SDK({
 
 sdk.wallets.getTransactions({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  pageSize: 687488,
-  walletID: "iusto",
+  pageSize: 730856,
+  walletID: "accusamus",
 }).then((res: GetTransactionsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -344,7 +347,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getWallet({
-  id: "3cf3be45-3f87-40b3-a6b5-a73429cdb1a8",
+  id: "453f870b-326b-45a7-b429-cdb1a8422bb6",
 }).then((res: GetWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -370,7 +373,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.getWalletSummary({
-  id: "422bb679-d232-4271-9bf0-cbb1e31b8b90",
+  id: "79d23227-15bf-40cb-b1e3-1b8b90f3443a",
 }).then((res: GetWalletSummaryResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -395,7 +398,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.listBalances({
-  id: "f3443a11-08e0-4adc-b4b9-21879fce953f",
+  id: "1108e0ad-cf4b-4921-879f-ce953f73ef7f",
 }).then((res: ListBalancesResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -422,11 +425,12 @@ const sdk = new SDK({
 sdk.wallets.listWallets({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   metadata: {
-    "consectetur": "vero",
-    "tenetur": "dignissimos",
+    "quod": "odio",
+    "similique": "facilis",
+    "vero": "ducimus",
   },
-  name: "Kelvin Schmidt",
-  pageSize: 708548,
+  name: "Rosemarie Stanton",
+  pageSize: 773326,
 }).then((res: ListWalletsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -454,13 +458,10 @@ const sdk = new SDK({
 sdk.wallets.updateWallet({
   requestBody: {
     metadata: {
-      "ducimus": "dolore",
-      "quibusdam": "illum",
-      "sequi": "natus",
-      "impedit": "aut",
+      "voluptatibus": "exercitationem",
     },
   },
-  id: "f5d2cff7-c70a-4456-a6d4-36813f16d9f5",
+  id: "d2cff7c7-0a45-4626-9436-813f16d9f5fc",
 }).then((res: UpdateWalletResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -486,7 +487,7 @@ const sdk = new SDK({
 });
 
 sdk.wallets.voidHold({
-  holdId: "sapiente",
+  holdId: "saepe",
 }).then((res: VoidHoldResponse) => {
   if (res.statusCode == 200) {
     // handle response

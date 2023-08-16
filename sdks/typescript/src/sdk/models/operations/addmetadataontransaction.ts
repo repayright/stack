@@ -22,12 +22,6 @@ export class AddMetadataOnTransactionRequest extends SpeakeasyBase {
   requestBody?: Record<string, string>;
 
   /**
-   * Set async mode.
-   */
-  @SpeakeasyMetadata({ data: "queryParam, style=form;explode=true;name=async" })
-  async?: boolean;
-
-  /**
    * Set the dryRun mode. Dry run mode doesn't add the logs to the database or publish a message to the message broker.
    */
   @SpeakeasyMetadata({
@@ -36,20 +30,18 @@ export class AddMetadataOnTransactionRequest extends SpeakeasyBase {
   dryRun?: boolean;
 
   /**
+   * Transaction ID.
+   */
+  @SpeakeasyMetadata({ data: "pathParam, style=simple;explode=false;name=id" })
+  id: number;
+
+  /**
    * Name of the ledger.
    */
   @SpeakeasyMetadata({
     data: "pathParam, style=simple;explode=false;name=ledger",
   })
   ledger: string;
-
-  /**
-   * Transaction ID.
-   */
-  @SpeakeasyMetadata({
-    data: "pathParam, style=simple;explode=false;name=txid",
-  })
-  txid: number;
 }
 
 export class AddMetadataOnTransactionResponse extends SpeakeasyBase {

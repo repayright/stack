@@ -80,8 +80,6 @@ lib/src/main/java/com/formance/formance_sdk/models/operations/CreateTransactionR
 lib/src/main/java/com/formance/formance_sdk/models/operations/CreateTransactionResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetAccountRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetAccountResponse.java
-lib/src/main/java/com/formance/formance_sdk/models/operations/GetBalancesRequest.java
-lib/src/main/java/com/formance/formance_sdk/models/operations/GetBalancesResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetBalancesAggregatedRequest.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetBalancesAggregatedResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/operations/GetInfoResponse.java
@@ -231,8 +229,6 @@ lib/src/main/java/com/formance/formance_sdk/models/shared/PostTransactionScript.
 lib/src/main/java/com/formance/formance_sdk/models/shared/PostTransaction.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/AccountResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/AccountWithVolumesAndBalances.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/BalancesCursorResponseCursor.java
-lib/src/main/java/com/formance/formance_sdk/models/shared/BalancesCursorResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/AggregateBalancesResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ConfigInfoResponse.java
 lib/src/main/java/com/formance/formance_sdk/models/shared/ConfigInfo.java

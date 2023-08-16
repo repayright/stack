@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/formancehq/ledger/internal/bus"
 	"github.com/formancehq/ledger/internal/engine/command"
 	"github.com/formancehq/ledger/internal/opentelemetry/metrics"
 	"github.com/formancehq/ledger/internal/storage/driver"
@@ -37,7 +38,7 @@ func Module(configuration Configuration) fx.Option {
 			}
 			return NewResolver(storageDriver, options...)
 		}),
-		fx.Provide(fx.Annotate(NewNoOpMonitor, fx.As(new(Monitor)))),
+		fx.Provide(fx.Annotate(bus.NewNoOpMonitor, fx.As(new(bus.Monitor)))),
 		fx.Provide(fx.Annotate(metrics.NewNoOpRegistry, fx.As(new(metrics.GlobalRegistry)))),
 		//TODO(gfyrag): Move in pkg/ledger package
 		fx.Invoke(func(lc fx.Lifecycle, resolver *Resolver) {

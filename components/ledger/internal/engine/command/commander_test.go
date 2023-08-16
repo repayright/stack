@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	ledger "github.com/formancehq/ledger/internal"
+	"github.com/formancehq/ledger/internal/bus"
 	storageerrors "github.com/formancehq/ledger/internal/storage"
 	internaltesting "github.com/formancehq/ledger/internal/testing"
 	"github.com/formancehq/stack/libs/go-libs/logging"
@@ -149,7 +150,7 @@ func TestCreateTransaction(t *testing.T) {
 			store := storageerrors.NewInMemoryStore()
 			ctx := logging.TestingContext()
 
-			commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer())
+			commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer(), bus.NewNoOpMonitor())
 			go commander.Run(ctx)
 			defer commander.Close()
 
@@ -169,14 +170,14 @@ func TestCreateTransaction(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotNil(t, ret)
-				tc.expectedTx.Date = now
+				tc.expectedTx.Timestamp = now
 				internaltesting.RequireEqual(t, tc.expectedTx, ret)
 
 				for ind := range tc.expectedLogs {
 					expectedLog := tc.expectedLogs[ind]
 					switch v := expectedLog.Data.(type) {
 					case ledger.NewTransactionLogPayload:
-						v.Transaction.Date = now
+						v.Transaction.Timestamp = now
 						expectedLog.Data = v
 					}
 					expectedLog.Date = now
@@ -200,7 +201,7 @@ func TestRevert(t *testing.T) {
 	err := store.InsertLogs(context.Background(), log)
 	require.NoError(t, err)
 
-	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer())
+	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer(), bus.NewNoOpMonitor())
 	go commander.Run(ctx)
 	defer commander.Close()
 
@@ -222,7 +223,7 @@ func TestRevertWithAlreadyReverted(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer())
+	commander := New(store, NoOpLocker, NewCompiler(1024), NewReferencer(), bus.NewNoOpMonitor())
 	go commander.Run(ctx)
 	defer commander.Close()
 
@@ -245,7 +246,7 @@ func TestRevertWithRevertOccurring(t *testing.T) {
 	require.NoError(t, err)
 
 	referencer := NewReferencer()
-	commander := New(store, NoOpLocker, NewCompiler(1024), referencer)
+	commander := New(store, NoOpLocker, NewCompiler(1024), referencer, bus.NewNoOpMonitor())
 	go commander.Run(ctx)
 	defer commander.Close()
 

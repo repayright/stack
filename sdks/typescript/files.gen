@@ -49,7 +49,6 @@ src/sdk/models/operations/countaccounts.ts
 src/sdk/models/operations/counttransactions.ts
 src/sdk/models/operations/createtransaction.ts
 src/sdk/models/operations/getaccount.ts
-src/sdk/models/operations/getbalances.ts
 src/sdk/models/operations/getbalancesaggregated.ts
 src/sdk/models/operations/getinfo.ts
 src/sdk/models/operations/getledgerinfo.ts
@@ -146,7 +145,6 @@ src/sdk/models/shared/posting.ts
 src/sdk/models/shared/posttransaction.ts
 src/sdk/models/shared/accountresponse.ts
 src/sdk/models/shared/accountwithvolumesandbalances.ts
-src/sdk/models/shared/balancescursorresponse.ts
 src/sdk/models/shared/aggregatebalancesresponse.ts
 src/sdk/models/shared/configinforesponse.ts
 src/sdk/models/shared/configinfo.ts

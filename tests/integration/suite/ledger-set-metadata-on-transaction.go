@@ -47,7 +47,7 @@ var _ = Given("some empty environment", func() {
 				TestContext(),
 				operations.GetTransactionRequest{
 					Ledger: "default",
-					Txid:   rsp.Data.Txid,
+					ID:     rsp.Data.ID,
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -63,7 +63,7 @@ var _ = Given("some empty environment", func() {
 				operations.AddMetadataOnTransactionRequest{
 					RequestBody: metadata,
 					Ledger:      "default",
-					Txid:        666,
+					ID:          666,
 				},
 			)
 			Expect(err).ToNot(HaveOccurred())
@@ -79,7 +79,7 @@ var _ = Given("some empty environment", func() {
 					operations.AddMetadataOnTransactionRequest{
 						RequestBody: metadata,
 						Ledger:      "default",
-						Txid:        rsp.Data.Txid,
+						ID:          rsp.Data.ID,
 					},
 				)
 				Expect(err).To(Succeed())
@@ -91,7 +91,7 @@ var _ = Given("some empty environment", func() {
 					TestContext(),
 					operations.GetTransactionRequest{
 						Ledger: "default",
-						Txid:   rsp.Data.Txid,
+						ID:     rsp.Data.ID,
 					},
 				)
 				Expect(err).ToNot(HaveOccurred())

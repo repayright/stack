@@ -8,7 +8,6 @@
 * [countTransactions](#counttransactions) - Count the transactions from a ledger
 * [createTransaction](#createtransaction) - Create a new transaction to a ledger
 * [getAccount](#getaccount) - Get account by its address
-* [getBalances](#getbalances) - Get the balances from a ledger's account
 * [getBalancesAggregated](#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [getInfo](#getinfo) - Show server information
 * [getLedgerInfo](#getledgerinfo) - Get information about a ledger
@@ -45,10 +44,9 @@ try {
         'explicabo' => 'nobis',
         'enim' => 'omnis',
     ];
-    $request->async = true;
     $request->dryRun = true;
+    $request->id = 1234;
     $request->ledger = 'ledger001';
-    $request->txid = 1234;
 
     $response = $sdk->ledger->addMetadataOnTransaction($request);
 
@@ -87,7 +85,6 @@ try {
         'iure' => 'culpa',
     ];
     $request->address = 'users:001';
-    $request->async = true;
     $request->dryRun = true;
     $request->ledger = 'ledger001';
 
@@ -235,7 +232,6 @@ try {
         'temporibus' => 'laborum',
     ];
     $request->postTransaction->timestamp = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-01-11T05:45:42.485Z');
-    $request->async = true;
     $request->dryRun = true;
     $request->ledger = 'ledger001';
 
@@ -271,47 +267,12 @@ $sdk = SDK::builder()
 try {
     $request = new GetAccountRequest();
     $request->address = 'users:001';
+    $request->expand = 'voluptatibus';
     $request->ledger = 'ledger001';
 
     $response = $sdk->ledger->getAccount($request);
 
     if ($response->accountResponse !== null) {
-        // handle response
-    }
-} catch (Exception $e) {
-    // handle exception
-}
-```
-
-## getBalances
-
-Get the balances from a ledger's account
-
-### Example Usage
-
-```php
-<?php
-
-declare(strict_types=1);
-require_once 'vendor/autoload.php';
-
-use \formance\stack\SDK;
-use \formance\stack\Models\Shared\Security;
-use \formance\stack\Models\Operations\GetBalancesRequest;
-
-$sdk = SDK::builder()
-    ->build();
-
-try {
-    $request = new GetBalancesRequest();
-    $request->address = 'users:001';
-    $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
-    $request->ledger = 'ledger001';
-    $request->pageSize = 976460;
-
-    $response = $sdk->ledger->getBalances($request);
-
-    if ($response->balancesCursorResponse !== null) {
         // handle response
     }
 } catch (Exception $e) {
@@ -436,8 +397,9 @@ $sdk = SDK::builder()
 
 try {
     $request = new GetTransactionRequest();
+    $request->expand = 'vero';
+    $request->id = 1234;
     $request->ledger = 'ledger001';
-    $request->txid = 1234;
 
     $response = $sdk->ledger->getTransaction($request);
 
@@ -472,9 +434,9 @@ try {
     $request = new ListAccountsRequest();
     $request->address = 'users:.+';
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
+    $request->expand = 'nihil';
     $request->ledger = 'ledger001';
     $request->metadata = [
-        'nihil' => 'praesentium',
         'voluptatibus' => 'ipsa',
         'omnis' => 'voluptate',
         'cum' => 'perferendis',
@@ -530,7 +492,7 @@ try {
 
 ## listTransactions
 
-List transactions from a ledger, sorted by txid in descending order.
+List transactions from a ledger, sorted by id in descending order.
 
 ### Example Usage
 
@@ -553,14 +515,17 @@ try {
     $request->cursor = 'aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==';
     $request->destination = 'users:001';
     $request->endTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-07-09T11:22:20.922Z');
+    $request->expand = 'dicta';
     $request->ledger = 'ledger001';
     $request->metadata = [
-        'harum' => 'enim',
+        'enim' => 'accusamus',
+        'commodi' => 'repudiandae',
+        'quae' => 'ipsum',
     ];
-    $request->pageSize = 880476;
+    $request->pageSize = 692472;
     $request->reference = 'ref:001';
     $request->source = 'users:001';
-    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2022-01-30T20:15:26.045Z');
+    $request->startTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', '2021-11-13T09:08:33.009Z');
 
     $response = $sdk->ledger->listTransactions($request);
 
@@ -627,8 +592,8 @@ $sdk = SDK::builder()
 
 try {
     $request = new RevertTransactionRequest();
+    $request->id = 1234;
     $request->ledger = 'ledger001';
-    $request->txid = 1234;
 
     $response = $sdk->ledger->revertTransaction($request);
 

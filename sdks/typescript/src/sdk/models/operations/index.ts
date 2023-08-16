@@ -34,7 +34,6 @@ export * from "./deleteworkflow";
 export * from "./getaccount";
 export * from "./getaccountbalances";
 export * from "./getbalance";
-export * from "./getbalances";
 export * from "./getbalancesaggregated";
 export * from "./getconnectortask";
 export * from "./gethold";

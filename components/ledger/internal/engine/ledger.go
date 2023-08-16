@@ -5,6 +5,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	ledger "github.com/formancehq/ledger/internal"
+	"github.com/formancehq/ledger/internal/bus"
 	"github.com/formancehq/ledger/internal/engine/command"
 	"github.com/formancehq/ledger/internal/storage/ledgerstore"
 	"github.com/formancehq/stack/libs/go-libs/api"
@@ -35,17 +36,17 @@ func New(
 	publisher message.Publisher,
 	compiler *command.Compiler,
 ) *Ledger {
-	//TODO: reimplements
-	//var monitor Monitor = NewNoOpMonitor()
-	//if publisher != nil {
-	//	monitor = bus.NewLedgerMonitor(publisher, name)
-	//}
+	var monitor bus.Monitor = bus.NewNoOpMonitor()
+	if publisher != nil {
+		monitor = bus.NewLedgerMonitor(publisher, store.Name())
+	}
 	return &Ledger{
 		commander: command.New(
 			store,
 			command.NewDefaultLocker(),
 			compiler,
 			command.NewReferencer(),
+			monitor,
 		),
 		store: store,
 	}

@@ -8,7 +8,7 @@ import (
 
 	ledger "github.com/formancehq/ledger/internal"
 	"github.com/formancehq/ledger/internal/storage"
-	paginate2 "github.com/formancehq/ledger/internal/storage/paginate"
+	"github.com/formancehq/ledger/internal/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/uptrace/bun"
@@ -23,7 +23,7 @@ func fetch[T any](s *Store, ctx context.Context, builders ...func(query *bun.Sel
 			query = query.Apply(builder)
 		}
 		if query.GetTableName() == "" && query.GetModel() == nil {
-			query = query.Model(ret)
+			//query = query.Model(ret)
 		}
 
 		return storage.PostgresError(query.Scan(ctx, ret))
@@ -37,13 +37,13 @@ func fetchAndMap[T any, TO any](s *Store, ctx context.Context,
 	ret, err := fetch[T](s, ctx, builders...)
 	if err != nil {
 		var zero TO
-		return zero, err
+		return zero, storage.PostgresError(err)
 	}
 	return mapper(ret), nil
 }
 
 func paginateWithOffset[FILTERS any, RETURN any](s *Store, ctx context.Context,
-	q paginate2.OffsetPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
+	q paginate.OffsetPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
 	tx, err := s.prepareTransaction(ctx)
 	if err != nil {
 		return nil, err
@@ -59,26 +59,26 @@ func paginateWithOffset[FILTERS any, RETURN any](s *Store, ctx context.Context,
 		query = query.Model(ret)
 	}
 
-	return paginate2.UsingOffset[FILTERS, RETURN](ctx, query, q)
+	return paginate.UsingOffset[FILTERS, RETURN](ctx, query, q)
 }
 
-func paginateWithColumn[FILTERS any, RETURN any](s *Store, ctx context.Context, q paginate2.ColumnPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
+func paginateWithColumn[FILTERS any, RETURN any](s *Store, ctx context.Context, q paginate.ColumnPaginatedQuery[FILTERS], builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (*api.Cursor[RETURN], error) {
 	tx, err := s.prepareTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
 
-	var ret RETURN
+	//var ret RETURN
 	query := s.db.NewSelect().Conn(tx)
 	for _, builder := range builders {
 		query = query.Apply(builder)
 	}
 	if query.GetModel() == nil && query.GetTableName() == "" {
-		query = query.Model(ret)
+		//query = query.Model(ret)
 	}
 
-	return paginate2.UsingColumn[FILTERS, RETURN](ctx, query, q)
+	return paginate.UsingColumn[FILTERS, RETURN](ctx, query, q)
 }
 
 func count(s *Store, ctx context.Context, builders ...func(query *bun.SelectQuery) *bun.SelectQuery) (uint64, error) {

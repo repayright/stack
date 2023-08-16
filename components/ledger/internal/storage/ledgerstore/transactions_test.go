@@ -42,7 +42,7 @@ func Reverse[T any](values ...T) []T {
 	return values
 }
 
-func TestGetTransaction(t *testing.T) {
+func TestGetTransactionWithVolumes(t *testing.T) {
 	t.Parallel()
 	store := newLedgerStore(t)
 	now := ledger.Now()
@@ -60,7 +60,7 @@ func TestGetTransaction(t *testing.T) {
 					},
 				},
 				Reference: "tx1",
-				Date:      now.Add(-3 * time.Hour),
+				Timestamp: now.Add(-3 * time.Hour),
 			},
 		},
 		PostCommitVolumes: ledger.AccountsAssetsVolumes{
@@ -105,7 +105,7 @@ func TestGetTransaction(t *testing.T) {
 					},
 				},
 				Reference: "tx2",
-				Date:      now.Add(-2 * time.Hour),
+				Timestamp: now.Add(-2 * time.Hour),
 			},
 		},
 		PostCommitVolumes: ledger.AccountsAssetsVolumes{
@@ -146,7 +146,7 @@ func TestGetTransaction(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, tx1.Postings, tx.Postings)
 	require.Equal(t, tx1.Reference, tx.Reference)
-	require.Equal(t, tx1.Date, tx.Date)
+	require.Equal(t, tx1.Timestamp, tx.Timestamp)
 	internaltesting.RequireEqual(t, ledger.AccountsAssetsVolumes{
 		"world": {
 			"USD": {
@@ -181,7 +181,7 @@ func TestGetTransaction(t *testing.T) {
 		WithExpandEffectiveVolumes())
 	require.Equal(t, tx2.Postings, tx.Postings)
 	require.Equal(t, tx2.Reference, tx.Reference)
-	require.Equal(t, tx2.Date, tx.Date)
+	require.Equal(t, tx2.Timestamp, tx.Timestamp)
 	internaltesting.RequireEqual(t, ledger.AccountsAssetsVolumes{
 		"world": {
 			"USD": {
@@ -212,6 +212,96 @@ func TestGetTransaction(t *testing.T) {
 	}, tx.PreCommitVolumes)
 }
 
+func TestGetTransaction(t *testing.T) {
+	t.Parallel()
+	store := newLedgerStore(t)
+	now := ledger.Now()
+
+	tx1 := ledger.Transaction{
+		ID: big.NewInt(0),
+		TransactionData: ledger.TransactionData{
+			Postings: []ledger.Posting{
+				{
+					Source:      "world",
+					Destination: "central_bank",
+					Amount:      big.NewInt(100),
+					Asset:       "USD",
+				},
+			},
+			Reference: "tx1",
+			Timestamp: now.Add(-3 * time.Hour),
+		},
+	}
+	tx2 := ledger.Transaction{
+		ID: big.NewInt(1),
+		TransactionData: ledger.TransactionData{
+			Postings: []ledger.Posting{
+				{
+					Source:      "world",
+					Destination: "central_bank",
+					Amount:      big.NewInt(100),
+					Asset:       "USD",
+				},
+			},
+			Reference: "tx2",
+			Timestamp: now.Add(-2 * time.Hour),
+		},
+	}
+
+	require.NoError(t, insertTransactions(context.Background(), store, tx1, tx2))
+
+	tx, err := store.GetTransaction(context.Background(), 0)
+	require.NoError(t, err)
+	require.Equal(t, tx1.Postings, tx.Postings)
+	require.Equal(t, tx1.Reference, tx.Reference)
+	require.Equal(t, tx1.Timestamp, tx.Timestamp)
+}
+
+func TestGetTransactionByReference(t *testing.T) {
+	t.Parallel()
+	store := newLedgerStore(t)
+	now := ledger.Now()
+
+	tx1 := ledger.Transaction{
+		ID: big.NewInt(0),
+		TransactionData: ledger.TransactionData{
+			Postings: []ledger.Posting{
+				{
+					Source:      "world",
+					Destination: "central_bank",
+					Amount:      big.NewInt(100),
+					Asset:       "USD",
+				},
+			},
+			Reference: "tx1",
+			Timestamp: now.Add(-3 * time.Hour),
+		},
+	}
+	tx2 := ledger.Transaction{
+		ID: big.NewInt(1),
+		TransactionData: ledger.TransactionData{
+			Postings: []ledger.Posting{
+				{
+					Source:      "world",
+					Destination: "central_bank",
+					Amount:      big.NewInt(100),
+					Asset:       "USD",
+				},
+			},
+			Reference: "tx2",
+			Timestamp: now.Add(-2 * time.Hour),
+		},
+	}
+
+	require.NoError(t, insertTransactions(context.Background(), store, tx1, tx2))
+
+	tx, err := store.GetTransactionByReference(context.Background(), "tx1")
+	require.NoError(t, err)
+	require.Equal(t, tx1.Postings, tx.Postings)
+	require.Equal(t, tx1.Reference, tx.Reference)
+	require.Equal(t, tx1.Timestamp, tx.Timestamp)
+}
+
 func TestInsertTransactions(t *testing.T) {
 	t.Parallel()
 	store := newLedgerStore(t)
@@ -230,8 +320,8 @@ func TestInsertTransactions(t *testing.T) {
 							Asset:       "USD",
 						},
 					},
-					Date:     now.Add(-3 * time.Hour),
-					Metadata: metadata.Metadata{},
+					Timestamp: now.Add(-3 * time.Hour),
+					Metadata:  metadata.Metadata{},
 				},
 			},
 			PreCommitVolumes: map[string]ledger.VolumesByAssets{
@@ -273,8 +363,8 @@ func TestInsertTransactions(t *testing.T) {
 							Asset:       "USD",
 						},
 					},
-					Date:     now.Add(-2 * time.Hour),
-					Metadata: metadata.Metadata{},
+					Timestamp: now.Add(-2 * time.Hour),
+					Metadata:  metadata.Metadata{},
 				},
 			},
 			PreCommitVolumes: map[string]ledger.VolumesByAssets{
@@ -307,8 +397,8 @@ func TestInsertTransactions(t *testing.T) {
 							Asset:       "USD",
 						},
 					},
-					Date:     now.Add(-1 * time.Hour),
-					Metadata: metadata.Metadata{},
+					Timestamp: now.Add(-1 * time.Hour),
+					Metadata:  metadata.Metadata{},
 				},
 			},
 			PreCommitVolumes: map[string]ledger.VolumesByAssets{
@@ -359,8 +449,8 @@ func TestCountTransactions(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Date:     now.Add(-3 * time.Hour),
-				Metadata: metadata.Metadata{},
+				Timestamp: now.Add(-3 * time.Hour),
+				Metadata:  metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]ledger.VolumesByAssets{
@@ -392,8 +482,8 @@ func TestCountTransactions(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Date:     now.Add(-2 * time.Hour),
-				Metadata: metadata.Metadata{},
+				Timestamp: now.Add(-2 * time.Hour),
+				Metadata:  metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]ledger.VolumesByAssets{
@@ -426,8 +516,8 @@ func TestCountTransactions(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Date:     now.Add(-1 * time.Hour),
-				Metadata: metadata.Metadata{},
+				Timestamp: now.Add(-1 * time.Hour),
+				Metadata:  metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]ledger.VolumesByAssets{
@@ -473,8 +563,8 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Date:     now.Add(-3 * time.Hour),
-				Metadata: metadata.Metadata{},
+				Timestamp: now.Add(-3 * time.Hour),
+				Metadata:  metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]ledger.VolumesByAssets{
@@ -506,8 +596,8 @@ func TestUpdateTransactionsMetadata(t *testing.T) {
 						Asset:       "USD",
 					},
 				},
-				Date:     now.Add(-2 * time.Hour),
-				Metadata: metadata.Metadata{},
+				Timestamp: now.Add(-2 * time.Hour),
+				Metadata:  metadata.Metadata{},
 			},
 		},
 		PreCommitVolumes: map[string]ledger.VolumesByAssets{

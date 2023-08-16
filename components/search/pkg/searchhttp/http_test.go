@@ -106,7 +106,7 @@ func TestMultiSearch(t *testing.T) {
 					},
 					"TRANSACTION": []interface{}{
 						map[string]interface{}{
-							"txid":      float64(1),
+							"id":      float64(1),
 							"reference": "tx1",
 							"timestamp": now.Format(time.RFC3339),
 							"metadata": map[string]interface{}{

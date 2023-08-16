@@ -8,7 +8,6 @@
 * [countTransactions](#counttransactions) - Count the transactions from a ledger
 * [createTransaction](#createtransaction) - Create a new transaction to a ledger
 * [getAccount](#getaccount) - Get account by its address
-* [getBalances](#getbalances) - Get the balances from a ledger's account
 * [getBalancesAggregated](#getbalancesaggregated) - Get the aggregated balances from selected accounts
 * [getInfo](#getinfo) - Show server information
 * [getLedgerInfo](#getledgerinfo) - Get information about a ledger
@@ -42,10 +41,9 @@ sdk.ledger.addMetadataOnTransaction({
     "explicabo": "nobis",
     "enim": "omnis",
   },
-  async: true,
   dryRun: true,
+  id: 1234,
   ledger: "ledger001",
-  txid: 1234,
 }).then((res: AddMetadataOnTransactionResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -77,7 +75,6 @@ sdk.ledger.addMetadataToAccount({
     "iure": "culpa",
   },
   address: "users:001",
-  async: true,
   dryRun: true,
   ledger: "ledger001",
 }).then((res: AddMetadataToAccountResponse) => {
@@ -213,7 +210,6 @@ sdk.ledger.createTransaction({
     },
     timestamp: new Date("2022-01-11T05:45:42.485Z"),
   },
-  async: true,
   dryRun: true,
   ledger: "ledger001",
 }).then((res: CreateTransactionResponse) => {
@@ -242,37 +238,9 @@ const sdk = new SDK({
 
 sdk.ledger.getAccount({
   address: "users:001",
+  expand: "voluptatibus",
   ledger: "ledger001",
 }).then((res: GetAccountResponse) => {
-  if (res.statusCode == 200) {
-    // handle response
-  }
-});
-```
-
-## getBalances
-
-Get the balances from a ledger's account
-
-### Example Usage
-
-```typescript
-import { SDK } from "@formance/formance-sdk";
-import { GetBalancesResponse } from "@formance/formance-sdk/dist/sdk/models/operations";
-import { ErrorsEnum } from "@formance/formance-sdk/dist/sdk/models/shared";
-
-const sdk = new SDK({
-  security: {
-    authorization: "Bearer YOUR_ACCESS_TOKEN_HERE",
-  },
-});
-
-sdk.ledger.getBalances({
-  address: "users:001",
-  cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
-  ledger: "ledger001",
-  pageSize: 976460,
-}).then((res: GetBalancesResponse) => {
   if (res.statusCode == 200) {
     // handle response
   }
@@ -374,8 +342,9 @@ const sdk = new SDK({
 });
 
 sdk.ledger.getTransaction({
+  expand: "vero",
+  id: 1234,
   ledger: "ledger001",
-  txid: 1234,
 }).then((res: GetTransactionResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -403,9 +372,9 @@ const sdk = new SDK({
 sdk.ledger.listAccounts({
   address: "users:.+",
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
+  expand: "nihil",
   ledger: "ledger001",
   metadata: {
-    "nihil": "praesentium",
     "voluptatibus": "ipsa",
     "omnis": "voluptate",
     "cum": "perferendis",
@@ -450,7 +419,7 @@ sdk.ledger.listLogs({
 
 ## listTransactions
 
-List transactions from a ledger, sorted by txid in descending order.
+List transactions from a ledger, sorted by id in descending order.
 
 ### Example Usage
 
@@ -470,14 +439,17 @@ sdk.ledger.listTransactions({
   cursor: "aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==",
   destination: "users:001",
   endTime: new Date("2022-07-09T11:22:20.922Z"),
+  expand: "dicta",
   ledger: "ledger001",
   metadata: {
-    "harum": "enim",
+    "enim": "accusamus",
+    "commodi": "repudiandae",
+    "quae": "ipsum",
   },
-  pageSize: 880476,
+  pageSize: 692472,
   reference: "ref:001",
   source: "users:001",
-  startTime: new Date("2022-01-30T20:15:26.045Z"),
+  startTime: new Date("2021-11-13T09:08:33.009Z"),
 }).then((res: ListTransactionsResponse) => {
   if (res.statusCode == 200) {
     // handle response
@@ -530,8 +502,8 @@ const sdk = new SDK({
 });
 
 sdk.ledger.revertTransaction({
+  id: 1234,
   ledger: "ledger001",
-  txid: 1234,
 }).then((res: RevertTransactionResponse) => {
   if (res.statusCode == 200) {
     // handle response

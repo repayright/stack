@@ -38,7 +38,6 @@ src/sdk/models/operations/countaccounts.py
 src/sdk/models/operations/counttransactions.py
 src/sdk/models/operations/createtransaction.py
 src/sdk/models/operations/getaccount.py
-src/sdk/models/operations/getbalances.py
 src/sdk/models/operations/getbalancesaggregated.py
 src/sdk/models/operations/getinfo.py
 src/sdk/models/operations/getledgerinfo.py
@@ -135,7 +134,6 @@ src/sdk/models/shared/posting.py
 src/sdk/models/shared/posttransaction.py
 src/sdk/models/shared/accountresponse.py
 src/sdk/models/shared/accountwithvolumesandbalances.py
-src/sdk/models/shared/balancescursorresponse.py
 src/sdk/models/shared/aggregatebalancesresponse.py
 src/sdk/models/shared/configinforesponse.py
 src/sdk/models/shared/configinfo.py

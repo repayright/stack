@@ -29,6 +29,11 @@ export class ListAccountsRequest extends SpeakeasyBase {
   })
   cursor?: string;
 
+  @SpeakeasyMetadata({
+    data: "queryParam, style=form;explode=true;name=expand",
+  })
+  expand?: string;
+
   /**
    * Name of the ledger.
    */

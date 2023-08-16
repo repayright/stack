@@ -36,7 +36,7 @@ func TestGetLastLog(t *testing.T) {
 					},
 				},
 				Reference: "tx1",
-				Date:      now.Add(-3 * time.Hour),
+				Timestamp: now.Add(-3 * time.Hour),
 			},
 		},
 		PostCommitVolumes: ledger.AccountsAssetsVolumes{
@@ -78,7 +78,7 @@ func TestGetLastLog(t *testing.T) {
 
 	require.Equal(t, tx1.Postings, lastLog.Data.(ledger.NewTransactionLogPayload).Transaction.Postings)
 	require.Equal(t, tx1.Reference, lastLog.Data.(ledger.NewTransactionLogPayload).Transaction.Reference)
-	require.Equal(t, tx1.Date, lastLog.Data.(ledger.NewTransactionLogPayload).Transaction.Date)
+	require.Equal(t, tx1.Timestamp, lastLog.Data.(ledger.NewTransactionLogPayload).Transaction.Timestamp)
 }
 
 func TestReadLogWithIdempotencyKey(t *testing.T) {
@@ -120,7 +120,7 @@ func TestGetLogs(t *testing.T) {
 					},
 				},
 				Reference: "tx1",
-				Date:      now.Add(-3 * time.Hour),
+				Timestamp: now.Add(-3 * time.Hour),
 			},
 		},
 		PostCommitVolumes: ledger.AccountsAssetsVolumes{
@@ -165,7 +165,7 @@ func TestGetLogs(t *testing.T) {
 					},
 				},
 				Reference: "tx2",
-				Date:      now.Add(-2 * time.Hour),
+				Timestamp: now.Add(-2 * time.Hour),
 			},
 		},
 		PostCommitVolumes: ledger.AccountsAssetsVolumes{
@@ -213,7 +213,7 @@ func TestGetLogs(t *testing.T) {
 				Metadata: metadata.Metadata{
 					"priority": "high",
 				},
-				Date: now.Add(-1 * time.Hour),
+				Timestamp: now.Add(-1 * time.Hour),
 			},
 		},
 		PreCommitVolumes: ledger.AccountsAssetsVolumes{
@@ -249,7 +249,7 @@ func TestGetLogs(t *testing.T) {
 	var previousLog *ledger.ChainedLog
 	for _, tx := range []ledger.ExpandedTransaction{tx1, tx2, tx3} {
 		newLog := ledger.NewTransactionLog(&tx.Transaction, map[string]metadata.Metadata{}).
-			WithDate(tx.Date).
+			WithDate(tx.Timestamp).
 			ChainLog(previousLog)
 		appendLog(t, store, newLog)
 		previousLog = newLog
@@ -263,7 +263,7 @@ func TestGetLogs(t *testing.T) {
 	require.Equal(t, big.NewInt(2), cursor.Data[0].ID)
 	require.Equal(t, tx3.Postings, cursor.Data[0].Data.(ledger.NewTransactionLogPayload).Transaction.Postings)
 	require.Equal(t, tx3.Reference, cursor.Data[0].Data.(ledger.NewTransactionLogPayload).Transaction.Reference)
-	require.Equal(t, tx3.Date, cursor.Data[0].Data.(ledger.NewTransactionLogPayload).Transaction.Date)
+	require.Equal(t, tx3.Timestamp, cursor.Data[0].Data.(ledger.NewTransactionLogPayload).Transaction.Timestamp)
 
 	cursor, err = store.GetLogs(context.Background(), ledgerstore.NewLogsQuery().WithPageSize(1))
 	require.NoError(t, err)

@@ -13,6 +13,10 @@ import { Expose, Transform, Type } from "class-transformer";
 
 export class WalletsTransaction extends SpeakeasyBase {
   @SpeakeasyMetadata()
+  @Expose({ name: "id" })
+  id?: number;
+
+  @SpeakeasyMetadata()
   @Expose({ name: "ledger" })
   ledger?: string;
 
@@ -64,8 +68,4 @@ export class WalletsTransaction extends SpeakeasyBase {
   @Expose({ name: "timestamp" })
   @Transform(({ value }) => new Date(value), { toClassOnly: true })
   timestamp: Date;
-
-  @SpeakeasyMetadata()
-  @Expose({ name: "txid" })
-  txid: number;
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	ledger "github.com/formancehq/ledger/internal"
-	paginate2 "github.com/formancehq/ledger/internal/storage/paginate"
+	"github.com/formancehq/ledger/internal/storage/paginate"
 	"github.com/formancehq/stack/libs/go-libs/api"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 	"github.com/uptrace/bun"
@@ -21,13 +21,16 @@ const (
 type Transaction struct {
 	bun.BaseModel `bun:"transactions,alias:transactions"`
 
-	ID                         *paginate2.BigInt            `bun:"id,type:numeric"`
-	Timestamp                  ledger.Time                  `bun:"date,type:timestamp without time zone"`
+	ID                         *paginate.BigInt             `bun:"id,type:numeric"`
+	Timestamp                  ledger.Time                  `bun:"timestamp,type:timestamp without time zone"`
 	Reference                  string                       `bun:"reference,type:varchar,unique,nullzero"`
 	Postings                   []ledger.Posting             `bun:"postings,type:jsonb"`
 	Metadata                   metadata.Metadata            `bun:"metadata,type:jsonb,default:'{}'"`
 	PostCommitEffectiveVolumes ledger.AccountsAssetsVolumes `bun:"post_commit_effective_volumes,type:jsonb"`
 	PostCommitVolumes          ledger.AccountsAssetsVolumes `bun:"post_commit_volumes,type:jsonb"`
+	Reverted                   bool                         `bun:"reverted"`
+	Revision                   int                          `bun:"revision"`
+	LastUpdate                 *ledger.Time                 `bun:"last_update"`
 }
 
 func (t *Transaction) toCore() *ledger.ExpandedTransaction {
@@ -54,10 +57,11 @@ func (t *Transaction) toCore() *ledger.ExpandedTransaction {
 			TransactionData: ledger.TransactionData{
 				Reference: t.Reference,
 				Metadata:  t.Metadata,
-				Date:      t.Timestamp,
+				Timestamp: t.Timestamp,
 				Postings:  t.Postings,
 			},
-			ID: (*big.Int)(t.ID),
+			ID:       (*big.Int)(t.ID),
+			Reverted: t.Reverted,
 		},
 		PreCommitEffectiveVolumes:  preCommitEffectiveVolumes,
 		PostCommitEffectiveVolumes: t.PostCommitEffectiveVolumes,
@@ -106,16 +110,15 @@ func (m1 *account) Scan(value interface{}) error {
 
 func (store *Store) transactionQuery(p PITFilter) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
-		query = query.
+		subQuery := query.NewSelect().
 			Table("transactions").
-			ColumnExpr("distinct on(transactions.id) transactions.id").
-			ColumnExpr("transactions.reference").
-			ColumnExpr("transactions.metadata").
-			ColumnExpr("transactions.postings").
-			ColumnExpr("transactions.date").
-			Apply(filterPIT(p.PIT, "transactions.date")).
+			ColumnExpr("distinct on(transactions.id) transactions.*").
+			Apply(filterPIT(p.PIT, "transactions.timestamp")).
 			OrderExpr("transactions.id desc, revision desc")
 
+		query = query.
+			TableExpr("(" + subQuery.String() + ") transactions").
+			ColumnExpr("transactions.*")
 		if p.ExpandEffectiveVolumes {
 			query = query.ColumnExpr("get_aggregated_effective_volumes_for_transaction(transactions) as post_commit_effective_volumes")
 		}
@@ -135,10 +138,10 @@ func (store *Store) transactionListBuilder(p GetTransactionsQuery) func(query *b
 			query.Where("transactions.reference = ?", p.Options.Reference)
 		}
 		if !p.Options.StartTime.IsZero() {
-			query.Where("transactions.date >= ?", p.Options.StartTime)
+			query.Where("transactions.timestamp >= ?", p.Options.StartTime)
 		}
 		if !p.Options.EndTime.IsZero() {
-			query.Where("transactions.date < ?", p.Options.EndTime)
+			query.Where("transactions.timestamp < ?", p.Options.EndTime)
 		}
 		if p.Options.AfterTxID != 0 {
 			query.Where("transactions.id > ?", p.Options.AfterTxID)
@@ -166,7 +169,7 @@ func (store *Store) transactionListBuilder(p GetTransactionsQuery) func(query *b
 
 func (store *Store) GetTransactions(ctx context.Context, q GetTransactionsQuery) (*api.Cursor[ledger.ExpandedTransaction], error) {
 	transactions, err := paginateWithColumn[TransactionsQueryOptions, Transaction](store, ctx,
-		paginate2.ColumnPaginatedQuery[TransactionsQueryOptions](q),
+		paginate.ColumnPaginatedQuery[TransactionsQueryOptions](q),
 		store.transactionListBuilder(q),
 	)
 	if err != nil {
@@ -195,7 +198,8 @@ func (store *Store) GetTransaction(ctx context.Context, txId uint64) (*ledger.Tr
 	return fetch[*ledger.Transaction](store, ctx,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
-				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.date`).
+				Table("transactions").
+				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.timestamp, transactions.reverted`).
 				Where("id = ?", txId).
 				Order("revision desc").
 				Limit(1)
@@ -207,20 +211,21 @@ func (store *Store) GetTransactionByReference(ctx context.Context, ref string) (
 		(*Transaction).toCore,
 		func(query *bun.SelectQuery) *bun.SelectQuery {
 			return query.
-				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.date`).
+				Table("transactions").
+				ColumnExpr(`transactions.id, transactions.reference, transactions.metadata, transactions.postings, transactions.timestamp, transactions.reverted`).
 				Where("reference = ?", ref).
 				Order("revision desc").
 				Limit(1)
 		})
 }
 
-type GetTransactionsQuery paginate2.ColumnPaginatedQuery[TransactionsQueryOptions]
+type GetTransactionsQuery paginate.ColumnPaginatedQuery[TransactionsQueryOptions]
 
 func NewTransactionsQuery() GetTransactionsQuery {
 	return GetTransactionsQuery{
-		PageSize: paginate2.QueryDefaultPageSize,
+		PageSize: paginate.QueryDefaultPageSize,
 		Column:   "id",
-		Order:    paginate2.OrderDesc,
+		Order:    paginate.OrderDesc,
 		Options: TransactionsQueryOptions{
 			Metadata: metadata.Metadata{},
 		},

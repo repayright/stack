@@ -12,14 +12,12 @@ type AddMetadataOnTransactionRequest struct {
 	IdempotencyKey *string `header:"style=simple,explode=false,name=Idempotency-Key"`
 	// metadata
 	RequestBody map[string]string `request:"mediaType=application/json"`
-	// Set async mode.
-	Async *bool `queryParam:"style=form,explode=true,name=async"`
 	// Set the dryRun mode. Dry run mode doesn't add the logs to the database or publish a message to the message broker.
 	DryRun *bool `queryParam:"style=form,explode=true,name=dryRun"`
+	// Transaction ID.
+	ID int64 `pathParam:"style=simple,explode=false,name=id"`
 	// Name of the ledger.
 	Ledger string `pathParam:"style=simple,explode=false,name=ledger"`
-	// Transaction ID.
-	Txid int64 `pathParam:"style=simple,explode=false,name=txid"`
 }
 
 type AddMetadataOnTransactionResponse struct {

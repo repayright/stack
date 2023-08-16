@@ -30,7 +30,6 @@ export * from "./attempt";
 export * from "./attemptresponse";
 export * from "./balance";
 export * from "./balancescursor";
-export * from "./balancescursorresponse";
 export * from "./balancewithassets";
 export * from "./bankingcircleconfig";
 export * from "./client";

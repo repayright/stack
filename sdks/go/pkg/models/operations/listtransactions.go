@@ -23,6 +23,7 @@ type ListTransactionsRequest struct {
 	// The format is RFC3339 and is exclusive (for example, "2023-01-02T15:04:01Z" excludes the first second of 4th minute).
 	//
 	EndTime *time.Time `queryParam:"style=form,explode=true,name=endTime"`
+	Expand  *string    `queryParam:"style=form,explode=true,name=expand"`
 	// Name of the ledger.
 	Ledger string `pathParam:"style=simple,explode=false,name=ledger"`
 	// Filter transactions by metadata key value pairs. Nested objects can be used as seen in the example below.

@@ -8,10 +8,10 @@ import (
 )
 
 type RevertTransactionRequest struct {
+	// Transaction ID.
+	ID int64 `pathParam:"style=simple,explode=false,name=id"`
 	// Name of the ledger.
 	Ledger string `pathParam:"style=simple,explode=false,name=ledger"`
-	// Transaction ID.
-	Txid int64 `pathParam:"style=simple,explode=false,name=txid"`
 }
 
 type RevertTransactionResponse struct {

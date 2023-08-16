@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	ledger "github.com/formancehq/ledger/internal"
+	"github.com/formancehq/ledger/internal/bus"
 	"github.com/formancehq/ledger/internal/engine/utils/batching"
 	"github.com/formancehq/ledger/internal/machine"
 	"github.com/formancehq/ledger/internal/machine/vm"
@@ -33,14 +34,10 @@ type Commander struct {
 	mu         sync.Mutex
 
 	lastLog *ledger.ChainedLog
+	monitor bus.Monitor
 }
 
-func New(
-	store Store,
-	locker Locker,
-	compiler *Compiler,
-	referencer *Referencer,
-) *Commander {
+func New(store Store, locker Locker, compiler *Compiler, referencer *Referencer, monitor bus.Monitor) *Commander {
 	log, err := store.ReadLastLogWithType(context.Background(), ledger.NewTransactionLogType, ledger.RevertedTransactionLogType)
 	if err != nil && !storageerrors.IsNotFoundError(err) {
 		panic(err)
@@ -73,6 +70,7 @@ func New(
 		lastTXID:   lastTxID,
 		lastLog:    lastLog,
 		Batcher:    batching.NewBatcher(store.InsertLogs, 1, 4096),
+		monitor:    monitor,
 	}
 }
 
@@ -174,6 +172,9 @@ func (commander *Commander) CreateTransaction(ctx context.Context, parameters Pa
 	if err != nil {
 		return nil, err
 	}
+
+	commander.monitor.CommittedTransactions(ctx, *log.Data.(ledger.NewTransactionLogPayload).Transaction)
+
 	return log.Data.(ledger.NewTransactionLogPayload).Transaction, nil
 }
 
@@ -218,7 +219,12 @@ func (commander *Commander) SaveMeta(ctx context.Context, parameters Parameters,
 
 		return executionContext.AppendLog(ctx, log)
 	})
-	return err
+	if err != nil {
+		return err
+	}
+
+	commander.monitor.SavedMetadata(ctx, targetType, fmt.Sprint(targetID), m)
+	return nil
 }
 
 func (commander *Commander) RevertTransaction(ctx context.Context, parameters Parameters, id uint64) (*ledger.Transaction, error) {
@@ -256,11 +262,13 @@ func (commander *Commander) RevertTransaction(ctx context.Context, parameters Pa
 			Metadata: rt.Metadata,
 		}),
 		func(tx *ledger.Transaction, accountMetadata map[string]metadata.Metadata) *ledger.Log {
-			return ledger.NewRevertedTransactionLog(tx.Date, transactionToRevert.ID, tx)
+			return ledger.NewRevertedTransactionLog(tx.Timestamp, transactionToRevert.ID, tx)
 		})
 	if err != nil {
 		return nil, err
 	}
+
+	commander.monitor.RevertedTransaction(ctx, log.Data.(ledger.RevertedTransactionLogPayload).RevertTransaction, tx)
 
 	return log.Data.(ledger.RevertedTransactionLogPayload).RevertTransaction, nil
 }

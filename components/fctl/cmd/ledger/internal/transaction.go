@@ -25,7 +25,7 @@ type Transaction struct {
 	Postings  []*shared.Posting      `json:"postings"`
 	Reference *string                `json:"reference,omitempty"`
 	Timestamp time.Time              `json:"timestamp"`
-	Txid      int64                  `json:"txid"`
+	ID        int64                  `json:"id"`
 }
 
 // Copy from SDK, + change metadata type to map[string]interface{}
@@ -37,7 +37,7 @@ type ExpandedTransaction struct {
 	PreCommitVolumes  map[string]map[string]*shared.Volume `json:"preCommitVolumes"`
 	Reference         *string                              `json:"reference,omitempty"`
 	Timestamp         time.Time                            `json:"timestamp"`
-	Txid              int64                                `json:"txid"`
+	ID                int64                                `json:"id"`
 }
 
 // CreateTransactionResponse - OK
@@ -223,7 +223,7 @@ func CreateTransaction(client *formance.Formance, ctx context.Context, request o
 		}
 
 		t := &Transaction{
-			Txid:      st.Txid,
+			ID:        st.Txid,
 			Postings:  make([]*shared.Posting, len(st.Postings)),
 			Reference: st.Reference,
 			Timestamp: st.Timestamp,

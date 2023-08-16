@@ -43,7 +43,7 @@ func OpenSQLDB(options ConnectionOptions, hooks ...bun.QueryHook) (*bun.DB, erro
 		sqldb.SetMaxOpenConns(options.MaxOpenConns)
 	}
 
-	db := bun.NewDB(sqldb, pgdialect.New())
+	db := bun.NewDB(sqldb, pgdialect.New(), bun.WithDiscardUnknownColumns())
 	if options.Trace {
 		writer := options.Writer
 		if writer == nil {

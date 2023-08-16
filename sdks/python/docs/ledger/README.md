@@ -8,7 +8,6 @@
 * [count_transactions](#count_transactions) - Count the transactions from a ledger
 * [create_transaction](#create_transaction) - Create a new transaction to a ledger
 * [get_account](#get_account) - Get account by its address
-* [get_balances](#get_balances) - Get the balances from a ledger's account
 * [get_balances_aggregated](#get_balances_aggregated) - Get the aggregated balances from selected accounts
 * [get_info](#get_info) - Show server information
 * [get_ledger_info](#get_ledger_info) - Get information about a ledger
@@ -41,10 +40,9 @@ req = operations.AddMetadataOnTransactionRequest(
         "explicabo": 'nobis',
         "enim": 'omnis',
     },
-    async_=True,
     dry_run=True,
+    id=1234,
     ledger='ledger001',
-    txid=1234,
 )
 
 res = s.ledger.add_metadata_on_transaction(req)
@@ -76,7 +74,6 @@ req = operations.AddMetadataToAccountRequest(
         "iure": 'culpa',
     },
     address='users:001',
-    async_=True,
     dry_run=True,
     ledger='ledger001',
 )
@@ -214,7 +211,6 @@ req = operations.CreateTransactionRequest(
         ),
         timestamp=dateutil.parser.isoparse('2022-01-11T05:45:42.485Z'),
     ),
-    async_=True,
     dry_run=True,
     ledger='ledger001',
 )
@@ -243,41 +239,13 @@ s = sdk.SDK(
 
 req = operations.GetAccountRequest(
     address='users:001',
+    expand='voluptatibus',
     ledger='ledger001',
 )
 
 res = s.ledger.get_account(req)
 
 if res.account_response is not None:
-    # handle response
-```
-
-## get_balances
-
-Get the balances from a ledger's account
-
-### Example Usage
-
-```python
-import sdk
-from sdk.models import operations
-
-s = sdk.SDK(
-    security=shared.Security(
-        authorization="Bearer YOUR_ACCESS_TOKEN_HERE",
-    ),
-)
-
-req = operations.GetBalancesRequest(
-    address='users:001',
-    cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
-    ledger='ledger001',
-    page_size=976460,
-)
-
-res = s.ledger.get_balances(req)
-
-if res.balances_cursor_response is not None:
     # handle response
 ```
 
@@ -374,8 +342,9 @@ s = sdk.SDK(
 )
 
 req = operations.GetTransactionRequest(
+    expand='vero',
+    id=1234,
     ledger='ledger001',
-    txid=1234,
 )
 
 res = s.ledger.get_transaction(req)
@@ -403,9 +372,9 @@ s = sdk.SDK(
 req = operations.ListAccountsRequest(
     address='users:.+',
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
+    expand='nihil',
     ledger='ledger001',
     metadata={
-        "nihil": 'praesentium',
         "voluptatibus": 'ipsa',
         "omnis": 'voluptate',
         "cum": 'perferendis',
@@ -452,7 +421,7 @@ if res.logs_cursor_response is not None:
 
 ## list_transactions
 
-List transactions from a ledger, sorted by txid in descending order.
+List transactions from a ledger, sorted by id in descending order.
 
 ### Example Usage
 
@@ -472,14 +441,17 @@ req = operations.ListTransactionsRequest(
     cursor='aHR0cHM6Ly9nLnBhZ2UvTmVrby1SYW1lbj9zaGFyZQ==',
     destination='users:001',
     end_time=dateutil.parser.isoparse('2022-07-09T11:22:20.922Z'),
+    expand='dicta',
     ledger='ledger001',
     metadata={
-        "harum": 'enim',
+        "enim": 'accusamus',
+        "commodi": 'repudiandae',
+        "quae": 'ipsum',
     },
-    page_size=880476,
+    page_size=692472,
     reference='ref:001',
     source='users:001',
-    start_time=dateutil.parser.isoparse('2022-01-30T20:15:26.045Z'),
+    start_time=dateutil.parser.isoparse('2021-11-13T09:08:33.009Z'),
 )
 
 res = s.ledger.list_transactions(req)
@@ -532,8 +504,8 @@ s = sdk.SDK(
 )
 
 req = operations.RevertTransactionRequest(
+    id=1234,
     ledger='ledger001',
-    txid=1234,
 )
 
 res = s.ledger.revert_transaction(req)

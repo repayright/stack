@@ -69,8 +69,6 @@ src/Models/Operations/CreateTransactionRequest.php
 src/Models/Operations/CreateTransactionResponse.php
 src/Models/Operations/GetAccountRequest.php
 src/Models/Operations/GetAccountResponse.php
-src/Models/Operations/GetBalancesRequest.php
-src/Models/Operations/GetBalancesResponse.php
 src/Models/Operations/GetBalancesAggregatedRequest.php
 src/Models/Operations/GetBalancesAggregatedResponse.php
 src/Models/Operations/GetInfoResponse.php
@@ -220,8 +218,6 @@ src/Models/Shared/PostTransactionScript.php
 src/Models/Shared/PostTransaction.php
 src/Models/Shared/AccountResponse.php
 src/Models/Shared/AccountWithVolumesAndBalances.php
-src/Models/Shared/BalancesCursorResponseCursor.php
-src/Models/Shared/BalancesCursorResponse.php
 src/Models/Shared/AggregateBalancesResponse.php
 src/Models/Shared/ConfigInfoResponse.php
 src/Models/Shared/ConfigInfo.php
