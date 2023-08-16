@@ -2,9 +2,7 @@ package ledger
 
 import (
 	"math/big"
-	"sort"
 
-	"github.com/formancehq/stack/libs/go-libs/collectionutils"
 	"github.com/formancehq/stack/libs/go-libs/metadata"
 )
 
@@ -36,18 +34,4 @@ func ComputeMetadata(key, value string) metadata.Metadata {
 
 func RevertMetadata(tx *big.Int) metadata.Metadata {
 	return ComputeMetadata(RevertMetadataSpecKey(), tx.String())
-}
-
-func hashStringMetadata(buf *buffer, m metadata.Metadata) {
-	if len(m) == 0 {
-		return
-	}
-	keysOfAccount := collectionutils.Keys(m)
-	if len(m) > 1 {
-		sort.Strings(keysOfAccount)
-	}
-	for _, key := range keysOfAccount {
-		buf.writeString(key)
-		buf.writeString(m[key])
-	}
 }

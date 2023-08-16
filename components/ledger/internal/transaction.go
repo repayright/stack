@@ -38,15 +38,6 @@ func (t *TransactionData) Reverse() TransactionData {
 	}
 }
 
-func (d TransactionData) hashString(buf *buffer) {
-	buf.writeString(d.Reference)
-	buf.writeUInt64(uint64(d.Timestamp.UnixNano()))
-	hashStringMetadata(buf, d.Metadata)
-	for _, posting := range d.Postings {
-		posting.hashString(buf)
-	}
-}
-
 func (d TransactionData) WithDate(now Time) TransactionData {
 	d.Timestamp = now
 
@@ -89,11 +80,6 @@ func (t *Transaction) WithMetadata(m metadata.Metadata) *Transaction {
 	return t
 }
 
-func (t *Transaction) hashString(buf *buffer) {
-	buf.writeUInt64(t.ID.Uint64())
-	t.TransactionData.hashString(buf)
-}
-
 func NewTransaction() *Transaction {
 	return &Transaction{
 		ID: big.NewInt(0),
@@ -127,8 +113,4 @@ func ExpandTransaction(tx *Transaction, preCommitVolumes AccountsAssetsVolumes) 
 		PreCommitVolumes:  preCommitVolumes,
 		PostCommitVolumes: postCommitVolumes,
 	}
-}
-
-func ExpandTransactionFromEmptyPreCommitVolumes(tx *Transaction) ExpandedTransaction {
-	return ExpandTransaction(tx, AccountsAssetsVolumes{})
 }
