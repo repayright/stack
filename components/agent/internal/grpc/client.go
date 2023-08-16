@@ -159,7 +159,6 @@ func (client *client) mergeStack(currentStack *v1beta3.Stack, createStack *v1bet
 	createStack.Spec.Versions = currentStack.Spec.Versions
 	createStack.Spec.DevProperties.Debug = currentStack.Spec.DevProperties.Debug
 	createStack.Spec.DevProperties.Dev = currentStack.Spec.DevProperties.Dev
-	createStack.Spec.Disabled = currentStack.Spec.Disabled
 	return createStack
 }
 
