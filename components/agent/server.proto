@@ -47,6 +47,7 @@ message Stack {
   AuthConfig authConfig = 3;
   repeated AuthClient staticClients = 4;
   StargateConfig stargateConfig = 5;
+  bool disabled = 6;
 }
 
 enum StackStatus {
