@@ -108,33 +108,38 @@ func filterMetadata(metadata metadata.Metadata) func(query *bun.SelectQuery) *bu
 	}
 }
 
-func filterAccountAddress(address, key string) func(query *bun.SelectQuery) *bun.SelectQuery {
+func filterAccountAddress(address, key string) string {
+	parts := make([]string, 0)
+	src := strings.Split(address, ":")
+
+	needSegmentCheck := false
+	for _, segment := range src {
+		needSegmentCheck = segment == ""
+		if needSegmentCheck {
+			break
+		}
+	}
+
+	if needSegmentCheck {
+		parts = append(parts, fmt.Sprintf("jsonb_array_length(%s_array) = %d", key, len(src)))
+
+		for i, segment := range src {
+			if len(segment) == 0 {
+				continue
+			}
+			parts = append(parts, fmt.Sprintf("%s_array @@ ('$[%d] == \"%s\"')::jsonpath", key, i, segment))
+		}
+	} else {
+		parts = append(parts, fmt.Sprintf("%s = '%s'", key, address))
+	}
+
+	return strings.Join(parts, " and ")
+}
+
+func filterAccountAddressBuilder(address, key string) func(query *bun.SelectQuery) *bun.SelectQuery {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
-
-		// todo: add check if we really need to filter on segments
 		if address != "" {
-			src := strings.Split(address, ":")
-
-			needSegmentCheck := false
-			for _, segment := range src {
-				needSegmentCheck = segment == ""
-				if needSegmentCheck {
-					break
-				}
-			}
-
-			if needSegmentCheck {
-				query = query.Where(fmt.Sprintf("jsonb_array_length(%s_array) = %d", key, len(src)))
-
-				for i, segment := range src {
-					if len(segment) == 0 {
-						continue
-					}
-					query.Where(fmt.Sprintf("%s_array @@ ('$[%d] == \"' || ?::text || '\"')::jsonpath", key, i), segment)
-				}
-			} else {
-				query = query.Where(key+" = ?", address)
-			}
+			return query.Where(filterAccountAddress(address, key))
 		}
 		return query
 	}

@@ -24,7 +24,7 @@ func (store *Store) GetAggregatedBalances(ctx context.Context, q GetAggregatedBa
 				Table(MovesTableName).
 				ColumnExpr("distinct on (moves.account_address, moves.asset) moves.*").
 				Order("account_address", "asset", "moves.seq desc").
-				Apply(filterAccountAddress(q.Options.AddressRegexp, "account_address")).
+				Apply(filterAccountAddressBuilder(q.Options.AddressRegexp, "account_address")).
 				Apply(filterPIT(q.Options.PIT, "insertion_date")) // todo(gfyrag): expose capability to use effective_date
 
 			return query.

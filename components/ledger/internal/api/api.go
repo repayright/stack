@@ -13,7 +13,7 @@ import (
 	"github.com/formancehq/stack/libs/go-libs/migrations"
 )
 
-//go:generate mockgen -source api.go -destination api_test.go -package controllers_test . Ledger
+//go:generate mockgen -source api.go -destination api_test.go -package api_test . Ledger
 
 type Ledger interface {
 	GetAccountWithVolumes(ctx context.Context, query ledgerstore.GetAccountQuery) (*ledger.ExpandedAccount, error)

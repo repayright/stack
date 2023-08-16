@@ -22,7 +22,7 @@ func countAccounts(w http.ResponseWriter, r *http.Request) {
 	l := LedgerFromContext(r.Context())
 
 	accountsQuery := ledgerstore.NewGetAccountsQuery().
-		WithAddress(r.URL.Query().Get("address")).
+		WithAddress(r.URL.Query()["address"]...).
 		WithMetadataFilter(sharedapi.GetQueryMap(r.URL.Query(), "metadata"))
 
 	count, err := l.CountAccounts(r.Context(), accountsQuery)
@@ -76,7 +76,7 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 
 		accountsQuery = accountsQuery.
 			WithAfterAddress(r.URL.Query().Get("after")).
-			WithAddress(r.URL.Query().Get("address")).
+			WithAddress(r.URL.Query()["address"]...).
 			WithMetadataFilter(sharedapi.GetQueryMap(r.URL.Query(), "metadata")).
 			WithPageSize(pageSize)
 	}

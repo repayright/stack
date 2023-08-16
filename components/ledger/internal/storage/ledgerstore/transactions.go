@@ -148,16 +148,16 @@ func (store *Store) transactionListBuilder(p GetTransactionsQuery) func(query *b
 			if p.Options.Source != "" {
 				query = query.
 					Where("m.is_source").
-					Apply(filterAccountAddress(p.Options.Source, "account_address"))
+					Apply(filterAccountAddressBuilder(p.Options.Source, "account_address"))
 
 			}
 			if p.Options.Destination != "" {
 				query = query.
 					Where("not m.is_source").
-					Apply(filterAccountAddress(p.Options.Destination, "account_address"))
+					Apply(filterAccountAddressBuilder(p.Options.Destination, "account_address"))
 			}
 			if p.Options.Account != "" {
-				query = query.Apply(filterAccountAddress(p.Options.Account, "account_address"))
+				query = query.Apply(filterAccountAddressBuilder(p.Options.Account, "account_address"))
 			}
 		}
 		return query

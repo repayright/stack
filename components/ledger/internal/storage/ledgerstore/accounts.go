@@ -2,6 +2,7 @@ package ledgerstore
 
 import (
 	"context"
+	"strings"
 
 	ledger "github.com/formancehq/ledger/internal"
 	storageerrors "github.com/formancehq/ledger/internal/storage"
@@ -48,10 +49,19 @@ func (store *Store) GetAccountsWithVolumes(ctx context.Context, q GetAccountsQue
 	return paginateWithOffset[GetAccountsOptions, ledger.ExpandedAccount](store, ctx,
 		paginate.OffsetPaginatedQuery[GetAccountsOptions](q),
 		func(query *bun.SelectQuery) *bun.SelectQuery {
-			return store.
+			query = store.
 				accountQueryBuilder(q.Options.PITFilter)(query).
-				Apply(filterAccountAddress(q.Options.Address, "accounts.address")).
 				Apply(filterMetadata(q.Options.Metadata))
+
+			if len(q.Options.Addresses) > 0 {
+				parts := make([]string, 0)
+				for _, address := range q.Options.Addresses {
+					parts = append(parts, filterAccountAddress(address, "accounts.address"))
+				}
+				query.Where("(" + strings.Join(parts, ") or (") + ")")
+			}
+
+			return query
 		},
 	)
 }
@@ -123,10 +133,15 @@ func (store *Store) GetAccountWithVolumes(ctx context.Context, q GetAccountQuery
 
 func (store *Store) CountAccounts(ctx context.Context, q GetAccountsQuery) (uint64, error) {
 	return count(store, ctx, func(query *bun.SelectQuery) *bun.SelectQuery {
-		return store.
+		query = store.
 			accountQueryBuilder(q.Options.PITFilter)(query).
-			Apply(filterAccountAddress(q.Options.Address, "accounts.address")).
 			Apply(filterMetadata(q.Options.Metadata))
+
+		for _, address := range q.Options.Addresses {
+			query.WhereOr(filterAccountAddress(address, "address"))
+		}
+
+		return query
 	})
 }
 
@@ -140,8 +155,8 @@ type PITFilter struct {
 
 type GetAccountsOptions struct {
 	PITFilter
-	AfterAddress string `json:"after"`
-	Address      string `json:"address"`
+	AfterAddress string   `json:"after"`
+	Addresses    []string `json:"address"`
 	Metadata     metadata.Metadata
 }
 
@@ -169,8 +184,8 @@ func (a GetAccountsQuery) WithAfterAddress(after string) GetAccountsQuery {
 	return a
 }
 
-func (a GetAccountsQuery) WithAddress(address string) GetAccountsQuery {
-	a.Options.Address = address
+func (a GetAccountsQuery) WithAddress(addresses ...string) GetAccountsQuery {
+	a.Options.Addresses = addresses
 
 	return a
 }

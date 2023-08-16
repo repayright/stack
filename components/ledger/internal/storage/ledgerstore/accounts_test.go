@@ -32,6 +32,8 @@ func TestGetAccounts(t *testing.T) {
 			ledger.NewSetMetadataOnAccountLog(ledger.Now(), "account:1", metadata.Metadata{"category": "1"}).WithDate(now.Add(time.Minute)),
 			ledger.NewSetMetadataOnAccountLog(ledger.Now(), "account:2", metadata.Metadata{"category": "2"}).WithDate(now.Add(2*time.Minute)),
 			ledger.NewSetMetadataOnAccountLog(ledger.Now(), "account:3", metadata.Metadata{"category": "3"}).WithDate(now.Add(3*time.Minute)),
+			ledger.NewSetMetadataOnAccountLog(ledger.Now(), "orders:1", metadata.Metadata{"foo": "bar"}).WithDate(now.Add(3*time.Minute)),
+			ledger.NewSetMetadataOnAccountLog(ledger.Now(), "orders:2", metadata.Metadata{"foo": "bar"}).WithDate(now.Add(3*time.Minute)),
 			ledger.NewTransactionLog(
 				ledger.NewTransaction().
 					WithPostings(ledger.NewPosting("world", "account:1", "USD", big.NewInt(100))).
@@ -52,7 +54,7 @@ func TestGetAccounts(t *testing.T) {
 	t.Run("list all", func(t *testing.T) {
 		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery())
 		require.NoError(t, err)
-		require.Len(t, accounts.Data, 5)
+		require.Len(t, accounts.Data, 7)
 	})
 
 	t.Run("list using metadata", func(t *testing.T) {
@@ -118,6 +120,12 @@ func TestGetAccounts(t *testing.T) {
 	t.Run("list using filter on address", func(t *testing.T) {
 		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
 			WithAddress("account:"))
+		require.NoError(t, err)
+		require.Len(t, accounts.Data, 3)
+	})
+	t.Run("list using filter on multiple address", func(t *testing.T) {
+		accounts, err := store.GetAccountsWithVolumes(context.Background(), ledgerstore.NewGetAccountsQuery().
+			WithAddress("account:1", "orders:"))
 		require.NoError(t, err)
 		require.Len(t, accounts.Data, 3)
 	})
