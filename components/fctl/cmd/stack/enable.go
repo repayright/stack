@@ -100,7 +100,7 @@ func (c *EnableController) Run(cmd *cobra.Command, args []string) (fctl.Renderab
 		return nil, fctl.ErrMissingApproval
 	}
 
-	if _, err := apiClient.DefaultApi.DisableStack(cmd.Context(), organization, stack.Id).Execute(); err != nil {
+	if _, err := apiClient.DefaultApi.EnableStack(cmd.Context(), organization, stack.Id).Execute(); err != nil {
 		return nil, errors.Wrap(err, "stack enable")
 	}
 
