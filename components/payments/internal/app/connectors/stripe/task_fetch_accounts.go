@@ -60,7 +60,7 @@ func FetchAccountsTask(config Config, client *DefaultClient) task.Task {
 
 						err = scheduler.Schedule(ctx, transactionsTask, models.TaskSchedulerOptions{
 							ScheduleOption: models.OPTIONS_RUN_NOW,
-							Restart:        true,
+							RestartOption:  models.OPTIONS_RESTART_IF_NOT_ACTIVE,
 						})
 						if err != nil && !errors.Is(err, task.ErrAlreadyScheduled) {
 							return errors.Wrap(err, "scheduling connected account")
@@ -77,7 +77,7 @@ func FetchAccountsTask(config Config, client *DefaultClient) task.Task {
 
 						err = scheduler.Schedule(ctx, balancesTask, models.TaskSchedulerOptions{
 							ScheduleOption: models.OPTIONS_RUN_NOW,
-							Restart:        true,
+							RestartOption:  models.OPTIONS_RESTART_IF_NOT_ACTIVE,
 						})
 						if err != nil && !errors.Is(err, task.ErrAlreadyScheduled) {
 							return errors.Wrap(err, "scheduling connected account")
@@ -94,7 +94,7 @@ func FetchAccountsTask(config Config, client *DefaultClient) task.Task {
 
 						err = scheduler.Schedule(ctx, externalAccountsTask, models.TaskSchedulerOptions{
 							ScheduleOption: models.OPTIONS_RUN_NOW,
-							Restart:        true,
+							RestartOption:  models.OPTIONS_RESTART_IF_NOT_ACTIVE,
 						})
 						if err != nil && !errors.Is(err, task.ErrAlreadyScheduled) {
 							return errors.Wrap(err, "scheduling connected account")

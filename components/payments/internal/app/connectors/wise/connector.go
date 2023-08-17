@@ -42,7 +42,7 @@ func (c *Connector) InitiateTransfer(ctx task.ConnectorContext, transfer models.
 
 	return ctx.Scheduler().Schedule(ctx.Context(), descriptor, models.TaskSchedulerOptions{
 		ScheduleOption: models.OPTIONS_RUN_NOW,
-		Restart:        true,
+		RestartOption:  models.OPTIONS_RESTART_NEVER,
 	})
 }
 
@@ -62,7 +62,7 @@ func (c *Connector) Install(ctx task.ConnectorContext) error {
 		Duration:       c.cfg.PollingPeriod.Duration,
 		// No need to restart this task, since the connector is not existing or
 		// was uninstalled previously, the task does not exists in the database
-		Restart: false,
+		RestartOption: models.OPTIONS_RESTART_NEVER,
 	})
 }
 
